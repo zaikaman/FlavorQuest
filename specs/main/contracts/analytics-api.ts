@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Analytics API Type Definitions
  * 

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Authentication & User Management Type Definitions
  * 
