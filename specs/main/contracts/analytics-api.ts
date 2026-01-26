@@ -1,7 +1,7 @@
 // @ts-nocheck
 /**
  * Analytics API Type Definitions
- * 
+ *
  * Định nghĩa types cho API endpoints liên quan đến analytics logging
  */
 
@@ -16,11 +16,11 @@ export type AnalyticsLogInsert = Database['public']['Tables']['analytics_logs'][
  * Event types cho analytics tracking
  */
 export type EventType =
-  | 'tour_start'       // User clicked "Start Tour" button
-  | 'tour_end'         // User stopped tour or left page
-  | 'auto_play'        // Audio tự động phát khi vào geofence
-  | 'manual_play'      // User manually clicked play button
-  | 'skip'             // User skipped audio trước khi nghe hết
+  | 'tour_start' // User clicked "Start Tour" button
+  | 'tour_end' // User stopped tour or left page
+  | 'auto_play' // Audio tự động phát khi vào geofence
+  | 'manual_play' // User manually clicked play button
+  | 'skip' // User skipped audio trước khi nghe hết
   | 'settings_change'; // User changed settings
 
 /**
@@ -61,8 +61,8 @@ export interface LogAnalyticsResponse {
  */
 export interface GetAnalyticsSummaryRequest {
   start_date?: string; // ISO date string
-  end_date?: string;   // ISO date string
-  poi_id?: string;     // Filter by POI
+  end_date?: string; // ISO date string
+  poi_id?: string; // Filter by POI
 }
 
 export interface AnalyticsSummary {
@@ -71,13 +71,13 @@ export interface AnalyticsSummary {
   total_tours_started: number;
   total_tours_completed: number;
   average_tour_duration: number; // seconds
-  
+
   // Per-event type counts
   event_counts: Record<EventType, number>;
-  
+
   // Per-language breakdown
   language_breakdown: Record<Language, number>;
-  
+
   // Top POIs by plays
   top_pois: Array<{
     poi_id: string;
@@ -86,7 +86,7 @@ export interface AnalyticsSummary {
     avg_listen_duration: number;
     completion_rate: number; // 0-1
   }>;
-  
+
   // Completion rates
   audio_completion_rate: number; // 0-1
   skip_rate: number; // 0-1
@@ -111,26 +111,26 @@ export interface GetPOIAnalyticsRequest {
 export interface POIAnalytics {
   poi_id: string;
   poi_name: string;
-  
+
   // Play stats
   total_plays: number;
   auto_plays: number;
   manual_plays: number;
-  
+
   // Listen stats
   avg_listen_duration: number; // seconds
   completion_rate: number; // 0-1
   skip_rate: number; // 0-1
-  
+
   // Per-language breakdown
   plays_by_language: Record<Language, number>;
-  
+
   // Time series data (daily aggregates)
   daily_plays: Array<{
     date: string; // ISO date
     play_count: number;
   }>;
-  
+
   // Heatmap data (rounded coordinates)
   location_heatmap: Array<{
     rounded_lat: number;
@@ -152,10 +152,7 @@ export interface GetPOIAnalyticsResponse {
 /**
  * Round coordinates to 2 decimal places for privacy
  */
-export function roundCoordinates(
-  lat: number,
-  lng: number
-): [number, number];
+export function roundCoordinates(lat: number, lng: number): [number, number];
 
 /**
  * Generate or retrieve session ID
@@ -175,7 +172,4 @@ export function logEventsBatch(events: AnalyticsEvent[]): Promise<void>;
 /**
  * Calculate listen completion rate
  */
-export function calculateCompletionRate(
-  listen_duration: number,
-  total_duration: number
-): number;
+export function calculateCompletionRate(listen_duration: number, total_duration: number): number;

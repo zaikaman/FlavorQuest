@@ -33,6 +33,7 @@ pnpm install
 ```
 
 **Key dependencies được install**:
+
 - `next@16+` - Framework
 - `react@19+` - UI library
 - `@supabase/supabase-js@2.x` - Supabase client
@@ -85,17 +86,18 @@ Seed data bao gồm 10-15 sample POI trên phố Vĩnh Khánh.
    - **`audio`**: Public bucket cho audio files
    - **`images`**: Public bucket cho POI images
 3. Set policies:
+
    ```sql
    -- Allow public read for audio bucket
    CREATE POLICY "Audio files are publicly accessible"
    ON storage.objects FOR SELECT
    USING (bucket_id = 'audio');
-   
+
    -- Allow admin insert for audio bucket
    CREATE POLICY "Admins can upload audio"
    ON storage.objects FOR INSERT
    WITH CHECK (bucket_id = 'audio' AND auth.jwt() ->> 'role' = 'admin');
-   
+
    -- Tương tự cho images bucket
    ```
 
@@ -222,18 +224,21 @@ vercel                   # Deploy to Vercel
 ## 9. First Tasks for New Developers
 
 ### Task 1: Verify Local Setup
+
 1. Run `npm run dev`
 2. Open [http://localhost:3000](http://localhost:3000)
 3. Verify landing page loads
 4. Check console for errors
 
 ### Task 2: Test Tour Flow
+
 1. Click "Bắt đầu tour" button
 2. Allow location permission (hoặc mock location)
 3. Verify map loads với POI markers
 4. Test manual POI selection
 
 ### Task 3: Test Admin Dashboard
+
 1. Go to [http://localhost:3000/admin](http://localhost:3000/admin)
 2. Click "Sign in with Google"
 3. After sign in, manually promote user to admin:
@@ -246,13 +251,16 @@ vercel                   # Deploy to Vercel
 ## 10. Development Workflow
 
 ### Branch Strategy
+
 - `main`: Production-ready code
 - `develop`: Integration branch
 - `feature/<feature-name>`: Feature branches
 - `hotfix/<bug-name>`: Hotfix branches
 
 ### Commit Convention
+
 Follow [Conventional Commits](https://www.conventionalcommits.org/):
+
 ```
 feat: Add geofencing logic với Web Worker
 fix: Resolve GPS drift với noise filter
@@ -261,6 +269,7 @@ chore: Upgrade dependencies
 ```
 
 ### Pull Request Process
+
 1. Create feature branch: `git checkout -b feature/my-feature`
 2. Make changes, commit regularly
 3. Push to remote: `git push origin feature/my-feature`
@@ -271,13 +280,14 @@ chore: Upgrade dependencies
 ## 11. Testing Guidelines
 
 ### Unit Tests
+
 ```typescript
 // Example: tests/unit/utils/distance.test.ts
 import { haversineDistance } from '@/lib/utils/distance';
 
 describe('haversineDistance', () => {
   it('calculates distance correctly', () => {
-    const dist = haversineDistance(10.7535, 106.6963, 10.7540, 106.6965);
+    const dist = haversineDistance(10.7535, 106.6963, 10.754, 106.6965);
     expect(dist).toBeCloseTo(60.5, 1); // ~60.5 meters
   });
 });
@@ -286,6 +296,7 @@ describe('haversineDistance', () => {
 Run: `npm run test`
 
 ### Integration Tests
+
 ```typescript
 // Example: tests/integration/tour-flow.test.tsx
 import { render, screen, waitFor } from '@testing-library/react';
@@ -304,6 +315,7 @@ describe('Tour Flow', () => {
 Run: `npm run test`
 
 ### E2E Tests
+
 ```typescript
 // Example: tests/e2e/user-journey.spec.ts
 import { test, expect } from '@playwright/test';
@@ -321,24 +333,32 @@ Run: `npm run test:e2e`
 ## 12. Common Issues & Solutions
 
 ### Issue: Service Worker không update
-**Solution**: 
+
+**Solution**:
+
 - Hard refresh: `Ctrl+Shift+R` (Windows) hoặc `Cmd+Shift+R` (Mac)
 - Unregister SW trong DevTools → Application → Service Workers → Unregister
 
 ### Issue: Supabase connection error
+
 **Solution**:
+
 - Verify `.env.local` có đúng credentials
 - Check Supabase project status (không bị paused)
 - Test connection: `curl https://YOUR_PROJECT_ID.supabase.co/rest/v1/pois`
 
 ### Issue: Geolocation không hoạt động
+
 **Solution**:
+
 - Chrome: Settings → Site Settings → Location → Allow localhost
 - Firefox: about:config → `geo.enabled` = true
 - Hoặc mock location trong DevTools → Sensors
 
 ### Issue: Audio không phát (autoplay blocked)
+
 **Solution**:
+
 - Browser policy requires user gesture trước khi phát audio
 - Ensure "Start Tour" button click unlocks audio context
 - Test với muted autoplay: `audio.muted = true; await audio.play();`
@@ -352,6 +372,7 @@ Run: `npm run test:e2e`
 - **API Contracts**: [specs/main/contracts/](specs/main/contracts/)
 
 ### External Resources
+
 - [Next.js 16 Docs](https://nextjs.org/docs)
 - [Supabase Docs](https://supabase.com/docs)
 - [Leaflet Docs](https://leafletjs.com/reference.html)
@@ -368,6 +389,7 @@ Run: `npm run test:e2e`
 ## Next Steps
 
 ✅ Setup complete! Bây giờ bạn có thể:
+
 1. Explore codebase
 2. Pick up tasks từ GitHub Issues
 3. Contribute code qua Pull Requests

@@ -1,7 +1,7 @@
 // @ts-nocheck
 /**
  * Authentication & User Management Type Definitions
- * 
+ *
  * Định nghĩa types cho Supabase authentication và user management
  */
 
@@ -27,7 +27,7 @@ export interface ExtendedUser {
   email: string;
   email_confirmed_at?: string;
   created_at: string;
-  
+
   // Custom user table fields
   role: UserRole;
 }

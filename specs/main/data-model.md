@@ -46,40 +46,41 @@ Legend:
 
 **Fields**:
 
-| Field | Type | Nullable | Description |
-|-------|------|----------|-------------|
-| `id` | UUID | No | Primary key, auto-generated |
-| `lat` | DOUBLE PRECISION | No | Latitude (WGS84 format) |
-| `lng` | DOUBLE PRECISION | No | Longitude (WGS84 format) |
-| `radius` | INTEGER | No (default: 20) | Geofence radius in meters (range: 1-100) |
-| `priority` | INTEGER | No (default: 5) | Priority ranking 1-10 (higher = more important) |
-| `name_vi` | TEXT | No | Tên tiếng Việt |
-| `name_en` | TEXT | No | English name |
-| `name_ja` | TEXT | Yes | Japanese name (日本語) |
-| `name_fr` | TEXT | Yes | French name (Français) |
-| `name_ko` | TEXT | Yes | Korean name (한국어) |
-| `name_zh` | TEXT | Yes | Chinese name (中文) |
-| `description_vi` | TEXT | Yes | Mô tả tiếng Việt (transcript cho TTS fallback) |
-| `description_en` | TEXT | Yes | English description |
-| `description_ja` | TEXT | Yes | Japanese description |
-| `description_fr` | TEXT | Yes | French description |
-| `description_ko` | TEXT | Yes | Korean description |
-| `description_zh` | TEXT | Yes | Chinese description |
-| `audio_url_vi` | TEXT | Yes | URL to Vietnamese audio file (MP3, 64kbps) |
-| `audio_url_en` | TEXT | Yes | URL to English audio file |
-| `audio_url_ja` | TEXT | Yes | URL to Japanese audio file |
-| `audio_url_fr` | TEXT | Yes | URL to French audio file |
-| `audio_url_ko` | TEXT | Yes | URL to Korean audio file |
-| `audio_url_zh` | TEXT | Yes | URL to Chinese audio file |
-| `image_url` | TEXT | Yes | URL to POI main image (WebP, optimized) |
-| `signature_dish` | TEXT | Yes | Món ăn signature (e.g., "Bánh xèo tôm nhảy") |
-| `fun_fact` | TEXT | Yes | Câu chuyện thú vị ngắn gọn |
-| `estimated_hours` | TEXT | Yes | Giờ hoạt động ước tính (e.g., "8:00-22:00") |
-| `created_at` | TIMESTAMP | No (default: NOW()) | Timestamp tạo record |
-| `updated_at` | TIMESTAMP | No (default: NOW()) | Timestamp cập nhật gần nhất |
-| `deleted_at` | TIMESTAMP | Yes | Soft delete timestamp |
+| Field             | Type             | Nullable            | Description                                     |
+| ----------------- | ---------------- | ------------------- | ----------------------------------------------- |
+| `id`              | UUID             | No                  | Primary key, auto-generated                     |
+| `lat`             | DOUBLE PRECISION | No                  | Latitude (WGS84 format)                         |
+| `lng`             | DOUBLE PRECISION | No                  | Longitude (WGS84 format)                        |
+| `radius`          | INTEGER          | No (default: 20)    | Geofence radius in meters (range: 1-100)        |
+| `priority`        | INTEGER          | No (default: 5)     | Priority ranking 1-10 (higher = more important) |
+| `name_vi`         | TEXT             | No                  | Tên tiếng Việt                                  |
+| `name_en`         | TEXT             | No                  | English name                                    |
+| `name_ja`         | TEXT             | Yes                 | Japanese name (日本語)                          |
+| `name_fr`         | TEXT             | Yes                 | French name (Français)                          |
+| `name_ko`         | TEXT             | Yes                 | Korean name (한국어)                            |
+| `name_zh`         | TEXT             | Yes                 | Chinese name (中文)                             |
+| `description_vi`  | TEXT             | Yes                 | Mô tả tiếng Việt (transcript cho TTS fallback)  |
+| `description_en`  | TEXT             | Yes                 | English description                             |
+| `description_ja`  | TEXT             | Yes                 | Japanese description                            |
+| `description_fr`  | TEXT             | Yes                 | French description                              |
+| `description_ko`  | TEXT             | Yes                 | Korean description                              |
+| `description_zh`  | TEXT             | Yes                 | Chinese description                             |
+| `audio_url_vi`    | TEXT             | Yes                 | URL to Vietnamese audio file (MP3, 64kbps)      |
+| `audio_url_en`    | TEXT             | Yes                 | URL to English audio file                       |
+| `audio_url_ja`    | TEXT             | Yes                 | URL to Japanese audio file                      |
+| `audio_url_fr`    | TEXT             | Yes                 | URL to French audio file                        |
+| `audio_url_ko`    | TEXT             | Yes                 | URL to Korean audio file                        |
+| `audio_url_zh`    | TEXT             | Yes                 | URL to Chinese audio file                       |
+| `image_url`       | TEXT             | Yes                 | URL to POI main image (WebP, optimized)         |
+| `signature_dish`  | TEXT             | Yes                 | Món ăn signature (e.g., "Bánh xèo tôm nhảy")    |
+| `fun_fact`        | TEXT             | Yes                 | Câu chuyện thú vị ngắn gọn                      |
+| `estimated_hours` | TEXT             | Yes                 | Giờ hoạt động ước tính (e.g., "8:00-22:00")     |
+| `created_at`      | TIMESTAMP        | No (default: NOW()) | Timestamp tạo record                            |
+| `updated_at`      | TIMESTAMP        | No (default: NOW()) | Timestamp cập nhật gần nhất                     |
+| `deleted_at`      | TIMESTAMP        | Yes                 | Soft delete timestamp                           |
 
 **Validation Rules**:
+
 - `lat` must be in range [10.750, 10.757] (Vĩnh Khánh area bounds)
 - `lng` must be in range [106.690, 106.703]
 - `radius` must be between 1 and 100 meters
@@ -89,12 +90,14 @@ Legend:
 - Image URL must be valid HTTPS URL
 
 **Indexes**:
+
 ```sql
 CREATE INDEX idx_pois_location ON pois(lat, lng) WHERE deleted_at IS NULL;
 CREATE INDEX idx_pois_priority ON pois(priority DESC) WHERE deleted_at IS NULL;
 ```
 
 **Business Rules**:
+
 - POIs are publicly readable (no authentication required for tour users)
 - Only admins can create/update/delete POIs
 - When user enters geofence (`distance <= radius`), trigger audio playback
@@ -109,21 +112,22 @@ Ghi lại các sự kiện người dùng để phân tích usage patterns, popu
 
 **Fields**:
 
-| Field | Type | Nullable | Description |
-|-------|------|----------|-------------|
-| `id` | UUID | No | Primary key, auto-generated |
-| `poi_id` | UUID | Yes (FK) | Reference to POI (nullable cho events không liên quan POI) |
-| `session_id` | UUID | No | Client-generated session UUID |
-| `rounded_lat` | DOUBLE PRECISION | Yes | User latitude rounded to 2 decimals (~1km accuracy) for privacy |
-| `rounded_lng` | DOUBLE PRECISION | Yes | User longitude rounded to 2 decimals |
-| `language` | VARCHAR(5) | Yes | Ngôn ngữ hiện tại ('vi', 'en', 'ja', 'fr', 'ko', 'zh') |
-| `event_type` | VARCHAR(20) | No | Event type (see enum below) |
-| `listen_duration` | INTEGER | Yes | Số giây người dùng đã nghe (null nếu không phải audio event) |
-| `completed` | BOOLEAN | Yes | Did user listen to the end? (null nếu không phải audio event) |
-| `timestamp` | TIMESTAMP | No (default: NOW()) | Event timestamp |
-| `user_agent` | TEXT | Yes | Browser user agent string |
+| Field             | Type             | Nullable            | Description                                                     |
+| ----------------- | ---------------- | ------------------- | --------------------------------------------------------------- |
+| `id`              | UUID             | No                  | Primary key, auto-generated                                     |
+| `poi_id`          | UUID             | Yes (FK)            | Reference to POI (nullable cho events không liên quan POI)      |
+| `session_id`      | UUID             | No                  | Client-generated session UUID                                   |
+| `rounded_lat`     | DOUBLE PRECISION | Yes                 | User latitude rounded to 2 decimals (~1km accuracy) for privacy |
+| `rounded_lng`     | DOUBLE PRECISION | Yes                 | User longitude rounded to 2 decimals                            |
+| `language`        | VARCHAR(5)       | Yes                 | Ngôn ngữ hiện tại ('vi', 'en', 'ja', 'fr', 'ko', 'zh')          |
+| `event_type`      | VARCHAR(20)      | No                  | Event type (see enum below)                                     |
+| `listen_duration` | INTEGER          | Yes                 | Số giây người dùng đã nghe (null nếu không phải audio event)    |
+| `completed`       | BOOLEAN          | Yes                 | Did user listen to the end? (null nếu không phải audio event)   |
+| `timestamp`       | TIMESTAMP        | No (default: NOW()) | Event timestamp                                                 |
+| `user_agent`      | TEXT             | Yes                 | Browser user agent string                                       |
 
 **Event Types** (enum):
+
 - `tour_start`: User clicked "Start Tour" button
 - `tour_end`: User explicitly stopped tour or left page
 - `auto_play`: Audio tự động phát khi vào geofence
@@ -132,6 +136,7 @@ Ghi lại các sự kiện người dùng để phân tích usage patterns, popu
 - `settings_change`: User changed settings (language, radius, etc.)
 
 **Validation Rules**:
+
 - `session_id` is client-generated UUID persisted in session storage
 - `rounded_lat` and `rounded_lng` must be rounded to 2 decimal places
 - `event_type` must be one of the defined enum values
@@ -139,6 +144,7 @@ Ghi lại các sự kiện người dùng để phân tích usage patterns, popu
 - No personally identifiable information (PII) should be logged
 
 **Indexes**:
+
 ```sql
 CREATE INDEX idx_analytics_poi_id ON analytics_logs(poi_id);
 CREATE INDEX idx_analytics_timestamp ON analytics_logs(timestamp DESC);
@@ -147,6 +153,7 @@ CREATE INDEX idx_analytics_event_type ON analytics_logs(event_type);
 ```
 
 **Business Rules**:
+
 - Anyone can insert logs (no authentication required) → privacy-first
 - Only admins can read logs → protects user data
 - Coordinates are rounded to preserve privacy (GDPR-compliant)
@@ -161,19 +168,21 @@ Chỉ dành cho admin authentication và role management. Regular tour users kh�
 
 **Fields**:
 
-| Field | Type | Nullable | Description |
-|-------|------|----------|-------------|
-| `id` | UUID | No | Primary key, matches Supabase auth.users.id |
-| `email` | TEXT | No | User email (unique) |
-| `role` | VARCHAR(10) | No (default: 'user') | User role: 'user' or 'admin' |
-| `created_at` | TIMESTAMP | No (default: NOW()) | Account creation timestamp |
+| Field        | Type        | Nullable             | Description                                 |
+| ------------ | ----------- | -------------------- | ------------------------------------------- |
+| `id`         | UUID        | No                   | Primary key, matches Supabase auth.users.id |
+| `email`      | TEXT        | No                   | User email (unique)                         |
+| `role`       | VARCHAR(10) | No (default: 'user') | User role: 'user' or 'admin'                |
+| `created_at` | TIMESTAMP   | No (default: NOW())  | Account creation timestamp                  |
 
 **Validation Rules**:
+
 - `email` must be valid email format and unique
 - `role` must be either 'user' or 'admin'
 - `id` should match Supabase `auth.users.id` for authenticated users
 
 **Business Rules**:
+
 - New users default to 'user' role
 - Only existing admins can promote users to 'admin'
 - 'admin' role grants access to:
@@ -197,7 +206,7 @@ export interface POI {
   lng: number;
   radius: number;
   priority: number;
-  
+
   // Multi-language fields
   name_vi: string;
   name_en: string;
@@ -205,26 +214,26 @@ export interface POI {
   name_fr?: string;
   name_ko?: string;
   name_zh?: string;
-  
+
   description_vi?: string;
   description_en?: string;
   description_ja?: string;
   description_fr?: string;
   description_ko?: string;
   description_zh?: string;
-  
+
   audio_url_vi?: string;
   audio_url_en?: string;
   audio_url_ja?: string;
   audio_url_fr?: string;
   audio_url_ko?: string;
   audio_url_zh?: string;
-  
+
   image_url?: string;
   signature_dish?: string;
   fun_fact?: string;
   estimated_hours?: string;
-  
+
   created_at: string;
   updated_at: string;
 }
@@ -349,12 +358,12 @@ import { get, set, del, clear } from 'idb-keyval';
 
 // Keys
 export const STORAGE_KEYS = {
-  POIS: 'pois',                   // POI[]
+  POIS: 'pois', // POI[]
   VISIT_HISTORY: 'visit-history', // VisitRecord[]
   USER_SETTINGS: 'user-settings', // UserSettings
-  SESSION_ID: 'session-id',       // string (UUID)
-  CACHED_AUDIO: 'cached-audio',   // Map<string, Blob> (audio file cache)
-  MAP_TILES: 'map-tiles',         // Map<string, Blob> (OSM tile cache) - handled by Service Worker
+  SESSION_ID: 'session-id', // string (UUID)
+  CACHED_AUDIO: 'cached-audio', // Map<string, Blob> (audio file cache)
+  MAP_TILES: 'map-tiles', // Map<string, Blob> (OSM tile cache) - handled by Service Worker
 } as const;
 
 // Storage functions

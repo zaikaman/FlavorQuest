@@ -18,17 +18,17 @@
 
 **Purpose**: Project initialization và cấu trúc cơ bản
 
-- [ ] T001 Create Next.js 16 project với App Router: `npx create-next-app@latest flavorquest --typescript --tailwind --app`
-- [ ] T002 [P] Install dependencies: next@16+, react@19+, @supabase/supabase-js@2.x, @supabase/auth-helpers-nextjs@0.10.x, leaflet@1.9.x, react-leaflet@4.x, idb-keyval@6.x
-- [ ] T003 [P] Configure TypeScript strict mode trong tsconfig.json
-- [ ] T004 [P] Setup ESLint + Prettier với Next.js rules trong .eslintrc.json và .prettierrc
-- [ ] T005 [P] Configure Tailwind CSS với custom design tokens trong tailwind.config.ts
-- [ ] T006 Create project folder structure theo plan.md: app/, components/, lib/, public/, tests/, docs/
-- [ ] T007 [P] Setup environment variables template trong .env.local.example
-- [ ] T008 [P] Create PWA manifest configuration trong app/manifest.ts
-- [ ] T009 [P] Configure next.config.js với next-pwa plugin và i18n support
-- [ ] T010 [P] Create constants file trong lib/constants.ts (geofence radius, cooldown, languages)
-- [ ] T011 [P] Create TypeScript types file trong lib/types.ts (POI, Language, UserSettings, etc.)
+- [x] T001 Create Next.js 16 project với App Router: `npx create-next-app@latest flavorquest --typescript --tailwind --app`
+- [x] T002 [P] Install dependencies: next@16+, react@19+, @supabase/supabase-js@2.x, @supabase/ssr@latest, leaflet@1.9.x, react-leaflet@5.x, idb-keyval@6.x
+- [x] T003 [P] Configure TypeScript strict mode trong tsconfig.json
+- [x] T004 [P] Setup ESLint + Prettier với Next.js rules trong eslint.config.mjs và .prettierrc
+- [x] T005 [P] Configure Tailwind CSS với custom design tokens trong app/globals.css (Tailwind 4)
+- [x] T006 Create project folder structure theo plan.md: app/, components/, lib/, public/, tests/, docs/
+- [x] T007 [P] Setup environment variables template trong .env.local.example
+- [x] T008 [P] Create PWA manifest configuration trong app/manifest.ts
+- [x] T009 [P] Configure next.config.js với PWA support và performance optimizations
+- [x] T010 [P] Create constants file trong lib/constants.ts (geofence radius, cooldown, languages)
+- [x] T011 [P] Create TypeScript types file trong lib/types.ts (POI, Language, UserSettings, etc.)
 
 ---
 
@@ -480,30 +480,36 @@ Total all tasks: ~200 tasks (~6-8 weeks cho 1 developer, hoặc 3-4 weeks cho te
 ### Parallel Opportunities
 
 #### Within Phase 2 (Foundational)
+
 - T013-T015 (database migrations) can run parallel
 - T017-T018 (seed data + storage buckets) can run parallel
 - T021-T026 (utility functions) can run parallel
 - T032-T036 (UI components) can run parallel
 
 #### Within Phase 3 (US1)
+
 - T041-T043 (hooks) can start parallel
 - T045-T048 (services) can run parallel
 - T049-T051 (components) can run parallel
 - T059-T063 (edge cases) can run parallel after core logic
 
 #### Within Phase 4 (US2)
+
 - T069-T071 (service worker enhancements) can run parallel
 - T075-T076 (offline indicators) can run parallel
 
 #### Within Phase 5 (US3)
+
 - T087-T089 (map components) can start parallel
 - T092, T094-T095, T099, T102 (various components) can run parallel
 
 #### Within Phase 6 (US4)
+
 - T109-T110 (localization setup) can start parallel
 - T114-T117 (UI localization) can run parallel
 
 #### Within Phase 7 (Admin)
+
 - T128-T129 (auth functions) can run parallel
 - T134-T137 (admin pages structure) can run parallel
 - T138-T141 (admin components) can run parallel
@@ -511,6 +517,7 @@ Total all tasks: ~200 tasks (~6-8 weeks cho 1 developer, hoặc 3-4 weeks cho te
 - T152-T153 (analytics components) can run parallel
 
 #### Within Phase 8 (Polish)
+
 - T154-T156 (performance optimizations) can run parallel
 - T166-T171 (accessibility improvements) can run parallel
 - T172-T176 (documentation) can run parallel
