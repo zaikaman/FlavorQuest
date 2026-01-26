@@ -40,24 +40,24 @@
 
 ### Supabase Setup
 
-- [ ] T012 Create Supabase project và lấy project URL + anon key
-- [ ] T013 Create database migrations: 001_create_pois.sql trong supabase/migrations/
-- [ ] T014 Create database migrations: 002_create_analytics.sql trong supabase/migrations/
-- [ ] T015 Create database migrations: 003_create_users.sql trong supabase/migrations/
-- [ ] T016 Run migrations với Supabase CLI: `supabase db push`
-- [ ] T017 [P] Create sample seed data trong supabase/seed.sql (10-15 POI cho phố Vĩnh Khánh)
-- [ ] T018 [P] Create Supabase storage buckets: 'audio' và 'images' với public access policies
-- [ ] T019 Generate database types: `supabase gen types typescript` → lib/types/database.types.ts
+- [x] T012 Create Supabase project và lấy project URL + anon key
+- [x] T013 Create database migrations: 001_create_pois.sql trong supabase/migrations/
+- [x] T014 Create database migrations: 002_create_analytics.sql trong supabase/migrations/
+- [x] T015 Create database migrations: 003_create_users.sql trong supabase/migrations/
+- [x] T016 Run migrations với Supabase CLI: `supabase db push`
+- [x] T017 [P] Create sample seed data trong supabase/seed.sql (10-15 POI cho phố Vĩnh Khánh)
+- [x] T018 [P] Create Supabase storage buckets: 'audio' và 'images' với public access policies
+- [x] T019 Generate database types: `supabase gen types typescript` → lib/types/database.types.ts
 
 ### Core Services
 
-- [ ] T020 Implement Supabase client setup trong lib/services/supabase.ts
-- [ ] T021 [P] Implement IndexedDB storage wrapper trong lib/services/storage.ts (với idb-keyval)
-- [ ] T022 [P] Implement Haversine distance calculation trong lib/utils/distance.ts
-- [ ] T023 [P] Implement GPS noise filter trong lib/utils/noise-filter.ts (simple moving average)
-- [ ] T024 [P] Implement cooldown manager trong lib/utils/cooldown.ts
-- [ ] T025 [P] Implement speed calculation từ GPS trong lib/utils/speed.ts
-- [ ] T026 [P] Implement battery status detection trong lib/utils/battery.ts
+- [x] T020 Implement Supabase client setup trong lib/supabase/client.ts và server.ts
+- [x] T021 [P] Implement IndexedDB storage wrapper trong lib/services/storage.ts (với idb-keyval)
+- [x] T022 [P] Implement Haversine distance calculation trong lib/utils/distance.ts
+- [x] T023 [P] Implement GPS noise filter trong lib/utils/noise-filter.ts (simple moving average)
+- [x] T024 [P] Implement cooldown manager trong lib/utils/cooldown.ts
+- [x] T025 [P] Implement speed calculation từ GPS trong lib/utils/speed.ts
+- [x] T026 [P] Implement battery status detection trong lib/utils/battery.ts
 
 ### Web Worker
 
