@@ -15,15 +15,8 @@
  * @see https://github.com/jakearchibald/idb-keyval
  */
 
-import { get, set, del, clear, keys, Store } from 'idb-keyval';
-import type { POI, UserSettings, VisitHistoryEntry, CooldownRecord, AnalyticsLog } from '@/lib/types';
-
-/**
- * Custom IndexedDB store cho FlavorQuest
- * Database name: 'flavorquest-storage'
- * Store name: 'app-data'
- */
-const flavorQuestStore = new Store('flavorquest-storage', 'app-data');
+import { get, set, del, clear, keys } from 'idb-keyval';
+import type { POI, UserSettings, VisitHistoryEntry, CooldownRecord, AnalyticsLog } from '@/lib/types/index';
 
 /**
  * Storage Keys
@@ -52,7 +45,7 @@ export const STORAGE_KEYS = {
  * Overwrite toàn bộ POI cache
  */
 export async function savePOIs(pois: POI[]): Promise<void> {
-  await set(STORAGE_KEYS.POIS, pois, flavorQuestStore);
+  await set(STORAGE_KEYS.POIS, pois);
 }
 
 /**
@@ -60,7 +53,7 @@ export async function savePOIs(pois: POI[]): Promise<void> {
  * Return empty array nếu không có data
  */
 export async function loadPOIs(): Promise<POI[]> {
-  const pois = await get<POI[]>(STORAGE_KEYS.POIS, flavorQuestStore);
+  const pois = await get<POI[]>(STORAGE_KEYS.POIS);
   return pois ?? [];
 }
 
@@ -68,7 +61,7 @@ export async function loadPOIs(): Promise<POI[]> {
  * Clear POIs cache
  */
 export async function clearPOIs(): Promise<void> {
-  await del(STORAGE_KEYS.POIS, flavorQuestStore);
+  await del(STORAGE_KEYS.POIS);
 }
 
 // ========================================
@@ -79,7 +72,7 @@ export async function clearPOIs(): Promise<void> {
  * Save user settings to IndexedDB
  */
 export async function saveSettings(settings: UserSettings): Promise<void> {
-  await set(STORAGE_KEYS.USER_SETTINGS, settings, flavorQuestStore);
+  await set(STORAGE_KEYS.USER_SETTINGS, settings);
 }
 
 /**
@@ -87,21 +80,18 @@ export async function saveSettings(settings: UserSettings): Promise<void> {
  * Return default settings nếu không có data
  */
 export async function loadSettings(): Promise<UserSettings> {
-  const settings = await get<UserSettings>(STORAGE_KEYS.USER_SETTINGS, flavorQuestStore);
+  const settings = await get<UserSettings>(STORAGE_KEYS.USER_SETTINGS);
   
   // Default settings nếu chưa có
   if (!settings) {
     return {
       language: 'vi',
       volume: 0.8,
-      autoMode: true,
-      geofenceRadius: 18, // meters
-      ttsEnabled: true,
-      ttsRate: 1.0,
-      ttsPitch: 1.0,
-      mapType: 'osm',
-      showVisitedPOIs: true,
-      batteryOptimization: true,
+      autoPlayEnabled: true,
+      geofenceRadius: 18,
+      batterySaverMode: false,
+      showNotifications: true,
+      preferredMapZoom: 15,
     };
   }
   
@@ -121,7 +111,7 @@ export async function updateSettings(partialSettings: Partial<UserSettings>): Pr
  * Clear user settings
  */
 export async function clearSettings(): Promise<void> {
-  await del(STORAGE_KEYS.USER_SETTINGS, flavorQuestStore);
+  await del(STORAGE_KEYS.USER_SETTINGS);
 }
 
 // ========================================
@@ -135,7 +125,7 @@ export async function clearSettings(): Promise<void> {
 export async function saveVisit(entry: VisitHistoryEntry): Promise<void> {
   const history = await loadVisitHistory();
   history.push(entry);
-  await set(STORAGE_KEYS.VISIT_HISTORY, history, flavorQuestStore);
+  await set(STORAGE_KEYS.VISIT_HISTORY, history);
 }
 
 /**
@@ -143,7 +133,7 @@ export async function saveVisit(entry: VisitHistoryEntry): Promise<void> {
  * Return empty array nếu không có data
  */
 export async function loadVisitHistory(): Promise<VisitHistoryEntry[]> {
-  const history = await get<VisitHistoryEntry[]>(STORAGE_KEYS.VISIT_HISTORY, flavorQuestStore);
+  const history = await get<VisitHistoryEntry[]>(STORAGE_KEYS.VISIT_HISTORY);
   return history ?? [];
 }
 
@@ -151,7 +141,7 @@ export async function loadVisitHistory(): Promise<VisitHistoryEntry[]> {
  * Clear visit history
  */
 export async function clearVisitHistory(): Promise<void> {
-  await del(STORAGE_KEYS.VISIT_HISTORY, flavorQuestStore);
+  await del(STORAGE_KEYS.VISIT_HISTORY);
 }
 
 /**
@@ -159,7 +149,7 @@ export async function clearVisitHistory(): Promise<void> {
  */
 export async function getVisitedPOIIds(): Promise<string[]> {
   const history = await loadVisitHistory();
-  const uniqueIds = new Set(history.map((entry) => entry.poiId));
+  const uniqueIds = new Set(history.map((entry) => entry.poi_id));
   return Array.from(uniqueIds);
 }
 
@@ -174,7 +164,7 @@ export async function getVisitedPOIIds(): Promise<string[]> {
 export async function saveCooldown(poiId: string, timestamp: number): Promise<void> {
   const tracker = await loadCooldownTracker();
   tracker[poiId] = timestamp;
-  await set(STORAGE_KEYS.COOLDOWN_TRACKER, tracker, flavorQuestStore);
+  await set(STORAGE_KEYS.COOLDOWN_TRACKER, tracker);
 }
 
 /**
@@ -182,7 +172,7 @@ export async function saveCooldown(poiId: string, timestamp: number): Promise<vo
  * Return empty object nếu không có data
  */
 export async function loadCooldownTracker(): Promise<CooldownRecord> {
-  const tracker = await get<CooldownRecord>(STORAGE_KEYS.COOLDOWN_TRACKER, flavorQuestStore);
+  const tracker = await get<CooldownRecord>(STORAGE_KEYS.COOLDOWN_TRACKER);
   return tracker ?? {};
 }
 
@@ -199,7 +189,7 @@ export async function getLastPlayed(poiId: string): Promise<number | null> {
  * Clear cooldown tracker
  */
 export async function clearCooldownTracker(): Promise<void> {
-  await del(STORAGE_KEYS.COOLDOWN_TRACKER, flavorQuestStore);
+  await del(STORAGE_KEYS.COOLDOWN_TRACKER);
 }
 
 // ========================================
@@ -212,14 +202,14 @@ export async function clearCooldownTracker(): Promise<void> {
 export async function enqueueAnalytics(event: AnalyticsLog): Promise<void> {
   const queue = await loadAnalyticsQueue();
   queue.push(event);
-  await set(STORAGE_KEYS.ANALYTICS_QUEUE, queue, flavorQuestStore);
+  await set(STORAGE_KEYS.ANALYTICS_QUEUE, queue);
 }
 
 /**
  * Load analytics queue from IndexedDB
  */
 export async function loadAnalyticsQueue(): Promise<AnalyticsLog[]> {
-  const queue = await get<AnalyticsLog[]>(STORAGE_KEYS.ANALYTICS_QUEUE, flavorQuestStore);
+  const queue = await get<AnalyticsLog[]>(STORAGE_KEYS.ANALYTICS_QUEUE);
   return queue ?? [];
 }
 
@@ -227,7 +217,7 @@ export async function loadAnalyticsQueue(): Promise<AnalyticsLog[]> {
  * Clear analytics queue (sau khi sync thành công)
  */
 export async function clearAnalyticsQueue(): Promise<void> {
-  await del(STORAGE_KEYS.ANALYTICS_QUEUE, flavorQuestStore);
+  await del(STORAGE_KEYS.ANALYTICS_QUEUE);
 }
 
 /**
@@ -236,7 +226,7 @@ export async function clearAnalyticsQueue(): Promise<void> {
 export async function removeAnalyticsFromQueue(idsToRemove: string[]): Promise<void> {
   const queue = await loadAnalyticsQueue();
   const filtered = queue.filter((event) => !idsToRemove.includes(event.id));
-  await set(STORAGE_KEYS.ANALYTICS_QUEUE, filtered, flavorQuestStore);
+  await set(STORAGE_KEYS.ANALYTICS_QUEUE, filtered);
 }
 
 // ========================================
@@ -247,7 +237,7 @@ export async function removeAnalyticsFromQueue(idsToRemove: string[]): Promise<v
  * Save last sync timestamp
  */
 export async function saveLastSync(timestamp: number): Promise<void> {
-  await set(STORAGE_KEYS.LAST_SYNC, timestamp, flavorQuestStore);
+  await set(STORAGE_KEYS.LAST_SYNC, timestamp);
 }
 
 /**
@@ -255,7 +245,7 @@ export async function saveLastSync(timestamp: number): Promise<void> {
  * Return null nếu chưa từng sync
  */
 export async function loadLastSync(): Promise<number | null> {
-  const timestamp = await get<number>(STORAGE_KEYS.LAST_SYNC, flavorQuestStore);
+  const timestamp = await get<number>(STORAGE_KEYS.LAST_SYNC);
   return timestamp ?? null;
 }
 
@@ -267,14 +257,14 @@ export async function loadLastSync(): Promise<number | null> {
  * Save last known position
  */
 export async function saveLastPosition(position: GeolocationPosition): Promise<void> {
-  await set(STORAGE_KEYS.LAST_POSITION, position, flavorQuestStore);
+  await set(STORAGE_KEYS.LAST_POSITION, position);
 }
 
 /**
  * Load last known position
  */
 export async function loadLastPosition(): Promise<GeolocationPosition | null> {
-  const position = await get<GeolocationPosition>(STORAGE_KEYS.LAST_POSITION, flavorQuestStore);
+  const position = await get<GeolocationPosition>(STORAGE_KEYS.LAST_POSITION);
   return position ?? null;
 }
 
@@ -294,14 +284,14 @@ export interface PreloadStatus {
  * Save preload status
  */
 export async function savePreloadStatus(status: PreloadStatus): Promise<void> {
-  await set(STORAGE_KEYS.PRELOAD_STATUS, status, flavorQuestStore);
+  await set(STORAGE_KEYS.PRELOAD_STATUS, status);
 }
 
 /**
  * Load preload status
  */
 export async function loadPreloadStatus(): Promise<PreloadStatus | null> {
-  const status = await get<PreloadStatus>(STORAGE_KEYS.PRELOAD_STATUS, flavorQuestStore);
+  const status = await get<PreloadStatus>(STORAGE_KEYS.PRELOAD_STATUS);
   return status ?? null;
 }
 
@@ -313,7 +303,7 @@ export async function loadPreloadStatus(): Promise<PreloadStatus | null> {
  * Get all storage keys
  */
 export async function getAllKeys(): Promise<string[]> {
-  return await keys(flavorQuestStore);
+  return await keys();
 }
 
 /**
@@ -321,7 +311,7 @@ export async function getAllKeys(): Promise<string[]> {
  * ⚠️ Warning: This will delete ALL offline data
  */
 export async function clearAllStorage(): Promise<void> {
-  await clear(flavorQuestStore);
+  await clear();
 }
 
 /**

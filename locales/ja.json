@@ -1,0 +1,131 @@
+{
+  "app": {
+    "name": "FlavorQuest",
+    "tagline": "音声でヴィンカイン料理を発見"
+  },
+  "common": {
+    "loading": "読み込み中...",
+    "error": "エラー",
+    "retry": "再試行",
+    "cancel": "キャンセル",
+    "confirm": "確認",
+    "save": "保存",
+    "close": "閉じる",
+    "back": "戻る",
+    "next": "次へ",
+    "done": "完了",
+    "yes": "はい",
+    "no": "いいえ"
+  },
+  "tour": {
+    "startTour": "ツアー開始",
+    "pauseTour": "一時停止",
+    "resumeTour": "再開",
+    "stopTour": "ツアー終了",
+    "autoMode": "自動再生",
+    "manualMode": "手動モード",
+    "nearbyPOIs": "近くのポイント",
+    "currentLocation": "現在地",
+    "distance": "距離",
+    "priority": "優先度"
+  },
+  "audio": {
+    "play": "再生",
+    "pause": "一時停止",
+    "stop": "停止",
+    "replay": "再生",
+    "volume": "音量",
+    "speed": "再生速度",
+    "loading": "音声を読み込み中...",
+    "error": "音声を再生できません",
+    "noAudio": "音声がありません",
+    "useTTS": "音声合成を使用"
+  },
+  "location": {
+    "requesting": "位置情報を要求中...",
+    "denied": "位置情報へのアクセスが拒否されました",
+    "unavailable": "位置情報が利用できません",
+    "timeout": "リクエストがタイムアウトしました",
+    "enableLocation": "位置情報を有効にする",
+    "accuracy": "精度",
+    "lastUpdate": "最終更新"
+  },
+  "settings": {
+    "title": "設定",
+    "language": "言語",
+    "volume": "音量",
+    "autoMode": "自動再生",
+    "geofenceRadius": "トリガー半径",
+    "ttsEnabled": "音声合成",
+    "ttsRate": "音声速度",
+    "ttsPitch": "音声ピッチ",
+    "mapType": "地図タイプ",
+    "showVisitedPOIs": "訪問済みポイントを表示",
+    "batteryOptimization": "バッテリー最適化"
+  },
+  "history": {
+    "title": "履歴",
+    "visited": "訪問済み",
+    "notVisited": "未訪問",
+    "visitedAt": "訪問日時",
+    "clear": "履歴をクリア",
+    "empty": "履歴はまだありません"
+  },
+  "map": {
+    "title": "地図",
+    "zoomIn": "拡大",
+    "zoomOut": "縮小",
+    "centerMap": "現在地を中心に",
+    "fullscreen": "全画面表示",
+    "layers": "地図レイヤー"
+  },
+  "poi": {
+    "details": "詳細",
+    "signatureDish": "看板メニュー",
+    "funFact": "豆知識",
+    "estimatedHours": "営業時間",
+    "directions": "道順",
+    "playAudio": "音声を再生",
+    "viewOnMap": "地図で見る"
+  },
+  "offline": {
+    "status": "オフライン",
+    "ready": "オフライン使用可能",
+    "syncing": "同期中...",
+    "syncComplete": "同期完了",
+    "cacheSize": "キャッシュサイズ",
+    "clearCache": "キャッシュをクリア"
+  },
+  "battery": {
+    "level": "バッテリーレベル",
+    "charging": "充電中",
+    "notCharging": "充電していません",
+    "lowPowerMode": "低電力モード",
+    "recommendation": "推奨事項",
+    "warning": "バッテリー残量が少なくなっています！一部の機能が制限される場合があります。"
+  },
+  "speed": {
+    "stationary": "静止",
+    "walking": "歩行中",
+    "jogging": "ジョギング中",
+    "running": "ランニング中",
+    "vehicle": "車両で移動中",
+    "tooFast": "移動速度が速すぎます！最高の体験のために歩いてください。"
+  },
+  "errors": {
+    "generic": "エラーが発生しました",
+    "network": "ネットワークエラー",
+    "locationDenied": "この機能を使用するには位置情報へのアクセスを許可する必要があります",
+    "audioPlayback": "音声を再生できません。もう一度お試しください。",
+    "storageQuota": "ストレージがいっぱいです。一部のデータをクリアしてください。",
+    "unsupported": "お使いのブラウザはこの機能をサポートしていません"
+  },
+  "welcome": {
+    "title": "FlavorQuestへようこそ！",
+    "description": "自動音声ナレーションでヴィンカインのフードストリートを発見",
+    "step1": "GPS位置情報を有効にする",
+    "step2": "ヴィンカイン通りに歩く",
+    "step3": "屋台の近くで音声ナレーションが自動再生されます",
+    "getStarted": "始める"
+  }
+}

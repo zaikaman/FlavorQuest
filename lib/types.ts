@@ -170,6 +170,14 @@ export interface GeolocationError {
   message: string;
 }
 
+/**
+ * Geolocation permission state
+ */
+export interface GeolocationState {
+  status: 'requesting' | 'granted' | 'denied' | 'unavailable';
+  error?: GeolocationError;
+}
+
 // ============================================
 // AUDIO TYPES
 // ============================================
@@ -340,6 +348,11 @@ export interface VisitHistory {
   listen_duration?: number;
 }
 
+/**
+ * Alias for VisitHistory (backward compatibility)
+ */
+export type VisitHistoryEntry = VisitHistory;
+
 // ============================================
 // COOLDOWN TYPES
 // ============================================
@@ -351,6 +364,11 @@ export interface CooldownEntry {
   poi_id: string;
   last_played_at: number; // timestamp in milliseconds
 }
+
+/**
+ * Cooldown tracker record (POI ID -> timestamp mapping)
+ */
+export type CooldownRecord = Record<string, number>;
 
 // ============================================
 // APP STATE TYPES

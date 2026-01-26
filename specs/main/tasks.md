@@ -61,32 +61,32 @@
 
 ### Web Worker
 
-- [ ] T027 Create Web Worker cho geofencing trong lib/workers/geofence.worker.ts
+- [x] T027 Create Web Worker cho geofencing trong lib/workers/geofence.worker.ts
 
 ### React Context & Hooks Foundation
 
-- [ ] T028 Create LanguageContext trong lib/contexts/LanguageContext.tsx
-- [ ] T029 Create AppContext trong lib/contexts/AppContext.tsx (global state)
-- [ ] T030 [P] Create localization helper trong lib/utils/localization.ts (getLocalizedField function)
-- [ ] T031 [P] Create JSON locale files trong locales/: vi.json, en.json, ja.json, fr.json, ko.json, zh.json (basic UI strings)
+- [x] T028 Create LanguageContext trong lib/contexts/LanguageContext.tsx
+- [x] T029 Create AppContext trong lib/contexts/AppContext.tsx (global state)
+- [x] T030 [P] Create localization helper trong lib/utils/localization.ts (getLocalizedField function)
+- [x] T031 [P] Create JSON locale files trong locales/: vi.json, en.json, ja.json, fr.json, ko.json, zh.json (basic UI strings)
 
 ### Base Components (UI Library)
 
-- [ ] T032 [P] Create Button component trong components/ui/Button.tsx
-- [ ] T033 [P] Create Card component trong components/ui/Card.tsx
-- [ ] T034 [P] Create Modal component trong components/ui/Modal.tsx
-- [ ] T035 [P] Create Spinner component trong components/ui/Spinner.tsx
-- [ ] T036 [P] Create Toast component trong components/ui/Toast.tsx
+- [x] T032 [P] Create Button component trong components/ui/Button.tsx
+- [x] T033 [P] Create Card component trong components/ui/Card.tsx
+- [x] T034 [P] Create Modal component trong components/ui/Modal.tsx
+- [x] T035 [P] Create Spinner component trong components/ui/Spinner.tsx
+- [x] T036 [P] Create Toast component trong components/ui/Toast.tsx
 
 ### Service Worker & PWA
 
-- [ ] T037 Configure service worker với Workbox trong next.config.js (OSM tiles, audio, images caching)
-- [ ] T038 Implement PWA lifecycle events trong lib/services/pwa.ts
-- [ ] T039 Create PWA icons (8 sizes: 72, 96, 128, 144, 152, 192, 384, 512) trong public/icons/
+- [x] T037 Configure service worker với Workbox trong next.config.js (OSM tiles, audio, images caching)
+- [x] T038 Implement PWA lifecycle events trong lib/services/pwa.ts
+- [x] T039 Create PWA icons (8 sizes: 72, 96, 128, 144, 152, 192, 384, 512) trong public/icons/
 
 ### Root Layout
 
-- [ ] T040 Create root layout trong app/layout.tsx với PWA meta tags, LanguageProvider, AppContext Provider
+- [x] T040 Create root layout trong app/layout.tsx với PWA meta tags, LanguageProvider, AppContext Provider
 
 **Checkpoint**: ✅ Foundation ready - User story implementation có thể bắt đầu parallel
 

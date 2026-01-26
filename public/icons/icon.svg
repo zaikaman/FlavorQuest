@@ -1,0 +1,21 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="512" height="512" rx="128" fill="#ef4444"/>
+  
+  <!-- Bowl -->
+  <path d="M128 256C128 256 128 320 256 320C384 320 384 256 384 256" stroke="white" stroke-width="24" stroke-linecap="round"/>
+  <ellipse cx="256" cy="256" rx="128" ry="32" fill="white" opacity="0.9"/>
+  
+  <!-- Steam Lines -->
+  <path d="M220 180C220 180 220 160 220 140C220 120 220 100 220 100" stroke="white" stroke-width="12" stroke-linecap="round" opacity="0.8"/>
+  <path d="M256 160C256 160 256 140 256 120C256 100 256 80 256 80" stroke="white" stroke-width="12" stroke-linecap="round" opacity="0.8"/>
+  <path d="M292 180C292 180 292 160 292 140C292 120 292 100 292 100" stroke="white" stroke-width="12" stroke-linecap="round" opacity="0.8"/>
+  
+  <!-- Food inside bowl -->
+  <circle cx="220" cy="256" r="16" fill="white" opacity="0.7"/>
+  <circle cx="256" cy="268" r="20" fill="white" opacity="0.7"/>
+  <circle cx="292" cy="256" r="16" fill="white" opacity="0.7"/>
+  
+  <!-- Text FQ -->
+  <text x="256" y="420" font-family="Arial, sans-serif" font-size="96" font-weight="bold" fill="white" text-anchor="middle">FQ</text>
+</svg>
