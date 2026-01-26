@@ -17,7 +17,7 @@
  */
 
 import { saveCooldown, getLastPlayed, loadCooldownTracker, clearCooldownTracker } from '@/lib/services/storage';
-import { COOLDOWN_PERIOD_MS } from '@/lib/constants';
+import { COOLDOWN_PERIOD_MS } from '@/lib/constants/index';
 
 /**
  * Cooldown Manager Class
@@ -126,7 +126,7 @@ export class CooldownManager {
     const inCooldown: string[] = [];
 
     for (const [poiId, lastPlayed] of Object.entries(tracker)) {
-      const timeSinceLastPlay = now - lastPlayed;
+      const timeSinceLastPlay = now - (lastPlayed as number);
       if (timeSinceLastPlay < this.cooldownDuration) {
         inCooldown.push(poiId);
       }

@@ -16,7 +16,7 @@
  */
 
 import { calculateDistance } from './distance';
-import type { Coordinates } from '@/lib/types';
+import type { Coordinates } from '@/lib/types/index';
 
 /**
  * Speed reading
@@ -118,7 +118,7 @@ export class SpeedCalculator {
       return null;
     }
 
-    const lastReading = this.readings[this.readings.length - 1];
+    const lastReading = this.readings[this.readings.length - 1]!; // Non-null: length check ensures element exists
     const timeDelta = timestamp - lastReading.timestamp;
 
     // Ignore if too soon (GPS hasn't updated yet)

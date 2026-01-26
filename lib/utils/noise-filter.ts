@@ -16,7 +16,7 @@
  * - Memory: ~1KB per 100 samples
  */
 
-import type { Coordinates } from '@/lib/types';
+import type { Coordinates } from '@/lib/types/index';
 
 /**
  * GPS Sample - một coordinate reading từ GPS
@@ -87,8 +87,8 @@ const DEFAULT_CONFIG: NoiseFilterConfig = {
  * ```
  */
 export class NoiseFilter {
-  private samples: GPSSample[] = [];
-  private config: NoiseFilterConfig;
+  protected samples: GPSSample[] = [];
+  protected config: NoiseFilterConfig;
 
   constructor(config: Partial<NoiseFilterConfig> = {}) {
     this.config = { ...DEFAULT_CONFIG, ...config };
@@ -136,7 +136,7 @@ export class NoiseFilter {
   /**
    * Calculate moving average of all samples in buffer
    */
-  private calculateMovingAverage(): Coordinates {
+  protected calculateMovingAverage(): Coordinates {
     if (this.samples.length === 0) {
       throw new Error('No samples to calculate average');
     }
@@ -227,7 +227,7 @@ export class WeightedNoiseFilter extends NoiseFilter {
    * Most recent sample has weight = windowSize
    * Oldest sample has weight = 1
    */
-  protected calculateMovingAverage(): Coordinates {
+  protected override calculateMovingAverage(): Coordinates {
     if (this.samples.length === 0) {
       throw new Error('No samples to calculate average');
     }
@@ -238,7 +238,7 @@ export class WeightedNoiseFilter extends NoiseFilter {
 
     for (let i = 0; i < this.samples.length; i++) {
       const weight = i + 1; // Linear weights: 1, 2, 3, ...
-      const sample = this.samples[i];
+      const sample = this.samples[i]!; // Non-null assertion: loop bounds guarantee valid index
 
       sumLat += sample.lat * weight;
       sumLng += sample.lng * weight;

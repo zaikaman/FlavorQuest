@@ -1,0 +1,131 @@
+{
+  "app": {
+    "name": "FlavorQuest",
+    "tagline": "오디오로 빈칸 요리 발견하기"
+  },
+  "common": {
+    "loading": "로딩 중...",
+    "error": "오류",
+    "retry": "다시 시도",
+    "cancel": "취소",
+    "confirm": "확인",
+    "save": "저장",
+    "close": "닫기",
+    "back": "뒤로",
+    "next": "다음",
+    "done": "완료",
+    "yes": "예",
+    "no": "아니요"
+  },
+  "tour": {
+    "startTour": "투어 시작",
+    "pauseTour": "일시 정지",
+    "resumeTour": "재개",
+    "stopTour": "투어 종료",
+    "autoMode": "자동 재생",
+    "manualMode": "수동 모드",
+    "nearbyPOIs": "근처 장소",
+    "currentLocation": "현재 위치",
+    "distance": "거리",
+    "priority": "우선순위"
+  },
+  "audio": {
+    "play": "재생",
+    "pause": "일시 정지",
+    "stop": "정지",
+    "replay": "다시 재생",
+    "volume": "볼륨",
+    "speed": "재생 속도",
+    "loading": "오디오 로딩 중...",
+    "error": "오디오를 재생할 수 없습니다",
+    "noAudio": "오디오 없음",
+    "useTTS": "음성 합성 사용"
+  },
+  "location": {
+    "requesting": "위치 요청 중...",
+    "denied": "위치 액세스 거부됨",
+    "unavailable": "위치를 사용할 수 없습니다",
+    "timeout": "요청 시간 초과",
+    "enableLocation": "위치 활성화",
+    "accuracy": "정확도",
+    "lastUpdate": "마지막 업데이트"
+  },
+  "settings": {
+    "title": "설정",
+    "language": "언어",
+    "volume": "볼륨",
+    "autoMode": "자동 재생",
+    "geofenceRadius": "트리거 반경",
+    "ttsEnabled": "음성 합성",
+    "ttsRate": "음성 속도",
+    "ttsPitch": "음성 높이",
+    "mapType": "지도 유형",
+    "showVisitedPOIs": "방문한 장소 표시",
+    "batteryOptimization": "배터리 최적화"
+  },
+  "history": {
+    "title": "기록",
+    "visited": "방문함",
+    "notVisited": "방문하지 않음",
+    "visitedAt": "방문 시간",
+    "clear": "기록 지우기",
+    "empty": "기록 없음"
+  },
+  "map": {
+    "title": "지도",
+    "zoomIn": "확대",
+    "zoomOut": "축소",
+    "centerMap": "현재 위치로 이동",
+    "fullscreen": "전체 화면",
+    "layers": "지도 레이어"
+  },
+  "poi": {
+    "details": "세부 정보",
+    "signatureDish": "대표 메뉴",
+    "funFact": "재미있는 사실",
+    "estimatedHours": "영업 시간",
+    "directions": "길 안내",
+    "playAudio": "오디오 재생",
+    "viewOnMap": "지도에서 보기"
+  },
+  "offline": {
+    "status": "오프라인",
+    "ready": "오프라인 사용 가능",
+    "syncing": "동기화 중...",
+    "syncComplete": "동기화 완료",
+    "cacheSize": "캐시 크기",
+    "clearCache": "캐시 지우기"
+  },
+  "battery": {
+    "level": "배터리 잔량",
+    "charging": "충전 중",
+    "notCharging": "충전 중 아님",
+    "lowPowerMode": "절전 모드",
+    "recommendation": "권장 사항",
+    "warning": "배터리 부족! 일부 기능이 제한될 수 있습니다."
+  },
+  "speed": {
+    "stationary": "정지",
+    "walking": "걷는 중",
+    "jogging": "조깅 중",
+    "running": "달리는 중",
+    "vehicle": "차량 이동 중",
+    "tooFast": "너무 빨리 이동 중입니다! 최상의 경험을 위해 걸어주세요."
+  },
+  "errors": {
+    "generic": "오류가 발생했습니다",
+    "network": "네트워크 오류",
+    "locationDenied": "이 기능을 사용하려면 위치 액세스 권한을 부여해야 합니다",
+    "audioPlayback": "오디오를 재생할 수 없습니다. 다시 시도해주세요.",
+    "storageQuota": "저장 공간이 가득 찼습니다. 일부 데이터를 삭제해주세요.",
+    "unsupported": "브라우저가 이 기능을 지원하지 않습니다"
+  },
+  "welcome": {
+    "title": "FlavorQuest에 오신 것을 환영합니다!",
+    "description": "자동 오디오 내레이션으로 빈칸 음식 거리를 발견하세요",
+    "step1": "GPS 위치 활성화",
+    "step2": "빈칸 거리로 걸어가기",
+    "step3": "음식점 근처에서 오디오 내레이션이 자동 재생됩니다",
+    "getStarted": "시작하기"
+  }
+}

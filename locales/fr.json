@@ -1,0 +1,131 @@
+{
+  "app": {
+    "name": "FlavorQuest",
+    "tagline": "Découvrez la cuisine de Vinh Khanh par l'audio"
+  },
+  "common": {
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "retry": "Réessayer",
+    "cancel": "Annuler",
+    "confirm": "Confirmer",
+    "save": "Enregistrer",
+    "close": "Fermer",
+    "back": "Retour",
+    "next": "Suivant",
+    "done": "Terminé",
+    "yes": "Oui",
+    "no": "Non"
+  },
+  "tour": {
+    "startTour": "Démarrer la visite",
+    "pauseTour": "Pause",
+    "resumeTour": "Reprendre",
+    "stopTour": "Arrêter la visite",
+    "autoMode": "Lecture automatique",
+    "manualMode": "Mode manuel",
+    "nearbyPOIs": "Points à proximité",
+    "currentLocation": "Position actuelle",
+    "distance": "Distance",
+    "priority": "Priorité"
+  },
+  "audio": {
+    "play": "Lecture",
+    "pause": "Pause",
+    "stop": "Arrêter",
+    "replay": "Rejouer",
+    "volume": "Volume",
+    "speed": "Vitesse de lecture",
+    "loading": "Chargement audio...",
+    "error": "Impossible de lire l'audio",
+    "noAudio": "Aucun audio disponible",
+    "useTTS": "Utiliser la synthèse vocale"
+  },
+  "location": {
+    "requesting": "Demande de localisation...",
+    "denied": "Accès à la localisation refusé",
+    "unavailable": "Localisation indisponible",
+    "timeout": "Délai d'attente dépassé",
+    "enableLocation": "Activer la localisation",
+    "accuracy": "Précision",
+    "lastUpdate": "Dernière mise à jour"
+  },
+  "settings": {
+    "title": "Paramètres",
+    "language": "Langue",
+    "volume": "Volume",
+    "autoMode": "Lecture automatique",
+    "geofenceRadius": "Rayon de déclenchement",
+    "ttsEnabled": "Synthèse vocale",
+    "ttsRate": "Vitesse de parole",
+    "ttsPitch": "Hauteur de voix",
+    "mapType": "Type de carte",
+    "showVisitedPOIs": "Afficher les points visités",
+    "batteryOptimization": "Optimisation de la batterie"
+  },
+  "history": {
+    "title": "Historique",
+    "visited": "Visité",
+    "notVisited": "Non visité",
+    "visitedAt": "Visité le",
+    "clear": "Effacer l'historique",
+    "empty": "Aucun historique"
+  },
+  "map": {
+    "title": "Carte",
+    "zoomIn": "Zoom avant",
+    "zoomOut": "Zoom arrière",
+    "centerMap": "Centrer sur la position",
+    "fullscreen": "Plein écran",
+    "layers": "Couches de carte"
+  },
+  "poi": {
+    "details": "Détails",
+    "signatureDish": "Plat signature",
+    "funFact": "Fait amusant",
+    "estimatedHours": "Heures d'ouverture",
+    "directions": "Itinéraire",
+    "playAudio": "Lire l'audio",
+    "viewOnMap": "Voir sur la carte"
+  },
+  "offline": {
+    "status": "Hors ligne",
+    "ready": "Prêt pour une utilisation hors ligne",
+    "syncing": "Synchronisation...",
+    "syncComplete": "Synchronisé",
+    "cacheSize": "Taille du cache",
+    "clearCache": "Vider le cache"
+  },
+  "battery": {
+    "level": "Niveau de batterie",
+    "charging": "En charge",
+    "notCharging": "Non en charge",
+    "lowPowerMode": "Mode économie d'énergie",
+    "recommendation": "Recommandation",
+    "warning": "Batterie faible ! Certaines fonctionnalités peuvent être limitées."
+  },
+  "speed": {
+    "stationary": "Stationnaire",
+    "walking": "Marche",
+    "jogging": "Jogging",
+    "running": "Course",
+    "vehicle": "En véhicule",
+    "tooFast": "Vous vous déplacez trop vite ! Veuillez marcher pour une meilleure expérience."
+  },
+  "errors": {
+    "generic": "Une erreur s'est produite",
+    "network": "Erreur réseau",
+    "locationDenied": "Vous devez autoriser l'accès à la localisation pour utiliser cette fonctionnalité",
+    "audioPlayback": "Impossible de lire l'audio. Veuillez réessayer.",
+    "storageQuota": "Le stockage est plein. Veuillez effacer certaines données.",
+    "unsupported": "Votre navigateur ne prend pas en charge cette fonctionnalité"
+  },
+  "welcome": {
+    "title": "Bienvenue sur FlavorQuest !",
+    "description": "Découvrez la rue gastronomique Vinh Khanh avec narration audio automatique",
+    "step1": "Activer la localisation GPS",
+    "step2": "Marcher vers la rue Vinh Khanh",
+    "step3": "La narration audio se lance automatiquement près des stands",
+    "getStarted": "Commencer"
+  }
+}

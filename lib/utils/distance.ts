@@ -9,7 +9,7 @@
  * @see https://en.wikipedia.org/wiki/Haversine_formula
  */
 
-import type { Coordinates } from '@/lib/types';
+import type { Coordinates } from '@/lib/types/index';
 
 /**
  * Earth radius in meters (mean radius)
@@ -113,11 +113,11 @@ export function findNearestPOI<T extends { lat: number; lng: number }>(
     return null;
   }
 
-  let nearestPOI = pois[0];
+  let nearestPOI: T = pois[0]!; // Non-null assertion: length check guarantees pois[0] exists
   let minDistance = calculateDistance(userPos, { lat: nearestPOI.lat, lng: nearestPOI.lng });
 
   for (let i = 1; i < pois.length; i++) {
-    const poi = pois[i];
+    const poi = pois[i]!; // Non-null assertion: loop guarantees valid index
     const distance = calculateDistance(userPos, { lat: poi.lat, lng: poi.lng });
 
     if (distance < minDistance) {
@@ -211,7 +211,7 @@ export function calculateBearing(from: Coordinates, to: Coordinates): number {
 export function getCompassDirection(bearing: number): string {
   const directions = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
   const index = Math.round(bearing / 45) % 8;
-  return directions[index];
+  return directions[index] ?? 'N'; // Fallback to 'N' if undefined
 }
 
 /**
