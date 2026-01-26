@@ -1,7 +1,7 @@
 // @ts-nocheck
 /**
  * POI API Type Definitions
- * 
+ *
  * Định nghĩa types cho API endpoints liên quan đến POI (Points of Interest)
  */
 
@@ -88,7 +88,7 @@ export interface CreatePOIRequest {
   lng: number;
   name_vi: string;
   name_en: string;
-  
+
   // Optional fields
   radius?: number; // default: 20
   priority?: number; // default: 5
@@ -236,8 +236,4 @@ export function calculateDistance(
 /**
  * Check xem user có ở trong geofence của POI không
  */
-export function isInGeofence(
-  userLat: number,
-  userLng: number,
-  poi: POI
-): boolean;
+export function isInGeofence(userLat: number, userLng: number, poi: POI): boolean;

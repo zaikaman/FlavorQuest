@@ -6,7 +6,8 @@
 
 FlavorQuest là một Progressive Web App (PWA) cung cấp trải nghiệm thuyết minh âm thanh tự động dựa trên vị trí cho phố ẩm thực Vĩnh Khánh (Quận 4, TP.HCM). Hệ thống sử dụng Next.js 16+ với App Router, Supabase backend, và offline-first architecture để tự động phát nội dung âm thanh khi người dùng đi gần các điểm quan tâm (POI) - quán ăn, quầy hàng - mà không cần tương tác màn hình. Hỗ trợ 6 ngôn ngữ (Việt, Anh, Nhật, Pháp, Hàn, Trung), hoạt động offline sau lần tải đầu, và tối ưu hóa tiết kiệm pin cho mobile.
 
-**Technical Approach**: 
+**Technical Approach**:
+
 - **Frontend/Full-stack**: Next.js 16+ (App Router) + React 19 + TypeScript + Tailwind CSS
 - **PWA**: Built-in Next.js PWA support với custom service worker cho offline caching
 - **Location**: Browser Geolocation API với watchPosition cho tracking realtime, custom geofencing logic (Haversine distance)
@@ -19,29 +20,33 @@ FlavorQuest là một Progressive Web App (PWA) cung cấp trải nghiệm thuy�
 
 ## Technical Context
 
-**Language/Version**: TypeScript 5.4+, Next.js 16+, React 19+, Node.js 20+  
+**Language/Version**: TypeScript 5.4+, Next.js 16+, React 19+, Node.js 20+
 
-**Primary Dependencies**: 
+**Primary Dependencies**:
+
 - next@16+, react@19+, typescript@5.4+
 - @supabase/supabase-js@2.x, @supabase/auth-helpers-nextjs@0.10.x
 - leaflet@1.9.x, react-leaflet@4.x
 - idb-keyval@6.x (IndexedDB wrapper)
 - tailwindcss@3.x
 
-**Storage**: 
+**Storage**:
+
 - **Server**: Supabase PostgreSQL (POI data, user sessions, analytics logs, audio/image URLs)
 - **Client**: IndexedDB (offline cache cho POI, audio files, images, user preferences, visit history)
 
 **Testing**: Jest + React Testing Library (unit), Playwright (E2E), Cypress (PWA testing)
 
-**Target Platform**: 
+**Target Platform**:
+
 - Mobile web browsers (iOS Safari 15+, Android Chrome 100+)
 - Desktop browsers (Chrome, Firefox, Safari, Edge - latest 2 versions)
 - PWA installable trên Android/iOS
 
 **Project Type**: Web application (full-stack với Next.js App Router, không tách frontend/backend riêng)
 
-**Performance Goals**: 
+**Performance Goals**:
+
 - Thời gian phát âm thanh tự động: <3 giây từ khi vào geofence
 - Page load: <2 giây (FCP), <3 giây (LCP) trên 4G
 - Offline cache load: <1 giây
@@ -49,7 +54,8 @@ FlavorQuest là một Progressive Web App (PWA) cung cấp trải nghiệm thuy�
 - TTS fallback: <2 giây để bắt đầu phát
 - Map render: <1.5 giây cho toàn bộ khu vực Vĩnh Khánh
 
-**Constraints**: 
+**Constraints**:
+
 - **Offline-first**: Tất cả chức năng chính phải hoạt động không cần mạng sau lần tải đầu
 - **Pin**: Tiêu thụ pin <15% sau 1 giờ sử dụng liên tục (màn hình tắt)
 - **Accuracy**: GPS accuracy 10-15m trong điều kiện tốt, bộ lọc nhiễu cho 95% trường hợp
@@ -58,7 +64,8 @@ FlavorQuest là một Progressive Web App (PWA) cung cấp trải nghiệm thuy�
 - **Background limitation**: PWA không có native background tracking → yêu cầu giữ tab mở hoặc dùng Periodic Background Sync
 - **Anonymous by default**: Không yêu cầu đăng nhập để sử dụng, auth chỉ cho admin/content management
 
-**Scale/Scope**: 
+**Scale/Scope**:
+
 - 50-100 POI trên phố Vĩnh Khánh
 - 6 ngôn ngữ × ~60-90 giây audio mỗi POI = ~30-50MB total audio
 - Hỗ trợ 200 người dùng đồng thời
@@ -67,18 +74,20 @@ FlavorQuest là một Progressive Web App (PWA) cung cấp trải nghiệm thuy�
 
 ## Constitution Check
 
-*GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
+_GATE: Must pass before Phase 0 research. Re-check after Phase 1 design._
 
 ### I. Exemplary Code Quality ✅ PASS
 
 **Compliance**:
+
 - TypeScript với strict mode đảm bảo static typing cho toàn bộ codebase
 - ESLint + Prettier configured cho Next.js 16 best practices
 - Modular architecture: tách biệt location logic, audio playback, storage layer, UI components
 - JSDoc comments cho tất cả public functions và custom hooks
 - Separation of concerns: hooks cho business logic, components cho presentation, services cho data access
 
-**Evidence**: 
+**Evidence**:
+
 - `tsconfig.json` với `strict: true`
 - Folder structure rõ ràng: `app/` (routes), `components/` (UI), `lib/` (business logic), `services/` (external APIs)
 - Custom hooks: `useGeolocation`, `useAudioPlayer`, `useOfflineSync`, `usePOIManager`
@@ -86,6 +95,7 @@ FlavorQuest là một Progressive Web App (PWA) cung cấp trải nghiệm thuy�
 ### II. UX Consistency First ✅ PASS
 
 **Compliance**:
+
 - Tailwind CSS với custom design tokens (colors, spacing, typography) trong `tailwind.config.ts`
 - Component library: buttons, cards, modals, maps, audio controls với consistent styling
 - Accessibility: ARIA labels, keyboard navigation, screen reader support cho audio feedback, alt text cho images
@@ -93,6 +103,7 @@ FlavorQuest là một Progressive Web App (PWA) cung cấp trải nghiệm thuy�
 - Predictable patterns: bottom navigation bar, FAB cho Start Tour, swipe gestures cho POI details
 
 **Evidence**:
+
 - Design system documented trong `docs/design-system.md`
 - Accessibility checklist trong testing (Lighthouse score target: 95+)
 - WCAG 2.1 AA compliance cho color contrast, focus states, audio alternatives (transcript text)
@@ -100,6 +111,7 @@ FlavorQuest là một Progressive Web App (PWA) cung cấp trải nghiệm thuy�
 ### III. Performance-Driven Engineering ✅ PASS
 
 **Compliance**:
+
 - Next.js App Router với React Server Components giảm JavaScript bundle size
 - Service Worker pre-cache audio files, map tiles, images → offline-first architecture
 - Lazy loading: POI details chỉ fetch khi user tap vào marker
@@ -110,6 +122,7 @@ FlavorQuest là một Progressive Web App (PWA) cung cấp trải nghiệm thuy�
 - Audio streaming: Progressive download, không cần tải toàn bộ file trước khi phát
 
 **Evidence**:
+
 - Performance budget: <50MB cache, <3s audio trigger, <2s FCP
 - Lighthouse CI integration trong GitHub Actions
 - Web Worker cho geofencing: `lib/workers/geofence.worker.ts`
@@ -266,8 +279,9 @@ flavorquest/
 └── README.md
 ```
 
-**Structure Decision**: 
+**Structure Decision**:
 Sử dụng cấu trúc Next.js App Router (Option 2 - Web application) vì:
+
 1. **Full-stack trong cùng một project**: Next.js App Router hỗ trợ Server Components và API Routes, không cần tách backend riêng
 2. **PWA-friendly**: Next.js có built-in support cho PWA manifest và service worker
 3. **File-based routing**: Dễ quản lý routes cho tour, admin, POI details
@@ -469,35 +483,41 @@ POI now visible to all tour users
 ## Key Technologies Justification
 
 ### Why Next.js App Router?
+
 - **Full-stack in one project**: Server Components + API Routes eliminates need for separate backend
 - **File-based routing**: Intuitive structure for tour pages, admin pages, POI details
 - **Built-in optimization**: Image optimization, code splitting, lazy loading out-of-the-box
 - **PWA support**: Easy integration với next-pwa plugin
 
 ### Why Supabase?
+
 - **All-in-one**: Database + Auth + Storage + Realtime trong một platform
 - **PostgreSQL**: Robust relational database với PostGIS cho geospatial queries
 - **Generous free tier**: 500MB DB, 1GB storage, 50GB bandwidth - đủ cho MVP và beyond
 - **No DevOps**: Không cần setup/maintain server, auto-scaling, auto-backups
 
 ### Why IndexedDB (not LocalStorage)?
+
 - **Storage capacity**: IndexedDB ~50MB+ vs LocalStorage ~5-10MB
 - **Structured data**: Store complex objects (POIs, audio blobs) không cần serialize JSON
 - **Async API**: Không block UI thread như LocalStorage (synchronous)
 - **Better performance**: Indexed queries nhanh hơn cho large datasets
 
 ### Why Web Worker for Geofencing?
+
 - **Non-blocking**: Distance calculation chạy parallel, không làm lag UI
 - **Battery efficient**: Offload heavy computation từ main thread
 - **Scalability**: Dễ dàng tính distance cho 50-100 POIs mỗi giây
 
 ### Why Leaflet (not Google Maps)?
+
 - **No API key**: Không cần register, no billing, no quota limits
 - **Offline-friendly**: OSM tiles dễ cache, không cần special offline SDK
 - **Lightweight**: 40KB gzipped vs Google Maps ~300KB+
 - **Open-source**: Full control, có thể customize markers, tiles, styles
 
 ### Why TTS Fallback?
+
 - **Network resilience**: Nếu audio file không tải được, TTS vẫn deliver content
 - **Browser native**: Web Speech Synthesis built-in, không cần external API
 - **Cost-effective**: Zero cost cho TTS, không như cloud TTS services ($4-16 per 1M chars)
@@ -506,27 +526,32 @@ POI now visible to all tour users
 ## Performance Optimization Strategies
 
 ### 1. Service Worker Caching
+
 - **App shell**: Cache HTML, CSS, JS essentials trong install event
 - **Audio files**: Cache-first strategy, preload POIs trong bán kính 500m
 - **Map tiles**: Cache-first, max 500 tiles (~10-15MB)
 - **Eviction policy**: LRU (Least Recently Used) khi vượt quota
 
 ### 2. Lazy Loading
+
 - **POI details**: Chỉ fetch khi user tap vào marker
 - **Audio files**: Progressive download, play khi đủ buffer
 - **Images**: Next.js Image component với lazy loading + WebP format
 
 ### 3. Throttling & Debouncing
+
 - **Geolocation updates**: Throttle updates khi user đứng yên (>5 phút)
 - **GPS accuracy**: High accuracy chỉ khi di chuyển, low khi đứng yên
 - **Map interactions**: Debounce zoom/pan events để giảm re-render
 
 ### 4. Code Splitting
+
 - **Route-based**: Mỗi page (tour, admin) loaded separately
 - **Component-based**: Admin components không load cho tour users
 - **Dynamic imports**: Heavy libraries (Leaflet, chart.js) loaded on-demand
 
 ### 5. Battery Optimization
+
 - **Detect battery level**: Reduce GPS frequency khi pin < 20%
 - **Background throttling**: Pause geolocation khi tab inactive
 - **Battery saver mode**: User toggle để reduce accuracy + frequency
@@ -534,23 +559,27 @@ POI now visible to all tour users
 ## Security Considerations
 
 ### 1. Data Privacy
+
 - **Anonymous by default**: Không yêu cầu đăng nhập để sử dụng tour
 - **Rounded coordinates**: Analytics logs round GPS to 2 decimals (~1km accuracy)
 - **No PII**: Không lưu user ID, email, phone trong analytics
 - **GDPR compliant**: User có thể xóa visit history, không track cross-session
 
 ### 2. Authentication Security
+
 - **Google OAuth only**: Leverage Google's security, không store passwords
 - **Role-based access**: Admin-only endpoints protected với RLS policies
 - **Session management**: Supabase handles token refresh, expiration
 - **HTTPS only**: Force HTTPS trong production
 
 ### 3. Input Validation
+
 - **Client-side**: TypeScript types, form validation với Zod/Yup
 - **Server-side**: Supabase RLS policies, PostgreSQL constraints
 - **File uploads**: Validate file type (MP3, WebP), size limits (audio <5MB, image <2MB)
 
 ### 4. Rate Limiting
+
 - **Supabase built-in**: 100 requests/second per IP (free tier)
 - **Analytics throttling**: Batch log events, max 10 events/minute per session
 - **Auth attempts**: Supabase handles brute-force protection
@@ -558,6 +587,7 @@ POI now visible to all tour users
 ## Deployment Strategy
 
 ### Vercel (Recommended)
+
 ```bash
 # Install Vercel CLI
 npm i -g vercel
@@ -570,6 +600,7 @@ vercel --prod
 ```
 
 **Why Vercel?**
+
 - Zero-config for Next.js
 - Global CDN (Edge Network)
 - Auto SSL certificates
@@ -578,6 +609,7 @@ vercel --prod
 - Free tier: 100GB bandwidth/month
 
 ### Environment Variables (Production)
+
 ```bash
 # Set trong Vercel dashboard
 NEXT_PUBLIC_SUPABASE_URL=...
@@ -589,6 +621,7 @@ NEXT_PUBLIC_COOLDOWN_MINUTES=30
 ```
 
 ### CI/CD Pipeline
+
 ```yaml
 # .github/workflows/deploy.yml
 name: Deploy to Vercel
@@ -614,6 +647,7 @@ jobs:
 ## Monitoring & Analytics
 
 ### Built-in Analytics
+
 - **Anonymous usage logs**: Lưu trong Supabase `analytics_logs` table
 - **Metrics tracked**:
   - Total sessions
@@ -623,11 +657,13 @@ jobs:
   - Tour start/end events
 
 ### Admin Dashboard
+
 - Summary page: Total sessions, top POIs, completion rates
 - POI details: Per-POI analytics, heatmap, time series
 - Real-time: Active sessions (nếu có Supabase Realtime enabled)
 
 ### Performance Monitoring
+
 - **Lighthouse CI**: Automated performance tests trong GitHub Actions
 - **Web Vitals**: Track LCP, FID, CLS trong production
 - **Error tracking**: Console errors logged to Supabase (optional)
@@ -639,4 +675,3 @@ jobs:
 ✅ **Agent context** updated: GitHub Copilot instructions synced
 
 → **Ready for Phase 2**: `/speckit.tasks` command to generate implementation tasks
-

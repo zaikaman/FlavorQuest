@@ -5,7 +5,7 @@
 **Status**: Draft  
 **Input**: Xây dựng một trải nghiệm thuyết minh âm thanh tự động trên web có tên FlavorQuest dành cho phố ẩm thực Vĩnh Khánh (Quận 4, TP.HCM). Website giúp du khách và người dân địa phương khám phá con phố ẩm thực nổi tiếng này một cách sống động, tự động phát nội dung kể chuyện, lịch sử, món ngon đặc trưng và mẹo hay về các quán ăn gần nhất — mà không cần người dùng phải nhìn màn hình hay bấm phát thủ công.
 
-## User Scenarios & Testing *(mandatory)*
+## User Scenarios & Testing _(mandatory)_
 
 ### User Story 1 - Trải Nghiệm Tự Động Phát Thuyết Minh Theo Vị Trí (Priority: P1)
 
@@ -91,7 +91,7 @@ Du khách Nhật Bản không biết tiếng Việt hoặc tiếng Anh đến ph
 - **Người dùng ở ngoài khu vực phố Vĩnh Khánh**: Hệ thống hiển thị thông báo "Bạn đang ở ngoài khu vực phố ẩm thực Vĩnh Khánh" và cung cấp bản đồ chỉ đường đến điểm bắt đầu.
 - **Trình duyệt không hỗ trợ các tính năng cần thiết (geolocation, audio, service worker)**: Hệ thống phát hiện và hiển thị thông báo yêu cầu sử dụng trình duyệt hiện đại (Chrome, Safari, Firefox phiên bản mới).
 
-## Requirements *(mandatory)*
+## Requirements _(mandatory)_
 
 ### Functional Requirements
 
@@ -132,7 +132,7 @@ Du khách Nhật Bản không biết tiếng Việt hoặc tiếng Anh đến ph
 - **Phiên Sử Dụng (Session)**: Đại diện cho một lần người dùng sử dụng website. Bao gồm: thời gian bắt đầu, thời gian kết thúc, danh sách điểm đã ghé thăm, tổng thời gian sử dụng, chế độ (tự động/thủ công)
 - **Bản Đồ**: Dữ liệu bản đồ khu vực phố Vĩnh Khánh để hiển thị offline. Bao gồm: phạm vi tọa độ, tiles bản đồ nền, lớp đường phố, lớp điểm quan tâm
 
-## Success Criteria *(mandatory)*
+## Success Criteria _(mandatory)_
 
 ### Measurable Outcomes
 
