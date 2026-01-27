@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>FlavorQuest - Welcome</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#f26c0d",
+                        "background-light": "#f8f7f5",
+                        "background-dark": "#221710",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "Noto Sans", "sans-serif"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                    backgroundImage: {
+                        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', "Noto Sans", sans-serif; }
+        /* Simulating iOS safe areas for PWA feel */
+        .safe-pb { padding-bottom: max(1.5rem, env(safe-area-inset-bottom)); }
+        .safe-pt { padding-top: max(3rem, env(safe-area-inset-top)); }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-dark text-white h-screen w-full overflow-hidden flex flex-col font-display selection:bg-primary selection:text-white">
+<!-- Full Screen Background Image with Overlay -->
+<div class="absolute inset-0 z-0 select-none pointer-events-none">
+<!-- Main Image -->
+<div class="w-full h-full bg-cover bg-center object-cover animate-fade-in" data-alt="Close up of delicious grilled food cooking on a charcoal street food grill at night with smoke rising" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuD1td4WSx6nl5TKAIPQHvb3mXshqreYAsVVo5NGNLo4nkeSZVy-c4WPWG5TBcBOnTUczh9Q4wjij1A12mpRZrc-ME4sJthwOil3ubDdHgHAPCiXAM-77eCwcoDOIozkEpSVKWANT49fnbkrsEeUQ6qRhE7Cjs7ecrqz_iS4B9ha0zKruboEGSrVxELdqF2B3ohGZZ99cp-OG1iRCCZ4t-cqTc7bQjxoV9kFzigSrAi2XDwsssfntyMkvmsUooxLreHQfcjVYlaTnbaN');">
+</div>
+<!-- Gradient Overlay: Clearer top for image visibility, dark bottom for text contrast -->
+<div class="absolute inset-0 bg-gradient-to-b from-black/20 via-background-dark/40 to-background-dark"></div>
+<!-- Extra bottom fade for seamless UI integration -->
+<div class="absolute bottom-0 left-0 w-full h-2/3 bg-gradient-to-t from-[#221710] via-[#221710]/90 to-transparent"></div>
+</div>
+<!-- Main Content Container -->
+<div class="relative z-10 flex flex-col h-full w-full justify-between safe-pt safe-pb px-6">
+<!-- Branding Section (Top/Center) -->
+<div class="flex flex-col items-center justify-center flex-grow">
+<!-- Logo Icon Composite -->
+<div class="relative mb-6 group">
+<div class="absolute -inset-1 bg-primary/30 rounded-full blur-xl opacity-50 group-hover:opacity-75 transition-opacity"></div>
+<div class="relative w-24 h-24 bg-[#2c1e16]/80 backdrop-blur-md rounded-full flex items-center justify-center border border-white/10 shadow-2xl">
+<span class="material-symbols-outlined text-primary text-5xl drop-shadow-lg">restaurant</span>
+<span class="material-symbols-outlined text-white absolute -bottom-1 -right-1 bg-primary rounded-full p-1 text-sm border-4 border-[#2c1e16]">graphic_eq</span>
+</div>
+</div>
+<!-- Headline -->
+<h1 class="text-white tracking-tight text-[40px] font-extrabold leading-tight text-center drop-shadow-xl">
+                FlavorQuest
+            </h1>
+<!-- Sub-headline -->
+<h2 class="text-gray-200 text-lg font-medium leading-relaxed tracking-wide mt-4 text-center max-w-[280px] drop-shadow-md opacity-90">
+                Khám phá Hành trình <br/> Ẩm thực Vĩnh Khánh
+            </h2>
+</div>
+<!-- Action Section (Bottom) -->
+<div class="flex flex-col items-center w-full gap-5">
+<!-- Language Pills (Chips Component Adapted) -->
+<div class="flex p-1 gap-1 bg-black/40 backdrop-blur-md rounded-xl border border-white/5 mb-2">
+<button class="flex h-9 min-w-[3.5rem] items-center justify-center rounded-lg bg-primary text-white text-sm font-bold shadow-sm transition-transform active:scale-95">VN</button>
+<button class="flex h-9 min-w-[3.5rem] items-center justify-center rounded-lg hover:bg-white/10 text-gray-400 hover:text-white text-sm font-medium transition-colors">EN</button>
+<button class="flex h-9 min-w-[3.5rem] items-center justify-center rounded-lg hover:bg-white/10 text-gray-400 hover:text-white text-sm font-medium transition-colors">ZH</button>
+</div>
+<!-- Primary Action Button -->
+<button class="w-full flex items-center justify-center rounded-xl h-14 px-6 bg-primary hover:bg-orange-600 text-white text-[17px] font-bold tracking-wide shadow-lg shadow-orange-900/30 transition-all active:scale-[0.98] group relative overflow-hidden">
+<div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]"></div>
+<span class="mr-2">Bắt đầu Tour</span>
+<span class="material-symbols-outlined text-xl group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</button>
+<!-- Secondary Links -->
+<div class="flex items-center gap-6 mt-1 text-sm font-medium text-gray-400">
+<a class="hover:text-white transition-colors py-2 flex items-center gap-1" href="#">
+<span class="material-symbols-outlined text-lg">explore</span>
+                    Duyệt thủ công
+                </a>
+<div class="w-1 h-1 rounded-full bg-gray-600"></div>
+<a class="hover:text-white transition-colors py-2 flex items-center gap-1" href="#">
+<span class="material-symbols-outlined text-lg">settings</span>
+                    Cài đặt
+                </a>
+</div>
+<!-- Offline Data Loading Bar -->
+<div class="w-full mt-4">
+<div class="flex justify-between items-end mb-2 px-1">
+<span class="text-[11px] uppercase tracking-wider text-gray-500 font-semibold flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] animate-spin">sync</span>
+                        Đang tải dữ liệu offline...
+                    </span>
+<span class="text-[11px] text-primary font-mono font-bold">85%</span>
+</div>
+<div class="h-1.5 w-full bg-gray-800/50 rounded-full overflow-hidden backdrop-blur-sm border border-white/5">
+<div class="h-full bg-primary w-[85%] rounded-full shadow-[0_0_8px_rgba(242,108,13,0.8)] relative">
+<div class="absolute inset-0 bg-white/20 w-full animate-[pulse_2s_cubic-bezier(0.4,0,0.6,1)_infinite]"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</body></html>

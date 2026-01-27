@@ -16,6 +16,11 @@
 export const GEOFENCE_RADIUS_METERS = 18;
 
 /**
+ * Alias for compatibility
+ */
+export const GEOFENCE_TRIGGER_RADIUS_M = GEOFENCE_RADIUS_METERS;
+
+/**
  * Khoảng cách preload audio cho các POI lân cận (meters)
  * POI trong bán kính này sẽ được preload để giảm độ trễ
  */
@@ -36,6 +41,11 @@ export const COOLDOWN_PERIOD_MS = 30 * 60 * 1000; // 30 minutes
  * Nếu user di chuyển nhanh hơn, tạm dừng auto narration
  */
 export const MAX_AUTO_PLAY_SPEED_KMH = 15;
+
+/**
+ * Alias for compatibility
+ */
+export const MAX_WALKING_SPEED_KMH = MAX_AUTO_PLAY_SPEED_KMH;
 
 /**
  * Ngưỡng tốc độ để coi như đứng yên (m/s)

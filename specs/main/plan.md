@@ -12,6 +12,7 @@ FlavorQuest là một Progressive Web App (PWA) cung cấp trải nghiệm thuy�
 - **PWA**: Built-in Next.js PWA support với custom service worker cho offline caching
 - **Location**: Browser Geolocation API với watchPosition cho tracking realtime, custom geofencing logic (Haversine distance)
 - **Audio**: HTML5 Audio API + custom queue manager, Web Speech Synthesis API (TTS) làm fallback
+- **TTS Generation**: Google Cloud Text-to-Speech API để tự động generate audio từ text (admin nhập text → hệ thống tạo 6 file audio cho 6 ngôn ngữ)
 - **Storage**: IndexedDB (qua idb-keyval) cho POI data, audio files, images, user preferences
 - **Maps**: Leaflet + OpenStreetMap tiles (miễn phí, không cần API key)
 - **Backend**: Supabase (PostgreSQL + Auth + Storage + Realtime)
@@ -26,6 +27,7 @@ FlavorQuest là một Progressive Web App (PWA) cung cấp trải nghiệm thuy�
 
 - next@16+, react@19+, typescript@5.4+
 - @supabase/supabase-js@2.x, @supabase/auth-helpers-nextjs@0.10.x
+- @google-cloud/text-to-speech@5.x (TTS audio generation)
 - leaflet@1.9.x, react-leaflet@4.x
 - idb-keyval@6.x (IndexedDB wrapper)
 - tailwindcss@3.x
@@ -175,7 +177,11 @@ flavorquest/
 │   │   ├── auth/
 │   │   │   └── callback/
 │   │   │       └── route.ts      # Supabase auth callback
+│   │   ├── tts/
+│   │   │   └── generate/
+│   │   │       └── route.ts      # TTS audio generation endpoint
 │   │   └── analytics/
+│   │       └── route.ts          # Log analytics events
 │   │       └── route.ts          # Log analytics events
 │   └── manifest.ts               # PWA manifest configuration
 │
@@ -190,7 +196,7 @@ flavorquest/
 │   │   └── StartTourButton.tsx   # FAB button để start tour
 │   ├── admin/
 │   │   ├── POIForm.tsx           # Form create/edit POI
-│   │   ├── AudioUploader.tsx     # Multi-language audio upload
+│   │   ├── TTSGenerator.tsx      # Text-to-Speech generator (nhập text → tạo 6 audio files)
 │   │   └── ImageUploader.tsx     # Upload POI images
 │   ├── layout/
 │   │   ├── Header.tsx            # App header với logo
@@ -216,7 +222,8 @@ flavorquest/
 │   │   ├── storage.ts            # IndexedDB wrapper functions
 │   │   ├── geolocation.ts        # Geolocation API wrapper
 │   │   ├── audio.ts              # Audio playback service
-│   │   ├── tts.ts                # Web Speech Synthesis service
+│   │   ├── tts.ts                # Web Speech Synthesis service (client-side fallback)
+│   │   ├── tts-generator.ts      # Google Cloud TTS service (server-side audio generation)
 │   │   ├── analytics.ts          # Analytics logging service
 │   │   └── pwa.ts                # PWA lifecycle events
 │   ├── utils/
@@ -446,7 +453,7 @@ Sync analytics logs to Supabase (background)
 Display "Đã đồng bộ" toast
 ```
 
-### 3. Admin POI Management Flow
+### 3. Admin POI Management Flow với TTS Auto-Generation
 
 ```
 Admin signs in with Google
@@ -461,11 +468,33 @@ Redirect to /admin dashboard
   ↓
 Admin creates/edits POI:
   ↓
-Fill POI form (multi-language)
+Fill POI form (name, description, coordinates, image)
   ↓
-Upload audio files (6 languages)
+Enter narration text for each language (6 textareas):
+  - Vietnamese narration (60-90s script)
+  - English narration
+  - Japanese narration
+  - French narration
+  - Korean narration
+  - Chinese narration
   ↓
-Upload POI image
+Click "Generate Audio" button
+  ↓
+[TTSGenerator component] Send text to /api/tts/generate
+  ↓
+Backend calls Google Cloud Text-to-Speech API (6 times):
+  - Convert Vietnamese text → audio file (vi-VN-Standard-A voice)
+  - Convert English text → audio file (en-US-Standard-C voice)
+  - Convert Japanese text → audio file (ja-JP-Standard-A voice)
+  - Convert French text → audio file (fr-FR-Standard-C voice)
+  - Convert Korean text → audio file (ko-KR-Standard-A voice)
+  - Convert Chinese text → audio file (cmn-CN-Standard-C voice)
+  ↓
+Upload 6 generated audio files to Supabase Storage
+  ↓
+Save audio URLs to POI record in database
+  ↓
+Upload POI image (if changed)
   ↓
 Submit form → POST /api/pois
   ↓
@@ -522,6 +551,41 @@ POI now visible to all tour users
 - **Browser native**: Web Speech Synthesis built-in, không cần external API
 - **Cost-effective**: Zero cost cho TTS, không như cloud TTS services ($4-16 per 1M chars)
 - **Multi-language**: Hỗ trợ 6 ngôn ngữ out-of-the-box
+
+### Why Google Cloud Text-to-Speech for Admin Panel?
+
+- **Professional quality**: Neural2 voices âm thanh tự nhiên, không bị robotic như Web Speech API
+- **Vietnamese support**: Tiếng Việt chất lượng cao với voices `vi-VN-Standard-A/B/C/D` và Neural2 variants
+- **Multi-language excellence**: 220+ voices cho 40+ ngôn ngữ với accent chuẩn (en-US, ja-JP, fr-FR, ko-KR, cmn-CN)
+- **Consistency**: Tất cả POI dùng chung voice profile → trải nghiệm đồng nhất
+- **SSML support**: Control pronunciation, pauses, emphasis để enhance narration
+- **Generous free tier**: 1 triệu ký tự/tháng miễn phí (~16 giờ audio), sau đó $4/1M chars
+- **Cost estimation**: 
+  - 100 POI × 6 ngôn ngữ × 500 chars average = 300K chars = $1.20 one-time
+  - Nếu regenerate thường xuyên: ~$5-10/tháng max
+- **Audio format options**: MP3, WAV, OGG - chọn MP3 48kbps cho balance giữa quality và file size
+- **Speed & pitch control**: Có thể điều chỉnh tốc độ đọc (0.25x-4x) và pitch (-20 to +20 semitones)
+
+**TTS Configuration**:
+```typescript
+// Voice recommendations cho từng ngôn ngữ
+const TTS_VOICES = {
+  vi: 'vi-VN-Neural2-A',      // Female, natural
+  en: 'en-US-Neural2-C',       // Female, Standard American
+  ja: 'ja-JP-Neural2-B',       // Female, Standard Japanese
+  fr: 'fr-FR-Neural2-C',       // Female, Standard French
+  ko: 'ko-KR-Neural2-A',       // Female, Standard Korean
+  zh: 'cmn-CN-Neural2-A',      // Female, Mandarin
+};
+
+// Audio config
+const AUDIO_CONFIG = {
+  audioEncoding: 'MP3',
+  speakingRate: 0.95,          // Chậm 5% để dễ nghe hơn
+  pitch: 0,                    // Natural pitch
+  sampleRateHertz: 24000,      // CD quality
+};
+```
 
 ## Performance Optimization Strategies
 

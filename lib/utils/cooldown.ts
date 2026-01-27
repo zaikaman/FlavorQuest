@@ -247,3 +247,28 @@ export function getCooldownManager(): CooldownManager {
 export function resetCooldownManager(cooldownDuration?: number): void {
   globalCooldownManager = new CooldownManager(cooldownDuration);
 }
+
+/**
+ * Helper: Check if POI is in cooldown (shortcut for global manager)
+ */
+export async function isCooldownActive(poiId: string): Promise<boolean> {
+  const manager = getCooldownManager();
+  const canPlay = await manager.canPlay(poiId);
+  return !canPlay; // Invert: canPlay = false means cooldown is active
+}
+
+/**
+ * Helper: Set cooldown for POI (shortcut for global manager)
+ */
+export async function setCooldown(poiId: string, timestamp?: number): Promise<void> {
+  const manager = getCooldownManager();
+  await manager.markAsPlayed(poiId, timestamp);
+}
+
+/**
+ * Helper: Get remaining cooldown time (shortcut for global manager)
+ */
+export async function getRemainingCooldown(poiId: string): Promise<number> {
+  const manager = getCooldownManager();
+  return manager.getRemainingCooldown(poiId);
+}

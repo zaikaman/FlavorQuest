@@ -1,241 +1,204 @@
--- Seed Data: Sample POIs for Vĩnh Khánh Food Street
--- Description: 12 POIs representing famous food stalls on Vĩnh Khánh, Q4, HCMC
+-- Seed Data: Sample POIs for Vĩnh Khánh Food Street (Real Data)
+-- Description: 12 specific POIs from the start to the end of Vĩnh Khánh street, District 4, HCMC
 -- Created: 2026-01-26
--- Note: Coordinates are approximate. Audio URLs and images need to be uploaded separately.
 
 -- ============================================
--- Insert Sample POIs
+-- Clean existing data
+-- ============================================
+TRUNCATE TABLE pois RESTART IDENTITY CASCADE;
+
+-- ============================================
+-- Insert Real POIs
 -- ============================================
 
--- 1. Bánh Xèo Bà Dưỡng (Famous crispy pancake)
+-- 1. Cổng vào (Điểm khởi đầu tour)
 INSERT INTO pois (
   lat, lng, radius, priority,
   name_vi, name_en,
   description_vi, description_en,
   signature_dish, fun_fact, estimated_hours
 ) VALUES (
-  10.759, 106.705, 20, 9,
-  'Bánh Xèo Bà Dưỡng', 'Ba Duong Crispy Pancake',
-  'Bánh xèo giòn rụm, nhân tôm thịt đầy đặn, rau sống tươi ngon. Bí quyết là lửa to và chảo gang nóng.', 
-  'Crispy Vietnamese pancake with shrimp, pork, and fresh vegetables. The secret is high heat and a hot cast iron pan.',
-  'Bánh xèo tôm nhảy', 
-  'Hơn 40 năm tuổi nghề, được Anthony Bourdain ghé thăm năm 2016',
-  '15:00-22:00'
+  10.761905898335831, 106.70222716527056, 80, 10,
+  'Cổng vào Phố Ẩm thực Vĩnh Khánh', 'Vinh Khanh Food Street Entrance',
+  'Biển chào "Phố Ẩm thực Vĩnh Khánh" – nơi bắt đầu hành trình khám phá thiên đường hải sản sầm uất nhất Quận 4. Được Time Out bình chọn là một trong 10 đường phố thú vị nhất thế giới năm 2025.', 
+  'The welcoming gate of "Vinh Khanh Food Street" - the start of your journey to explore District 4''s busiest seafood paradise. Ranked as one of the 10 coolest streets in the world for 2025 by Time Out.',
+  'Hải sản tươi sống (Seafood)', 
+  'Đây là điểm quét QR code để bắt đầu tour thuyết minh tự động.',
+  '17:00-23:00'
 );
 
--- 2. Bánh Khọt Vĩnh Khánh (Mini savory pancakes)
+-- 2. Ốc Vũ
 INSERT INTO pois (
   lat, lng, radius, priority,
   name_vi, name_en,
   description_vi, description_en,
   signature_dish, fun_fact, estimated_hours
 ) VALUES (
-  10.759, 106.706, 18, 8,
-  'Bánh Khọt Vĩnh Khánh', 'Vinh Khanh Mini Pancakes',
-  'Bánh khọt giòn tan với nhân tôm tươi, nước chấm chua ngọt đậm đà. Ăn kèm rau sống và bánh tráng.', 
-  'Mini crispy pancakes with fresh shrimp, sweet and sour dipping sauce. Served with fresh vegetables and rice paper.',
-  'Bánh khọt tôm',
-  'Sử dụng khuôn gang chuyên dụng truyền thống, mỗi chiếc bánh phải chín đều',
-  '14:00-21:00'
+  10.761518431027818, 106.70271542519974, 50, 7,
+  'Ốc Vũ', 'Vu Snails',
+  'Nằm tại 37 Vĩnh Khánh, quán thu hút đông đảo giới trẻ bởi thực đơn đa dạng và giá cả cực kỳ bình dân. Các món nướng tại đây luôn nóng hổi và đậm đà.', 
+  'Located at 37 Vinh Khanh, this spot attracts many youngsters with its diverse menu and very affordable prices. The grilled dishes here are always hot and flavorful.',
+  'Ốc xào bơ tỏi, Hải sản nướng',
+  'Giá cực mềm, phù hợp cho học sinh sinh viên.',
+  '15:00-00:00'
 );
 
--- 3. Bánh Canh Cua 87 (Crab thick noodle soup)
+-- 3. Ốc Thảo
 INSERT INTO pois (
   lat, lng, radius, priority,
   name_vi, name_en,
   description_vi, description_en,
   signature_dish, fun_fact, estimated_hours
 ) VALUES (
-  10.758, 106.705, 20, 8,
-  'Bánh Canh Cua 87', 'Crab Noodle Soup 87',
-  'Bánh canh sợi dai, nước dùng ngọt từ xương heo, cua đồng tươi. Ăn kèm rau thơm và chanh.', 
-  'Thick tapioca noodles in sweet pork bone broth with fresh crab. Served with herbs and lime.',
-  'Bánh canh cua đồng',
-  'Nước dùng được ninh từ xương heo và cua suốt 6 tiếng',
-  '06:00-22:00'
+  10.761795162597451, 106.70239298897182, 50, 7,
+  'Ốc Thảo', 'Thao Snails',
+  'Địa chỉ 383 Vĩnh Khánh. Quán nổi tiếng với không gian rộng rãi, sạch sẽ và cách chế biến món ăn cầu kỳ, giữ được độ ngọt tự nhiên của hải sản.', 
+  'Located at 383 Vinh Khanh. Famous for its spacious and clean area. The cooking techniques are meticulous, preserving the natural sweetness of the seafood.',
+  'Ốc len xào dừa, Sò điệp nướng mỡ hành',
+  'Thực đơn phong phú với hơn 30 loại ốc khác nhau.',
+  '14:00-23:00'
 );
 
--- 4. Hủ Tiếu Nam Vang Mỹ Tho (Southern-style noodle soup)
+-- 4. Ốc Sáu Nở
 INSERT INTO pois (
   lat, lng, radius, priority,
   name_vi, name_en,
   description_vi, description_en,
   signature_dish, fun_fact, estimated_hours
 ) VALUES (
-  10.758, 106.706, 18, 7,
-  'Hủ Tiếu Nam Vang Mỹ Tho', 'My Tho Phnom Penh Noodle',
-  'Hủ tiếu Nam Vang nước trong, ngọt xương, nhiều hải sản. Ăn kèm giá đỗ và rau thơm.', 
-  'Clear Phnom Penh-style noodle soup with seafood and sweet broth. Served with bean sprouts and herbs.',
-  'Hủ tiếu Nam Vang đặc biệt',
-  'Công thức gốc từ người Hoa ở Campuchia, truyền vào Việt Nam từ thập niên 1950',
-  '05:00-14:00'
-);
-
--- 5. Bánh Mì Chảo Bà Út (Sizzling bread bowl)
-INSERT INTO pois (
-  lat, lng, radius, priority,
-  name_vi, name_en,
-  description_vi, description_en,
-  signature_dish, fun_fact, estimated_hours
-) VALUES (
-  10.757, 106.705, 20, 7,
-  'Bánh Mì Chảo Bà Út', 'Ba Ut Sizzling Bread Bowl',
-  'Bánh mì nướng giòn chứa đầy nhân thịt bò, trứng, pate và rau củ. Ăn nóng mới ngon.', 
-  'Crispy toasted bread bowl filled with beef, eggs, pate, and vegetables. Best eaten hot.',
-  'Bánh mì chảo bò',
-  'Mỗi chiếc bánh mì được khoét lõi và nướng giòn trước khi cho nhân',
-  '16:00-23:00'
-);
-
--- 6. Chè Bà Thin (Traditional Vietnamese dessert)
-INSERT INTO pois (
-  lat, lng, radius, priority,
-  name_vi, name_en,
-  description_vi, description_en,
-  signature_dish, fun_fact, estimated_hours
-) VALUES (
-  10.757, 106.706, 15, 6,
-  'Chè Bà Thin', 'Ba Thin Sweet Soup',
-  'Chè thập cẩm với nhiều loại đậu, thạch, trái cây và nước cốt dừa. Mát lạnh giải nhiệt.', 
-  'Mixed sweet soup with various beans, jelly, fruits, and coconut milk. Refreshing and cooling.',
-  'Chè thập cẩm',
-  'Có hơn 10 loại nguyên liệu khác nhau trong mỗi tô chè',
-  '07:00-22:00'
-);
-
--- 7. Cơm Tấm Sườn Nướng (Broken rice with grilled pork)
-INSERT INTO pois (
-  lat, lng, radius, priority,
-  name_vi, name_en,
-  description_vi, description_en,
-  signature_dish, fun_fact, estimated_hours
-) VALUES (
-  10.760, 106.705, 20, 7,
-  'Cơm Tấm Sườn Nướng', 'Grilled Pork with Broken Rice',
-  'Cơm tấm thơm mềm, sườn nướng thơm lừng, trứng ốp la và bì. Nước mắm ngọt đậm đà.', 
-  'Fragrant broken rice with grilled pork chop, fried egg, and pork skin. Sweet fish sauce.',
-  'Cơm tấm sườn bì chả',
-  'Sườn được ướp gia vị đặc biệt ít nhất 12 tiếng trước khi nướng',
-  '06:00-21:00'
-);
-
--- 8. Bánh Tráng Nướng (Grilled rice paper pizza)
-INSERT INTO pois (
-  lat, lng, radius, priority,
-  name_vi, name_en,
-  description_vi, description_en,
-  signature_dish, fun_fact, estimated_hours
-) VALUES (
-  10.760, 106.706, 15, 6,
-  'Bánh Tráng Nướng', 'Grilled Rice Paper',
-  'Bánh tráng nướng giòn với trứng, tôm khô, hành phi và sốt mayonnaise. Vị ngon lạ miệng.', 
-  'Crispy grilled rice paper with eggs, dried shrimp, scallions, and mayonnaise. Unique and delicious.',
-  'Bánh tráng nướng đặc biệt',
-  'Được gọi là "pizza Việt Nam", món ăn này xuất phát từ Đà Lạt',
-  '15:00-23:00'
-);
-
--- 9. Bún Mắm Cô Ba (Fermented fish noodle soup)
-INSERT INTO pois (
-  lat, lng, radius, priority,
-  name_vi, name_en,
-  description_vi, description_en,
-  signature_dish, fun_fact, estimated_hours
-) VALUES (
-  10.759, 106.707, 20, 7,
-  'Bún Mắm Cô Ba', 'Co Ba Fermented Fish Noodle',
-  'Bún mắm đậm đà với nhiều hải sản, thịt heo, và rau sống. Nước mắm pha chua ngọt độc đáo.', 
-  'Rich fermented fish noodle soup with seafood, pork, and fresh vegetables. Unique sweet and sour broth.',
-  'Bún mắm đặc biệt',
-  'Nước mắm được pha chế bí truyền, cân bằng giữa mặn, ngọt, chua và cay',
-  '10:00-20:00'
-);
-
--- 10. Ốc Xào Bơ Tỏi (Snails stir-fried with butter and garlic)
-INSERT INTO pois (
-  lat, lng, radius, priority,
-  name_vi, name_en,
-  description_vi, description_en,
-  signature_dish, fun_fact, estimated_hours
-) VALUES (
-  10.758, 106.707, 18, 6,
-  'Ốc Xào Bơ Tỏi', 'Butter Garlic Snails',
-  'Ốc tươi xào với bơ, tỏi, sả và ớt. Thơm ngon, ăn kèm bánh mì nướng.', 
-  'Fresh snails stir-fried with butter, garlic, lemongrass, and chili. Served with toasted bread.',
-  'Ốc hương xào bơ tỏi',
-  'Có hơn 20 loại ốc khác nhau để lựa chọn',
+  10.761038078500885, 106.70290444809687, 50, 8,
+  'Ốc Sáu Nở', 'Sau No Snails',
+  'Tọa lạc tại khu vực 121-128 Vĩnh Khánh, đây là một trong những quán ốc vỉa hè đời đầu với không gian sôi động, đậm chất đường phố Sài Gòn.', 
+  'Situated at 121-128 Vinh Khanh, this is one of the original sidewalk snail stalls with a vibrant atmosphere, quintessential of Saigon street style.',
+  'Nghêu hấp sả, Ốc hương rang muối',
+  'Tươi ngon và náo nhiệt là những từ khóa khi nhắc đến Sáu Nở.',
   '16:00-23:30'
 );
 
--- 11. Gỏi Cuốn Tôm Thịt (Fresh spring rolls)
+-- 5. Ốc Oanh (quán huyền thoại)
 INSERT INTO pois (
   lat, lng, radius, priority,
   name_vi, name_en,
   description_vi, description_en,
   signature_dish, fun_fact, estimated_hours
 ) VALUES (
-  10.757, 106.707, 15, 5,
-  'Gỏi Cuốn Tôm Thịt', 'Fresh Shrimp Spring Rolls',
-  'Gỏi cuốn tươi mát với tôm, thịt, bún và rau sống. Nước chấm đậm đà.', 
-  'Fresh spring rolls with shrimp, pork, vermicelli, and vegetables. Rich peanut dipping sauce.',
-  'Gỏi cuốn đặc biệt',
-  'Cuốn tươi theo yêu cầu, đảm bảo độ tươi ngon tối đa',
-  '10:00-21:00'
+  10.760848629826567, 106.7032957744219, 60, 9,
+  'Ốc Oanh', 'Oanh Snails',
+  'Quán lão làng với tuổi đời hơn 20 năm tại 534 Vĩnh Khánh. Nổi tiếng nhất với các món ốc sốt bơ tỏi và đặc biệt được vinh danh trong danh mục Bib Gourmand của Michelin.', 
+  'A legendary spot with over 20 years of history at 534 Vinh Khanh. Most famous for its butter garlic sauce and specially honored in the Michelin Bib Gourmand list.',
+  'Ốc hương xào bơ tỏi, Ốc bươu nướng phô mai',
+  'Đứng đầu danh sách những quán phải thử khi đến Vĩnh Khánh.',
+  '15:00-23:00'
 );
 
--- 12. Cà Phê Sữa Đá (Vietnamese iced coffee)
+-- 6. A Fat Hot Pot
 INSERT INTO pois (
   lat, lng, radius, priority,
   name_vi, name_en,
   description_vi, description_en,
   signature_dish, fun_fact, estimated_hours
 ) VALUES (
-  10.760, 106.707, 15, 5,
-  'Cà Phê Vỉa Hè', 'Sidewalk Coffee',
-  'Cà phê phin truyền thống, đậm đà với sữa đặc ngọt. Ngồi vỉa hè ngắm người qua lại.', 
-  'Traditional Vietnamese drip coffee, strong and sweet with condensed milk. Enjoy on the sidewalk.',
-  'Cà phê sữa đá',
-  'Cà phê được pha từ hạt robusta Việt Nam rang truyền thống',
-  '06:00-22:00'
+  10.760806933075282, 106.70347875218654, 50, 6,
+  'A Fat Hot Pot', 'A Fat Hot Pot',
+  'Nằm tại 668 Vĩnh Khánh, quán chuyên về lẩu và nướng tự chọn. Không gian rộng thoáng, rất phù hợp cho những buổi tụ tập nhóm đông người.', 
+  'Located at 668 Vinh Khanh, specialized in self-selected hot pot and BBQ. The spacious and airy environment makes it ideal for large group gatherings.',
+  'Lẩu hải sản, Hào sữa nướng',
+  'Phong cách buffet tại bàn rất được ưa chuộng.',
+  '16:00-23:00'
 );
 
--- ============================================
--- Verify Insert
--- ============================================
+-- 7. Chilli Lẩu Nướng Tự Chọn
+INSERT INTO pois (
+  lat, lng, radius, priority,
+  name_vi, name_en,
+  description_vi, description_en,
+  signature_dish, fun_fact, estimated_hours
+) VALUES (
+  10.760794431975599, 106.7036590681073, 50, 6,
+  'Chilli Lẩu Nướng Tự Chọn', 'Chilli BBQ & Hot Pot',
+  'Địa chỉ 232 Vĩnh Khánh. Đây là điểm đến quen thuộc của giới trẻ với các món lẩu nướng đa dạng, từ hải sản đến thịt bò Mỹ cao cấp.', 
+  'Address: 232 Vinh Khanh. A popular destination for youngsters, offering a variety of BBQ and hot pot dishes from seafood to premium US beef.',
+  'Lẩu nướng hải sản, Bò Mỹ nướng',
+  'Gia vị ướp đậm đà là đặc trưng riêng của Chilli.',
+  '16:00-00:00'
+);
 
--- Check total POIs inserted
-SELECT COUNT(*) as total_pois FROM pois;
+-- 8. Alo Quán – Seafood & Beer
+INSERT INTO pois (
+  lat, lng, radius, priority,
+  name_vi, name_en,
+  description_vi, description_en,
+  signature_dish, fun_fact, estimated_hours
+) VALUES (
+  10.761127163188009, 106.70475425408135, 50, 7,
+  'Alo Quán – Seafood & Beer', 'Alo Quan - Seafood & Beer',
+  'Tọa lạc tại 333 Vĩnh Khánh, Alo Quán mang phong cách hiện đại, chill, phù hợp cho những buổi nhậu đêm thoải mái bên gia đình và bạn bè.', 
+  'Located at 333 Vinh Khanh, Alo Quan offers a modern, chill style, perfect for late-night drinking and relaxing with family and friends.',
+  'Tôm sốt Thái, Nghêu hấp sả',
+  'Không gian mở rất thoáng và view ngắm phố cực đẹp.',
+  '15:00-01:00'
+);
 
--- Check POI names
-SELECT id, name_vi, name_en, priority, estimated_hours 
-FROM pois 
-ORDER BY priority DESC, name_vi;
+-- 9. Ốc Đào 2
+INSERT INTO pois (
+  lat, lng, radius, priority,
+  name_vi, name_en,
+  description_vi, description_en,
+  signature_dish, fun_fact, estimated_hours
+) VALUES (
+  10.761347965170131, 106.70496784739889, 50, 8,
+  'Ốc Đào 2', 'Dao Snails 2',
+  'Chi nhánh nổi tiếng tại 232/123 Vĩnh Khánh. Ốc Đào nổi danh nhờ nước chấm đặc trưng và thực đơn phong phú với hơn 30 cách chế biến khác nhau.', 
+  'A famous branch at 232/123 Vinh Khanh. Dao Snails is renowned for its signature dipping sauce and a rich menu with over 30 different cooking styles.',
+  'Ốc sốt trứng muối, Ốc me',
+  'Thương hiệu ốc top đầu Sài Gòn nay đã có mặt tại Vĩnh Khánh.',
+  '12:00-22:00'
+);
 
--- Check coordinates are within Vĩnh Khánh bounds
-SELECT 
-  name_vi,
-  lat,
-  lng,
-  CASE 
-    WHEN lat BETWEEN 10.750 AND 10.765 AND lng BETWEEN 106.690 AND 106.710 
-    THEN 'OK' 
-    ELSE 'OUT OF BOUNDS' 
-  END as location_status
-FROM pois;
+-- 10. Lãng Quán
+INSERT INTO pois (
+  lat, lng, radius, priority,
+  name_vi, name_en,
+  description_vi, description_en,
+  signature_dish, fun_fact, estimated_hours
+) VALUES (
+  10.761149988188182, 106.70538401196282, 50, 6,
+  'Lãng Quán', 'Lang Quan',
+  'Nằm ở đoạn giữa phố (khu vực 500-600), Lãng Quán là lựa chọn tuyệt vời cho các nhóm nhậu với menu lẩu nướng và hải sản vô cùng đa dạng.', 
+  'Located in the middle of the street (area 500-600), Lang Quan is a great choice for drinking groups with an extremely diverse BBQ and seafood menu.',
+  'Lẩu hải sản nướng, Bạch tuộc nướng',
+  'Giá cả ổn định và phục vụ nhanh nhẹn.',
+  '16:00-00:00'
+);
 
--- ============================================
--- Notes
--- ============================================
+-- 11. Ớt Xiêm Quán
+INSERT INTO pois (
+  lat, lng, radius, priority,
+  name_vi, name_en,
+  description_vi, description_en,
+  signature_dish, fun_fact, estimated_hours
+) VALUES (
+  10.761185236052697, 106.70570361039157, 50, 7,
+  'Ớt Xiêm Quán', 'Ot Xiem Quan',
+  'Nằm tại 568 Vĩnh Khánh, quán nổi bật với các món hải sản được chế biến cầu kỳ theo phong cách riêng, không chỉ giới hạn ở các món ốc.', 
+  'Located at 568 Vinh Khanh, this place stands out with elaborately prepared seafood dishes in its own style, not just limited to snail dishes.',
+  'Cá diêu hồng rang muối Hồng Kông, Tôm sú mù tạt',
+  'Điểm đến cho những ai thích khám phá hương vị hải sản mới lạ.',
+  '16:00-23:00'
+);
 
--- Audio URLs and image URLs need to be added after:
--- 1. Recording/generating audio narrations for each POI in 6 languages
--- 2. Taking/uploading photos for each POI
--- 3. Uploading to Supabase Storage buckets
--- 4. Running UPDATE queries to add URLs:
-
--- Example UPDATE query (run after uploading audio/images):
--- UPDATE pois SET 
---   audio_url_vi = 'https://....supabase.co/storage/v1/object/public/audio/poi-1-vi.mp3',
---   audio_url_en = 'https://....supabase.co/storage/v1/object/public/audio/poi-1-en.mp3',
---   image_url = 'https://....supabase.co/storage/v1/object/public/images/poi-1.webp'
--- WHERE name_vi = 'Bánh Xèo Bà Dưỡng';
+-- 12. Bún Cá Châu Đốc Dì Tư
+INSERT INTO pois (
+  lat, lng, radius, priority,
+  name_vi, name_en,
+  description_vi, description_en,
+  signature_dish, fun_fact, estimated_hours
+) VALUES (
+  10.761123552506971, 106.70660690985743, 40, 7,
+  'Bún Cá Châu Đốc Dì Tư', 'Di Tu Chau Doc Fish Noodles',
+  'Địa chỉ 320/79 Vĩnh Khánh. Quán mang hương vị bún cá miền Tây đặc trưng với nước dùng thanh ngọt từ cá và nghệ. Một sự thay đổi khẩu vị tuyệt vời sau các món nướng.', 
+  'Address: 320/79 Vinh Khanh. The stall brings the typical Western fish noodle flavor with a clear, sweet broth made from fish and turmeric. A great change of pace after grilled dishes.',
+  'Bún cá đặc biệt, Bún mực',
+  'Có phục vụ cả buổi sáng sớm cho khách ghé phố.',
+  '06:00-21:00'
+);

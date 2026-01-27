@@ -32,6 +32,12 @@ export async function registerServiceWorker(): Promise<ServiceWorkerRegistration
     return null;
   }
 
+  // Disable SW in development to prevent caching issues
+  if (process.env.NODE_ENV === 'development') {
+    console.log('Service Worker registration disabled in development mode');
+    return null;
+  }
+
   try {
     const registration = await navigator.serviceWorker.register('/sw.js', {
       scope: '/',
@@ -124,7 +130,7 @@ export function setupInstallPrompt(
   callback: (event: BeforeInstallPromptEvent | null, outcome?: 'accepted' | 'dismissed') => void
 ): () => void {
   if (typeof window === 'undefined') {
-    return () => {};
+    return () => { };
   }
 
   let deferredPrompt: BeforeInstallPromptEvent | null = null;

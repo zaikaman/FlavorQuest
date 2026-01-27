@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import { LanguageProvider } from '@/lib/contexts/LanguageContext';
 import { AppProvider } from '@/lib/contexts/AppContext';
+import { AuthProvider } from '@/lib/contexts/AuthContext';
 import { ToastContainer } from '@/components/ui/Toast';
 import ServiceWorkerRegistration from '@/components/ServiceWorkerRegistration';
 
@@ -82,17 +83,20 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
+        <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         suppressHydrationWarning
       >
-        <LanguageProvider>
-          <AppProvider>
-            {children}
-            <ToastContainer position="top-right" />
-          </AppProvider>
-        </LanguageProvider>
+        <AuthProvider>
+          <LanguageProvider>
+            <AppProvider>
+              {children}
+              <ToastContainer position="top-right" />
+            </AppProvider>
+          </LanguageProvider>
+        </AuthProvider>
         <ServiceWorkerRegistration />
       </body>
     </html>

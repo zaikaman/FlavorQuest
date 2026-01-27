@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="vi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Tour Summary &amp; Completion</title>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&amp;display=swap" rel="stylesheet"/>
+<!-- Material Icons -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Config -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#f26c0d",
+                        "background-light": "#f8f7f5",
+                        "background-dark": "#221710",
+                        "surface-dark": "#2d241e", // Slightly lighter for cards in dark mode
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display antialiased text-slate-900 dark:text-white min-h-screen flex flex-col selection:bg-primary selection:text-white">
+<!-- Top App Bar -->
+<div class="sticky top-0 z-50 flex items-center bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-sm p-4 pb-2 justify-between">
+<button class="text-slate-900 dark:text-white flex size-12 shrink-0 items-center justify-center rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<h2 class="text-slate-900 dark:text-white text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center pr-12">Tổng kết</h2>
+</div>
+<main class="flex-1 flex flex-col w-full max-w-md mx-auto pb-8">
+<!-- Hero Section with Image and Title -->
+<div class="flex flex-col items-center pt-2 px-4 animate-fade-in-up">
+<!-- Festive Image -->
+<div class="w-full gap-1 overflow-hidden rounded-xl shadow-lg shadow-black/20 aspect-[3/2] flex relative group">
+<div class="absolute inset-0 bg-gradient-to-t from-background-dark/80 via-transparent to-transparent z-10"></div>
+<div class="w-full bg-center bg-no-repeat bg-cover aspect-auto flex-1 transform transition-transform duration-700 group-hover:scale-105" data-alt="Vibrant night street food scene in Vietnam with lights and people eating" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuB5y6p4zvv0_RF0K5Z1tlULPaqsKPkjnx2sIqLOVAek8Z8O49CawnOFa9S_QjoIY3DUfqaqm-oOHjsLyDj_NI7WysrttIqD9PTe62byJcMTYN69PlGYocPHuCw-R07gWlsXMqVBvnkiiP54LyMqeqRLFz5QXtJTxWr5TUBXTvv7C-1q1MI0ZCpn_xN15G-KmIBREo-sXp3-1B8I4tvKPHlBdmKqFORuDIE-Nx1L__f3rlYMmCNcSWlsEl33T6q7-HUH-WngzaO-0KwR");'>
+</div>
+<!-- Success Badge Overlay -->
+<div class="absolute bottom-4 right-4 z-20 bg-primary text-white p-2 rounded-full shadow-lg">
+<span class="material-symbols-outlined text-3xl">emoji_events</span>
+</div>
+</div>
+<!-- Headline -->
+<h1 class="text-slate-900 dark:text-white tracking-tight text-[28px] font-extrabold leading-tight text-center mt-6 mb-2">
+                Cảm ơn bạn đã khám phá <span class="text-primary">Vĩnh Khánh!</span>
+</h1>
+<p class="text-slate-500 dark:text-gray-400 text-center text-sm px-6">
+                Chuyến hành trình ẩm thực đêm nay đã khép lại, hy vọng bạn đã có những trải nghiệm tuyệt vời.
+            </p>
+</div>
+<!-- Stats Section -->
+<div class="grid grid-cols-2 gap-4 p-4 mt-4">
+<!-- Stat 1: POI -->
+<div class="flex flex-col justify-between gap-2 rounded-xl p-5 bg-white dark:bg-surface-dark shadow-sm border border-gray-100 dark:border-white/5 relative overflow-hidden group">
+<div class="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
+<span class="material-symbols-outlined text-6xl">headphones</span>
+</div>
+<div>
+<p class="text-slate-500 dark:text-gray-400 text-sm font-medium leading-normal">POI đã nghe</p>
+<div class="flex items-baseline gap-1 mt-1">
+<p class="text-slate-900 dark:text-white tracking-tight text-3xl font-bold">12</p>
+<p class="text-slate-400 dark:text-gray-500 text-lg font-semibold">/15</p>
+</div>
+</div>
+<!-- Progress Bar -->
+<div class="w-full bg-gray-200 dark:bg-white/10 rounded-full h-1.5 mt-2">
+<div class="bg-primary h-1.5 rounded-full" style="width: 80%"></div>
+</div>
+</div>
+<!-- Stat 2: Top Food -->
+<div class="flex flex-col justify-between gap-2 rounded-xl p-5 bg-white dark:bg-surface-dark shadow-sm border border-gray-100 dark:border-white/5 relative overflow-hidden group">
+<div class="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
+<span class="material-symbols-outlined text-6xl">restaurant</span>
+</div>
+<p class="text-slate-500 dark:text-gray-400 text-sm font-medium leading-normal">Top món ăn</p>
+<div class="flex flex-wrap gap-2 mt-1">
+<span class="inline-flex items-center rounded-md bg-primary/10 px-2 py-1 text-xs font-medium text-primary ring-1 ring-inset ring-primary/20">Ốc hương</span>
+<span class="inline-flex items-center rounded-md bg-primary/10 px-2 py-1 text-xs font-medium text-primary ring-1 ring-inset ring-primary/20">Càng ghẹ</span>
+</div>
+</div>
+</div>
+<!-- Rating Section -->
+<div class="flex flex-col items-center justify-center p-4 mt-2">
+<h3 class="text-slate-900 dark:text-white tracking-tight text-xl font-bold leading-tight mb-4">Bạn thấy tour thế nào?</h3>
+<div class="flex gap-2">
+<button class="group transition-transform active:scale-95 focus:outline-none">
+<span class="material-symbols-outlined text-primary text-5xl fill-1 group-hover:scale-110 transition-transform font-variation-settings-fill">star</span>
+</button>
+<button class="group transition-transform active:scale-95 focus:outline-none">
+<span class="material-symbols-outlined text-primary text-5xl fill-1 group-hover:scale-110 transition-transform font-variation-settings-fill">star</span>
+</button>
+<button class="group transition-transform active:scale-95 focus:outline-none">
+<span class="material-symbols-outlined text-primary text-5xl fill-1 group-hover:scale-110 transition-transform font-variation-settings-fill">star</span>
+</button>
+<button class="group transition-transform active:scale-95 focus:outline-none">
+<span class="material-symbols-outlined text-primary text-5xl fill-1 group-hover:scale-110 transition-transform font-variation-settings-fill">star</span>
+</button>
+<button class="group transition-transform active:scale-95 focus:outline-none">
+<span class="material-symbols-outlined text-gray-300 dark:text-gray-600 text-5xl group-hover:scale-110 transition-transform">star</span>
+</button>
+</div>
+<p class="text-xs text-slate-400 dark:text-gray-500 mt-2">Chạm để đánh giá</p>
+</div>
+<!-- Spacer to push footer down if content is short -->
+<div class="flex-1 min-h-[20px]"></div>
+<!-- Actions Footer -->
+<div class="flex flex-col gap-3 p-4 mt-auto">
+<button class="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-6 py-4 text-white shadow-lg shadow-primary/30 transition-all active:scale-[0.98] hover:bg-primary/90">
+<span class="material-symbols-outlined text-[20px]">share</span>
+<span class="text-base font-bold">Chia sẻ trải nghiệm</span>
+</button>
+<button class="flex w-full items-center justify-center gap-2 rounded-lg border border-gray-200 dark:border-white/20 bg-transparent px-6 py-4 text-slate-900 dark:text-white transition-all active:scale-[0.98] hover:bg-black/5 dark:hover:bg-white/5">
+<span class="material-symbols-outlined text-[20px]">replay</span>
+<span class="text-base font-bold">Bắt đầu lại</span>
+</button>
+<a class="text-center text-sm font-medium text-slate-500 dark:text-gray-400 underline decoration-slate-300 dark:decoration-gray-600 underline-offset-4 py-2 hover:text-primary dark:hover:text-primary transition-colors" href="#">
+                Quay về danh sách
+            </a>
+</div>
+</main>
+<style>
+        .font-variation-settings-fill {
+            font-variation-settings: 'FILL' 1;
+        }
+        /* Custom scrollbar for webkit */
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #493222;
+            border-radius: 4px;
+        }
+    </style>
+</body></html>

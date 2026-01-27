@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Now Playing - Food Tour</title>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#f26c0d",
+                        "background-light": "#f8f7f5",
+                        "background-dark": "#221710",
+                        "surface-dark": "#2e211a", // Slightly lighter for cards
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "2xl": "1rem",
+                        "full": "9999px"
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        /* Custom scrollbar for transcript */
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .glass-panel {
+            background: rgba(46, 33, 26, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .control-button-shadow {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        .primary-shadow {
+            box-shadow: 0 4px 20px rgba(242, 108, 13, 0.4);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-white antialiased overflow-hidden selection:bg-primary selection:text-white">
+<!-- Main Mobile Container -->
+<div class="relative flex flex-col h-screen w-full max-w-md mx-auto bg-background-light dark:bg-background-dark shadow-2xl overflow-hidden">
+<!-- Background Gradient/Ambient Effect -->
+<div class="absolute top-0 left-0 w-full h-[60vh] bg-gradient-to-b from-[#3a281e] to-background-dark opacity-40 pointer-events-none z-0"></div>
+<!-- 1. Navigation Header -->
+<header class="relative z-10 flex items-center justify-between p-4 pt-6 bg-gradient-to-b from-black/50 to-transparent">
+<button class="flex items-center justify-center size-10 rounded-full bg-white/5 active:bg-white/10 transition-colors text-white">
+<span class="material-symbols-outlined text-3xl">keyboard_arrow_down</span>
+</button>
+<div class="flex flex-col items-center">
+<span class="text-xs font-medium text-white/60 uppercase tracking-widest">Now Playing</span>
+<span class="text-sm font-bold text-white">Vinh Khanh Street Tour</span>
+</div>
+<button class="flex items-center justify-center size-10 rounded-full bg-white/5 active:bg-white/10 transition-colors text-white">
+<span class="material-symbols-outlined">queue_music</span>
+</button>
+</header>
+<!-- Main Scrollable Content -->
+<div class="flex-1 overflow-y-auto scrollbar-hide relative z-10 pb-32">
+<!-- 2. Hero Visual -->
+<div class="px-6 pt-2 pb-6 w-full">
+<div class="relative aspect-[4/5] w-full rounded-2xl overflow-hidden shadow-2xl border border-white/5 group">
+<!-- Image -->
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105" data-alt="Close up of delicious grilled snails with garlic and chili on a dark plate" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDfgMrZzWkL76vN3MmF56eBe8Ia2_CfNFxAnej8yNDWRBJOTkyc5EYmidIWqKHlqjNVfjj3pCCgXP8fmJzB-BkRIYrtbywlhbdluPQC7rbaBGIMg07QmJVPn1g_huVObthYPbI-4jqtdO5W6r7W4WSit4C5_gJzL46xzBu0LrbU5JaBeFukV4PuusjnWlcKkJ_LLB0tWqZQ8kuuHStQOZvrWaGt8zu8xG6ZWAZ0tr1rtt7zxYL-yvOMJGYEs3F68872e-lkwEf5uqZR');">
+</div>
+<!-- Gradient Overlay -->
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+<!-- Location Badge -->
+<div class="absolute bottom-4 left-4 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-lg flex items-center gap-1.5 border border-white/10">
+<span class="material-symbols-outlined text-primary text-sm">location_on</span>
+<span class="text-xs font-medium text-white">District 4, HCMC</span>
+</div>
+</div>
+</div>
+<!-- 3. Meta Information & Actions -->
+<div class="px-6 flex items-start justify-between gap-4">
+<div class="flex-1">
+<h1 class="text-2xl font-bold text-white leading-tight mb-1">Stop 4: Ốc Oanh</h1>
+<p class="text-primary font-medium text-sm">The Queen of Snails • 50m away</p>
+</div>
+<div class="flex flex-col gap-3">
+<button class="text-white/70 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[28px]">favorite_border</span>
+</button>
+<button class="text-white/70 hover:text-white transition-colors">
+<span class="material-symbols-outlined text-[28px]">share</span>
+</button>
+</div>
+</div>
+<!-- 4. Audio Controls Section -->
+<div class="px-6 mt-8">
+<!-- Seeker -->
+<div class="w-full group/seeker cursor-pointer">
+<div class="relative h-1.5 bg-white/10 rounded-full overflow-hidden">
+<div class="absolute top-0 left-0 h-full w-[33%] bg-primary rounded-full"></div>
+</div>
+<!-- Thumb (Visual only, usually moves with JS) -->
+<div class="relative w-full h-0">
+<div class="absolute -top-3 left-[33%] size-4 bg-white rounded-full shadow-md scale-0 group-hover/seeker:scale-100 transition-transform duration-200"></div>
+</div>
+<div class="flex justify-between items-center mt-2 text-xs font-medium text-white/50">
+<span>01:23</span>
+<span>04:15</span>
+</div>
+</div>
+<!-- Main Buttons -->
+<div class="flex items-center justify-between mt-6 mb-8">
+<button class="text-white/40 hover:text-white transition-colors">
+<span class="material-symbols-outlined text-2xl">shuffle</span>
+</button>
+<div class="flex items-center gap-6">
+<button class="text-white hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-4xl fill-1">skip_previous</span>
+</button>
+<button class="size-16 rounded-full bg-primary text-white flex items-center justify-center primary-shadow hover:scale-105 active:scale-95 transition-all">
+<span class="material-symbols-outlined text-4xl fill-1">pause</span>
+</button>
+<button class="text-white hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-4xl fill-1">skip_next</span>
+</button>
+</div>
+<button class="text-primary hover:text-primary/80 transition-colors relative">
+<span class="material-symbols-outlined text-2xl">repeat</span>
+<span class="absolute -bottom-1 left-1/2 -translate-x-1/2 size-1 bg-primary rounded-full"></span>
+</button>
+</div>
+<!-- Speed & Volume Mini Controls -->
+<div class="flex items-center justify-center gap-8 mb-6">
+<button class="px-3 py-1 rounded-full bg-white/5 border border-white/5 text-xs font-semibold text-white/80 hover:bg-white/10">
+                        1.0x
+                    </button>
+<div class="flex items-center gap-2 w-24 group/vol">
+<span class="material-symbols-outlined text-white/50 text-sm">volume_up</span>
+<div class="h-1 flex-1 bg-white/10 rounded-full overflow-hidden">
+<div class="h-full w-[70%] bg-white/40 group-hover/vol:bg-primary transition-colors"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- 5. Transcript Drawer -->
+<div class="px-6 mt-4">
+<div class="bg-surface-dark/50 rounded-xl p-5 border border-white/5">
+<div class="flex items-center gap-2 mb-3">
+<span class="material-symbols-outlined text-primary text-lg">description</span>
+<h3 class="text-sm font-bold text-white uppercase tracking-wider">Transcript</h3>
+</div>
+<div class="prose prose-invert prose-sm max-w-none">
+<p class="text-white/70 leading-relaxed">
+                            Welcome to Ốc Oanh. As you approach the stall, you'll immediately be hit by the intoxicating aroma of garlic frying in oil and the smoky scent of charcoal grills. This isn't just a restaurant; it's an institution on Vinh Khanh Street.
+                        </p>
+<p class="text-white/70 leading-relaxed mt-4">
+                            Look at the vibrant red chilies adorning the plates. The dish in front of you is the famous "Ốc Hương" - sweet snails stir-fried with salted egg yolk. Notice the rich, creamy texture of the sauce...
+                        </p>
+<p class="text-white/70 leading-relaxed mt-4">
+                            The atmosphere here is quintessentially Saigon. Plastic chairs, bustling crowds, and the constant clinking of glasses. It's loud, it's messy, and it's absolutely delicious.
+                        </p>
+</div>
+</div>
+</div>
+<!-- Spacer for bottom fixed card -->
+<div class="h-6"></div>
+</div>
+<!-- 6. Up Next Preview (Sticky Bottom) -->
+<div class="absolute bottom-0 left-0 w-full z-30">
+<!-- Glassmorphism Container -->
+<div class="glass-panel p-4 pb-8">
+<div class="flex items-center justify-between mb-2">
+<span class="text-[10px] font-bold uppercase tracking-wider text-primary">POI gần tiếp theo (Up Next)</span>
+<span class="text-[10px] font-medium text-white/40">3 min walk</span>
+</div>
+<div class="flex items-center gap-3 bg-white/5 p-2 rounded-lg border border-white/5 hover:bg-white/10 transition-colors cursor-pointer">
+<!-- Thumbnail -->
+<div class="size-12 rounded bg-cover bg-center shrink-0" data-alt="Golden crispy Vietnamese crepe Banh Xeo being folded" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuD-EuTmSJYuJ_JFGwK_0FbqqN0nmUzmkV2u1Zgn1UiZGhiXM9Xp6945_yArsOnbWqqgz_12GGdGjhoWJuXFXEarBn3-YseGYWzpabMXmMDj6y_Cd0Js0c0X7UkczlnbmpHrEV07_SdI7PMd5rbjrqZUhmoeCW4219EXHkj6cCAHM17Ii6m6Scm_GQiLZI63KIXaWGiRtGCy2NN3ZWmDkEd_wYwYT3AP36tiI4fGgz5KXVJaHkeWXFdyn6rd0MvqPTOBn1EmxZSEIo3S');">
+</div>
+<!-- Text Info -->
+<div class="flex-1 min-w-0">
+<h4 class="text-sm font-bold text-white truncate">Stop 5: Bánh Xèo Stall</h4>
+<p class="text-xs text-white/50 truncate">The sizzling crepe of the south</p>
+</div>
+<!-- Action -->
+<button class="size-8 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-primary hover:text-white transition-colors">
+<span class="material-symbols-outlined text-lg">play_arrow</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</body></html>
