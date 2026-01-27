@@ -100,51 +100,51 @@
 
 ### Core Hooks for US1
 
-- [ ] T041 [P] [US1] Implement useGeolocation hook trong lib/hooks/useGeolocation.ts (watchPosition wrapper)
-- [ ] T042 [P] [US1] Implement useGeofencing hook trong lib/hooks/useGeofencing.ts (Web Worker integration, distance check)
-- [ ] T043 [P] [US1] Implement useAudioPlayer hook trong lib/hooks/useAudioPlayer.ts (HTML5 Audio + queue manager)
-- [ ] T044 [US1] Implement usePOIManager hook trong lib/hooks/usePOIManager.ts (fetch, cache, filter POIs) - depends on T041, T042
+- [x] T041 [P] [US1] Implement useGeolocation hook trong lib/hooks/useGeolocation.ts (watchPosition wrapper)
+- [x] T042 [P] [US1] Implement useGeofencing hook trong lib/hooks/useGeofencing.ts (Web Worker integration, distance check)
+- [x] T043 [P] [US1] Implement useAudioPlayer hook trong lib/hooks/useAudioPlayer.ts (HTML5 Audio + queue manager)
+- [x] T044 [US1] Implement usePOIManager hook trong lib/hooks/usePOIManager.ts (fetch, cache, filter POIs) - depends on T041, T042
 
 ### Services for US1
 
-- [ ] T045 [P] [US1] Implement geolocation service trong lib/services/geolocation.ts (wrapper cho browser API)
-- [ ] T046 [P] [US1] Implement audio playback service trong lib/services/audio.ts (AudioPlayer class với queue)
-- [ ] T047 [P] [US1] Implement TTS service trong lib/services/tts.ts (Web Speech Synthesis wrapper)
-- [ ] T048 [P] [US1] Implement analytics logging service trong lib/services/analytics.ts (log events to Supabase)
+- [x] T045 [P] [US1] Implement geolocation service trong lib/services/geolocation.ts (wrapper cho browser API)
+- [x] T046 [P] [US1] Implement audio playback service trong lib/services/audio.ts (AudioPlayer class với queue)
+- [x] T047 [P] [US1] Implement TTS service trong lib/services/tts.ts (Web Speech Synthesis wrapper)
+- [x] T048 [P] [US1] Implement analytics logging service trong lib/services/analytics.ts (log events to Supabase)
 
 ### Components for US1
 
-- [ ] T049 [P] [US1] Create StartTourButton component trong components/tour/StartTourButton.tsx (unlock audio context)
-- [ ] T050 [P] [US1] Create AudioPlayer component trong components/tour/AudioPlayer.tsx (controls UI)
-- [ ] T051 [P] [US1] Create NarrationOverlay component trong components/tour/NarrationOverlay.tsx (hiển thị transcript)
+- [x] T049 [P] [US1] Create StartTourButton component trong components/tour/StartTourButton.tsx (unlock audio context)
+- [x] T050 [P] [US1] Create AudioPlayer component trong components/tour/AudioPlayer.tsx (controls UI)
+- [x] T051 [P] [US1] Create NarrationOverlay component trong components/tour/NarrationOverlay.tsx (hiển thị transcript)
 
 ### Pages for US1
 
-- [ ] T052 [US1] Create landing page trong app/page.tsx (QR code info, Start Tour button)
-- [ ] T053 [US1] Create tour layout trong app/tour/layout.tsx (location permission request)
-- [ ] T054 [US1] Create main tour page trong app/tour/page.tsx (auto narration logic) - integrates T041-T051
+- [x] T052 [US1] Create landing page trong app/page.tsx (QR code info, Start Tour button)
+- [x] T053 [US1] Create tour layout trong app/tour/layout.tsx (location permission request)
+- [x] T054 [US1] Create main tour page trong app/tour/page.tsx (auto narration logic) - integrates T041-T051
 
 ### Auto Narration Logic
 
-- [ ] T055 [US1] Integrate geofencing + audio playback trong tour page: detect POI entry → check cooldown → enqueue audio
-- [ ] T056 [US1] Implement cooldown tracking trong IndexedDB: save/load last played timestamp per POI
-- [ ] T057 [US1] Implement auto-pause khi user dừng lâu >5 phút (detect từ speed === 0)
-- [ ] T058 [US1] Implement priority sorting: nếu nhiều POI cùng lúc, phát POI priority cao nhất + gần nhất
+- [x] T055 [US1] Integrate geofencing + audio playback trong tour page: detect POI entry → check cooldown → enqueue audio
+- [x] T056 [US1] Implement cooldown tracking trong IndexedDB: save/load last played timestamp per POI
+- [x] T057 [US1] Implement auto-pause khi user dừng lâu >5 phút (detect từ speed === 0)
+- [x] T058 [US1] Implement priority sorting: nếu nhiều POI cùng lúc, phát POI priority cao nhất + gần nhất
 
 ### Edge Cases for US1
 
-- [ ] T059 [US1] Handle location permission denied: hiển thị Modal với hướng dẫn enable location
-- [ ] T060 [US1] Handle GPS drift: apply noise filter trước khi check geofence
-- [ ] T061 [US1] Handle fast movement (>15 km/h): pause auto narration, hiển thị Toast khuyến nghị đi bộ
-- [ ] T062 [US1] Handle browser autoplay policy: require user gesture (Start Tour button) trước khi phát audio
-- [ ] T063 [US1] Handle audio load error: fallback to TTS với transcript từ POI description
+- [x] T059 [US1] Handle location permission denied: hiển thị Modal với hướng dẫn enable location
+- [x] T060 [US1] Handle GPS drift: apply noise filter trước khi check geofence
+- [x] T061 [US1] Handle fast movement (>15 km/h): pause auto narration, hiển thị Toast khuyến nghị đi bộ
+- [x] T062 [US1] Handle browser autoplay policy: require user gesture (Start Tour button) trước khi phát audio
+- [x] T063 [US1] Handle audio load error: fallback to TTS với transcript từ POI description
 
 ### Analytics for US1
 
-- [ ] T064 [US1] Log 'tour_start' event khi user click Start Tour button
-- [ ] T065 [US1] Log 'auto_play' event khi audio tự động phát với POI ID, rounded GPS, language
-- [ ] T066 [US1] Log 'skip' event nếu user skip audio trước khi nghe hết
-- [ ] T067 [US1] Log 'tour_end' event khi user leave page hoặc stop tour
+- [x] T064 [US1] Log 'tour_start' event khi user click Start Tour button
+- [x] T065 [US1] Log 'auto_play' event khi audio tự động phát với POI ID, rounded GPS, language
+- [x] T066 [US1] Log 'skip' event nếu user skip audio trước khi nghe hết
+- [x] T067 [US1] Log 'tour_end' event khi user leave page hoặc stop tour
 
 **Checkpoint**: ✅ At this point, User Story 1 fully functional và testable independently. User có thể quét QR, start tour, nhận auto narration khi đi gần POI.
 
@@ -304,57 +304,58 @@
 
 ## Phase 7: Admin Dashboard & POI Management (Supporting Feature)
 
-**Purpose**: Admin có thể đăng nhập, CRUD POIs, upload audio/images, xem analytics
+**Purpose**: Admin có thể đăng nhập, CRUD POIs, upload audio/images, tạo audio từ mô tả, xem analytics
 
 **⚠️ Note**: Admin feature không phải core user story, nhưng cần thiết cho content management
 
 ### Authentication Setup
 
-- [ ] T127 Setup Google OAuth trong Supabase dashboard
-- [ ] T128 [P] Implement signInWithGoogle function trong lib/services/auth.ts
-- [ ] T129 [P] Implement signOut function trong lib/services/auth.ts
-- [ ] T130 Create auth callback route trong app/api/auth/callback/route.ts
+- [x] T127 Setup Google OAuth trong Supabase dashboard
+- [x] T128 [P] Implement signInWithGoogle function trong lib/services/auth.ts
+- [x] T129 [P] Implement signOut function trong lib/services/auth.ts
+- [x] T130 Create auth callback route trong app/api/auth/callback/route.ts
 
 ### Auth Context & Hooks
 
-- [ ] T131 Create AuthContext trong lib/contexts/AuthContext.tsx (track user session, admin role)
-- [ ] T132 Implement useAuth hook trong lib/hooks/useAuth.ts (getCurrentUser, isAdmin, signIn, signOut)
+- [x] T131 Create AuthContext trong lib/contexts/AuthContext.tsx (track user session, admin role)
+- [x] T132 Implement useAuth hook trong lib/hooks/useAuth.ts (getCurrentUser, isAdmin, signIn, signOut)
 
 ### Admin Layout & Routes
 
-- [ ] T133 Create admin layout trong app/admin/layout.tsx (auth check middleware, redirect nếu không phải admin)
-- [ ] T134 [P] Create admin dashboard page trong app/admin/page.tsx (summary stats)
-- [ ] T135 Create POI list page trong app/admin/pois/page.tsx
-- [ ] T136 Create new POI page trong app/admin/pois/new/page.tsx
-- [ ] T137 Create edit POI page trong app/admin/pois/[id]/edit/page.tsx
+- [x] T133 Create admin layout trong app/admin/layout.tsx (auth check middleware, redirect nếu không phải admin)
+- [x] T134 [P] Create admin dashboard page trong app/admin/page.tsx (summary stats)
+- [x] T135 Create POI list page trong app/admin/pois/page.tsx
+- [x] T136 Create new POI page trong app/admin/pois/new/page.tsx
+- [x] T137 Create edit POI page trong app/admin/pois/[id]/edit/page.tsx
 
 ### Admin Components
 
-- [ ] T138 [P] Create POIForm component trong components/admin/POIForm.tsx (multi-language inputs)
-- [ ] T139 [P] Create AudioUploader component trong components/admin/AudioUploader.tsx (upload 6 audio files)
-- [ ] T140 [P] Create ImageUploader component trong components/admin/ImageUploader.tsx
-- [ ] T141 [P] Create AdminHeader component trong components/admin/AdminHeader.tsx (sign out button)
+- [x] T138 [P] Create POIForm component trong components/admin/POIForm.tsx (multi-language text inputs cho narration content)
+- [x] T139 [P] Create TTSGenerator component trong components/admin/TTSGenerator.tsx (textarea cho mỗi ngôn ngữ + button "Generate Audio" → gọi API tạo 6 files)
+- [x] T140 [P] Create ImageUploader component trong components/admin/ImageUploader.tsx
+- [x] T141 [P] Create AdminHeader component trong components/admin/AdminHeader.tsx (sign out button)
 
 ### POI CRUD API Routes
 
-- [ ] T142 [P] Create GET /api/pois route trong app/api/pois/route.ts (fetch all POIs)
-- [ ] T143 [P] Create POST /api/pois route (create POI, admin only)
-- [ ] T144 [P] Create PUT /api/pois/[id] route trong app/api/pois/[id]/route.ts (update POI, admin only)
-- [ ] T145 [P] Create DELETE /api/pois/[id] route (soft delete POI, admin only)
+- [x] T142 [P] Create GET /api/pois route trong app/api/pois/route.ts (fetch all POIs)
+- [x] T143 [P] Create POST /api/pois route (create POI, admin only)
+- [x] T144 [P] Create PUT /api/pois/[id] route trong app/api/pois/[id]/route.ts (update POI, admin only)
+- [x] T145 [P] Create DELETE /api/pois/[id] route (soft delete POI, admin only)
 
-### File Upload
+### TTS Audio Generation & File Upload
 
-- [ ] T146 Implement uploadAudio function trong lib/services/storage.ts (upload to Supabase Storage)
-- [ ] T147 Implement uploadImage function trong lib/services/storage.ts
-- [ ] T148 Create POST /api/pois/[id]/audio route trong app/api/pois/[id]/audio/route.ts
-- [ ] T149 Create POST /api/pois/[id]/image route trong app/api/pois/[id]/image/route.ts
+- [x] T146 Setup Google Cloud TTS credentials (service account key trong .env.local)
+- [x] T147 Implement generateTTSAudio function trong lib/services/tts-generator.ts (gọi Google Cloud TTS API)
+- [x] T148 Create POST /api/tts/generate route trong app/api/tts/generate/route.ts (nhận text → generate 6 audio files → upload to Supabase Storage → return URLs)
+- [x] T149 Implement uploadImage function trong lib/services/storage.ts
+- [x] T150 Create POST /api/pois/[id]/image route trong app/api/pois/[id]/image/route.ts
 
 ### Analytics Dashboard
 
-- [ ] T150 Create GET /api/analytics/summary route trong app/api/analytics/summary/route.ts (admin only)
-- [ ] T151 Create GET /api/analytics/poi/[id] route trong app/api/analytics/poi/[id]/route.ts
-- [ ] T152 [P] Create AnalyticsSummary component trong components/admin/AnalyticsSummary.tsx
-- [ ] T153 [P] Create POIAnalyticsChart component trong components/admin/POIAnalyticsChart.tsx (daily plays, completion rate)
+- [x] T151 Create GET /api/analytics/summary route trong app/api/analytics/summary/route.ts (admin only)
+- [x] T152 Create GET /api/analytics/poi/[id] route trong app/api/analytics/poi/[id]/route.ts
+- [x] T153 [P] Create AnalyticsSummary component trong components/admin/AnalyticsSummary.tsx
+- [x] T154 [P] Create POIAnalyticsChart component trong components/admin/POIAnalyticsChart.tsx (daily plays, completion rate)
 
 **Checkpoint**: ✅ Admin có thể manage POIs và xem analytics. Content management ready.
 

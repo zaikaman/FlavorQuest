@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="vi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Location Access Permission</title>
+<!-- Required Fonts and Icons -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Theme Configuration -->
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#f26c0d",
+              "background-light": "#f8f7f5",
+              "background-dark": "#221710",
+            },
+            fontFamily: {
+              "display": ["Inter", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display antialiased selection:bg-primary/30">
+<!-- Main Container -->
+<div class="relative flex h-screen w-full flex-col overflow-hidden bg-background-light dark:bg-background-dark group/design-root">
+<!-- Ambient Background Glow (Street Light Effect) -->
+<div class="pointer-events-none absolute bottom-0 left-0 right-0 h-1/2 bg-gradient-to-t from-primary/10 to-transparent opacity-50"></div>
+<!-- Top Navigation -->
+<div class="relative z-10 flex w-full items-center justify-between p-4 pt-6 md:pt-8">
+<!-- Empty left side for balance if needed, or back button -->
+<div class="flex size-12 items-center justify-center"></div>
+<!-- Close Button -->
+<button class="flex size-12 shrink-0 items-center justify-center rounded-full text-slate-800 transition-colors hover:bg-black/5 dark:text-white dark:hover:bg-white/10">
+<span class="material-symbols-outlined" style="font-size: 24px;">close</span>
+</button>
+</div>
+<!-- Main Content Area (Centered) -->
+<div class="relative z-10 flex flex-1 flex-col items-center justify-center px-6 pb-4">
+<!-- Illustration Area -->
+<div class="mb-8 flex w-full max-w-[320px] flex-col items-center justify-center">
+<div class="relative aspect-square w-full overflow-hidden rounded-full bg-primary/5 p-8 ring-1 ring-white/5 dark:bg-white/5">
+<!-- Inner Glow -->
+<div class="absolute inset-0 bg-gradient-to-tr from-primary/20 via-transparent to-transparent opacity-60"></div>
+<!-- Image -->
+<div class="relative flex h-full w-full items-center justify-center overflow-hidden rounded-xl bg-background-dark/50 shadow-2xl backdrop-blur-sm">
+<div class="h-full w-full bg-contain bg-center bg-no-repeat opacity-90 mix-blend-normal" data-alt="Abstract illustration of smartphone map interface with a glowing orange location pin" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBhuo0skfvTiZt_3lWmoCLAxIhH97-k2p4IhT7Dp8a7K5tUePgr9bFbdZAjBTH1Vs6fKQbEAz2vIAhakVKb6vssUJtxwzAdz2DLyMhrE8cbQZS3KveST3ofStke2JtI07C-_59pLK8Yu6oU3umBVBaTQspcm_-9qY8uOTT3zc62ooJYYIIcxVP5AiD2qFpzHHak2Jc5NYitNYl6_xqq7nWHf1m7PEKjWaKJurX3HbD8I0PfMwT2Kfl_LKKKvI0FAmZZberhJFDPhXEh");'>
+</div>
+<!-- Floating POI Icon Overlay -->
+<div class="absolute flex size-16 items-center justify-center rounded-full bg-primary shadow-[0_0_30px_rgba(242,108,13,0.6)]">
+<span class="material-symbols-outlined text-white" style="font-size: 32px;">location_on</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Typography Group -->
+<div class="flex max-w-md flex-col items-center text-center">
+<!-- Headline -->
+<h2 class="px-2 pb-3 pt-2 text-[28px] font-bold leading-tight tracking-tight text-slate-900 dark:text-white">
+                    Cho phép vị trí để tự động phát thuyết minh gần quán ăn
+                </h2>
+<!-- Body Text -->
+<p class="px-4 pb-3 pt-1 text-base font-normal leading-relaxed text-slate-600 dark:text-slate-300/80">
+                    Trải nghiệm tốt nhất khi ứng dụng tự động nhận diện vị trí của bạn trên đường Vĩnh Khánh.
+                </p>
+</div>
+</div>
+<!-- Bottom Action Area -->
+<div class="relative z-10 mt-auto w-full px-4 pb-8 pt-4 md:pb-12">
+<div class="mx-auto flex w-full max-w-[480px] flex-col gap-4">
+<!-- Primary Button -->
+<button class="flex h-14 w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg bg-primary px-5 text-base font-bold leading-normal tracking-[0.015em] text-white shadow-lg transition-transform active:scale-[0.98]">
+<span class="truncate">Cho phép</span>
+</button>
+<!-- Secondary Link -->
+<button class="group flex w-full cursor-pointer items-center justify-center text-sm font-medium text-slate-500 transition-colors hover:text-slate-800 dark:text-slate-400 dark:hover:text-white">
+<span class="mr-1">Không cho phép?</span>
+<span class="decoration-primary/50 underline-offset-4 group-hover:underline dark:decoration-primary">Chuyển sang chế độ thủ công</span>
+</button>
+</div>
+</div>
+</div>
+</body></html>

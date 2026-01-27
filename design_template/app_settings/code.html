@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>App Settings - Vinh Khanh Food Tour</title>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Config -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+            extend: {
+                colors: {
+                "primary": "#f26c0d",
+                "background-light": "#f8f7f5",
+                "background-dark": "#221710",
+                "surface-dark": "#2c1e16",
+                "accent-brown": "#493222",
+                },
+                fontFamily: {
+                "display": ["Inter", "sans-serif"]
+                },
+                borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+            },
+            },
+        }
+    </script>
+<style>
+        /* Custom Range Slider Styling for Webkit */
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            background: #f26c0d;
+            cursor: pointer;
+            margin-top: -8px; 
+            box-shadow: 0 0 4px rgba(0,0,0,0.5);
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            background: #493222;
+            border-radius: 2px;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white font-display antialiased overflow-x-hidden pb-24 selection:bg-primary selection:text-white">
+<!-- Top App Bar -->
+<div class="sticky top-0 z-50 flex items-center bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-md p-4 pb-2 justify-between border-b border-black/5 dark:border-white/5">
+<div class="flex size-12 shrink-0 items-center justify-center cursor-pointer rounded-full active:bg-black/10 dark:active:bg-white/10 transition-colors">
+<span class="material-symbols-outlined text-slate-900 dark:text-white" style="font-size: 24px;">arrow_back</span>
+</div>
+<h2 class="text-slate-900 dark:text-white text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center pr-12">Cài đặt</h2>
+</div>
+<!-- Section: General -->
+<div class="mt-2">
+<h3 class="text-slate-900 dark:text-white tracking-tight text-xl font-bold leading-tight px-4 text-left pb-3 pt-4">Chung</h3>
+<!-- Language Selector -->
+<div class="px-4 py-2">
+<div class="flex h-12 flex-1 items-center justify-center rounded-xl bg-gray-200 dark:bg-accent-brown p-1.5">
+<label class="flex cursor-pointer h-full grow items-center justify-center overflow-hidden rounded-lg px-2 has-[:checked]:bg-white dark:has-[:checked]:bg-primary has-[:checked]:shadow-sm text-slate-600 dark:text-[#cba990] has-[:checked]:text-slate-900 dark:has-[:checked]:text-white text-sm font-semibold leading-normal transition-all duration-200">
+<span class="truncate">VN</span>
+<input checked="" class="invisible w-0" name="language_select" type="radio" value="VN"/>
+</label>
+<label class="flex cursor-pointer h-full grow items-center justify-center overflow-hidden rounded-lg px-2 has-[:checked]:bg-white dark:has-[:checked]:bg-primary has-[:checked]:shadow-sm text-slate-600 dark:text-[#cba990] has-[:checked]:text-slate-900 dark:has-[:checked]:text-white text-sm font-semibold leading-normal transition-all duration-200">
+<span class="truncate">EN</span>
+<input class="invisible w-0" name="language_select" type="radio" value="EN"/>
+</label>
+<label class="flex cursor-pointer h-full grow items-center justify-center overflow-hidden rounded-lg px-2 has-[:checked]:bg-white dark:has-[:checked]:bg-primary has-[:checked]:shadow-sm text-slate-600 dark:text-[#cba990] has-[:checked]:text-slate-900 dark:has-[:checked]:text-white text-sm font-semibold leading-normal transition-all duration-200">
+<span class="truncate">ZH</span>
+<input class="invisible w-0" name="language_select" type="radio" value="ZH"/>
+</label>
+</div>
+</div>
+<!-- Google Login -->
+<div class="flex items-center gap-4 px-4 py-4 justify-between active:bg-black/5 dark:active:bg-white/5 cursor-pointer transition-colors">
+<div class="flex items-center gap-4">
+<div class="text-white flex items-center justify-center rounded-xl bg-primary/10 dark:bg-accent-brown shrink-0 size-10">
+<span class="material-symbols-outlined text-primary dark:text-white" style="font-size: 24px;">account_circle</span>
+</div>
+<p class="text-slate-900 dark:text-white text-base font-medium leading-normal flex-1 truncate">Đăng nhập với Google</p>
+</div>
+<div class="shrink-0 text-slate-400 dark:text-white/60">
+<span class="material-symbols-outlined" style="font-size: 24px;">chevron_right</span>
+</div>
+</div>
+</div>
+<div class="h-px bg-slate-200 dark:bg-white/10 mx-4 my-2"></div>
+<!-- Section: Tour Experience -->
+<div>
+<h3 class="text-slate-900 dark:text-white tracking-tight text-xl font-bold leading-tight px-4 text-left pb-3 pt-4">Trải nghiệm Tour</h3>
+<!-- TTS Voice -->
+<div class="flex items-center gap-4 px-4 py-3 justify-between active:bg-black/5 dark:active:bg-white/5 cursor-pointer transition-colors">
+<div class="flex flex-col gap-1">
+<p class="text-slate-900 dark:text-white text-base font-medium leading-normal">Giọng đọc (TTS)</p>
+<p class="text-sm text-slate-500 dark:text-gray-400">Nữ - Miền Bắc</p>
+</div>
+<div class="shrink-0 text-slate-400 dark:text-white/60">
+<span class="material-symbols-outlined" style="font-size: 24px;">chevron_right</span>
+</div>
+</div>
+<!-- Auto Play Toggle -->
+<div class="flex items-center gap-4 px-4 py-3 justify-between">
+<div class="flex flex-col gap-1">
+<p class="text-slate-900 dark:text-white text-base font-medium leading-normal">Tự động phát âm thanh</p>
+<p class="text-sm text-slate-500 dark:text-gray-400">Khi đến gần địa điểm</p>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox" value=""/>
+<div class="w-12 h-7 bg-gray-300 dark:bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all dark:border-gray-600 peer-checked:bg-primary"></div>
+</label>
+</div>
+<!-- Volume Slider -->
+<div class="flex flex-col gap-3 px-4 py-4">
+<div class="flex justify-between items-center">
+<p class="text-slate-900 dark:text-white text-base font-medium leading-normal">Âm lượng hướng dẫn</p>
+<span class="material-symbols-outlined text-slate-400 dark:text-white/60" style="font-size: 20px;">volume_up</span>
+</div>
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-slate-400 dark:text-gray-500" style="font-size: 18px;">volume_mute</span>
+<input class="w-full h-1.5 bg-gray-200 dark:bg-accent-brown rounded-lg appearance-none cursor-pointer accent-primary focus:outline-none focus:ring-2 focus:ring-primary/20" max="100" min="0" type="range" value="80"/>
+<span class="material-symbols-outlined text-slate-400 dark:text-gray-500" style="font-size: 18px;">volume_up</span>
+</div>
+</div>
+<!-- Geofence Sensitivity -->
+<div class="flex flex-col gap-3 px-4 py-4">
+<div class="flex justify-between items-center">
+<p class="text-slate-900 dark:text-white text-base font-medium leading-normal">Độ nhạy vị trí</p>
+<span class="material-symbols-outlined text-slate-400 dark:text-white/60" style="font-size: 20px;">radar</span>
+</div>
+<div class="flex items-center gap-3 pt-1">
+<input class="w-full h-1.5 bg-gray-200 dark:bg-accent-brown rounded-lg appearance-none cursor-pointer accent-primary focus:outline-none focus:ring-2 focus:ring-primary/20" max="100" min="0" type="range" value="40"/>
+</div>
+<div class="flex justify-between text-xs text-slate-500 dark:text-gray-400 font-medium px-1">
+<span>Chính xác (Gần)</span>
+<span>Rộng (Xa)</span>
+</div>
+</div>
+</div>
+<div class="h-px bg-slate-200 dark:bg-white/10 mx-4 my-2"></div>
+<!-- Section: Data -->
+<div>
+<h3 class="text-slate-900 dark:text-white tracking-tight text-xl font-bold leading-tight px-4 text-left pb-3 pt-4">Dữ liệu</h3>
+<div class="px-4 py-2">
+<button class="w-full group flex items-center justify-center gap-2 rounded-xl border border-primary/30 bg-primary/5 dark:bg-primary/10 p-3.5 active:bg-primary/20 transition-all duration-200">
+<span class="material-symbols-outlined text-primary group-active:rotate-180 transition-transform duration-500" style="font-size: 20px;">sync</span>
+<span class="text-primary text-base font-bold">Kiểm tra dữ liệu offline</span>
+</button>
+<p class="text-xs text-center text-slate-400 dark:text-gray-500 mt-2">Đã cập nhật: Hôm nay, 18:30</p>
+</div>
+</div>
+<!-- Footer / Privacy -->
+<div class="px-4 py-8 flex flex-col items-center gap-2">
+<a class="text-sm text-slate-500 dark:text-gray-400 hover:text-primary transition-colors underline underline-offset-2" href="#">Chính sách bảo mật &amp; Điều khoản</a>
+<p class="text-xs text-slate-400 dark:text-gray-600">Phiên bản 1.2.0 (Build 45)</p>
+</div>
+<!-- Bottom Navigation -->
+<div class="fixed bottom-0 left-0 right-0 bg-background-light dark:bg-background-dark border-t border-black/5 dark:border-white/5 px-6 py-3 flex justify-between items-center z-40 pb-6 safe-area-pb">
+<button class="flex flex-col items-center gap-1 text-slate-400 dark:text-gray-500 hover:text-primary dark:hover:text-primary transition-colors">
+<span class="material-symbols-outlined" style="font-size: 24px;">map</span>
+<span class="text-[10px] font-medium">Bản đồ</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-slate-400 dark:text-gray-500 hover:text-primary dark:hover:text-primary transition-colors">
+<span class="material-symbols-outlined" style="font-size: 24px;">tour</span>
+<span class="text-[10px] font-medium">Tour</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-slate-400 dark:text-gray-500 hover:text-primary dark:hover:text-primary transition-colors">
+<span class="material-symbols-outlined" style="font-size: 24px;">favorite</span>
+<span class="text-[10px] font-medium">Đã lưu</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-primary">
+<span class="material-symbols-outlined fill-current" style="font-variation-settings: 'FILL' 1; font-size: 24px;">settings</span>
+<span class="text-[10px] font-bold">Cài đặt</span>
+</button>
+</div>
+</body></html>

@@ -104,7 +104,12 @@ export class NoiseFilter {
     // Filter out low accuracy samples
     if (sample.accuracy && sample.accuracy > this.config.minAccuracy) {
       // Don't add to buffer but still return last known good position
-      return this.getCurrentPosition();
+      if (this.samples.length > 0) {
+        return this.getCurrentPosition();
+      }
+      // If no history, return the raw sample to avoid crashing
+      // (Better to have a noisy position than no position/error)
+      return { lat: sample.lat, lng: sample.lng };
     }
 
     // Add sample to buffer

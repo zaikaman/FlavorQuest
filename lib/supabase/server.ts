@@ -196,9 +196,15 @@ export async function getCurrentUser(client: SupabaseServerClient) {
  */
 export async function isUserAdmin(client: SupabaseServerClient): Promise<boolean> {
   const { data: { user } } = await client.auth.getUser();
-  
+
   if (!user) {
     return false;
+  }
+
+  // Check Env Var first (hardcoded super admins)
+  const adminEmails = process.env.ADMIN_EMAILS || process.env.NEXT_PUBLIC_ADMIN_EMAILS || '';
+  if (user.email && adminEmails.toLowerCase().includes(user.email.toLowerCase())) {
+    return true;
   }
 
   const { data } = await client

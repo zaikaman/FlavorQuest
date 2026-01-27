@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Browse Food POIs</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#f26c0d",
+              "background-light": "#f8f7f5",
+              "background-dark": "#221710",
+              "surface-dark": "#2f2219",
+              "card-dark": "#342418", 
+            },
+            fontFamily: {
+              "display": ["Inter", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined.fill {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-gray-900 dark:text-white overflow-x-hidden pb-24 selection:bg-primary/30">
+<!-- Top App Bar -->
+<div class="sticky top-0 z-30 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-md px-4 py-3 flex items-center justify-between border-b border-gray-200 dark:border-white/5 transition-colors duration-300">
+<h2 class="text-xl font-bold tracking-[-0.015em] leading-tight flex-1">Vinh Khanh Street Eats</h2>
+<button class="flex items-center gap-1.5 pl-4 text-primary hover:text-orange-400 transition-colors">
+<span class="material-symbols-outlined text-[20px]">sort</span>
+<span class="text-sm font-bold tracking-wide uppercase">Sort</span>
+</button>
+</div>
+<!-- Search Bar -->
+<div class="px-4 py-3">
+<label class="relative flex items-center w-full h-12 rounded-lg bg-white dark:bg-[#493222] border border-gray-100 dark:border-transparent focus-within:ring-2 focus-within:ring-primary/50 transition-all shadow-sm">
+<div class="grid place-items-center h-full w-12 text-[#cba990]">
+<span class="material-symbols-outlined">search</span>
+</div>
+<input class="peer h-full w-full outline-none bg-transparent text-base text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-[#cba990] pr-4" placeholder="Find snails, seafood..." type="text"/>
+</label>
+</div>
+<!-- Filters (Chips) -->
+<div class="flex gap-3 px-4 pb-2 overflow-x-auto hide-scrollbar snap-x">
+<!-- Active Chip -->
+<button class="snap-start flex h-9 shrink-0 items-center justify-center gap-2 rounded-lg bg-primary px-4 text-white shadow-lg shadow-primary/20 transition-transform active:scale-95">
+<span class="material-symbols-outlined text-[18px]">restaurant</span>
+<span class="text-sm font-bold">All</span>
+</button>
+<!-- Inactive Chips -->
+<button class="snap-start flex h-9 shrink-0 items-center justify-center gap-2 rounded-lg bg-white dark:bg-[#493222] px-4 text-gray-700 dark:text-white border border-gray-100 dark:border-transparent shadow-sm hover:bg-gray-50 dark:hover:bg-[#5a3e2b] transition-colors active:scale-95">
+<span class="text-sm font-medium">Hải sản</span>
+</button>
+<button class="snap-start flex h-9 shrink-0 items-center justify-center gap-2 rounded-lg bg-white dark:bg-[#493222] px-4 text-gray-700 dark:text-white border border-gray-100 dark:border-transparent shadow-sm hover:bg-gray-50 dark:hover:bg-[#5a3e2b] transition-colors active:scale-95">
+<span class="text-sm font-medium">Ốc</span>
+</button>
+<button class="snap-start flex h-9 shrink-0 items-center justify-center gap-2 rounded-lg bg-white dark:bg-[#493222] px-4 text-gray-700 dark:text-white border border-gray-100 dark:border-transparent shadow-sm hover:bg-gray-50 dark:hover:bg-[#5a3e2b] transition-colors active:scale-95">
+<span class="text-sm font-medium">Ăn rẻ</span>
+</button>
+<button class="snap-start flex h-9 shrink-0 items-center justify-center gap-2 rounded-lg bg-white dark:bg-[#493222] px-4 text-gray-700 dark:text-white border border-gray-100 dark:border-transparent shadow-sm hover:bg-gray-50 dark:hover:bg-[#5a3e2b] transition-colors active:scale-95">
+<span class="text-sm font-medium">Gần tôi</span>
+</button>
+</div>
+<!-- POI List -->
+<div class="flex flex-col gap-5 px-4 pt-4">
+<!-- Card 1: Ốc Oanh -->
+<div class="group relative flex flex-col overflow-hidden rounded-xl bg-white dark:bg-card-dark shadow-md dark:shadow-[0_0_4px_rgba(0,0,0,0.3)] ring-1 ring-black/5 dark:ring-white/5 transition-transform">
+<!-- Image Section -->
+<div class="relative aspect-[16/9] w-full overflow-hidden bg-gray-200 dark:bg-gray-800">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110" data-alt="Plate of grilled scallops with peanuts and green onion oil" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuACKOvc7wZSnGrJpncmP8iXtGCrvh9B9U1O49_-PJpOTJrTWTQlIHmpqHDPZ-wVHCQR4jaP_95tUAF88Pt2TvIcZbYio0UDApHlkHadAsu4E4UO7ojdLGB6rIGceL7xAOgenyCwgHEwKuJkBmdqDzkHYChNZBcLP7Cm6LjC0EfBZ6FVCFZRGv8mTAPFvw1mnfZ8ZJbjJby4Frux8c1BJ_T17WtZqlYAxwbzyOmvAXj-NzqsJ_1IQAGXP4dEqAp4r3NbCI9TO6fzvoFW');"></div>
+<!-- Gradient Overlay for contrast -->
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-90"></div>
+<!-- Offline Badge -->
+<div class="absolute top-3 left-3 flex items-center gap-1.5 rounded-full bg-black/60 backdrop-blur-md px-3 py-1 text-xs font-semibold text-white border border-white/10 shadow-lg">
+<span class="material-symbols-outlined text-[14px] text-green-400">check_circle</span>
+<span>Offline Ready</span>
+</div>
+</div>
+<!-- Content Section -->
+<div class="relative p-4 pt-5">
+<!-- Floating Play Button -->
+<button class="absolute -top-7 right-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-white shadow-lg shadow-primary/40 hover:bg-orange-600 hover:scale-105 active:scale-95 transition-all z-10">
+<span class="material-symbols-outlined text-[32px] ml-1 fill">play_arrow</span>
+</button>
+<!-- Header Info -->
+<div class="flex flex-col gap-1 pr-12">
+<h3 class="text-xl font-bold text-gray-900 dark:text-white leading-tight tracking-tight">Ốc Oanh (Famous Snail Stall)</h3>
+<div class="flex items-center gap-2 text-sm">
+<span class="font-bold text-primary">50m away</span>
+<span class="text-gray-400">•</span>
+<span class="font-medium text-gray-600 dark:text-[#cba990]">$$</span>
+<span class="text-gray-400">•</span>
+<div class="flex items-center gap-0.5 text-yellow-500">
+<span class="material-symbols-outlined text-[16px] fill">star</span>
+<span class="text-gray-700 dark:text-white font-bold">4.8</span>
+</div>
+</div>
+</div>
+<!-- Description -->
+<p class="mt-3 text-sm text-gray-600 dark:text-gray-300/90 line-clamp-2 leading-relaxed font-normal">
+                    The most famous spot on the street, known for their grilled scallops with spring onion oil and roasted peanuts.
+                </p>
+</div>
+</div>
+<!-- Card 2: Bánh Mì Chảo -->
+<div class="group relative flex flex-col overflow-hidden rounded-xl bg-white dark:bg-card-dark shadow-md dark:shadow-[0_0_4px_rgba(0,0,0,0.3)] ring-1 ring-black/5 dark:ring-white/5 transition-transform">
+<div class="relative aspect-[16/9] w-full overflow-hidden bg-gray-200 dark:bg-gray-800">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110" data-alt="Sizzling steak and eggs in a hot iron pan" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDrEjFdqlz4DfxrGjtPAzRoGF2Qmyi3iJogjql5vMZy9hW5L111rAAOdgiuq3nzUBhOgR0-CPg0KZtwYtELhxlK-is8sUXL5o8NsqJAm8HawE8MsjGOxiKzPyRwiqB9nS0nqEHtrnMaYKDcmAJD5yKTuTFkyk7oTNZso9naesk1lhjHLLhiVE96yl7tTvYFHds8_aTj4x6PdO06eGzpnZSj6LNXtmxQIdUb8T1mWW3Ww6IJlFAroSce6n83vfyxB01-cSXSaMFcjsJ1');"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-90"></div>
+<!-- Offline Badge -->
+<div class="absolute top-3 left-3 flex items-center gap-1.5 rounded-full bg-black/60 backdrop-blur-md px-3 py-1 text-xs font-semibold text-white border border-white/10 shadow-lg">
+<span class="material-symbols-outlined text-[14px] text-green-400">check_circle</span>
+<span>Offline Ready</span>
+</div>
+</div>
+<div class="relative p-4 pt-5">
+<button class="absolute -top-7 right-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-white shadow-lg shadow-primary/40 hover:bg-orange-600 hover:scale-105 active:scale-95 transition-all z-10">
+<span class="material-symbols-outlined text-[32px] ml-1 fill">play_arrow</span>
+</button>
+<div class="flex flex-col gap-1 pr-12">
+<h3 class="text-xl font-bold text-gray-900 dark:text-white leading-tight tracking-tight">Bánh Mì Chảo 211</h3>
+<div class="flex items-center gap-2 text-sm">
+<span class="font-bold text-primary">120m away</span>
+<span class="text-gray-400">•</span>
+<span class="font-medium text-gray-600 dark:text-[#cba990]">$</span>
+<span class="text-gray-400">•</span>
+<div class="flex items-center gap-0.5 text-yellow-500">
+<span class="material-symbols-outlined text-[16px] fill">star</span>
+<span class="text-gray-700 dark:text-white font-bold">4.5</span>
+</div>
+</div>
+</div>
+<p class="mt-3 text-sm text-gray-600 dark:text-gray-300/90 line-clamp-2 leading-relaxed font-normal">
+                    Sizzling bread pan with eggs, pate, and sausage. A classic breakfast for dinner experience.
+                </p>
+</div>
+</div>
+<!-- Card 3: Quán Ốc Tuyết -->
+<div class="group relative flex flex-col overflow-hidden rounded-xl bg-white dark:bg-card-dark shadow-md dark:shadow-[0_0_4px_rgba(0,0,0,0.3)] ring-1 ring-black/5 dark:ring-white/5 transition-transform">
+<div class="relative aspect-[16/9] w-full overflow-hidden bg-gray-200 dark:bg-gray-800">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110" data-alt="Steamed clams in a clay pot with lemongrass" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAN4nROh2OiQ1r9894-uW5IE14FL1Am8Hq4x_SYLnWx976kwLrpUXC2gCdr5TbQb6Sjfxip_lLmyrWda8KmgAH0L31xMxEiK237SdWFQU86iRdn-6lm9JdKx3vDnkxRT1jGqDHy33wngzLb8TPT0qCtooRV5E5LEkgg9EerJu80vAoKFwFCIG5Dz9fuhsUsUy11LnJdfsSyNVJvkKQ6MAYr2ZT_ikiBq0ql-Qd7GpDobotkQZANg1ALzBO-LHRoS6NwhSr6Du-F61Hk');"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-90"></div>
+</div>
+<div class="relative p-4 pt-5">
+<button class="absolute -top-7 right-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-white shadow-lg shadow-primary/40 hover:bg-orange-600 hover:scale-105 active:scale-95 transition-all z-10">
+<span class="material-symbols-outlined text-[32px] ml-1 fill">play_arrow</span>
+</button>
+<div class="flex flex-col gap-1 pr-12">
+<h3 class="text-xl font-bold text-gray-900 dark:text-white leading-tight tracking-tight">Quán Ốc Tuyết</h3>
+<div class="flex items-center gap-2 text-sm">
+<span class="font-bold text-primary">300m away</span>
+<span class="text-gray-400">•</span>
+<span class="font-medium text-gray-600 dark:text-[#cba990]">$</span>
+<span class="text-gray-400">•</span>
+<div class="flex items-center gap-0.5 text-yellow-500">
+<span class="material-symbols-outlined text-[16px] fill">star</span>
+<span class="text-gray-700 dark:text-white font-bold">4.2</span>
+</div>
+</div>
+</div>
+<p class="mt-3 text-sm text-gray-600 dark:text-gray-300/90 line-clamp-2 leading-relaxed font-normal">
+                    A hidden gem for those who prefer quieter spots. Famous for their lemongrass steamed clams and spicy sauces.
+                </p>
+</div>
+</div>
+</div>
+<!-- Bottom Navigation -->
+<div class="fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-[#221710]/95 backdrop-blur-xl border-t border-gray-200 dark:border-white/5 pb-6 pt-3 px-2">
+<div class="flex justify-around items-end">
+<button class="flex flex-1 flex-col items-center gap-1.5 text-gray-400 dark:text-[#cba990]/60 hover:text-gray-600 dark:hover:text-[#cba990]">
+<span class="material-symbols-outlined text-[24px]">map</span>
+<span class="text-[10px] font-bold uppercase tracking-wider">Map</span>
+</button>
+<button class="flex flex-1 flex-col items-center gap-1.5 text-primary">
+<span class="material-symbols-outlined text-[24px] fill">restaurant_menu</span>
+<span class="text-[10px] font-bold uppercase tracking-wider">Browse</span>
+</button>
+<button class="flex flex-1 flex-col items-center gap-1.5 text-gray-400 dark:text-[#cba990]/60 hover:text-gray-600 dark:hover:text-[#cba990]">
+<span class="material-symbols-outlined text-[24px]">favorite</span>
+<span class="text-[10px] font-bold uppercase tracking-wider">Saved</span>
+</button>
+<button class="flex flex-1 flex-col items-center gap-1.5 text-gray-400 dark:text-[#cba990]/60 hover:text-gray-600 dark:hover:text-[#cba990]">
+<span class="material-symbols-outlined text-[24px]">person</span>
+<span class="text-[10px] font-bold uppercase tracking-wider">Profile</span>
+</button>
+</div>
+</div>
+</body></html>
