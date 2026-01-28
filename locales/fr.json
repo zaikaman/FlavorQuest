@@ -22,12 +22,22 @@
     "pauseTour": "Pause",
     "resumeTour": "Reprendre",
     "stopTour": "Arrêter la visite",
-    "autoMode": "Lecture automatique",
+    "autoMode": "Mode automatique",
     "manualMode": "Mode manuel",
     "nearbyPOIs": "Points à proximité",
     "currentLocation": "Position actuelle",
     "distance": "Distance",
-    "priority": "Priorité"
+    "priority": "Priorité",
+    "nowPlaying": "En cours : {name}",
+    "syncedEvents": "{count} événements synchronisés",
+    "offlineReady": "Prêt pour une utilisation hors ligne",
+    "dataSaved": "Données enregistrées, prêt hors ligne",
+    "usingTTS": "Utilisation de la synthèse vocale (hors ligne)",
+    "tooFast": "Vous vous déplacez trop vite. Veuillez marcher pour écouter le guide.",
+    "locationDenied": "Localisation refusée. Passage en mode manuel.",
+    "httpsRequired": "Erreur : le GPS nécessite HTTPS. Utilisez localhost ou installez SSL.",
+    "gpsError": "Erreur GPS : {message}",
+    "noAudioForPOI": "Aucun audio disponible pour ce lieu"
   },
   "audio": {
     "play": "Lecture",
@@ -127,5 +137,28 @@
     "step2": "Marcher vers la rue Vinh Khanh",
     "step3": "La narration audio se lance automatiquement près des stands",
     "getStarted": "Commencer"
-  }
+  },
+  "splash": {
+    "subtitle": "Découvrez le Voyage Culinaire de Vinh Khanh",
+    "startTour": "Démarrer la Visite",
+    "browse": "Parcourir manuellement",
+    "settings": "Paramètres"  },
+  "login": {
+    "title": "Connexion FlavorQuest",
+    "subtitle": "Enregistrez votre progression et synchronisez votre expérience",
+    "prompt": "Connectez-vous avec votre compte Google pour continuer",
+    "signInWithGoogle": "Se connecter avec Google",
+    "or": "ou",
+    "backToHome": "Retour à l'accueil",
+    "error": "Échec de la connexion. Veuillez réessayer."
+  },
+  "poiDetail": {
+    "notFound": "Emplacement introuvable",
+    "notFoundMessage": "Cet emplacement a peut-être été supprimé ou n'existe pas.",
+    "playNarration": "Lire la narration",
+    "introduction": "Introduction",
+    "noDescription": "Aucune description disponible pour cet emplacement.",
+    "didYouKnow": "Le saviez-vous?",
+    "nowPlaying": "En cours : {name}",
+    "errorPlaying": "Erreur audio, utilisation de la synthèse vocale"  }
 }

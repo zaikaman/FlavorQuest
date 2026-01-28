@@ -22,12 +22,22 @@
     "pauseTour": "暂停",
     "resumeTour": "继续",
     "stopTour": "结束游览",
-    "autoMode": "自动播放",
+    "autoMode": "自动模式",
     "manualMode": "手动模式",
     "nearbyPOIs": "附近景点",
     "currentLocation": "当前位置",
     "distance": "距离",
-    "priority": "优先级"
+    "priority": "优先级",
+    "nowPlaying": "正在播放: {name}",
+    "syncedEvents": "已同步 {count} 个事件",
+    "offlineReady": "可离线使用",
+    "dataSaved": "数据已保存，可离线使用",
+    "usingTTS": "正在使用语音合成（离线）",
+    "tooFast": "移动太快。请步行以收听讲解。",
+    "locationDenied": "位置权限被拒绝。切换到手动模式。",
+    "httpsRequired": "错误：GPS需要HTTPS。请使用localhost或安装SSL。",
+    "gpsError": "GPS错误：{message}",
+    "noAudioForPOI": "此位置没有音频"
   },
   "audio": {
     "play": "播放",
@@ -127,5 +137,30 @@
     "step2": "前往永庆街",
     "step3": "靠近食品摊位时音频讲解会自动播放",
     "getStarted": "开始"
+  },
+  "splash": {
+    "subtitle": "探索永庆美食之旅",
+    "startTour": "开始游览",
+    "browse": "手动浏览",
+    "settings": "设置"
+  },
+  "login": {
+    "title": "FlavorQuest 登录",
+    "subtitle": "保存进度并同步体验",
+    "prompt": "使用 Google 账户登录以继续",
+    "signInWithGoogle": "使用 Google 登录",
+    "or": "或",
+    "backToHome": "返回首页",
+    "error": "登录失败。请重试。"
+  },
+  "poiDetail": {
+    "notFound": "未找到位置",
+    "notFoundMessage": "此位置可能已被删除或不存在。",
+    "playNarration": "播放旁白",
+    "introduction": "介绍",
+    "noDescription": "此位置没有描述。",
+    "didYouKnow": "你知道吗？",
+    "nowPlaying": "正在播放：{name}",
+    "errorPlaying": "音频错误，正在使用语音合成"
   }
 }

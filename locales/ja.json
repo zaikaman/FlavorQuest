@@ -22,12 +22,22 @@
     "pauseTour": "一時停止",
     "resumeTour": "再開",
     "stopTour": "ツアー終了",
-    "autoMode": "自動再生",
+    "autoMode": "自動モード",
     "manualMode": "手動モード",
     "nearbyPOIs": "近くのポイント",
     "currentLocation": "現在地",
     "distance": "距離",
-    "priority": "優先度"
+    "priority": "優先度",
+    "nowPlaying": "再生中: {name}",
+    "syncedEvents": "{count}件のイベントを同期しました",
+    "offlineReady": "オフライン使用可能",
+    "dataSaved": "データ保存済み、オフライン準備完了",
+    "usingTTS": "音声合成を使用中（オフライン）",
+    "tooFast": "移動が速すぎます。音声ガイドを聞くには歩いてください。",
+    "locationDenied": "位置情報が拒否されました。手動モードに切り替えます。",
+    "httpsRequired": "エラー: GPSにはHTTPSが必要です。localhostまたはSSLを使用してください。",
+    "gpsError": "GPSエラー: {message}",
+    "noAudioForPOI": "この場所の音声はありません"
   },
   "audio": {
     "play": "再生",
@@ -127,5 +137,28 @@
     "step2": "ヴィンカイン通りに歩く",
     "step3": "屋台の近くで音声ナレーションが自動再生されます",
     "getStarted": "始める"
-  }
+  },
+  "splash": {
+    "subtitle": "ヴィンカイン美食の旅を発見",
+    "startTour": "ツアー開始",
+    "browse": "手動で閲覧",
+    "settings": "設定"  },
+  "login": {
+    "title": "FlavorQuest ログイン",
+    "subtitle": "進行状況を保存して体験を同期",
+    "prompt": "続行するにはGoogleアカウントでサインインしてください",
+    "signInWithGoogle": "Googleでサインイン",
+    "or": "または",
+    "backToHome": "ホームに戻る",
+    "error": "サインインに失敗しました。もう一度お試しください。"
+  },
+  "poiDetail": {
+    "notFound": "場所が見つかりません",
+    "notFoundMessage": "この場所は削除されたか、存在しません。",
+    "playNarration": "ナレーションを再生",
+    "introduction": "紹介",
+    "noDescription": "この場所の説明はありません。",
+    "didYouKnow": "ご存知ですか？",
+    "nowPlaying": "再生中: {name}",
+    "errorPlaying": "音声エラー、音声合成を使用しています"  }
 }

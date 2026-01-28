@@ -22,12 +22,22 @@
     "pauseTour": "Tạm dừng",
     "resumeTour": "Tiếp tục",
     "stopTour": "Dừng Tour",
-    "autoMode": "Tự động phát",
+    "autoMode": "Chế độ tự động",
     "manualMode": "Chế độ thủ công",
     "nearbyPOIs": "Điểm gần đây",
     "currentLocation": "Vị trí hiện tại",
     "distance": "Khoảng cách",
-    "priority": "Ưu tiên"
+    "priority": "Ưu tiên",
+    "nowPlaying": "Đang phát: {name}",
+    "syncedEvents": "Đã đồng bộ {count} sự kiện",
+    "offlineReady": "Sẵn sàng sử dụng ngoại tuyến",
+    "dataSaved": "Dữ liệu đã được lưu, sẵn sàng ngoại tuyến",
+    "usingTTS": "Đang sử dụng giọng đọc tổng hợp (offline)",
+    "tooFast": "Di chuyển quá nhanh. Vui lòng đi bộ để nghe thuyết minh.",
+    "locationDenied": "Vị trí bị từ chối. Chuyển sang chế độ thủ công.",
+    "httpsRequired": "Lỗi: GPS yêu cầu HTTPS. Vui lòng dùng localhost hoặc cài đặt SSL.",
+    "gpsError": "Lỗi GPS: {message}",
+    "noAudioForPOI": "Không có audio cho địa điểm này"
   },
   "audio": {
     "play": "Phát",
@@ -127,5 +137,30 @@
     "step2": "Di chuyển đến phố Vĩnh Khánh",
     "step3": "Thuyết minh tự động phát khi gần điểm ăn uống",
     "getStarted": "Bắt đầu"
+  },
+  "splash": {
+    "subtitle": "Khám phá Hành trình Ẩm thực Vĩnh Khánh",
+    "startTour": "Bắt đầu Tour",
+    "browse": "Duyệt thủ công",
+    "settings": "Cài đặt"
+  },
+  "login": {
+    "title": "Đăng nhập FlavorQuest",
+    "subtitle": "Lưu tiến độ và đồng bộ trải nghiệm của bạn",
+    "prompt": "Đăng nhập bằng tài khoản Google để tiếp tục",
+    "signInWithGoogle": "Đăng nhập với Google",
+    "or": "hoặc",
+    "backToHome": "Quay lại trang chủ",
+    "error": "Đăng nhập thất bại. Vui lòng thử lại."
+  },
+  "poiDetail": {
+    "notFound": "Không tìm thấy địa điểm",
+    "notFoundMessage": "Địa điểm này có thể đã bị xóa hoặc không tồn tại.",
+    "playNarration": "Nghe thuyết minh",
+    "introduction": "Giới thiệu",
+    "noDescription": "Chưa có mô tả cho địa điểm này.",
+    "didYouKnow": "Bạn có biết?",
+    "nowPlaying": "Đang phát: {name}",
+    "errorPlaying": "Lỗi phát audio, đang dùng giọng đọc tổng hợp"
   }
 }

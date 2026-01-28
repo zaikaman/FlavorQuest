@@ -8,6 +8,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useLanguage } from '@/lib/contexts/LanguageContext';
+import { useTranslations } from '@/lib/hooks/useTranslations';
 import { useAudioPlayer } from '@/lib/hooks/useAudioPlayer';
 import { usePOIManager } from '@/lib/hooks/usePOIManager';
 import { getLocalizedPOI } from '@/lib/utils/localization';
@@ -22,6 +23,7 @@ export default function POIDetailPage() {
   const router = useRouter();
   const poiId = params.poiId as string;
   const { language } = useLanguage();
+  const { t } = useTranslations();
   
   const { pois, isLoading } = usePOIManager({ language });
   const [poi, setPoi] = useState<POI | null>(null);
@@ -38,7 +40,7 @@ export default function POIDetailPage() {
     autoPlay: false,
     enableTTSFallback: true,
     language,
-    onError: () => showToastMsg('Lỗi phát audio, đang dùng giọng đọc tổng hợp'),
+    onError: () => showToastMsg(t('poiDetail.errorPlaying')),
   });
 
   // Tìm POI từ danh sách
@@ -74,7 +76,7 @@ export default function POIDetailPage() {
       listened: true,
     });
 
-    showToastMsg(`Đang phát: ${localized.name}`);
+    showToastMsg(t('poiDetail.nowPlaying', { name: localized.name }));
   }, [poi, language, audioPlayer, showToastMsg]);
 
   // Format time
@@ -96,13 +98,13 @@ export default function POIDetailPage() {
     return (
       <div className="flex flex-col items-center justify-center h-screen bg-background-dark text-white p-4">
         <span className="material-symbols-outlined text-6xl text-muted mb-4">location_off</span>
-        <h1 className="text-xl font-bold mb-2">Không tìm thấy địa điểm</h1>
-        <p className="text-muted text-center mb-6">Địa điểm này có thể đã bị xóa hoặc không tồn tại.</p>
+        <h1 className="text-xl font-bold mb-2">{t('poiDetail.notFound')}</h1>
+        <p className="text-muted text-center mb-6">{t('poiDetail.notFoundMessage')}</p>
         <button
           onClick={() => router.back()}
           className="px-6 py-3 bg-primary text-white rounded-lg font-medium"
         >
-          Quay lại
+          {t('common.back')}
         </button>
       </div>
     );
@@ -206,7 +208,7 @@ export default function POIDetailPage() {
               className="w-full flex items-center justify-center gap-3 py-3 bg-primary rounded-lg font-bold"
             >
               <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>play_arrow</span>
-              Nghe thuyết minh
+              {t('poiDetail.playNarration')}
             </button>
           )}
         </div>
@@ -215,10 +217,10 @@ export default function POIDetailPage() {
         <div className="mb-4">
           <h2 className="text-lg font-bold mb-2 flex items-center gap-2">
             <span className="material-symbols-outlined text-primary">description</span>
-            Giới thiệu
+            {t('poiDetail.introduction')}
           </h2>
           <p className="text-white/80 leading-relaxed">
-            {localized.description || 'Chưa có mô tả cho địa điểm này.'}
+            {localized.description || t('poiDetail.noDescription')}
           </p>
         </div>
 
@@ -227,7 +229,7 @@ export default function POIDetailPage() {
           <div className="bg-primary/10 rounded-xl p-4 mb-4 border border-primary/20">
             <h3 className="text-sm font-bold text-primary mb-1 flex items-center gap-2">
               <span className="material-symbols-outlined text-lg">lightbulb</span>
-              Bạn có biết?
+              {t('poiDetail.didYouKnow')}
             </h3>
             <p className="text-white/80 text-sm">{poi.fun_fact}</p>
           </div>

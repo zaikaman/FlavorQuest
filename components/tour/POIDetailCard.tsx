@@ -6,6 +6,7 @@
 'use client';
 
 import { useLanguage } from '@/lib/contexts/LanguageContext';
+import { useTranslations } from '@/lib/hooks/useTranslations';
 import { getLocalizedPOI } from '@/lib/utils/localization';
 import type { POI } from '@/lib/types/index';
 
@@ -27,6 +28,7 @@ export function POIDetailCard({
   onViewDetail,
 }: POIDetailCardProps) {
   const { language } = useLanguage();
+  const { t } = useTranslations();
   const localized = getLocalizedPOI(poi, language);
 
   const formatDistance = (meters: number | null | undefined): string => {
@@ -41,7 +43,7 @@ export function POIDetailCard({
       <button
         onClick={onClose}
         className="absolute -top-2 -right-2 flex h-7 w-7 items-center justify-center rounded-full bg-[#493222] text-white shadow border border-white/10 hover:bg-[#5a4030] transition-colors active:scale-95"
-        aria-label="Đóng"
+        aria-label={t('common.close')}
       >
         <span className="material-symbols-outlined text-[16px]">close</span>
       </button>
@@ -93,7 +95,7 @@ export function POIDetailCard({
       <button
         onClick={onPlay}
         className="group flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary text-white shadow-lg shadow-primary/30 transition-all active:scale-95 hover:bg-primary/90"
-        aria-label={isPlaying ? 'Đang phát' : 'Phát audio'}
+        aria-label={isPlaying ? t('audio.pause') : t('audio.play')}
       >
         <span
           className="material-symbols-outlined text-[28px] ml-0.5 group-hover:scale-110 transition-transform"
