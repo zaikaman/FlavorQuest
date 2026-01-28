@@ -230,25 +230,80 @@ export async function logTourEnd(
 
 /**
  * Sync queued analytics events (offline → online)
+ * Uses batch API endpoint for better reliability
  */
-export async function syncQueuedEvents(): Promise<void> {
+export async function syncQueuedEvents(): Promise<{ synced: number; failed: boolean }> {
   const queuedEvents = await loadAnalyticsQueue();
 
   if (queuedEvents.length === 0) {
-    return;
+    return { synced: 0, failed: false };
   }
 
-  const supabase = createClient();
+  // Check if online
+  if (typeof navigator !== 'undefined' && !navigator.onLine) {
+    console.log('Offline, skipping sync');
+    return { synced: 0, failed: true };
+  }
 
-  const { error } = await supabase
-    .from('analytics_logs')
-    .insert(queuedEvents);
+  try {
+    // Try batch API first (more reliable for offline sync)
+    const response = await fetch('/api/analytics/batch', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ events: queuedEvents }),
+    });
 
-  if (!error) {
-    // Clear synced events
-    await clearAnalyticsQueue();
-    console.log(`Synced ${queuedEvents.length} analytics events`);
-  } else {
+    if (response.ok) {
+      await clearAnalyticsQueue();
+      console.log(`Synced ${queuedEvents.length} analytics events via batch API`);
+      return { synced: queuedEvents.length, failed: false };
+    }
+
+    // Fallback to direct Supabase insert
+    const supabase = createClient();
+
+    const { error } = await supabase
+      .from('analytics_logs')
+      .insert(queuedEvents);
+
+    if (!error) {
+      await clearAnalyticsQueue();
+      console.log(`Synced ${queuedEvents.length} analytics events via Supabase`);
+      return { synced: queuedEvents.length, failed: false };
+    }
+
     console.error('Failed to sync analytics events:', error);
+    return { synced: 0, failed: true };
+  } catch (error) {
+    console.error('Analytics sync error:', error);
+    return { synced: 0, failed: true };
+  }
+}
+
+/**
+ * Get count of pending analytics events
+ */
+export async function getPendingEventsCount(): Promise<number> {
+  const queue = await loadAnalyticsQueue();
+  return queue.length;
+}
+
+/**
+ * Register background sync for analytics (if supported)
+ */
+export async function registerAnalyticsBackgroundSync(): Promise<boolean> {
+  if (typeof navigator === 'undefined') return false;
+  if (!('serviceWorker' in navigator)) return false;
+  if (!('sync' in ServiceWorkerRegistration.prototype)) return false;
+
+  try {
+    const registration = await navigator.serviceWorker.ready;
+    await (registration as any).sync.register('sync-analytics');
+    return true;
+  } catch (error) {
+    console.error('Failed to register background sync:', error);
+    return false;
   }
 }

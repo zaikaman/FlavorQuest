@@ -7,18 +7,21 @@
  * - Queue management (enqueue, dequeue, skip)
  * - Playback state tracking
  * - Error handling với TTS fallback
+ * - Offline audio support
  */
 
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import type { POI } from '@/lib/types/index';
+import type { POI, Language } from '@/lib/types/index';
 
 export interface AudioQueueItem {
   poi: POI;
   audioUrl: string;
   title: string;
   duration?: number;
+  description?: string; // For TTS fallback
+  language?: Language; // For TTS fallback
 }
 
 export interface AudioPlayerState {
@@ -31,20 +34,29 @@ export interface AudioPlayerState {
   duration: number;
   volume: number;
   error: string | null;
+  isTTSFallback: boolean; // Using TTS instead of audio file
 }
 
 export interface UseAudioPlayerOptions {
   autoPlay?: boolean;
   volume?: number;
+  /** Enable TTS fallback khi audio không load được */
+  enableTTSFallback?: boolean;
+  /** Language mặc định cho TTS */
+  language?: Language;
   onEnded?: (item: AudioQueueItem) => void;
   onError?: (error: string, item: AudioQueueItem) => void;
   onPlay?: (item: AudioQueueItem) => void;
   onPause?: (item: AudioQueueItem) => void;
+  /** Callback khi sử dụng TTS fallback */
+  onTTSFallback?: (item: AudioQueueItem) => void;
 }
 
 const DEFAULT_OPTIONS: UseAudioPlayerOptions = {
   autoPlay: false,
   volume: 1.0,
+  enableTTSFallback: true,
+  language: 'vi',
 };
 
 export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
@@ -60,6 +72,7 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
     duration: 0,
     volume: opts.volume!,
     error: null,
+    isTTSFallback: false,
   });
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -67,6 +80,8 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
   const isLoadingRef = useRef(false); // Lock to prevent double loading
   const currentItemRef = useRef<AudioQueueItem | null>(null);
   const optionsRef = useRef<UseAudioPlayerOptions>(opts);
+  const ttsUtteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
+  const playNextRef = useRef<() => void>(() => {});
 
   useEffect(() => {
     currentItemRef.current = state.currentItem;
@@ -125,6 +140,13 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
       const error = (e.target as HTMLAudioElement).error;
       const errorMessage = error?.message || 'Unknown audio error';
       
+      // Try TTS fallback if enabled
+      const currentItem = currentItemRef.current;
+      if (optionsRef.current.enableTTSFallback && currentItem) {
+        playWithTTS(currentItem);
+        return;
+      }
+      
       setState(prev => ({
         ...prev,
         isPlaying: false,
@@ -132,8 +154,8 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
         error: errorMessage,
       }));
 
-      if (currentItemRef.current && optionsRef.current.onError) {
-        optionsRef.current.onError(errorMessage, currentItemRef.current);
+      if (currentItem && optionsRef.current.onError) {
+        optionsRef.current.onError(errorMessage, currentItem);
       }
     };
 
@@ -215,6 +237,12 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
   const safePause = useCallback(async () => {
     if (!audioRef.current) return;
     
+    // Cancel any TTS
+    if (typeof speechSynthesis !== 'undefined') {
+      speechSynthesis.cancel();
+    }
+    ttsUtteranceRef.current = null;
+    
     // Wait for any pending play promise to resolve
     if (playPromiseRef.current) {
       try {
@@ -227,6 +255,90 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
     
     audioRef.current.pause();
   }, []);
+
+  // Language code mapping for TTS
+  const getLangCode = useCallback((lang?: Language): string => {
+    const langMap: Record<Language, string> = {
+      vi: 'vi-VN',
+      en: 'en-US',
+      ja: 'ja-JP',
+      fr: 'fr-FR',
+      ko: 'ko-KR',
+      zh: 'zh-CN',
+    };
+    return langMap[lang || 'vi'] || 'vi-VN';
+  }, []);
+
+  // Play using TTS (fallback when audio file fails)
+  const playWithTTS = useCallback((item: AudioQueueItem) => {
+    if (typeof speechSynthesis === 'undefined') {
+      console.error('Speech synthesis not supported');
+      setState(prev => ({
+        ...prev,
+        isPlaying: false,
+        isLoading: false,
+        error: 'TTS not supported',
+      }));
+      return;
+    }
+
+    // Cancel any existing speech
+    speechSynthesis.cancel();
+
+    // Get text to speak
+    const text = item.description || item.title || '';
+    if (!text) {
+      console.error('No text for TTS');
+      playNextRef.current();
+      return;
+    }
+
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = getLangCode(item.language || opts.language);
+    utterance.rate = 1.0;
+    utterance.pitch = 1.0;
+    utterance.volume = state.volume;
+
+    utterance.onstart = () => {
+      setState(prev => ({
+        ...prev,
+        isPlaying: true,
+        isPaused: false,
+        isLoading: false,
+        isTTSFallback: true,
+      }));
+      optionsRef.current.onTTSFallback?.(item);
+    };
+
+    utterance.onend = () => {
+      setState(prev => ({
+        ...prev,
+        isPlaying: false,
+        isPaused: false,
+        isTTSFallback: false,
+        currentTime: 0,
+      }));
+      ttsUtteranceRef.current = null;
+      optionsRef.current.onEnded?.(item);
+      playNextRef.current();
+    };
+
+    utterance.onerror = (event) => {
+      console.error('TTS error:', event.error);
+      setState(prev => ({
+        ...prev,
+        isPlaying: false,
+        isLoading: false,
+        isTTSFallback: false,
+        error: 'TTS error: ' + event.error,
+      }));
+      ttsUtteranceRef.current = null;
+      playNextRef.current();
+    };
+
+    ttsUtteranceRef.current = utterance;
+    speechSynthesis.speak(utterance);
+  }, [opts.language, state.volume, getLangCode]);
 
   // Play audio
   const play = useCallback(async (item?: AudioQueueItem) => {
@@ -380,6 +492,11 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
     });
   }, [play]);
 
+  // Update playNextRef after playNext is defined
+  useEffect(() => {
+    playNextRef.current = playNext;
+  }, [playNext]);
+
   // Skip current
   const skip = useCallback(() => {
     stop();
@@ -403,5 +520,7 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
     clearQueue,
     playNext,
     unlockAudio,
+    playWithTTS,
+    isTTSFallback: state.isTTSFallback,
   };
 }
