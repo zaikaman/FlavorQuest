@@ -1,7 +1,7 @@
 /**
  * Main Tour Page
  * Auto narration logic với geofencing
- * Based on design_template/active_audio_tour_dashboard/code.html
+ * Based on design_template/interactive_street_map/code.html
  */
 
 'use client';
@@ -13,6 +13,7 @@ import { useGeofencing } from '@/lib/hooks/useGeofencing';
 import { useAudioPlayer } from '@/lib/hooks/useAudioPlayer';
 import { usePOIManager } from '@/lib/hooks/usePOIManager';
 import { useLanguage } from '@/lib/contexts/LanguageContext';
+import { InteractiveMap } from '@/components/tour/InteractiveMap';
 import { NarrationOverlay } from '@/components/tour/NarrationOverlay';
 import { AudioPlayer } from '@/components/tour/AudioPlayer';
 import { Toast } from '@/components/ui/Toast';
@@ -29,7 +30,7 @@ export default function TourPage() {
   const { language } = useLanguage();
 
   // Geolocation
-  const { coordinates, accuracy, error: geoError, permissionState } = useGeolocation();
+  const { coordinates, accuracy, heading, error: geoError, permissionState } = useGeolocation();
 
   // POI Management
   const { pois, isLoading: poisLoading } = usePOIManager({ language });
@@ -40,6 +41,8 @@ export default function TourPage() {
   const [toastMessage, setToastMessage] = useState('');
   const [visitedPOIs, setVisitedPOIs] = useState<Set<string>>(new Set());
   const [tourStartTime] = useState(Date.now());
+  const [selectedPOI, setSelectedPOI] = useState<POI | null>(null);
+  const [isOfflineReady, setIsOfflineReady] = useState(false);
 
   // Refs
   const noiseFilterRef = useRef<NoiseFilter>(new NoiseFilter({ windowSize: 5 })); // 5 samples moving average
@@ -211,99 +214,99 @@ export default function TourPage() {
     }
   }, [audioPlayer, language]);
 
+  // Handle POI selection from map
+  const handleSelectPOI = useCallback((poi: POI | null) => {
+    setSelectedPOI(poi);
+  }, []);
+
+  // Handle play POI from map card
+  const handlePlayPOI = useCallback(async (poi: POI) => {
+    const localizedPOI = getLocalizedPOI(poi, language);
+    const audioUrl = localizedPOI.audio_url;
+
+    console.log('[handlePlayPOI] POI:', poi.name_vi);
+    console.log('[handlePlayPOI] Language:', language);
+    console.log('[handlePlayPOI] Audio URL:', audioUrl);
+
+    if (!audioUrl) {
+      showToastMessage('Không có audio cho địa điểm này');
+      return;
+    }
+
+    enqueue({
+      poi,
+      audioUrl,
+      title: localizedPOI.name,
+    });
+
+    // Track visited
+    setVisitedPOIs(prev => new Set([...prev, poi.id]));
+
+    // Log analytics
+    await logAutoPlay(poi.id, language, undefined, {
+      distance: 0,
+      accuracy: accuracy ?? undefined,
+    });
+
+    showToastMessage(`Đang phát: ${localizedPOI.name}`);
+  }, [language, enqueue, showToastMessage, accuracy]);
+
+  // Check offline readiness
+  useEffect(() => {
+    const checkOffline = async () => {
+      if ('serviceWorker' in navigator) {
+        const registration = await navigator.serviceWorker.ready;
+        setIsOfflineReady(!!registration.active);
+      }
+    };
+    checkOffline();
+  }, []);
+
   // Get next POI
   const nextPOI = nearbyPOIs.find(p => p.id !== audioPlayer.currentItem?.poi.id);
 
+  // Debug audio player state
+  console.log('[TourPage] audioPlayer.currentItem:', audioPlayer.currentItem?.title);
+  console.log('[TourPage] audioPlayer.isPlaying:', audioPlayer.isPlaying);
+
   return (
     <div className="relative flex flex-col h-screen w-full overflow-hidden bg-background-dark">
-      {/* Top Header */}
-      <div className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between p-4 pt-6 bg-gradient-to-b from-black/80 to-transparent pointer-events-none">
-        <button
-          onClick={() => router.push('/')}
-          className="pointer-events-auto flex size-10 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-sm hover:bg-black/60 transition-colors"
-        >
-          <span className="material-symbols-outlined">arrow_back</span>
-        </button>
-        <h2 className="text-white text-base font-semibold tracking-wide drop-shadow-md opacity-90">Active Tour</h2>
-        <button
-          className="pointer-events-auto flex size-10 items-center justify-center rounded-full bg-black/40 text-seafood-green backdrop-blur-sm hover:bg-black/60 transition-colors"
-          title="Offline Ready"
-        >
-          <span className="material-symbols-outlined text-[20px] fill-1">offline_pin</span>
-        </button>
+      {/* Interactive Map - Full Screen */}
+      <div className="absolute inset-0 z-0">
+        <InteractiveMap
+          userLocation={filteredPosition}
+          heading={heading}
+          accuracy={accuracy}
+          pois={pois}
+          selectedPOI={selectedPOI}
+          onSelectPOI={handleSelectPOI}
+          onPlayPOI={handlePlayPOI}
+          isOfflineReady={isOfflineReady}
+        />
       </div>
 
-      {/* Map Section (Placeholder for now) */}
-      <div className="h-[40vh] w-full relative group/map">
-        {/* Map Image Placeholder */}
-        <div
-          className="absolute inset-0 bg-cover bg-center grayscale-[20%] sepia-[10%]"
-          style={{
-            backgroundImage: `url('https://lh3.googleusercontent.com/aida-public/AB6AXuD4wtbfZGczbsVLAR7s4-a9gAPKJvaVP59XVcin-TKFc062ZhzVWfNrpqniSnOIVpCjvDORKWrV_1iHqIszwXvlJzENMUTUnBUY_et14hjKxaU6geBUaXepZMdHQLLdQIbEMzGdvJqAWEZKo8BM_kHVO_ZtYC4KC17ryHMVGIFie6n3yxoadHyEoUsNKjgumvmScVnlpwpVkHi7U_39rmKoDV36G0sXciStusQ5UEhUVaAIUG-eT0LNms7hzvuZnnXAPkISU_ZAvNpJ')`,
-          }}
-        ></div>
-        <div className="absolute inset-0 bg-gradient-to-t from-background-dark via-transparent to-transparent"></div>
-
-        {/* Loading State */}
-        {poisLoading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-            <div className="flex flex-col items-center gap-2 text-white">
-              <span className="material-symbols-outlined text-4xl animate-spin">sync</span>
-              <p>Đang tải POIs...</p>
-            </div>
+      {/* Loading Overlay */}
+      {poisLoading && (
+        <div className="absolute inset-0 z-40 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="flex flex-col items-center gap-3 text-white">
+            <span className="material-symbols-outlined text-5xl animate-spin">sync</span>
+            <p className="text-lg font-medium">Đang tải địa điểm...</p>
           </div>
-        )}
-      </div>
-
-      {/* Content Area */}
-      <div className="flex-1 overflow-y-auto no-scrollbar pb-24 relative z-10">
-        <div className="px-4 py-6">
-          <h3 className="text-xl font-bold text-white mb-4">POIs gần bạn</h3>
-
-          {nearbyPOIs.length === 0 ? (
-            <div className="text-center py-12 text-gray-400">
-              <span className="material-symbols-outlined text-6xl opacity-30 mb-2 block">location_searching</span>
-              <p>Không có POI nào gần bạn</p>
-              <p className="text-sm mt-1">Di chuyển đến Vĩnh Khánh để bắt đầu tour</p>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {nearbyPOIs.map((poi) => (
-                <div
-                  key={poi.id}
-                  className="bg-surface-dark/50 rounded-xl p-4 border border-white/5"
-                >
-                  <div className="flex items-start gap-3">
-                    {poi.image_url && (
-                      <img
-                        src={poi.image_url}
-                        alt={getLocalizedPOI(poi, language).name}
-                        className="w-16 h-16 rounded-lg object-cover"
-                      />
-                    )}
-                    <div className="flex-1">
-                      <h4 className="font-bold text-white">{getLocalizedPOI(poi, language).name}</h4>
-                      <p className="text-sm text-gray-400 line-clamp-2">{getLocalizedPOI(poi, language).description}</p>
-                      <p className="text-xs text-primary mt-1">{poi.distance}m away</p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
         </div>
-      </div>
+      )}
 
       {/* Narration Overlay (Mini Player) */}
       {audioPlayer.currentItem && !showPlayerModal && (
-        <NarrationOverlay
-          currentPOI={audioPlayer.currentItem.poi}
-          distance={nearbyPOIs.find(p => p.id === audioPlayer.currentItem?.poi.id)?.distance}
-          isPlaying={audioPlayer.isPlaying}
-          currentTime={audioPlayer.currentTime}
-          duration={audioPlayer.duration}
-          onExpand={() => setShowPlayerModal(true)}
-        />
+        <div className="absolute bottom-24 left-0 right-0 z-30 px-4">
+          <NarrationOverlay
+            currentPOI={audioPlayer.currentItem.poi}
+            distance={nearbyPOIs.find(p => p.id === audioPlayer.currentItem?.poi.id)?.distance}
+            isPlaying={audioPlayer.isPlaying}
+            currentTime={audioPlayer.currentTime}
+            duration={audioPlayer.duration}
+            onExpand={() => setShowPlayerModal(true)}
+          />
+        </div>
       )}
 
       {/* Full Audio Player Modal */}
@@ -340,29 +343,37 @@ export default function TourPage() {
       )}
 
       {/* Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 z-50 bg-background-dark/95 backdrop-blur-lg border-t border-white/5 pb-safe">
-        <div className="flex h-16 items-center justify-around px-2">
-          <button className="flex flex-1 flex-col items-center justify-center gap-1 text-primary">
-            <span className="material-symbols-outlined text-[24px] fill-1">map</span>
-            <span className="text-[10px] font-medium">Tour</span>
+      <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-[#493222] bg-[#221710] px-2 pb-6 pt-2">
+        <div className="flex justify-between items-end">
+          <button className="flex flex-1 flex-col items-center justify-center gap-1.5 rounded-lg py-1 group transition-colors">
+            <div className="flex h-7 w-12 items-center justify-center rounded-full bg-primary/10 group-hover:bg-primary/20 transition-colors">
+              <span className="material-symbols-outlined text-primary text-[24px]" style={{ fontVariationSettings: "'FILL' 1" }}>map</span>
+            </div>
+            <p className="text-primary text-[10px] font-semibold leading-none tracking-wide">Bản đồ</p>
           </button>
           <button
             onClick={() => router.push('/browse')}
-            className="flex flex-1 flex-col items-center justify-center gap-1 text-gray-500 hover:text-gray-300 transition-colors"
+            className="flex flex-1 flex-col items-center justify-center gap-1.5 rounded-lg py-1 group transition-colors"
           >
-            <span className="material-symbols-outlined text-[24px]">format_list_bulleted</span>
-            <span className="text-[10px] font-medium">List</span>
+            <div className="flex h-7 w-12 items-center justify-center rounded-full bg-transparent group-hover:bg-white/5 transition-colors">
+              <span className="material-symbols-outlined text-[#8d7b6f] text-[24px] group-hover:text-[#cba990] transition-colors">format_list_bulleted</span>
+            </div>
+            <p className="text-[#8d7b6f] text-[10px] font-medium leading-none tracking-wide group-hover:text-[#cba990] transition-colors">Danh sách</p>
           </button>
-          <button className="flex flex-1 flex-col items-center justify-center gap-1 text-gray-500 hover:text-gray-300 transition-colors">
-            <span className="material-symbols-outlined text-[24px]">bookmark_border</span>
-            <span className="text-[10px] font-medium">Saved</span>
+          <button className="flex flex-1 flex-col items-center justify-center gap-1.5 rounded-lg py-1 group transition-colors">
+            <div className="flex h-7 w-12 items-center justify-center rounded-full bg-transparent group-hover:bg-white/5 transition-colors">
+              <span className="material-symbols-outlined text-[#8d7b6f] text-[24px] group-hover:text-[#cba990] transition-colors">headphones</span>
+            </div>
+            <p className="text-[#8d7b6f] text-[10px] font-medium leading-none tracking-wide group-hover:text-[#cba990] transition-colors">Tour của tôi</p>
           </button>
           <button
             onClick={() => router.push('/settings')}
-            className="flex flex-1 flex-col items-center justify-center gap-1 text-gray-500 hover:text-gray-300 transition-colors"
+            className="flex flex-1 flex-col items-center justify-center gap-1.5 rounded-lg py-1 group transition-colors"
           >
-            <span className="material-symbols-outlined text-[24px]">person</span>
-            <span className="text-[10px] font-medium">Profile</span>
+            <div className="flex h-7 w-12 items-center justify-center rounded-full bg-transparent group-hover:bg-white/5 transition-colors">
+              <span className="material-symbols-outlined text-[#8d7b6f] text-[24px] group-hover:text-[#cba990] transition-colors">person</span>
+            </div>
+            <p className="text-[#8d7b6f] text-[10px] font-medium leading-none tracking-wide group-hover:text-[#cba990] transition-colors">Hồ sơ</p>
           </button>
         </div>
       </nav>
