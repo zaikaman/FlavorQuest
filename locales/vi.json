@@ -199,7 +199,9 @@
     "downloadStarted": "Bắt đầu tải xuống nội dung offline...",
     "poisLabel": "điểm tham quan",
     "audioLabel": "Audio thuyết minh",
-    "imageLabel": "Hình ảnh địa điểm"
+    "imageLabel": "Hình ảnh địa điểm",
+    "successTitle": "Sẵn sàng offline",
+    "successMessage": "Đã tải xuống nội dung thành công."
   },
   "battery": {
     "level": "Mức pin",

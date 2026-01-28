@@ -199,7 +199,9 @@
     "downloadStarted": "Starting offline content download...",
     "poisLabel": "points of interest",
     "audioLabel": "Audio narration",
-    "imageLabel": "Location images"
+    "imageLabel": "Location images",
+    "successTitle": "Ready for Offline",
+    "successMessage": "Content downloaded successfully."
   },
   "battery": {
     "level": "Battery Level",
