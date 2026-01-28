@@ -10,7 +10,7 @@
 
 'use client';
 
-import Link from 'next/link';
+
 import { StartTourButton } from '@/components/tour/StartTourButton';
 import { LanguageSelector } from '@/components/layout/LanguageSelector';
 import { useTranslations } from '@/lib/hooks/useTranslations';
@@ -47,31 +47,14 @@ export function SplashContent({ isAuthenticated }: SplashContentProps) {
       </div>
 
       {/* Action Section (Bottom) */}
-      <div className="flex flex-col items-center w-full gap-5">
+      <div className="flex flex-col items-center w-full gap-5 pb-12">
         {/* Language Pills - 6 ngôn ngữ */}
         <LanguageSelector variant="splash" />
 
         {/* Primary Action Button */}
         <StartTourButton isAuthenticated={isAuthenticated} />
 
-        {/* Secondary Links */}
-        <div className="flex items-center gap-6 mt-1 text-sm font-medium text-gray-400">
-          <Link
-            href="/browse"
-            className="hover:text-white transition-colors py-2 flex items-center gap-1"
-          >
-            <span className="material-symbols-outlined text-lg">explore</span>
-            {t('splash.browse')}
-          </Link>
-          <div className="w-1 h-1 rounded-full bg-gray-600"></div>
-          <Link
-            href="/settings"
-            className="hover:text-white transition-colors py-2 flex items-center gap-1"
-          >
-            <span className="material-symbols-outlined text-lg">settings</span>
-            {t('splash.settings')}
-          </Link>
-        </div>
+
       </div>
     </>
   );

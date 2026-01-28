@@ -14,6 +14,8 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useOfflineSync } from '@/lib/hooks/useOfflineSync';
+import { useTranslations } from '@/lib/hooks/useTranslations';
+import { useLanguage } from '@/lib/contexts/LanguageContext';
 
 export interface OfflineIndicatorProps {
   /** Hiển thị dạng compact (chỉ icon) */
@@ -38,6 +40,7 @@ export function OfflineIndicator({
   onOfflineChange,
   onSyncComplete,
 }: OfflineIndicatorProps) {
+  const { t } = useTranslations();
   const {
     isOnline,
     syncStatus,
@@ -80,10 +83,10 @@ export function OfflineIndicator({
         icon: 'cloud_off',
         color: 'text-yellow-500',
         bgColor: 'bg-yellow-500/10',
-        label: 'Ngoại tuyến',
+        label: t('offline.status'),
         description: isOfflineReady
-          ? 'Đang sử dụng dữ liệu đã lưu'
-          : 'Một số tính năng không khả dụng',
+          ? t('offline.usingCachedData')
+          : t('offline.limitedFeatures'),
       };
     }
 
@@ -92,8 +95,8 @@ export function OfflineIndicator({
         icon: 'sync',
         color: 'text-blue-500',
         bgColor: 'bg-blue-500/10',
-        label: 'Đang đồng bộ...',
-        description: 'Đang tải dữ liệu lên máy chủ',
+        label: t('offline.syncing'),
+        description: t('offline.uploading'),
         spinning: true,
       };
     }
@@ -103,8 +106,8 @@ export function OfflineIndicator({
         icon: 'sync_problem',
         color: 'text-red-500',
         bgColor: 'bg-red-500/10',
-        label: 'Lỗi đồng bộ',
-        description: 'Nhấn để thử lại',
+        label: t('offline.syncError'),
+        description: t('offline.retrySync'),
       };
     }
 
@@ -113,8 +116,8 @@ export function OfflineIndicator({
         icon: 'cloud_sync',
         color: 'text-amber-500',
         bgColor: 'bg-amber-500/10',
-        label: 'Chờ đồng bộ',
-        description: `${pendingEventsCount} mục đang chờ`,
+        label: t('offline.pendingSync'),
+        description: t('offline.pendingItems', { count: pendingEventsCount }),
       };
     }
 
@@ -122,8 +125,8 @@ export function OfflineIndicator({
       icon: 'cloud_done',
       color: 'text-green-500',
       bgColor: 'bg-green-500/10',
-      label: 'Trực tuyến',
-      description: 'Đã đồng bộ',
+      label: t('offline.online'),
+      description: t('offline.synced'),
     };
   };
 
@@ -143,7 +146,7 @@ export function OfflineIndicator({
           w-10 h-10 rounded-full
           ${status.bgColor}
           transition-all duration-200
-          hover:scale-110
+          hover:scale-105 active:scale-95
           ${className}
         `}
         aria-label={status.label}
@@ -214,7 +217,7 @@ export function OfflineIndicator({
       {/* Sync button (when online with pending items) */}
       {isOnline && pendingEventsCount > 0 && syncStatus !== 'syncing' && (
         <span className="ml-auto text-xs text-gray-400 underline">
-          Nhấn để đồng bộ
+          {t('offline.tapToSync')}
         </span>
       )}
     </button>
@@ -227,6 +230,7 @@ export function OfflineIndicator({
  */
 export function OfflineBadge({ className = '' }: { className?: string }) {
   const { isOnline, isOfflineReady } = useOfflineSync();
+  const { t } = useTranslations();
 
   // Only show when offline
   if (isOnline) {
@@ -248,7 +252,7 @@ export function OfflineBadge({ className = '' }: { className?: string }) {
         cloud_off
       </span>
       <span className="text-sm font-medium text-black">
-        {isOfflineReady ? 'Chế độ ngoại tuyến' : 'Không có kết nối'}
+        {isOfflineReady ? t('offline.offlineMode') : t('offline.noConnection')}
       </span>
     </div>
   );
@@ -265,50 +269,51 @@ export function SyncStatusIndicator({ className = '' }: { className?: string }) 
     lastSyncTime,
     syncNow,
   } = useOfflineSync();
+  const { t } = useTranslations();
+  const { language } = useLanguage();
 
   const formatLastSync = (timestamp: number | null): string => {
-    if (!timestamp) return 'Chưa đồng bộ';
+    if (!timestamp) return t('offline.notSyncedYet');
 
     const now = Date.now();
     const diff = now - timestamp;
 
-    if (diff < 60000) return 'Vừa xong';
-    if (diff < 3600000) return `${Math.floor(diff / 60000)} phút trước`;
-    if (diff < 86400000) return `${Math.floor(diff / 3600000)} giờ trước`;
-    return new Date(timestamp).toLocaleDateString('vi-VN');
+    if (diff < 60000) return t('history.justNow');
+    if (diff < 3600000) return t('history.minsAgo', { mins: Math.floor(diff / 60000) });
+    if (diff < 86400000) return t('history.hoursAgo', { hours: Math.floor(diff / 3600000) });
+    return new Date(timestamp).toLocaleDateString(language === 'vi' ? 'vi-VN' : 'en-US');
   };
 
   return (
     <div className={`flex flex-col gap-2 ${className}`}>
       {/* Status row */}
       <div className="flex items-center justify-between">
-        <span className="text-sm text-gray-400">Trạng thái</span>
+        <span className="text-sm text-gray-400">{t('offline.statusLabel')}</span>
         <div className="flex items-center gap-2">
           <span
-            className={`w-2 h-2 rounded-full ${
-              isOnline ? 'bg-green-500' : 'bg-yellow-500'
-            }`}
+            className={`w-2 h-2 rounded-full ${isOnline ? 'bg-green-500' : 'bg-yellow-500'
+              }`}
           />
           <span className="text-sm font-medium">
-            {isOnline ? 'Trực tuyến' : 'Ngoại tuyến'}
+            {isOnline ? t('offline.online') : t('offline.status')}
           </span>
         </div>
       </div>
 
       {/* Last sync row */}
       <div className="flex items-center justify-between">
-        <span className="text-sm text-gray-400">Đồng bộ lần cuối</span>
+        <span className="text-sm text-gray-400">{t('offline.lastSync')}</span>
         <span className="text-sm font-medium">
-          {formatLastSync(lastSyncTime)}
+          {formatLastSync(lastSyncTime) || t('offline.notSyncedYet')}
         </span>
       </div>
 
       {/* Pending items row */}
       {pendingEventsCount > 0 && (
         <div className="flex items-center justify-between">
-          <span className="text-sm text-gray-400">Chờ đồng bộ</span>
+          <span className="text-sm text-gray-400">{t('offline.pendingSync')}</span>
           <span className="text-sm font-medium text-amber-500">
-            {pendingEventsCount} mục
+            {t('offline.pendingItems', { count: pendingEventsCount })}
           </span>
         </div>
       )}
@@ -322,10 +327,9 @@ export function SyncStatusIndicator({ className = '' }: { className?: string }) 
             mt-2 w-full py-2 px-4 rounded-lg
             text-sm font-medium
             transition-colors duration-200
-            ${
-              syncStatus === 'syncing'
-                ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
-                : 'bg-primary text-white hover:bg-primary/80'
+            ${syncStatus === 'syncing'
+              ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+              : 'bg-primary text-white hover:bg-primary/80'
             }
           `}
         >
@@ -334,10 +338,10 @@ export function SyncStatusIndicator({ className = '' }: { className?: string }) 
               <span className="material-symbols-outlined text-lg animate-spin">
                 sync
               </span>
-              Đang đồng bộ...
+              {t('offline.syncing')}
             </span>
           ) : (
-            'Đồng bộ ngay'
+            t('offline.syncNow')
           )}
         </button>
       )}

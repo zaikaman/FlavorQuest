@@ -33,8 +33,8 @@ export function POIDetailCard({
 
   const formatDistance = (meters: number | null | undefined): string => {
     if (meters == null) return '';
-    if (meters < 1000) return `${Math.round(meters)}m`;
-    return `${(meters / 1000).toFixed(1)}km`;
+    if (meters < 1000) return `${Math.round(meters)}${t('units.meters')}`;
+    return `${(meters / 1000).toFixed(1)}${t('units.kilometers')}`;
   };
 
   return (
@@ -49,7 +49,7 @@ export function POIDetailCard({
       </button>
 
       {/* POI Image */}
-      <div 
+      <div
         className="h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-gray-700 relative shadow-inner cursor-pointer"
         onClick={onViewDetail}
       >
@@ -67,7 +67,7 @@ export function POIDetailCard({
       </div>
 
       {/* POI Content */}
-      <div 
+      <div
         className="flex flex-1 flex-col justify-center min-w-0 cursor-pointer"
         onClick={onViewDetail}
       >
@@ -82,7 +82,7 @@ export function POIDetailCard({
           )}
         </div>
         <p className="text-[#cba990] text-xs font-normal leading-relaxed truncate mt-0.5">
-          Ẩm thực {distance != null && `• ${formatDistance(distance)}`}
+          {t('poi.cuisine')} {distance != null && `• ${formatDistance(distance)}`}
         </p>
         {poi.signature_dish && (
           <p className="text-[10px] text-[#8d7b6f] truncate mt-1">

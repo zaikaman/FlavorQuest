@@ -9,6 +9,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import type { POI, Coordinates } from '@/lib/types/index';
 import { getLocalizedPOI } from '@/lib/utils/localization';
+import { useTranslations } from '@/lib/hooks/useTranslations';
 import { useLanguage } from '@/lib/contexts/LanguageContext';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -25,7 +26,7 @@ interface InteractiveMapProps {
   selectedPOI: POI | null;
   onSelectPOI: (poi: POI | null) => void;
   onPlayPOI: (poi: POI) => void;
-  isOfflineReady?: boolean;
+
 }
 
 export function InteractiveMap({
@@ -36,9 +37,11 @@ export function InteractiveMap({
   selectedPOI,
   onSelectPOI,
   onPlayPOI,
-  isOfflineReady = false,
+
+
 }: InteractiveMapProps) {
   const { language } = useLanguage();
+  const { t } = useTranslations();
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
   const userMarkerRef = useRef<L.Marker | null>(null);
@@ -52,8 +55,8 @@ export function InteractiveMap({
 
     // Tạo map với style tối
     const map = L.map(mapContainerRef.current, {
-      center: userLocation 
-        ? [userLocation.lat, userLocation.lng] 
+      center: userLocation
+        ? [userLocation.lat, userLocation.lng]
         : [10.7610, 106.7040], // Vĩnh Khánh street - center of POIs
       zoom: 16,
       zoomControl: false,
@@ -218,8 +221,8 @@ export function InteractiveMap({
     const Δλ = (poi.lng - userLocation.lng) * Math.PI / 180;
 
     const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
-              Math.cos(φ1) * Math.cos(φ2) *
-              Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+      Math.cos(φ1) * Math.cos(φ2) *
+      Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
     return Math.round(R * c);
@@ -228,8 +231,8 @@ export function InteractiveMap({
   return (
     <div className="relative h-full w-full overflow-hidden">
       {/* Map Container */}
-      <div 
-        ref={mapContainerRef} 
+      <div
+        ref={mapContainerRef}
         className="h-full w-full map-bg z-1"
       />
 
@@ -238,7 +241,7 @@ export function InteractiveMap({
         <div className="absolute inset-0 flex items-center justify-center bg-background-dark">
           <div className="flex flex-col items-center gap-3">
             <span className="material-symbols-outlined text-4xl text-primary animate-spin">sync</span>
-            <p className="text-white">Đang tải bản đồ...</p>
+            <p className="text-white">{t('map.loadingMap')}</p>
           </div>
         </div>
       )}
@@ -249,14 +252,14 @@ export function InteractiveMap({
       <div className="absolute right-4 top-1/2 z-20 flex -translate-y-1/2 flex-col gap-3 pointer-events-none">
         {/* Zoom Controls */}
         <div className="flex flex-col gap-0.5 rounded-lg bg-[#342418]/90 backdrop-blur shadow-lg pointer-events-auto border border-white/5">
-          <button 
+          <button
             onClick={handleZoomIn}
             className="flex h-10 w-10 items-center justify-center text-white hover:bg-white/10 rounded-t-lg transition-colors"
           >
             <span className="material-symbols-outlined text-[24px]">add</span>
           </button>
           <div className="h-px w-full bg-white/10"></div>
-          <button 
+          <button
             onClick={handleZoomOut}
             className="flex h-10 w-10 items-center justify-center text-white hover:bg-white/10 rounded-b-lg transition-colors"
           >
@@ -265,7 +268,7 @@ export function InteractiveMap({
         </div>
 
         {/* Center on User Button */}
-        <button 
+        <button
           onClick={handleCenterOnUser}
           className="pointer-events-auto flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-white shadow-lg hover:bg-primary/90 transition-colors active:scale-95"
         >
@@ -278,7 +281,7 @@ export function InteractiveMap({
         <div className="absolute bottom-20 left-4 right-4 z-20 animate-slideInUp">
           <div className="relative flex items-center gap-4 rounded-xl bg-[#2a1e16]/95 backdrop-blur-xl border border-white/5 p-3 shadow-2xl ring-1 ring-black/20">
             {/* Close Button */}
-            <button 
+            <button
               onClick={() => onSelectPOI(null)}
               className="absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-[#493222] text-white shadow border border-white/10 hover:bg-[#5a4030] transition-colors"
             >
@@ -288,8 +291,8 @@ export function InteractiveMap({
             {/* POI Image */}
             <div className="h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-gray-700 relative shadow-inner">
               {selectedPOI.image_url ? (
-                <img 
-                  src={selectedPOI.image_url} 
+                <img
+                  src={selectedPOI.image_url}
                   alt={getLocalizedPOI(selectedPOI, language).name}
                   className="absolute inset-0 w-full h-full object-cover"
                 />
@@ -308,12 +311,12 @@ export function InteractiveMap({
                 </h3>
                 {selectedPOI.priority && selectedPOI.priority <= 3 && (
                   <span className="flex h-5 items-center rounded bg-primary/20 px-1.5 text-[10px] font-bold text-primary uppercase">
-                    No. {selectedPOI.priority}
+                    {t('units.number')} {selectedPOI.priority}
                   </span>
                 )}
               </div>
               <p className="text-[#cba990] text-xs font-normal leading-relaxed truncate mt-0.5">
-                Ẩm thực • {getDistanceToPOI(selectedPOI)}m
+                {t('poi.cuisine')} • {getDistanceToPOI(selectedPOI)}{t('units.meters')}
               </p>
               <div className="mt-1.5 flex items-center gap-2">
                 {selectedPOI.signature_dish && (
@@ -325,7 +328,7 @@ export function InteractiveMap({
             </div>
 
             {/* Play Button */}
-            <button 
+            <button
               onClick={() => onPlayPOI(selectedPOI)}
               className="group flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary text-white shadow-lg transition-all active:scale-95 hover:bg-primary/90"
             >

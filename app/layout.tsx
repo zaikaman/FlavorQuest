@@ -6,6 +6,7 @@ import { AppProvider } from '@/lib/contexts/AppContext';
 import { AuthProvider } from '@/lib/contexts/AuthContext';
 import { ToastContainer } from '@/components/ui/Toast';
 import ServiceWorkerRegistration from '@/components/ServiceWorkerRegistration';
+import vi from '@/locales/vi.json';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -20,10 +21,10 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'FlavorQuest - Khám Phá Ẩm Thực Vĩnh Khánh',
-  description: 'Tour âm thanh tự động dẫn đường khám phá ẩm thực phố Vĩnh Khánh, Cần Thơ. Offline-first PWA với hỗ trợ đa ngôn ngữ.',
-  applicationName: 'FlavorQuest',
-  keywords: ['food tour', 'audio guide', 'Vĩnh Khánh', 'Cần Thơ', 'ẩm thực', 'PWA'],
+  title: vi.metadata.title,
+  description: vi.metadata.description,
+  applicationName: vi.app.name,
+  keywords: vi.metadata.keywords,
   authors: [{ name: 'FlavorQuest Team' }],
   creator: 'FlavorQuest Team',
   publisher: 'FlavorQuest',
@@ -39,15 +40,15 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     siteName: 'FlavorQuest',
-    title: 'FlavorQuest - Khám Phá Ẩm Thực Vĩnh Khánh',
-    description: 'Tour âm thanh tự động dẫn đường khám phá ẩm thực phố Vĩnh Khánh',
+    title: vi.metadata.title,
+    description: vi.metadata.description,
     locale: 'vi_VN',
     alternateLocale: ['en_US', 'ja_JP', 'fr_FR', 'ko_KR', 'zh_CN'],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'FlavorQuest - Khám Phá Ẩm Thực Vĩnh Khánh',
-    description: 'Tour âm thanh tự động dẫn đường khám phá ẩm thực phố Vĩnh Khánh',
+    title: vi.metadata.title,
+    description: vi.metadata.description,
   },
   icons: {
     icon: [

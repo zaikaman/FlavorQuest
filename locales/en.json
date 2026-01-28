@@ -3,6 +3,33 @@
     "name": "FlavorQuest",
     "tagline": "Discover Vinh Khanh cuisine through audio"
   },
+  "metadata": {
+    "title": "FlavorQuest - Discover Vinh Khanh Food Street",
+    "description": "Automatic location-based audio tour of Vinh Khanh food street, Can Tho. Offline-first PWA with multi-language support.",
+    "keywords": [
+      "food tour",
+      "audio guide",
+      "Vinh Khanh",
+      "Can Tho",
+      "cuisine",
+      "PWA"
+    ]
+  },
+  "manifest": {
+    "name": "FlavorQuest - Automatic Audio Tour Experience",
+    "shortName": "FlavorQuest",
+    "description": "Discover Vinh Khanh food street with location-based automatic audio narration. Supports 6 languages, works offline.",
+    "shortcuts": {
+      "startTour": {
+        "name": "Start Tour",
+        "description": "Start automatic tour"
+      },
+      "viewMap": {
+        "name": "View Map",
+        "description": "View tour map"
+      }
+    }
+  },
   "common": {
     "loading": "Loading...",
     "error": "Error",
@@ -15,7 +42,24 @@
     "next": "Next",
     "done": "Done",
     "yes": "Yes",
-    "no": "No"
+    "no": "No",
+    "allow": "Allow",
+    "deny": "Deny",
+    "browse": "Browse",
+    "privacyPolicy": "Privacy Policy"
+  },
+  "list": {
+    "searchPlaceholder": "Search for snails, seafood, banh mi...",
+    "notFoundTitle": "Not Found",
+    "notFoundDesc": "Try searching with different keywords",
+    "offlineBadge": "Offline"
+  },
+  "categories": {
+    "all": "All",
+    "snails": "Snails",
+    "seafood": "Seafood",
+    "grill": "Grill",
+    "nearMe": "Near Me"
   },
   "tour": {
     "startTour": "Start Tour",
@@ -24,6 +68,10 @@
     "stopTour": "Stop Tour",
     "autoMode": "Auto Mode",
     "manualMode": "Manual Mode",
+    "auto": "Auto",
+    "manual": "Manual",
+    "loadingPOIs": "Loading locations...",
+    "searchingPOIs": "Searching for nearby spots...",
     "nearbyPOIs": "Nearby Points",
     "currentLocation": "Current Location",
     "distance": "Distance",
@@ -71,7 +119,9 @@
     "ttsPitch": "Speech Pitch",
     "mapType": "Map Type",
     "showVisitedPOIs": "Show Visited Points",
-    "batteryOptimization": "Battery Optimization"
+    "batteryOptimization": "Battery Optimization",
+    "geofenceClose": "Close (Precise)",
+    "geofenceFar": "Far (Wide)"
   },
   "history": {
     "title": "History",
@@ -79,7 +129,13 @@
     "notVisited": "Not Visited",
     "visitedAt": "Visited at",
     "clear": "Clear History",
-    "empty": "No history yet"
+    "empty": "No history yet",
+    "justNow": "Just now",
+    "minsAgo": "{mins} mins ago",
+    "hoursAgo": "{hours} hours ago",
+    "today": "Today, {time}",
+    "yesterday": "Yesterday, {time}",
+    "listened": "Listened"
   },
   "map": {
     "title": "Map",
@@ -87,7 +143,8 @@
     "zoomOut": "Zoom Out",
     "centerMap": "Center on Location",
     "fullscreen": "Fullscreen",
-    "layers": "Map Layers"
+    "layers": "Map Layers",
+    "loadingMap": "Loading map..."
   },
   "poi": {
     "details": "Details",
@@ -96,7 +153,12 @@
     "estimatedHours": "Opening Hours",
     "directions": "Directions",
     "playAudio": "Play Audio",
-    "viewOnMap": "View on Map"
+    "viewOnMap": "View on Map",
+    "cuisine": "Cuisine",
+    "upNext": "Up Next",
+    "district4": "District 4, HCMC",
+    "transcript": "Transcript",
+    "estimatedWalk": "3 min walk"
   },
   "offline": {
     "status": "Offline",
@@ -104,7 +166,23 @@
     "syncing": "Syncing...",
     "syncComplete": "Synced",
     "cacheSize": "Cache Size",
-    "clearCache": "Clear Cache"
+    "clearCache": "Clear Cache",
+    "usingCachedData": "Using cached data",
+    "limitedFeatures": "Some features unavailable",
+    "uploading": "Uploading data to server",
+    "syncError": "Sync Error",
+    "retrySync": "Tap to retry",
+    "pendingSync": "Pending Sync",
+    "pendingItems": "{count} items pending",
+    "online": "Online",
+    "synced": "Synced",
+    "offlineMode": "Offline Mode",
+    "noConnection": "No Connection",
+    "statusLabel": "Status",
+    "lastSync": "Last Sync",
+    "notSyncedYet": "Not synced yet",
+    "syncNow": "Sync Now",
+    "tapToSync": "Tap to sync"
   },
   "battery": {
     "level": "Battery Level",
@@ -142,7 +220,8 @@
     "subtitle": "Discover Vinh Khanh Culinary Journey",
     "startTour": "Start Tour",
     "browse": "Browse manually",
-    "settings": "Settings"  },
+    "settings": "Settings"
+  },
   "login": {
     "title": "FlavorQuest Login",
     "subtitle": "Save your progress and sync your experience",
@@ -160,5 +239,21 @@
     "noDescription": "No description available for this location.",
     "didYouKnow": "Did You Know?",
     "nowPlaying": "Now Playing: {name}",
-    "errorPlaying": "Audio error, using text-to-speech"  }
+    "errorPlaying": "Audio error, using text-to-speech"
+  },
+  "permissions": {
+    "checking": "Checking permissions...",
+    "locationTitle": "Enable location for automatic audio narration near food stalls",
+    "locationDesc": "Best experience when the app automatically detects your location on Vinh Khanh street.",
+    "denyPrompt": "Don't allow?",
+    "switchToManual": "Switch to manual mode"
+  },
+  "units": {
+    "meters": "m",
+    "kilometers": "km",
+    "number": "No."
+  },
+  "sort": {
+    "az": "A-Z"
+  }
 }
