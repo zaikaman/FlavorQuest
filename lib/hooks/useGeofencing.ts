@@ -44,6 +44,16 @@ export function useGeofencing(
   
   const workerRef = useRef<Worker | null>(null);
   const previousActivePOIsRef = useRef<Set<string>>(new Set());
+  const onEnterRef = useRef(opts.onEnter);
+  const onExitRef = useRef(opts.onExit);
+  const poisRef = useRef(pois);
+
+  // Update refs when callbacks or pois change
+  useEffect(() => {
+    onEnterRef.current = opts.onEnter;
+    onExitRef.current = opts.onExit;
+    poisRef.current = pois;
+  }, [opts.onEnter, opts.onExit, pois]);
 
   // Initialize Web Worker
   useEffect(() => {
@@ -64,13 +74,17 @@ export function useGeofencing(
           setActivePOIs(newActivePOIs);
           
           // Detect enter/exit events
-          if (opts.onEnter || opts.onExit) {
+          const onEnter = onEnterRef.current;
+          const onExit = onExitRef.current;
+          const currentPOIs = poisRef.current;
+          
+          if (onEnter || onExit) {
             const previousActive = previousActivePOIsRef.current;
             
             // Check for new POIs (enter events)
             poisWithDistance.forEach((poi: POI & { distance: number }) => {
-              if (!previousActive.has(poi.id) && opts.onEnter) {
-                opts.onEnter({
+              if (!previousActive.has(poi.id) && onEnter) {
+                onEnter({
                   poi,
                   distance: poi.distance,
                   timestamp: Date.now(),
@@ -79,12 +93,12 @@ export function useGeofencing(
             });
             
             // Check for left POIs (exit events)
-            if (opts.onExit) {
+            if (onExit) {
               previousActive.forEach((poiId: string) => {
                 if (!newActivePOIs.has(poiId)) {
-                  const poi = pois.find((p: POI) => p.id === poiId);
-                  if (poi && opts.onExit) {
-                    opts.onExit({
+                  const poi = currentPOIs.find((p: POI) => p.id === poiId);
+                  if (poi) {
+                    onExit({
                       poi,
                       distance: opts.radius!,
                       timestamp: Date.now(),
@@ -100,7 +114,7 @@ export function useGeofencing(
       };
       
       workerRef.current.onerror = (error) => {
-        console.error('Geofence worker error:', error);
+        console.error('Geofence worker error:', error.message || error);
       };
     } catch (error) {
       console.error('Failed to initialize geofence worker:', error);
@@ -109,7 +123,8 @@ export function useGeofencing(
     return () => {
       workerRef.current?.terminate();
     };
-  }, [opts.onEnter, opts.onExit, opts.radius, pois]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Chỉ initialize một lần
 
   // Send position updates to worker
   useEffect(() => {

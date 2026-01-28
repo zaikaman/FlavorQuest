@@ -1,13 +1,13 @@
 /**
  * Main Tour Page
- * Auto narration logic với geofencing
- * Based on design_template/interactive_street_map/code.html
+ * Phase 5 - Manual mode, settings, history, bottom nav integration
  * 
  * Features:
- * - Auto narration khi đi gần POI
- * - Offline-first với audio preloading
- * - TTS fallback khi audio không load được
- * - Background sync cho analytics
+ * - Auto/Manual mode toggle (T104-T105)
+ * - Bottom navigation (T102-T103)
+ * - Settings panel (T094-T098)
+ * - History view (T099-T101)
+ * - Map interactions (T106-T108)
  */
 
 'use client';
@@ -23,14 +23,19 @@ import { useLanguage } from '@/lib/contexts/LanguageContext';
 import { InteractiveMap } from '@/components/tour/InteractiveMap';
 import { NarrationOverlay } from '@/components/tour/NarrationOverlay';
 import { AudioPlayer } from '@/components/tour/AudioPlayer';
-import { OfflineBadge } from '@/components/layout/OfflineIndicator';
+import { POIListView } from '@/components/tour/POIListView';
+import { HistoryView } from '@/components/tour/HistoryView';
+import { BottomNav, type NavTab } from '@/components/layout/BottomNav';
+import { SettingsPanel } from '@/components/layout/SettingsPanel';
+import { OfflineIndicator } from '@/components/layout/OfflineIndicator';
 import { Toast } from '@/components/ui/Toast';
 import { NoiseFilter } from '@/lib/utils/noise-filter';
 import { SpeedCalculator } from '@/lib/utils/speed';
 import { isCooldownActive, setCooldown } from '@/lib/utils/cooldown';
 import { logAutoPlay, logSkip, logTourEnd } from '@/lib/services/analytics';
+import { saveVisit, loadSettings } from '@/lib/services/storage';
 import { getLocalizedPOI } from '@/lib/utils/localization';
-import type { POI, Coordinates } from '@/lib/types/index';
+import type { POI, Coordinates, UserSettings } from '@/lib/types/index';
 import { GEOFENCE_TRIGGER_RADIUS_M, MAX_WALKING_SPEED_KMH } from '@/lib/constants/index';
 
 export default function TourPage() {
@@ -72,19 +77,32 @@ export default function TourPage() {
   });
 
   // UI State
+  const [activeTab, setActiveTab] = useState<NavTab>('map');
   const [showPlayerModal, setShowPlayerModal] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
   const [visitedPOIs, setVisitedPOIs] = useState<Set<string>>(new Set());
   const [tourStartTime] = useState(Date.now());
   const [selectedPOI, setSelectedPOI] = useState<POI | null>(null);
   const [isOfflineReady, setIsOfflineReady] = useState(false);
+  const [isAutoMode, setIsAutoMode] = useState(true);
+  const [settings, setSettings] = useState<UserSettings | null>(null);
 
   // Refs
   const noiseFilterRef = useRef<NoiseFilter>(new NoiseFilter({ windowSize: 5 })); // 5 samples moving average
   const speedCalculatorRef = useRef<SpeedCalculator>(new SpeedCalculator({ windowSize: 10 }));
   const [filteredPosition, setFilteredPosition] = useState<Coordinates | null>(null);
   const hasPreloadedRef = useRef(false);
+
+  // Load settings on mount
+  useEffect(() => {
+    loadSettings().then(s => {
+      setSettings(s);
+      setIsAutoMode(s.autoPlayEnabled);
+    });
+  }, []);
 
   // Toast helper
   const showToastMessage = useCallback((message: string) => {
@@ -131,6 +149,8 @@ export default function TourPage() {
 
   // Handle POI entry event
   const handlePOIEnter = useCallback(async (event: { poi: POI; distance: number }) => {
+    if (!isAutoMode) return; // Skip if manual mode
+    
     const { poi } = event;
 
     // Check cooldown
@@ -143,13 +163,9 @@ export default function TourPage() {
     // Check speed
     const currentSpeed = speedCalculatorRef.current.getSpeedKmh();
     if (currentSpeed !== null && currentSpeed > MAX_WALKING_SPEED_KMH) {
-      showToastMessage(`Bạn đang di chuyển quá nhanh (${currentSpeed.toFixed(1)} km/h). Vui lòng đi bộ để nhận thuyết minh.`);
+      showToastMessage(`Di chuyển quá nhanh. Vui lòng đi bộ để nghe thuyết minh.`);
       return;
     }
-
-    // Priority sorting: if multiple POIs active, choose highest priority + closest
-    // note: nearbyPOIs is not available here easily without circular dependency if we use it in dep array
-    // effectively we trust the event passed the relevant POI
 
     // Enqueue audio
     const localizedPOI = getLocalizedPOI(poi, language);
@@ -164,33 +180,30 @@ export default function TourPage() {
       poi,
       audioUrl,
       title: localizedPOI.name,
-      description: localizedPOI.description, // For TTS fallback
-      language, // For TTS fallback
+      description: localizedPOI.description,
+      language,
     });
 
-    // Set cooldown
     await setCooldown(poi.id);
-
-    // Track visited
     setVisitedPOIs(prev => new Set([...prev, poi.id]));
-
-    // Log analytics
-    await logAutoPlay(poi.id, language, undefined, {
-      distance: event.distance,
-      accuracy: undefined,
+    await logAutoPlay(poi.id, language, undefined, { distance: event.distance });
+    await saveVisit({ 
+      poi_id: poi.id, 
+      poi_name: localizedPOI.name,
+      visited_at: new Date().toISOString(),
+      listened: true,
     });
 
-    // Show toast
     showToastMessage(`Đang phát: ${localizedPOI.name}`);
-  }, [language, enqueue, showToastMessage]);
+  }, [isAutoMode, language, enqueue, showToastMessage]);
 
   // Geofencing - detect POI entry
   const { nearbyPOIs } = useGeofencing(
     filteredPosition,
     pois,
     {
-      radius: GEOFENCE_TRIGGER_RADIUS_M,
-      enabled: true,
+      radius: settings?.geofenceRadius || GEOFENCE_TRIGGER_RADIUS_M,
+      enabled: isAutoMode,
       onEnter: handlePOIEnter,
     }
   );
@@ -223,11 +236,9 @@ export default function TourPage() {
   useEffect(() => {
     if (permissionState === 'denied') {
       showToastMessage('Vị trí bị từ chối. Chuyển sang chế độ thủ công.');
-      setTimeout(() => {
-        router.push('/browse');
-      }, 3000);
+      setIsAutoMode(false);
     }
-  }, [permissionState, router, showToastMessage]);
+  }, [permissionState, showToastMessage]);
 
   // Handle geolocation error
   useEffect(() => {
@@ -299,14 +310,45 @@ export default function TourPage() {
     // Track visited
     setVisitedPOIs(prev => new Set([...prev, poi.id]));
 
-    // Log analytics
+    // Log analytics & save visit
     await logAutoPlay(poi.id, language, undefined, {
       distance: 0,
       accuracy: accuracy ?? undefined,
     });
+    await saveVisit({ 
+      poi_id: poi.id, 
+      poi_name: localizedPOI.name,
+      visited_at: new Date().toISOString(),
+      listened: true,
+    });
 
     showToastMessage(`Đang phát: ${localizedPOI.name}`);
   }, [language, enqueue, showToastMessage, accuracy]);
+
+  // Handle view POI detail
+  const handleViewPOI = useCallback((poi: POI) => {
+    router.push(`/tour/${poi.id}`);
+  }, [router]);
+
+  // Handle tab change
+  const handleTabChange = useCallback((tab: NavTab) => {
+    if (tab === 'settings') {
+      setShowSettings(true);
+    } else if (tab === 'history') {
+      setShowHistory(true);
+    } else {
+      setActiveTab(tab);
+    }
+  }, []);
+
+  // Toggle auto/manual mode
+  const toggleAutoMode = useCallback(() => {
+    setIsAutoMode(prev => {
+      const newMode = !prev;
+      showToastMessage(newMode ? 'Chế độ tự động' : 'Chế độ thủ công');
+      return newMode;
+    });
+  }, [showToastMessage]);
 
   // Check offline readiness
   useEffect(() => {
@@ -327,54 +369,102 @@ export default function TourPage() {
   console.log('[TourPage] audioPlayer.isPlaying:', audioPlayer.isPlaying);
 
   return (
-    <div className="relative flex flex-col h-screen w-full overflow-hidden bg-background-dark">
-      {/* Offline Badge */}
-      <OfflineBadge />
+    <div className="relative flex flex-col h-screen w-full overflow-hidden bg-background-dark">      {/* Header */}
+      <div className="absolute top-0 left-0 right-0 z-50 bg-gradient-to-b from-background-dark/95 to-transparent pointer-events-none">
+        <div className="flex items-center justify-between px-4 py-3 pointer-events-auto">
+          <button
+            onClick={() => router.push('/')}
+            className="p-2 rounded-full hover:bg-white/10 transition-colors"
+            aria-label="Quay lại"
+          >
+            <span className="material-symbols-outlined text-2xl text-white">arrow_back</span>
+          </button>
 
-      {/* Interactive Map - Full Screen */}
-      <div className="absolute inset-0 z-0">
-        <InteractiveMap
-          userLocation={filteredPosition}
-          heading={heading}
-          accuracy={accuracy}
-          pois={pois}
-          selectedPOI={selectedPOI}
-          onSelectPOI={handleSelectPOI}
-          onPlayPOI={handlePlayPOI}
-          isOfflineReady={isOfflineReady || offlineSyncReady}
-        />
+          <h1 className="text-lg font-bold text-white">FlavorQuest</h1>
+
+          <OfflineIndicator />
+        </div>
       </div>
+      {/* Main Content Area */}
+      <div className="flex-1 relative overflow-hidden pt-16 pb-16">
+        {/* Map View */}
+        {activeTab === 'map' && (
+          <>
+            <InteractiveMap
+              userLocation={filteredPosition}
+              heading={heading}
+              accuracy={accuracy}
+              pois={pois}
+              selectedPOI={selectedPOI}
+              onSelectPOI={handleSelectPOI}
+              onPlayPOI={handlePlayPOI}
+              isOfflineReady={isOfflineReady || offlineSyncReady}
+            />
 
-      {/* Offline Mode Indicator */}
-      {isOfflineMode && (
-        <div className="absolute top-16 left-1/2 -translate-x-1/2 z-30 px-3 py-1.5 bg-amber-500/90 rounded-full">
-          <span className="text-xs font-medium text-black">Chế độ ngoại tuyến</span>
-        </div>
-      )}
+            {/* Auto/Manual Mode Toggle */}
+            <div className="absolute top-20 left-1/2 -translate-x-1/2 z-20">
+              <button
+                onClick={toggleAutoMode}
+                className={`flex items-center gap-2 px-4 py-2 rounded-full backdrop-blur-md border transition-all ${
+                  isAutoMode
+                    ? 'bg-primary/90 border-primary text-white'
+                    : 'bg-[#3a2d25]/90 border-white/10 text-white'
+                }`}
+              >
+                <span className="material-symbols-outlined text-lg">
+                  {isAutoMode ? 'sensors' : 'touch_app'}
+                </span>
+                <span className="text-sm font-medium">
+                  {isAutoMode ? 'Tự động' : 'Thủ công'}
+                </span>
+              </button>
+            </div>
 
-      {/* Loading Overlay */}
-      {poisLoading && (
-        <div className="absolute inset-0 z-40 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <div className="flex flex-col items-center gap-3 text-white">
-            <span className="material-symbols-outlined text-5xl animate-spin">sync</span>
-            <p className="text-lg font-medium">Đang tải địa điểm...</p>
-          </div>
-        </div>
-      )}
+            {/* Offline Mode Indicator */}
+            {isOfflineMode && (
+              <div className="absolute top-24 left-1/2 -translate-x-1/2 z-20 px-3 py-1.5 bg-amber-500/90 rounded-full">
+                <span className="text-xs font-medium text-black">Chế độ ngoại tuyến</span>
+              </div>
+            )}
+          </>
+        )}
 
-      {/* Narration Overlay (Mini Player) */}
-      {audioPlayer.currentItem && !showPlayerModal && (
-        <div className="absolute bottom-24 left-0 right-0 z-30 px-4">
-          <NarrationOverlay
-            currentPOI={audioPlayer.currentItem.poi}
-            distance={nearbyPOIs.find(p => p.id === audioPlayer.currentItem?.poi.id)?.distance}
-            isPlaying={audioPlayer.isPlaying}
-            currentTime={audioPlayer.currentTime}
-            duration={audioPlayer.duration}
-            onExpand={() => setShowPlayerModal(true)}
+        {/* List View */}
+        {activeTab === 'list' && (
+          <POIListView
+            pois={pois}
+            userLocation={filteredPosition}
+            onPlayPOI={handlePlayPOI}
+            onViewPOI={handleViewPOI}
+            playingPOIId={audioPlayer.currentItem?.poi.id}
+            isOfflineReady={isOfflineReady || offlineSyncReady}
           />
-        </div>
-      )}
+        )}
+
+        {/* Loading Overlay */}
+        {poisLoading && (
+          <div className="absolute inset-0 z-40 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+            <div className="flex flex-col items-center gap-3 text-white">
+              <span className="material-symbols-outlined text-5xl animate-spin">sync</span>
+              <p className="text-lg font-medium">Đang tải địa điểm...</p>
+            </div>
+          </div>
+        )}
+
+        {/* Narration Overlay (Mini Player) */}
+        {audioPlayer.currentItem && !showPlayerModal && (
+          <div className="absolute bottom-0 left-0 right-0 z-40 px-4 pb-20">
+            <NarrationOverlay
+              currentPOI={audioPlayer.currentItem.poi}
+              distance={nearbyPOIs.find(p => p.id === audioPlayer.currentItem?.poi.id)?.distance}
+              isPlaying={audioPlayer.isPlaying}
+              currentTime={audioPlayer.currentTime}
+              duration={audioPlayer.duration}
+              onExpand={() => setShowPlayerModal(true)}
+            />
+          </div>
+        )}
+      </div>
 
       {/* Full Audio Player Modal */}
       {showPlayerModal && audioPlayer.currentItem && (
@@ -398,52 +488,40 @@ export default function TourPage() {
         </div>
       )}
 
+      {/* Settings Panel */}
+      <SettingsPanel
+        isOpen={showSettings}
+        onClose={() => {
+          setShowSettings(false);
+          // Reload settings
+          loadSettings().then(s => {
+            setSettings(s);
+            setIsAutoMode(s.autoPlayEnabled);
+          });
+        }}
+      />
+
+      {/* History View */}
+      <HistoryView
+        isOpen={showHistory}
+        onClose={() => setShowHistory(false)}
+        onPlayPOI={handlePlayPOI}
+        onViewPOI={handleViewPOI}
+      />
+
       {/* Toast Notifications */}
       {showToast && (
-        <div className="fixed top-20 left-4 right-4 z-50">
-          <Toast
-            message={toastMessage}
-            type="info"
-            onClose={() => setShowToast(false)}
-          />
+        <div className="fixed top-20 left-4 right-4 z-[60]">
+          <Toast message={toastMessage} type="info" onClose={() => setShowToast(false)} />
         </div>
       )}
 
       {/* Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-[#493222] bg-[#221710] px-2 pb-6 pt-2">
-        <div className="flex justify-between items-end">
-          <button className="flex flex-1 flex-col items-center justify-center gap-1.5 rounded-lg py-1 group transition-colors">
-            <div className="flex h-7 w-12 items-center justify-center rounded-full bg-primary/10 group-hover:bg-primary/20 transition-colors">
-              <span className="material-symbols-outlined text-primary text-[24px]" style={{ fontVariationSettings: "'FILL' 1" }}>map</span>
-            </div>
-            <p className="text-primary text-[10px] font-semibold leading-none tracking-wide">Bản đồ</p>
-          </button>
-          <button
-            onClick={() => router.push('/browse')}
-            className="flex flex-1 flex-col items-center justify-center gap-1.5 rounded-lg py-1 group transition-colors"
-          >
-            <div className="flex h-7 w-12 items-center justify-center rounded-full bg-transparent group-hover:bg-white/5 transition-colors">
-              <span className="material-symbols-outlined text-[#8d7b6f] text-[24px] group-hover:text-[#cba990] transition-colors">format_list_bulleted</span>
-            </div>
-            <p className="text-[#8d7b6f] text-[10px] font-medium leading-none tracking-wide group-hover:text-[#cba990] transition-colors">Danh sách</p>
-          </button>
-          <button className="flex flex-1 flex-col items-center justify-center gap-1.5 rounded-lg py-1 group transition-colors">
-            <div className="flex h-7 w-12 items-center justify-center rounded-full bg-transparent group-hover:bg-white/5 transition-colors">
-              <span className="material-symbols-outlined text-[#8d7b6f] text-[24px] group-hover:text-[#cba990] transition-colors">headphones</span>
-            </div>
-            <p className="text-[#8d7b6f] text-[10px] font-medium leading-none tracking-wide group-hover:text-[#cba990] transition-colors">Tour của tôi</p>
-          </button>
-          <button
-            onClick={() => router.push('/settings')}
-            className="flex flex-1 flex-col items-center justify-center gap-1.5 rounded-lg py-1 group transition-colors"
-          >
-            <div className="flex h-7 w-12 items-center justify-center rounded-full bg-transparent group-hover:bg-white/5 transition-colors">
-              <span className="material-symbols-outlined text-[#8d7b6f] text-[24px] group-hover:text-[#cba990] transition-colors">person</span>
-            </div>
-            <p className="text-[#8d7b6f] text-[10px] font-medium leading-none tracking-wide group-hover:text-[#cba990] transition-colors">Hồ sơ</p>
-          </button>
-        </div>
-      </nav>
+      <BottomNav
+        activeTab={activeTab}
+        onTabChange={handleTabChange}
+        className="fixed bottom-0 left-0 right-0 z-50"
+      />
     </div>
   );
 }

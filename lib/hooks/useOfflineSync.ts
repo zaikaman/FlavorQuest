@@ -319,8 +319,8 @@ export function useOfflineSync(options: UseOfflineSyncOptions = {}): UseOfflineS
     loadPendingCount();
     loadLastSync().then(setLastSyncTime);
     checkOfflineReady().then((ready) => {
-      if (ready) {
-        opts.onOfflineReady?.();
+      if (ready && opts.onOfflineReady) {
+        opts.onOfflineReady();
       }
     });
 
@@ -328,7 +328,8 @@ export function useOfflineSync(options: UseOfflineSyncOptions = {}): UseOfflineS
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
     };
-  }, [handleOnline, handleOffline, loadPendingCount, checkOfflineReady, opts]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Auto sync on mount if online và có pending events
   useEffect(() => {
