@@ -40,10 +40,12 @@ const STATIC_ASSETS = [
 ];
 
 // Supabase Storage URL patterns
-const SUPABASE_STORAGE_PATTERNS = [
-  /supabase\.co.*\/storage\/v1\/object\/public\/audio\//,
-  /supabase\.co.*\/storage\/v1\/object\/public\/images\//,
-];
+// Audio: https://...supabase.co/storage/v1/object/public/audio/{uuid}/audio_url_{lang}-{uuid}.mp3
+// Image: https://...supabase.co/storage/v1/object/public/images/pois/{uuid}.png
+const SUPABASE_STORAGE_PATTERNS = {
+  audio: /\/storage\/v1\/object\/public\/audio\//,
+  images: /\/storage\/v1\/object\/public\/images\//,
+};
 
 // Audio file extensions
 const AUDIO_EXTENSIONS = ['.mp3', '.wav', '.ogg', '.m4a', '.aac'];
@@ -112,14 +114,21 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // Log all Supabase requests for debugging
+  if (url.href.includes('supabase.co')) {
+    console.log('[SW] Supabase request:', url.href);
+  }
+
   // Supabase Storage audio files: Cache first (high priority for offline)
   if (isSupabaseAudioUrl(url.href)) {
+    console.log('[SW] Matched audio pattern:', url.href);
     event.respondWith(cacheFirstWithTimeout(request, CACHE_NAMES.audio, 10000));
     return;
   }
 
   // Supabase Storage image files: Cache first with placeholder fallback
   if (isSupabaseImageUrl(url.href)) {
+    console.log('[SW] Matched image pattern:', url.href);
     event.respondWith(cacheFirstWithImageFallback(request, CACHE_NAMES.images));
     return;
   }
@@ -156,14 +165,14 @@ self.addEventListener('fetch', (event) => {
  * Check if URL is Supabase Storage audio
  */
 function isSupabaseAudioUrl(href) {
-  return SUPABASE_STORAGE_PATTERNS[0].test(href);
+  return SUPABASE_STORAGE_PATTERNS.audio.test(href);
 }
 
 /**
  * Check if URL is Supabase Storage image
  */
 function isSupabaseImageUrl(href) {
-  return SUPABASE_STORAGE_PATTERNS[1].test(href);
+  return SUPABASE_STORAGE_PATTERNS.images.test(href);
 }
 
 /**
@@ -186,9 +195,9 @@ function isImageFile(pathname) {
  * Check if URL is OSM tile
  */
 function isOSMTile(url) {
-  return url.hostname.includes('openstreetmap.org') || 
-         url.hostname.includes('tile.osm.org') ||
-         url.pathname.includes('.tile.');
+  return url.hostname.includes('openstreetmap.org') ||
+    url.hostname.includes('tile.osm.org') ||
+    url.pathname.includes('.tile.');
 }
 
 /**
@@ -230,9 +239,18 @@ async function cacheFirst(request, cacheName) {
  */
 async function cacheFirstWithTimeout(request, cacheName, timeoutMs = 5000) {
   const cache = await caches.open(cacheName);
-  const cached = await cache.match(request);
+
+  // IMPORTANT: Try cache with exact URL match first
+  let cached = await cache.match(request, { ignoreSearch: false });
+
+  // Also try without query params if not found
+  if (!cached && request.url.includes('?')) {
+    const urlWithoutQuery = request.url.split('?')[0];
+    cached = await cache.match(urlWithoutQuery);
+  }
 
   if (cached) {
+    console.log('[SW] Serving audio from cache:', request.url);
     // Return cached immediately, optionally update in background nếu online
     if (navigator.onLine) {
       updateCacheInBackground(request, cache);
@@ -251,6 +269,7 @@ async function cacheFirstWithTimeout(request, cacheName, timeoutMs = 5000) {
   }
 
   try {
+    console.log('[SW] Fetching audio from network:', request.url);
     // Fetch with timeout chỉ khi online
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
@@ -260,9 +279,14 @@ async function cacheFirstWithTimeout(request, cacheName, timeoutMs = 5000) {
 
     // Cache successful responses
     if (response.ok) {
+      console.log('[SW] Caching audio response:', request.url);
       // Clone response trước khi cache
       const responseToCache = response.clone();
-      cache.put(request, responseToCache).catch(err => {
+
+      // Cache with both URL variants
+      cache.put(request, responseToCache).then(() => {
+        console.log('[SW] Audio cached successfully');
+      }).catch(err => {
         console.error('[SW] Failed to cache audio:', err);
       });
     }
@@ -581,36 +605,66 @@ async function preloadAudioFiles(urls) {
   console.log(`[SW] Preloading ${urls.length} audio files...`);
 
   const cache = await caches.open(CACHE_NAMES.audio);
+  let completedCount = 0;
+  const total = urls.length;
+
+  // Helper to notify clients of progress
+  const notifyProgress = async () => {
+    completedCount++;
+    const clients = await self.clients.matchAll();
+    clients.forEach(client => {
+      client.postMessage({
+        type: 'PRELOAD_PROGRESS',
+        category: 'audio',
+        completed: completedCount,
+        total: total,
+      });
+    });
+  };
+
   const results = await Promise.allSettled(
     urls.map(async (url) => {
       try {
+        // Normalize URL - remove query params for consistent caching
+        const cleanUrl = url.split('?')[0];
+
         // Check if already cached
-        const cached = await cache.match(url);
+        const cached = await cache.match(cleanUrl);
         if (cached) {
-          console.log('[SW] Already cached:', url);
-          return { url, status: 'already-cached' };
+          console.log('[SW] Already cached:', cleanUrl);
+          await notifyProgress();
+          return { url: cleanUrl, status: 'already-cached' };
         }
 
         // Fetch and cache với retry
         let lastError;
         for (let retry = 0; retry < 3; retry++) {
           try {
-            const response = await fetch(url, {
-              cache: 'force-cache', // Sử dụng browser cache nếu có
+            console.log(`[SW] Fetching audio (attempt ${retry + 1}):`, cleanUrl);
+            const response = await fetch(cleanUrl, {
+              mode: 'cors',
+              credentials: 'omit',
             });
-            
+
             if (response.ok) {
               // Verify content type
               const contentType = response.headers.get('content-type') || '';
-              if (!contentType.includes('audio') && !contentType.includes('octet-stream')) {
-                console.warn('[SW] Invalid content type for audio:', contentType, url);
+
+              // Clone và cache response
+              const responseToCache = response.clone();
+              await cache.put(cleanUrl, responseToCache);
+
+              // Verify cache was successful
+              const verify = await cache.match(cleanUrl);
+              if (verify) {
+                console.log('[SW] Successfully cached:', cleanUrl);
+                await notifyProgress();
+                return { url: cleanUrl, status: 'cached' };
+              } else {
+                throw new Error('Cache verification failed');
               }
-              
-              await cache.put(url, response);
-              console.log('[SW] Successfully cached:', url);
-              return { url, status: 'cached' };
             }
-            lastError = response.statusText;
+            lastError = `HTTP ${response.status}: ${response.statusText}`;
           } catch (err) {
             lastError = err.message;
             // Wait before retry
@@ -619,11 +673,13 @@ async function preloadAudioFiles(urls) {
             }
           }
         }
-        
-        console.error('[SW] Failed to cache after retries:', url, lastError);
-        return { url, status: 'failed', reason: lastError };
+
+        console.error('[SW] Failed to cache after retries:', cleanUrl, lastError);
+        await notifyProgress();
+        return { url: cleanUrl, status: 'failed', reason: lastError };
       } catch (error) {
         console.error('[SW] Error preloading audio:', url, error);
+        await notifyProgress();
         return { url, status: 'failed', reason: error.message };
       }
     })
@@ -655,21 +711,42 @@ async function preloadImageFiles(urls) {
   console.log(`[SW] Preloading ${urls.length} image files...`);
 
   const cache = await caches.open(CACHE_NAMES.images);
+  let completedCount = 0;
+  const total = urls.length;
+
+  // Helper to notify clients of progress
+  const notifyProgress = async () => {
+    completedCount++;
+    const clients = await self.clients.matchAll();
+    clients.forEach(client => {
+      client.postMessage({
+        type: 'PRELOAD_PROGRESS',
+        category: 'images',
+        completed: completedCount,
+        total: total,
+      });
+    });
+  };
+
   const results = await Promise.allSettled(
     urls.map(async (url) => {
       try {
         const cached = await cache.match(url);
         if (cached) {
+          await notifyProgress();
           return { url, status: 'already-cached' };
         }
 
         const response = await fetch(url);
         if (response.ok) {
           await cache.put(url, response);
+          await notifyProgress();
           return { url, status: 'cached' };
         }
+        await notifyProgress();
         return { url, status: 'failed', reason: response.statusText };
       } catch (error) {
+        await notifyProgress();
         return { url, status: 'failed', reason: error.message };
       }
     })

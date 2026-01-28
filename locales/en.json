@@ -184,12 +184,22 @@
     "syncNow": "Sync Now",
     "tapToSync": "Tap to sync",
     "downloadingAudio": "Downloading audio for offline",
+    "downloadingContent": "Downloading offline content",
     "audioReady": "Audio ready offline",
     "audioDownloaded": "Audio downloaded for offline mode",
     "downloadError": "Download error",
     "retry": "Retry",
     "noAudioCache": "No audio cached. Connect to download.",
-    "updateCache": "Update cache"
+    "updateCache": "Update cache",
+    "downloadPromptTitle": "Download offline content?",
+    "downloadPromptDesc": "Would you like to download all audio and images for offline use?",
+    "downloadPromptNote": "You can change this preference in Settings anytime.",
+    "downloadNow": "Download now",
+    "downloadLater": "Later",
+    "downloadStarted": "Starting offline content download...",
+    "poisLabel": "points of interest",
+    "audioLabel": "Audio narration",
+    "imageLabel": "Location images"
   },
   "battery": {
     "level": "Battery Level",

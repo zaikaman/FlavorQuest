@@ -184,12 +184,22 @@
     "syncNow": "Đồng bộ ngay",
     "tapToSync": "Nhấn để đồng bộ",
     "downloadingAudio": "Đang tải audio offline",
+    "downloadingContent": "Đang tải nội dung offline",
     "audioReady": "Audio đã sẵn sàng offline",
     "audioDownloaded": "Audio đã tải xong cho chế độ offline",
     "downloadError": "Lỗi tải xuống",
     "retry": "Thử lại",
     "noAudioCache": "Chưa có audio offline. Kết nối mạng để tải xuống.",
-    "updateCache": "Cập nhật cache"
+    "updateCache": "Cập nhật cache",
+    "downloadPromptTitle": "Tải xuống nội dung offline?",
+    "downloadPromptDesc": "Bạn có muốn tải xuống tất cả audio và hình ảnh để sử dụng khi không có mạng?",
+    "downloadPromptNote": "Bạn có thể thay đổi lựa chọn này trong Cài đặt bất cứ lúc nào.",
+    "downloadNow": "Tải ngay",
+    "downloadLater": "Để sau",
+    "downloadStarted": "Bắt đầu tải xuống nội dung offline...",
+    "poisLabel": "điểm tham quan",
+    "audioLabel": "Audio thuyết minh",
+    "imageLabel": "Hình ảnh địa điểm"
   },
   "battery": {
     "level": "Mức pin",

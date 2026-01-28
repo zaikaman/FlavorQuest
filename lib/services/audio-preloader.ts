@@ -99,7 +99,11 @@ function getAllAudioUrls(poi: POI): string[] {
 /**
  * Preload audio files thông qua Service Worker
  */
-async function preloadViaServiceWorker(urls: string[]): Promise<void> {
+async function preloadViaServiceWorker(
+  urls: string[],
+  category: 'audio' | 'images',
+  onProgress?: (completed: number, total: number) => void
+): Promise<void> {
   if (!('serviceWorker' in navigator)) {
     throw new Error('Service Worker not supported');
   }
@@ -111,26 +115,44 @@ async function preloadViaServiceWorker(urls: string[]): Promise<void> {
   }
 
   return new Promise((resolve, reject) => {
-    const messageChannel = new MessageChannel();
+    const handleMessage = (event: MessageEvent) => {
+      const data = event.data;
+      if (!data) return;
 
-    messageChannel.port1.onmessage = (event) => {
-      if (event.data.type === 'PRELOAD_COMPLETE') {
+      // Filter by category to avoid mixing audio/image progress
+      if (data.category !== category) return;
+
+      if (data.type === 'PRELOAD_PROGRESS') {
+        onProgress?.(data.completed, data.total);
+      } else if (data.type === 'PRELOAD_COMPLETE') {
+        cleanup();
         resolve();
-      } else if (event.data.type === 'PRELOAD_ERROR') {
-        reject(new Error(event.data.error));
+      } else if (data.type === 'PRELOAD_ERROR') {
+        cleanup();
+        reject(new Error(data.error));
       }
     };
 
-    registration.active!.postMessage(
-      {
-        type: 'PRELOAD_AUDIO',
-        urls,
-      },
-      [messageChannel.port2]
-    );
+    const cleanup = () => {
+      navigator.serviceWorker.removeEventListener('message', handleMessage);
+    };
 
-    // Timeout fallback
-    setTimeout(resolve, 30000);
+    navigator.serviceWorker.addEventListener('message', handleMessage);
+
+    // Send the preload command
+    registration.active!.postMessage({
+      type: category === 'audio' ? 'PRELOAD_AUDIO' : 'PRELOAD_IMAGES',
+      urls,
+    });
+
+    // Timeout fallback (longer timeout for large downloads)
+    setTimeout(() => {
+      cleanup();
+      // Don't reject, just resolve to let the fallback check checks work or just assume it's running
+      // But for now, let's just log a warning and resolve so UI doesn't hang forever
+      console.warn('Service Worker preload timeout or completed silently');
+      resolve();
+    }, 60000);
   });
 }
 
@@ -259,8 +281,18 @@ export class AudioPreloader {
       let preloadResult: { success: number; failed: number; alreadyCached: number };
 
       try {
-        await preloadViaServiceWorker(audioUrls);
-        // SW handles its own tracking, assume all successful
+        await preloadViaServiceWorker(audioUrls, 'audio', (completed, total) => {
+          onProgress?.({
+            total,
+            completed,
+            pending: total - completed,
+            failed: 0,
+            percent: Math.round((completed / total) * 100),
+          });
+        });
+
+        // SW handles its own tracking, assume all successful locally or trust what SW did
+        // Ideally SW returns stats, but for now we assume success if promise resolves
         preloadResult = {
           success: audioUrls.length,
           failed: 0,
@@ -429,53 +461,58 @@ export class AudioPreloader {
       return result;
     }
 
-    // Try Service Worker first
-    try {
-      if ('serviceWorker' in navigator) {
-        const registration = await navigator.serviceWorker.ready;
-        registration.active?.postMessage({
-          type: 'PRELOAD_IMAGES',
-          urls: imageUrls,
-        });
-      }
-    } catch (error) {
-      console.error('Failed to preload images via SW:', error);
-    }
-
-    // Direct preload as fallback
-    const cache = await caches.open('flavorquest-images-v1');
+    // Try Service Worker first, fallback to direct fetch
     let success = 0;
     let failed = 0;
     let alreadyCached = 0;
 
-    for (let i = 0; i < imageUrls.length; i++) {
-      const url = imageUrls[i];
-      if (!url) continue;
-
-      try {
-        const cached = await cache.match(url);
-        if (cached) {
-          alreadyCached++;
-        } else {
-          const response = await fetch(url);
-          if (response.ok) {
-            await cache.put(url, response);
-            success++;
-          } else {
-            failed++;
-          }
-        }
-      } catch {
-        failed++;
-      }
-
-      onProgress?.({
-        total: imageUrls.length,
-        completed: i + 1,
-        pending: imageUrls.length - i - 1,
-        failed,
-        percent: Math.round(((i + 1) / imageUrls.length) * 100),
+    try {
+      await preloadViaServiceWorker(imageUrls, 'images', (completed, total) => {
+        onProgress?.({
+          total,
+          completed,
+          pending: total - completed,
+          failed: 0,
+          percent: Math.round((completed / total) * 100),
+        });
       });
+
+      success = imageUrls.length;
+    } catch (error) {
+      console.error('Failed to preload images via SW, falling back to direct:', error);
+
+      // Direct preload as fallback
+      const cache = await caches.open('flavorquest-images-v1');
+
+      for (let i = 0; i < imageUrls.length; i++) {
+        const url = imageUrls[i];
+        if (!url) continue;
+
+        try {
+          const cached = await cache.match(url);
+          if (cached) {
+            alreadyCached++;
+          } else {
+            const response = await fetch(url);
+            if (response.ok) {
+              await cache.put(url, response);
+              success++;
+            } else {
+              failed++;
+            }
+          }
+        } catch {
+          failed++;
+        }
+
+        onProgress?.({
+          total: imageUrls.length,
+          completed: i + 1,
+          pending: imageUrls.length - i - 1,
+          failed,
+          percent: Math.round(((i + 1) / imageUrls.length) * 100),
+        });
+      }
     }
 
     // Update preload status

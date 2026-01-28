@@ -32,6 +32,7 @@ import { BottomNav, type NavTab } from '@/components/layout/BottomNav';
 import { SettingsPanel } from '@/components/layout/SettingsPanel';
 import { OfflineIndicator } from '@/components/layout/OfflineIndicator';
 import { AudioPreloadIndicator } from '@/components/layout/AudioPreloadIndicator';
+import { OfflineDownloadPrompt } from '@/components/layout/OfflineDownloadPrompt';
 import { Toast } from '@/components/ui/Toast';
 import { NoiseFilter } from '@/lib/utils/noise-filter';
 import { SpeedCalculator } from '@/lib/utils/speed';
@@ -93,6 +94,8 @@ export default function TourPage() {
   const [isOfflineReady, setIsOfflineReady] = useState(false);
   const [isAutoMode, setIsAutoMode] = useState(true);
   const [settings, setSettings] = useState<UserSettings | null>(null);
+  const [showOfflinePrompt, setShowOfflinePrompt] = useState(false);
+  const [shouldPreloadOffline, setShouldPreloadOffline] = useState(false);
 
   // Refs
   const noiseFilterRef = useRef<NoiseFilter>(new NoiseFilter({ windowSize: 5 })); // 5 samples moving average
@@ -103,16 +106,24 @@ export default function TourPage() {
   // Load settings on mount
   useEffect(() => {
     loadSettings().then(s => {
-      console.log('[TourPage] Loaded settings with language:', s.language);
+
       setSettings(s);
       setIsAutoMode(s.autoPlayEnabled);
     });
+
+    // Check offline preference from localStorage
+    const savedPreference = localStorage.getItem('flavorquest-offline-preference');
+    if (savedPreference) {
+      setShouldPreloadOffline(savedPreference === 'accepted');
+    } else {
+      // Chưa có preference, hiển thị prompt sau 2 giây
+      setTimeout(() => {
+        setShowOfflinePrompt(true);
+      }, 2000);
+    }
   }, []);
 
-  // Log current language for debugging
-  useEffect(() => {
-    console.log('[TourPage] Current language from context:', language);
-  }, [language]);
+
 
   // Toast helper
   const showToastMessage = useCallback((message: string) => {
@@ -120,6 +131,24 @@ export default function TourPage() {
     setShowToast(true);
     setTimeout(() => setShowToast(false), 3000);
   }, []);
+
+  // Handle offline download acceptance
+  const handleOfflineAccept = useCallback(() => {
+    setShouldPreloadOffline(true);
+    localStorage.setItem('flavorquest-offline-preference', 'accepted');
+    setShowOfflinePrompt(false);
+    showToastMessage(t('offline.downloadStarted') || 'Bắt đầu tải xuống nội dung offline...');
+  }, [showToastMessage, t]);
+
+  // Handle offline download decline
+  const handleOfflineDecline = useCallback(() => {
+    setShouldPreloadOffline(false);
+    localStorage.setItem('flavorquest-offline-preference', 'declined');
+    setShowOfflinePrompt(false);
+  }, []);
+
+  // Calculate estimated size
+  const estimatedSize = Math.round((pois.length * 2.5)); // ~2.5MB per POI (audio + image)
 
   // Handle TTS fallback
   const handleTTSFallback = useCallback(() => {
@@ -300,9 +329,7 @@ export default function TourPage() {
     const localizedPOI = getLocalizedPOI(poi, language);
     const audioUrl = localizedPOI.audio_url;
 
-    console.log('[handlePlayPOI] POI:', poi.name_vi);
-    console.log('[handlePlayPOI] Language:', language);
-    console.log('[handlePlayPOI] Audio URL:', audioUrl);
+
 
     if (!audioUrl) {
       showToastMessage(t('tour.noAudioForPOI'));
@@ -374,9 +401,7 @@ export default function TourPage() {
   // Get next POI
   const nextPOI = nearbyPOIs.find(p => p.id !== audioPlayer.currentItem?.poi.id);
 
-  // Debug audio player state
-  console.log('[TourPage] audioPlayer.currentItem:', audioPlayer.currentItem?.title);
-  console.log('[TourPage] audioPlayer.isPlaying:', audioPlayer.isPlaying);
+
 
   return (
     <div className="relative flex flex-col h-screen w-full overflow-hidden bg-background-dark">      {/* Header */}
@@ -547,19 +572,29 @@ export default function TourPage() {
       )}
 
       {/* Audio Preload Indicator */}
-      {pois.length > 0 && (
+      {pois.length > 0 && shouldPreloadOffline && (
         <AudioPreloadIndicator
           pois={pois}
           language={language}
           currentPosition={filteredPosition || undefined}
-          preloadRadius={500}
+          preloadRadius={5000} // Tải hết tất cả POIs
           autoPreload={true}
           compact={false}
+          showUI={true}
           onComplete={() => {
-            showToastMessage(t('offline.audioDownloaded') || 'Audio đã tải xong cho chế độ offline');
+            setIsOfflineReady(true);
           }}
         />
       )}
+
+      {/* Offline Download Prompt */}
+      <OfflineDownloadPrompt
+        isOpen={showOfflinePrompt}
+        onAccept={handleOfflineAccept}
+        onDecline={handleOfflineDecline}
+        poisCount={pois.length}
+        estimatedSize={estimatedSize}
+      />
 
       {/* Bottom Navigation */}
       <BottomNav
