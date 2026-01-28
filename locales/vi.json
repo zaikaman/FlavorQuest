@@ -182,7 +182,14 @@
     "lastSync": "Đồng bộ lần cuối",
     "notSyncedYet": "Chưa đồng bộ",
     "syncNow": "Đồng bộ ngay",
-    "tapToSync": "Nhấn để đồng bộ"
+    "tapToSync": "Nhấn để đồng bộ",
+    "downloadingAudio": "Đang tải audio offline",
+    "audioReady": "Audio đã sẵn sàng offline",
+    "audioDownloaded": "Audio đã tải xong cho chế độ offline",
+    "downloadError": "Lỗi tải xuống",
+    "retry": "Thử lại",
+    "noAudioCache": "Chưa có audio offline. Kết nối mạng để tải xuống.",
+    "updateCache": "Cập nhật cache"
   },
   "battery": {
     "level": "Mức pin",

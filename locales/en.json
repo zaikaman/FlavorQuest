@@ -182,7 +182,14 @@
     "lastSync": "Last Sync",
     "notSyncedYet": "Not synced yet",
     "syncNow": "Sync Now",
-    "tapToSync": "Tap to sync"
+    "tapToSync": "Tap to sync",
+    "downloadingAudio": "Downloading audio for offline",
+    "audioReady": "Audio ready offline",
+    "audioDownloaded": "Audio downloaded for offline mode",
+    "downloadError": "Download error",
+    "retry": "Retry",
+    "noAudioCache": "No audio cached. Connect to download.",
+    "updateCache": "Update cache"
   },
   "battery": {
     "level": "Battery Level",
