@@ -3,6 +3,33 @@
     "name": "FlavorQuest",
     "tagline": "Découvrez la cuisine de Vinh Khanh par l'audio"
   },
+  "metadata": {
+    "title": "FlavorQuest - Découvrez la Rue Gastronomique Vinh Khanh",
+    "description": "Visite audio automatique géolocalisée de la rue gastronomique Vinh Khanh, Can Tho. PWA hors ligne avec support multilingue.",
+    "keywords": [
+      "visite gastronomique",
+      "guide audio",
+      "Vinh Khanh",
+      "Can Tho",
+      "cuisine",
+      "PWA"
+    ]
+  },
+  "manifest": {
+    "name": "FlavorQuest - Expérience de Visite Audio Automatique",
+    "shortName": "FlavorQuest",
+    "description": "Découvrez la rue gastronomique Vinh Khanh avec narration audio automatique basée sur la localisation. Supporte 6 langues, fonctionne hors ligne.",
+    "shortcuts": {
+      "startTour": {
+        "name": "Démarrer la visite",
+        "description": "Démarrer la visite automatique"
+      },
+      "viewMap": {
+        "name": "Voir la carte",
+        "description": "Voir la carte de la visite"
+      }
+    }
+  },
   "common": {
     "loading": "Chargement...",
     "error": "Erreur",
@@ -15,7 +42,24 @@
     "next": "Suivant",
     "done": "Terminé",
     "yes": "Oui",
-    "no": "Non"
+    "no": "Non",
+    "allow": "Autoriser",
+    "deny": "Refuser",
+    "browse": "Parcourir",
+    "privacyPolicy": "Politique de confidentialité"
+  },
+  "list": {
+    "searchPlaceholder": "Rechercher escargots, fruits de mer, banh mi...",
+    "notFoundTitle": "Introuvable",
+    "notFoundDesc": "Essayez d'autres mots-clés",
+    "offlineBadge": "Hors ligne"
+  },
+  "categories": {
+    "all": "Tout",
+    "snails": "Escargots",
+    "seafood": "Fruits de mer",
+    "grill": "Grillades",
+    "nearMe": "À proximité"
   },
   "tour": {
     "startTour": "Démarrer la visite",
@@ -24,6 +68,10 @@
     "stopTour": "Arrêter la visite",
     "autoMode": "Mode automatique",
     "manualMode": "Mode manuel",
+    "auto": "Auto",
+    "manual": "Manuel",
+    "loadingPOIs": "Chargement des lieux...",
+    "searchingPOIs": "Recherche de points à proximité...",
     "nearbyPOIs": "Points à proximité",
     "currentLocation": "Position actuelle",
     "distance": "Distance",
@@ -71,7 +119,9 @@
     "ttsPitch": "Hauteur de voix",
     "mapType": "Type de carte",
     "showVisitedPOIs": "Afficher les points visités",
-    "batteryOptimization": "Optimisation de la batterie"
+    "batteryOptimization": "Optimisation de la batterie",
+    "geofenceClose": "Proche (Précis)",
+    "geofenceFar": "Loin (Large)"
   },
   "history": {
     "title": "Historique",
@@ -79,7 +129,13 @@
     "notVisited": "Non visité",
     "visitedAt": "Visité le",
     "clear": "Effacer l'historique",
-    "empty": "Aucun historique"
+    "empty": "Aucun historique",
+    "justNow": "À l'instant",
+    "minsAgo": "il y a {mins} min",
+    "hoursAgo": "il y a {hours} h",
+    "today": "Aujourd'hui, {time}",
+    "yesterday": "Hier, {time}",
+    "listened": "Écouté"
   },
   "map": {
     "title": "Carte",
@@ -87,7 +143,8 @@
     "zoomOut": "Zoom arrière",
     "centerMap": "Centrer sur la position",
     "fullscreen": "Plein écran",
-    "layers": "Couches de carte"
+    "layers": "Couches de carte",
+    "loadingMap": "Chargement de la carte..."
   },
   "poi": {
     "details": "Détails",
@@ -96,7 +153,12 @@
     "estimatedHours": "Heures d'ouverture",
     "directions": "Itinéraire",
     "playAudio": "Lire l'audio",
-    "viewOnMap": "Voir sur la carte"
+    "viewOnMap": "Voir sur la carte",
+    "cuisine": "Cuisine",
+    "upNext": "À suivre",
+    "district4": "District 4, HCMC",
+    "transcript": "Transcription",
+    "estimatedWalk": "3 min à pied"
   },
   "offline": {
     "status": "Hors ligne",
@@ -104,7 +166,42 @@
     "syncing": "Synchronisation...",
     "syncComplete": "Synchronisé",
     "cacheSize": "Taille du cache",
-    "clearCache": "Vider le cache"
+    "clearCache": "Vider le cache",
+    "usingCachedData": "Utilisation des données en cache",
+    "limitedFeatures": "Certaines fonctionnalités indisponibles",
+    "uploading": "Téléchargement des données vers le serveur",
+    "syncError": "Erreur de synchronisation",
+    "retrySync": "Appuyez pour réessayer",
+    "pendingSync": "Synchronisation en attente",
+    "pendingItems": "{count} éléments en attente",
+    "online": "En ligne",
+    "synced": "Synchronisé",
+    "offlineMode": "Mode hors ligne",
+    "noConnection": "Pas de connexion",
+    "statusLabel": "Statut",
+    "lastSync": "Dernière synchro",
+    "notSyncedYet": "Pas encore synchronisé",
+    "syncNow": "Synchroniser maintenant",
+    "tapToSync": "Appuyez pour synchroniser",
+    "downloadingAudio": "Téléchargement de l'audio pour hors ligne",
+    "downloadingContent": "Téléchargement du contenu hors ligne",
+    "audioReady": "Audio prêt hors ligne",
+    "audioDownloaded": "Audio téléchargé pour le mode hors ligne",
+    "downloadError": "Erreur de téléchargement",
+    "retry": "Réessayer",
+    "noAudioCache": "Aucun cache audio. Connectez-vous pour télécharger.",
+    "updateCache": "Mettre à jour le cache",
+    "downloadPromptTitle": "Télécharger le contenu hors ligne ?",
+    "downloadPromptDesc": "Voulez-vous télécharger tout l'audio et les images pour une utilisation hors ligne ?",
+    "downloadPromptNote": "Vous pouvez modifier cette préférence dans les paramètres à tout moment.",
+    "downloadNow": "Télécharger maintenant",
+    "downloadLater": "Plus tard",
+    "downloadStarted": "Démarrage du téléchargement du contenu hors ligne...",
+    "poisLabel": "points d'intérêt",
+    "audioLabel": "Narration audio",
+    "imageLabel": "Images du lieu",
+    "successTitle": "Prêt pour hors ligne",
+    "successMessage": "Contenu téléchargé avec succès."
   },
   "battery": {
     "level": "Niveau de batterie",
@@ -142,7 +239,8 @@
     "subtitle": "Découvrez le Voyage Culinaire de Vinh Khanh",
     "startTour": "Démarrer la Visite",
     "browse": "Parcourir manuellement",
-    "settings": "Paramètres"  },
+    "settings": "Paramètres"
+  },
   "login": {
     "title": "Connexion FlavorQuest",
     "subtitle": "Enregistrez votre progression et synchronisez votre expérience",
@@ -160,5 +258,21 @@
     "noDescription": "Aucune description disponible pour cet emplacement.",
     "didYouKnow": "Le saviez-vous?",
     "nowPlaying": "En cours : {name}",
-    "errorPlaying": "Erreur audio, utilisation de la synthèse vocale"  }
+    "errorPlaying": "Erreur audio, utilisation de la synthèse vocale"
+  },
+  "permissions": {
+    "checking": "Vérification des permissions...",
+    "locationTitle": "Activer la localisation pour la narration automatique",
+    "locationDesc": "Meilleure expérience lorsque l'application détecte votre position rue Vinh Khanh.",
+    "denyPrompt": "Refuser ?",
+    "switchToManual": "Passer en mode manuel"
+  },
+  "units": {
+    "meters": "m",
+    "kilometers": "km",
+    "number": "N°"
+  },
+  "sort": {
+    "az": "A-Z"
+  }
 }

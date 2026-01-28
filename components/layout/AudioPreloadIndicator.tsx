@@ -17,6 +17,7 @@ import { useTranslations } from '@/lib/hooks/useTranslations';
 import type { POI, Language, Coordinates } from '@/lib/types/index';
 import { audioPreloader, type PreloadProgress } from '@/lib/services/audio-preloader';
 import { loadPreloadStatus, type PreloadStatus } from '@/lib/services/storage';
+import { Toast } from '@/components/ui/Toast';
 
 export interface AudioPreloadIndicatorProps {
   /** POIs cần preload */
@@ -53,7 +54,7 @@ export function AudioPreloadIndicator({
   const [preloadStatus, setPreloadStatus] = useState<PreloadStatus | null>(null);
   const [isPreloading, setIsPreloading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [showDetails, setShowDetails] = useState(false);
+  const [showSuccessToast, setShowSuccessToast] = useState(false);
 
   // Load preload status on mount
   useEffect(() => {
@@ -94,6 +95,7 @@ export function AudioPreloadIndicator({
 
     setIsPreloading(true);
     setError(null);
+    setShowSuccessToast(false);
 
     // Calculate total: audio + images
     const totalItems = pois.length * 2; // audio + image per POI
@@ -113,7 +115,7 @@ export function AudioPreloadIndicator({
         language,
         currentPosition,
         preloadRadius,
-        preloadAll: preloadRadius > 2000, // Nếu radius lớn, preload all
+        preloadAll: preloadRadius > 2000,
         onProgress: (prog) => {
           completedCount = prog.completed;
           setProgress({
@@ -155,11 +157,10 @@ export function AudioPreloadIndicator({
           // Verify cache sau khi download
           await verifyCache();
 
-          // Tự động ẩn sau 5 giây khi thành công
-          setTimeout(() => {
-            setProgress(null);
-            setIsPreloading(false);
-          }, 5000);
+          // Khi hoàn thành, ẩn progress và hiện toast
+          setProgress(null);
+          setIsPreloading(false);
+          setShowSuccessToast(true);
         },
       });
 
@@ -181,24 +182,6 @@ export function AudioPreloadIndicator({
       const imageCache = await caches.open('flavorquest-images-v1');
       const imageKeys = await imageCache.keys();
       console.log(`[Verify] Image cache có ${imageKeys.length} files`);
-
-      // Test load 1 audio file để verify
-      if (audioKeys.length > 0 && audioKeys[0]) {
-        const testResponse = await audioCache.match(audioKeys[0]);
-        if (testResponse) {
-          console.log('[Verify] Audio cache hoạt động tốt');
-          console.log('[Verify] Sample audio URL:', audioKeys[0].url);
-        }
-      }
-
-      // Test load 1 image file để verify
-      if (imageKeys.length > 0 && imageKeys[0]) {
-        const testResponse = await imageCache.match(imageKeys[0]);
-        if (testResponse) {
-          console.log('[Verify] Image cache hoạt động tốt');
-          console.log('[Verify] Sample image URL:', imageKeys[0].url);
-        }
-      }
     } catch (err) {
       console.error('[Verify] Lỗi khi verify cache:', err);
     }
@@ -207,6 +190,21 @@ export function AudioPreloadIndicator({
   // Nếu không hiển thị UI, return null
   if (!showUI) {
     return null;
+  }
+
+  // Toast Success
+  if (showSuccessToast) {
+    return (
+      <div className="fixed top-24 left-1/2 -translate-x-1/2 z-[100] w-full max-w-sm px-4">
+        <Toast
+          type="success"
+          title={t('offline.successTitle') || 'Ready for Offline'}
+          message={t('offline.successMessage') || 'Content downloaded successfully.'}
+          onClose={() => setShowSuccessToast(false)}
+          duration={4000}
+        />
+      </div>
+    );
   }
 
   // Nếu đang preload, hiển thị progress
@@ -255,102 +253,6 @@ export function AudioPreloadIndicator({
             </span>
           )}
         </div>
-      </div>
-    );
-  }
-
-  // Nếu không preload, hiển thị trạng thái cached
-  if (!isPreloading && preloadStatus && preloadStatus.preloadedAudio.length > 0) {
-    if (compact) {
-      return (
-        <button
-          onClick={() => setShowDetails(!showDetails)}
-          className="fixed bottom-20 right-4 bg-white dark:bg-[#221710] text-orange-600 dark:text-orange-500 rounded-full p-3 shadow-lg hover:shadow-xl z-50
-            border border-orange-100 dark:border-orange-900/30 transition-all hover:scale-105 group"
-          title={t('offline.audioReady') || 'Offline ready'}
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="group-hover:text-orange-700 dark:group-hover:text-orange-400">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-            <polyline points="7 10 12 15 17 10"></polyline>
-            <line x1="12" y1="15" x2="12" y2="3"></line>
-          </svg>
-          <span className="absolute -top-1 -right-1 flex h-3 w-3">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500 border-2 border-white dark:border-[#221710]"></span>
-          </span>
-        </button>
-      );
-    }
-
-    return (
-      <div className={`fixed bottom-24 right-4 bg-white dark:bg-[#221710]
-        rounded-2xl shadow-xl shadow-black/5 p-4 z-50 border border-orange-100 dark:border-orange-900/30
-        transition-all duration-300 ease-in-out origin-bottom-right
-        ${showDetails ? 'w-72 opacity-100 scale-100' : 'w-auto opacity-95 hover:scale-105'}`}>
-
-        <button
-          onClick={() => setShowDetails(!showDetails)}
-          className="flex items-center gap-3 w-full text-left"
-        >
-          <div className="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center flex-shrink-0">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-green-600 dark:text-green-400">
-              <polyline points="20 6 9 17 4 12"></polyline>
-            </svg>
-          </div>
-          <div>
-            <span className="block text-sm font-bold text-gray-900 dark:text-gray-100">
-              {t('offline.audioReady') || 'Offline Ready'}
-            </span>
-            {!showDetails && (
-              <span className="block text-[10px] text-gray-500 dark:text-gray-400">
-                {preloadStatus.totalPOIs} items cached
-              </span>
-            )}
-          </div>
-          {showDetails ? (
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="ml-auto text-gray-400">
-              <polyline points="6 9 12 15 18 9"></polyline>
-            </svg>
-          ) : (
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="ml-auto text-gray-400">
-              <polyline points="18 15 12 9 6 15"></polyline>
-            </svg>
-          )}
-        </button>
-
-        {showDetails && (
-          <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-800 animate-fadeIn">
-            <div className="space-y-2 mb-3">
-              <div className="flex justify-between items-center text-xs">
-                <span className="text-gray-500 dark:text-gray-400">Audio Files</span>
-                <span className="font-medium text-gray-900 dark:text-gray-200">{preloadStatus.preloadedAudio.length}/{preloadStatus.totalPOIs}</span>
-              </div>
-              <div className="flex justify-between items-center text-xs">
-                <span className="text-gray-500 dark:text-gray-400">Images</span>
-                <span className="font-medium text-gray-900 dark:text-gray-200">{preloadStatus.preloadedImages?.length || 0}/{preloadStatus.totalPOIs}</span>
-              </div>
-              <div className="text-[10px] text-gray-400 dark:text-gray-500 text-right pt-1">
-                Updated: {new Date(preloadStatus.lastPreloadTime).toLocaleDateString()}
-              </div>
-            </div>
-
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                handlePreload();
-              }}
-              className="w-full bg-orange-50 dark:bg-orange-900/20 hover:bg-orange-100 dark:hover:bg-orange-900/40 text-orange-700 dark:text-orange-300 
-                py-2 px-3 rounded-lg text-xs font-semibold transition-colors flex items-center justify-center gap-2"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                <polyline points="7 10 12 15 17 10"></polyline>
-                <line x1="12" y1="15" x2="12" y2="3"></line>
-              </svg>
-              {t('offline.updateCache') || 'Update Content'}
-            </button>
-          </div>
-        )}
       </div>
     );
   }

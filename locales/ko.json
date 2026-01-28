@@ -3,6 +3,33 @@
     "name": "FlavorQuest",
     "tagline": "오디오로 빈칸 요리 발견하기"
   },
+  "metadata": {
+    "title": "FlavorQuest - 빈칸 음식 거리 발견",
+    "description": "빈칸 음식 거리, 껀 터의 자동 위치 기반 오디오 투어. 다국어 지원이 포함된 오프라인 우선 PWA.",
+    "keywords": [
+      "음식 투어",
+      "오디오 가이드",
+      "빈칸",
+      "껀 터",
+      "요리",
+      "PWA"
+    ]
+  },
+  "manifest": {
+    "name": "FlavorQuest - 자동 오디오 투어 경험",
+    "shortName": "FlavorQuest",
+    "description": "위치 기반 자동 오디오 내레이션으로 빈칸 음식 거리를 발견하십시오. 6개 언어 지원, 오프라인 작동.",
+    "shortcuts": {
+      "startTour": {
+        "name": "투어 시작",
+        "description": "자동 투어 시작"
+      },
+      "viewMap": {
+        "name": "지도 보기",
+        "description": "투어 지도 보기"
+      }
+    }
+  },
   "common": {
     "loading": "로딩 중...",
     "error": "오류",
@@ -15,7 +42,24 @@
     "next": "다음",
     "done": "완료",
     "yes": "예",
-    "no": "아니요"
+    "no": "아니요",
+    "allow": "허용",
+    "deny": "거부",
+    "browse": "탐색",
+    "privacyPolicy": "개인정보 처리방침"
+  },
+  "list": {
+    "searchPlaceholder": "달팽이, 해산물, 반미 검색...",
+    "notFoundTitle": "찾을 수 없음",
+    "notFoundDesc": "다른 키워드로 검색해보세요",
+    "offlineBadge": "오프라인"
+  },
+  "categories": {
+    "all": "전체",
+    "snails": "달팽이",
+    "seafood": "해산물",
+    "grill": "구이",
+    "nearMe": "내 주변"
   },
   "tour": {
     "startTour": "투어 시작",
@@ -24,6 +68,10 @@
     "stopTour": "투어 종료",
     "autoMode": "자동 모드",
     "manualMode": "수동 모드",
+    "auto": "자동",
+    "manual": "수동",
+    "loadingPOIs": "위치 로드 중...",
+    "searchingPOIs": "주변 장소 검색 중...",
     "nearbyPOIs": "근처 장소",
     "currentLocation": "현재 위치",
     "distance": "거리",
@@ -71,7 +119,9 @@
     "ttsPitch": "음성 높이",
     "mapType": "지도 유형",
     "showVisitedPOIs": "방문한 장소 표시",
-    "batteryOptimization": "배터리 최적화"
+    "batteryOptimization": "배터리 최적화",
+    "geofenceClose": "가깝게 (정확)",
+    "geofenceFar": "멀게 (넓게)"
   },
   "history": {
     "title": "기록",
@@ -79,7 +129,13 @@
     "notVisited": "방문하지 않음",
     "visitedAt": "방문 시간",
     "clear": "기록 지우기",
-    "empty": "기록 없음"
+    "empty": "기록 없음",
+    "justNow": "방금",
+    "minsAgo": "{mins}분 전",
+    "hoursAgo": "{hours}시간 전",
+    "today": "오늘, {time}",
+    "yesterday": "어제, {time}",
+    "listened": "청취됨"
   },
   "map": {
     "title": "지도",
@@ -87,7 +143,8 @@
     "zoomOut": "축소",
     "centerMap": "현재 위치로 이동",
     "fullscreen": "전체 화면",
-    "layers": "지도 레이어"
+    "layers": "지도 레이어",
+    "loadingMap": "지도를 불러오는 중..."
   },
   "poi": {
     "details": "세부 정보",
@@ -96,7 +153,12 @@
     "estimatedHours": "영업 시간",
     "directions": "길 안내",
     "playAudio": "오디오 재생",
-    "viewOnMap": "지도에서 보기"
+    "viewOnMap": "지도에서 보기",
+    "cuisine": "요리",
+    "upNext": "다음 장소",
+    "district4": "호치민 4군",
+    "transcript": "스크립트",
+    "estimatedWalk": "도보 3분"
   },
   "offline": {
     "status": "오프라인",
@@ -104,7 +166,42 @@
     "syncing": "동기화 중...",
     "syncComplete": "동기화 완료",
     "cacheSize": "캐시 크기",
-    "clearCache": "캐시 지우기"
+    "clearCache": "캐시 지우기",
+    "usingCachedData": "캐시된 데이터 사용 중",
+    "limitedFeatures": "일부 기능 사용 불가",
+    "uploading": "서버에 데이터 업로드 중",
+    "syncError": "동기화 오류",
+    "retrySync": "다시 시도하려면 탭하세요",
+    "pendingSync": "동기화 대기 중",
+    "pendingItems": "{count}개 항목 대기 중",
+    "online": "온라인",
+    "synced": "동기화됨",
+    "offlineMode": "오프라인 모드",
+    "noConnection": "연결 없음",
+    "statusLabel": "상태",
+    "lastSync": "마지막 동기화",
+    "notSyncedYet": "아직 동기화되지 않음",
+    "syncNow": "지금 동기화",
+    "tapToSync": "동기화하려면 탭하세요",
+    "downloadingAudio": "오프라인용 오디오 다운로드 중",
+    "downloadingContent": "오프라인 콘텐츠 다운로드 중",
+    "audioReady": "오디오 오프라인 준비 완료",
+    "audioDownloaded": "오프라인 모드용 오디오 다운로드 완료",
+    "downloadError": "다운로드 오류",
+    "retry": "다시 시도",
+    "noAudioCache": "오디오 캐시 없음. 다운로드하려면 연결하세요.",
+    "updateCache": "캐시 업데이트",
+    "downloadPromptTitle": "오프라인 콘텐츠를 다운로드하시겠습니까?",
+    "downloadPromptDesc": "오프라인 사용을 위해 모든 오디오와 이미지를 다운로드하시겠습니까?",
+    "downloadPromptNote": "설정에서 언제든지 이 기본 설정을 변경할 수 있습니다.",
+    "downloadNow": "지금 다운로드",
+    "downloadLater": "나중에",
+    "downloadStarted": "오프라인 콘텐츠 다운로드 시작...",
+    "poisLabel": "장소",
+    "audioLabel": "오디오 내레이션",
+    "imageLabel": "장소 이미지",
+    "successTitle": "오프라인 준비 완료",
+    "successMessage": "콘텐츠 다운로드가 완료되었습니다."
   },
   "battery": {
     "level": "배터리 잔량",
@@ -142,7 +239,8 @@
     "subtitle": "빈칸 미식 여행을 발견하세요",
     "startTour": "투어 시작",
     "browse": "수동 탐색",
-    "settings": "설정"  },
+    "settings": "설정"
+  },
   "login": {
     "title": "FlavorQuest 로그인",
     "subtitle": "진행 상황을 저장하고 경험을 동기화하세요",
@@ -160,5 +258,21 @@
     "noDescription": "이 위치에 대한 설명이 없습니다.",
     "didYouKnow": "아시나요?",
     "nowPlaying": "재생 중: {name}",
-    "errorPlaying": "오디오 오류, 음성 합성 사용 중"  }
+    "errorPlaying": "오디오 오류, 음성 합성 사용 중"
+  },
+  "permissions": {
+    "checking": "권한 확인 중...",
+    "locationTitle": "음식점 근처 자동 음성 해설 활성화",
+    "locationDesc": "빈칸 거리에서 사용자의 위치를 자동으로 감지할 때 최적의 경험을 제공합니다.",
+    "denyPrompt": "거부하시겠습니까?",
+    "switchToManual": "수동 모드로 전환"
+  },
+  "units": {
+    "meters": "m",
+    "kilometers": "km",
+    "number": "No."
+  },
+  "sort": {
+    "az": "A-Z"
+  }
 }

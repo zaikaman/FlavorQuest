@@ -3,6 +3,33 @@
     "name": "FlavorQuest",
     "tagline": "音声でヴィンカイン料理を発見"
   },
+  "metadata": {
+    "title": "FlavorQuest - ヴィンカイン・フードストリートを発見",
+    "description": "カントーのヴィンカイン・フードストリートの自動位置情報音声ガイド。多言語サポート付きのオフライン対応PWA。",
+    "keywords": [
+      "フードツアー",
+      "音声ガイド",
+      "ヴィンカイン",
+      "カントー",
+      "料理",
+      "PWA"
+    ]
+  },
+  "manifest": {
+    "name": "FlavorQuest - 自動音声ツアー体験",
+    "shortName": "FlavorQuest",
+    "description": "位置情報に基づいた自動音声ナレーションでヴィンカイン・フードストリートを発見。6言語対応、オフラインで動作。",
+    "shortcuts": {
+      "startTour": {
+        "name": "ツアー開始",
+        "description": "自動ツアーを開始"
+      },
+      "viewMap": {
+        "name": "地図を表示",
+        "description": "ツアーマップを表示"
+      }
+    }
+  },
   "common": {
     "loading": "読み込み中...",
     "error": "エラー",
@@ -15,7 +42,24 @@
     "next": "次へ",
     "done": "完了",
     "yes": "はい",
-    "no": "いいえ"
+    "no": "いいえ",
+    "allow": "許可",
+    "deny": "拒否",
+    "browse": "閲覧",
+    "privacyPolicy": "プライバシーポリシー"
+  },
+  "list": {
+    "searchPlaceholder": "カタツムリ、シーフード、バインミーを検索...",
+    "notFoundTitle": "見つかりません",
+    "notFoundDesc": "別のキーワードで検索してみてください",
+    "offlineBadge": "オフライン"
+  },
+  "categories": {
+    "all": "すべて",
+    "snails": "カタツムリ",
+    "seafood": "シーフード",
+    "grill": "グリル",
+    "nearMe": "近く"
   },
   "tour": {
     "startTour": "ツアー開始",
@@ -24,6 +68,10 @@
     "stopTour": "ツアー終了",
     "autoMode": "自動モード",
     "manualMode": "手動モード",
+    "auto": "自動",
+    "manual": "手動",
+    "loadingPOIs": "場所を読み込み中...",
+    "searchingPOIs": "近くのスポットを検索中...",
     "nearbyPOIs": "近くのポイント",
     "currentLocation": "現在地",
     "distance": "距離",
@@ -43,7 +91,7 @@
     "play": "再生",
     "pause": "一時停止",
     "stop": "停止",
-    "replay": "再生",
+    "replay": "再開",
     "volume": "音量",
     "speed": "再生速度",
     "loading": "音声を読み込み中...",
@@ -71,7 +119,9 @@
     "ttsPitch": "音声ピッチ",
     "mapType": "地図タイプ",
     "showVisitedPOIs": "訪問済みポイントを表示",
-    "batteryOptimization": "バッテリー最適化"
+    "batteryOptimization": "バッテリー最適化",
+    "geofenceClose": "近い (正確)",
+    "geofenceFar": "遠い (広範囲)"
   },
   "history": {
     "title": "履歴",
@@ -79,7 +129,13 @@
     "notVisited": "未訪問",
     "visitedAt": "訪問日時",
     "clear": "履歴をクリア",
-    "empty": "履歴はまだありません"
+    "empty": "履歴はまだありません",
+    "justNow": "たった今",
+    "minsAgo": "{mins}分前",
+    "hoursAgo": "{hours}時間前",
+    "today": "今日, {time}",
+    "yesterday": "昨日, {time}",
+    "listened": "聴取済み"
   },
   "map": {
     "title": "地図",
@@ -87,7 +143,8 @@
     "zoomOut": "縮小",
     "centerMap": "現在地を中心に",
     "fullscreen": "全画面表示",
-    "layers": "地図レイヤー"
+    "layers": "地図レイヤー",
+    "loadingMap": "地図を読み込み中..."
   },
   "poi": {
     "details": "詳細",
@@ -96,7 +153,12 @@
     "estimatedHours": "営業時間",
     "directions": "道順",
     "playAudio": "音声を再生",
-    "viewOnMap": "地図で見る"
+    "viewOnMap": "地図で見る",
+    "cuisine": "料理",
+    "upNext": "次は",
+    "district4": "ホーチミン市4区",
+    "transcript": "文字起こし",
+    "estimatedWalk": "徒歩3分"
   },
   "offline": {
     "status": "オフライン",
@@ -104,7 +166,42 @@
     "syncing": "同期中...",
     "syncComplete": "同期完了",
     "cacheSize": "キャッシュサイズ",
-    "clearCache": "キャッシュをクリア"
+    "clearCache": "キャッシュをクリア",
+    "usingCachedData": "キャッシュデータを使用中",
+    "limitedFeatures": "一部の機能が利用できません",
+    "uploading": "サーバーにデータをアップロード中",
+    "syncError": "同期エラー",
+    "retrySync": "タップして再試行",
+    "pendingSync": "同期保留中",
+    "pendingItems": "{count} アイテムが保留中",
+    "online": "オンライン",
+    "synced": "同期済み",
+    "offlineMode": "オフラインモード",
+    "noConnection": "接続なし",
+    "statusLabel": "ステータス",
+    "lastSync": "最終同期",
+    "notSyncedYet": "未同期",
+    "syncNow": "今すぐ同期",
+    "tapToSync": "タップして同期",
+    "downloadingAudio": "オフライン用音声をダウンロード中",
+    "downloadingContent": "オフラインコンテンツをダウンロード中",
+    "audioReady": "音声オフライン準備完了",
+    "audioDownloaded": "オフライン用音声のダウンロード完了",
+    "downloadError": "ダウンロードエラー",
+    "retry": "再試行",
+    "noAudioCache": "音声キャッシュがありません。接続してダウンロードしてください。",
+    "updateCache": "キャッシュを更新",
+    "downloadPromptTitle": "オフラインコンテンツをダウンロード？",
+    "downloadPromptDesc": "オフラインで使用するためにすべての音声と画像をダウンロードしますか？",
+    "downloadPromptNote": "この設定はいつでも変更できます。",
+    "downloadNow": "今すぐダウンロード",
+    "downloadLater": "後で",
+    "downloadStarted": "オフラインコンテンツのダウンロードを開始...",
+    "poisLabel": "ポイント",
+    "audioLabel": "音声ナレーション",
+    "imageLabel": "場所の画像",
+    "successTitle": "オフライン準備完了",
+    "successMessage": "コンテンツのダウンロードが完了しました。"
   },
   "battery": {
     "level": "バッテリーレベル",
@@ -142,7 +239,8 @@
     "subtitle": "ヴィンカイン美食の旅を発見",
     "startTour": "ツアー開始",
     "browse": "手動で閲覧",
-    "settings": "設定"  },
+    "settings": "設定"
+  },
   "login": {
     "title": "FlavorQuest ログイン",
     "subtitle": "進行状況を保存して体験を同期",
@@ -160,5 +258,21 @@
     "noDescription": "この場所の説明はありません。",
     "didYouKnow": "ご存知ですか？",
     "nowPlaying": "再生中: {name}",
-    "errorPlaying": "音声エラー、音声合成を使用しています"  }
+    "errorPlaying": "音声エラー、音声合成を使用しています"
+  },
+  "permissions": {
+    "checking": "権限を確認中...",
+    "locationTitle": "屋台の近くで自動音声ガイドを有効にする",
+    "locationDesc": "アプリがヴィンカイン通りでの現在地を自動検出すると、最高の体験が得られます。",
+    "denyPrompt": "許可しませんか？",
+    "switchToManual": "手動モードに切り替え"
+  },
+  "units": {
+    "meters": "m",
+    "kilometers": "km",
+    "number": "No."
+  },
+  "sort": {
+    "az": "A-Z"
+  }
 }

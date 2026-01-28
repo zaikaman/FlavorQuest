@@ -3,6 +3,33 @@
     "name": "FlavorQuest",
     "tagline": "通过音频发现永庆美食"
   },
+  "metadata": {
+    "title": "FlavorQuest - 探索永庆美食街",
+    "description": "位于芹苴永庆美食街的自动定位语音导览。离线优先的 PWA，提供多语言支持。",
+    "keywords": [
+      "美食之旅",
+      "语音导览",
+      "永庆",
+      "芹苴",
+      "美食",
+      "PWA"
+    ]
+  },
+  "manifest": {
+    "name": "FlavorQuest - 自动语音导览体验",
+    "shortName": "FlavorQuest",
+    "description": "通过基于位置的自动语音讲解探索永庆美食街。支持 6 种语言，可离线工作。",
+    "shortcuts": {
+      "startTour": {
+        "name": "开始游览",
+        "description": "开始自动游览"
+      },
+      "viewMap": {
+        "name": "查看地图",
+        "description": "查看游览地图"
+      }
+    }
+  },
   "common": {
     "loading": "加载中...",
     "error": "错误",
@@ -15,7 +42,24 @@
     "next": "下一步",
     "done": "完成",
     "yes": "是",
-    "no": "否"
+    "no": "否",
+    "allow": "允许",
+    "deny": "拒绝",
+    "browse": "浏览",
+    "privacyPolicy": "隐私政策"
+  },
+  "list": {
+    "searchPlaceholder": "搜索螺、海鲜、法式面包...",
+    "notFoundTitle": "未找到",
+    "notFoundDesc": "尝试搜索不同关键词",
+    "offlineBadge": "离线"
+  },
+  "categories": {
+    "all": "全部",
+    "snails": "螺类",
+    "seafood": "海鲜",
+    "grill": "烧烤",
+    "nearMe": "附近"
   },
   "tour": {
     "startTour": "开始游览",
@@ -24,6 +68,10 @@
     "stopTour": "结束游览",
     "autoMode": "自动模式",
     "manualMode": "手动模式",
+    "auto": "自动",
+    "manual": "手动",
+    "loadingPOIs": "正在加载地点...",
+    "searchingPOIs": "正在搜索附近地点...",
     "nearbyPOIs": "附近景点",
     "currentLocation": "当前位置",
     "distance": "距离",
@@ -35,8 +83,8 @@
     "usingTTS": "正在使用语音合成（离线）",
     "tooFast": "移动太快。请步行以收听讲解。",
     "locationDenied": "位置权限被拒绝。切换到手动模式。",
-    "httpsRequired": "错误：GPS需要HTTPS。请使用localhost或安装SSL。",
-    "gpsError": "GPS错误：{message}",
+    "httpsRequired": "错误：GPS 需要 HTTPS。请使用 localhost 或安装 SSL。",
+    "gpsError": "GPS 错误：{message}",
     "noAudioForPOI": "此位置没有音频"
   },
   "audio": {
@@ -71,7 +119,9 @@
     "ttsPitch": "语音音调",
     "mapType": "地图类型",
     "showVisitedPOIs": "显示已访问景点",
-    "batteryOptimization": "电池优化"
+    "batteryOptimization": "电池优化",
+    "geofenceClose": "近（精准）",
+    "geofenceFar": "远（广域）"
   },
   "history": {
     "title": "历史记录",
@@ -79,15 +129,22 @@
     "notVisited": "未访问",
     "visitedAt": "访问时间",
     "clear": "清除历史",
-    "empty": "暂无历史记录"
+    "empty": "暂无历史记录",
+    "justNow": "刚刚",
+    "minsAgo": "{mins} 分钟前",
+    "hoursAgo": "{hours} 小时前",
+    "today": "今天，{time}",
+    "yesterday": "昨天，{time}",
+    "listened": "已收听"
   },
   "map": {
     "title": "地图",
     "zoomIn": "放大",
     "zoomOut": "缩小",
     "centerMap": "回到当前位置",
-    "fullscreen": "全屏",
-    "layers": "地图图层"
+    "fullscreen": "全屏挑战",
+    "layers": "地图图层",
+    "loadingMap": "加载地图中..."
   },
   "poi": {
     "details": "详情",
@@ -96,7 +153,12 @@
     "estimatedHours": "营业时间",
     "directions": "路线",
     "playAudio": "播放音频",
-    "viewOnMap": "在地图上查看"
+    "viewOnMap": "在地图上查看",
+    "cuisine": "菜系",
+    "upNext": "下一站",
+    "district4": "胡志明市第四区",
+    "transcript": "文本",
+    "estimatedWalk": "步行 3 分钟"
   },
   "offline": {
     "status": "离线",
@@ -104,7 +166,42 @@
     "syncing": "同步中...",
     "syncComplete": "已同步",
     "cacheSize": "缓存大小",
-    "clearCache": "清除缓存"
+    "clearCache": "清除缓存",
+    "usingCachedData": "正在使用缓存数据",
+    "limitedFeatures": "部分功能不可用",
+    "uploading": "正在上传数据到服务器",
+    "syncError": "同步错误",
+    "retrySync": "点击重试",
+    "pendingSync": "等待同步",
+    "pendingItems": "{count} 项待同步",
+    "online": "在线",
+    "synced": "已同步",
+    "offlineMode": "离线模式",
+    "noConnection": "无连接",
+    "statusLabel": "状态",
+    "lastSync": "上次同步",
+    "notSyncedYet": "尚未同步",
+    "syncNow": "立即同步",
+    "tapToSync": "点击同步",
+    "downloadingAudio": "正在下载离线音频",
+    "downloadingContent": "正在下载离线内容",
+    "audioReady": "音频已离线就绪",
+    "audioDownloaded": "离线模式音频已下载",
+    "downloadError": "下载错误",
+    "retry": "重试",
+    "noAudioCache": "无音频缓存。请连接以下载。",
+    "updateCache": "更新缓存",
+    "downloadPromptTitle": "下载离线内容？",
+    "downloadPromptDesc": "您想下载所有音频和图像以供离线使用吗？",
+    "downloadPromptNote": "您可以随时在设置中更改此首选项。",
+    "downloadNow": "立即下载",
+    "downloadLater": "稍后",
+    "downloadStarted": "开始下载离线内容...",
+    "poisLabel": "景点",
+    "audioLabel": "音频讲解",
+    "imageLabel": "位置图片",
+    "successTitle": "离线模式已就绪",
+    "successMessage": "内容已成功下载。"
   },
   "battery": {
     "level": "电池电量",
@@ -162,5 +259,20 @@
     "didYouKnow": "你知道吗？",
     "nowPlaying": "正在播放：{name}",
     "errorPlaying": "音频错误，正在使用语音合成"
+  },
+  "permissions": {
+    "checking": "正在检查权限...",
+    "locationTitle": "启用定位以在摊位附近自动播放语音讲解",
+    "locationDesc": "当应用自动检测到您在永庆街的位置时，体验最佳。",
+    "denyPrompt": "不允许？",
+    "switchToManual": "切换到手动模式"
+  },
+  "units": {
+    "meters": "m",
+    "kilometers": "km",
+    "number": "第"
+  },
+  "sort": {
+    "az": "A-Z"
   }
 }
