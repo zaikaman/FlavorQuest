@@ -46,7 +46,7 @@ export function usePOIManager(options: UsePOIManagerOptions = {}) {
     const { data, error } = await supabase
       .from('pois')
       .select('*')
-      .eq('is_active', true)
+      .is('deleted_at', null)
       .order('priority', { ascending: false });
 
     if (error) {
