@@ -7,6 +7,7 @@
 
 import { useState, useEffect } from 'react';
 import { useLanguage } from '@/lib/contexts/LanguageContext';
+import { useTranslations } from '@/lib/hooks/useTranslations';
 import { usePOIManager } from '@/lib/hooks/usePOIManager';
 import { loadVisitHistory } from '@/lib/services/storage';
 import { getLocalizedPOI } from '@/lib/utils/localization';
@@ -25,6 +26,7 @@ interface HistoryItemWithPOI extends VisitHistoryEntry {
 
 export function HistoryView({ isOpen, onClose, onPlayPOI, onViewPOI }: HistoryViewProps) {
   const { language } = useLanguage();
+  const { t } = useTranslations();
   const { pois } = usePOIManager({ language });
   const [history, setHistory] = useState<HistoryItemWithPOI[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -105,8 +107,8 @@ export function HistoryView({ isOpen, onClose, onPlayPOI, onViewPOI }: HistoryVi
         <div className="sticky top-0 z-10 bg-background-dark border-b border-white/5 px-4 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-xl font-bold text-white">Lịch sử</h2>
-              <p className="text-sm text-muted">{history.length} địa điểm đã nghe</p>
+              <h2 className="text-xl font-bold text-white">{t('history.title')}</h2>
+              <p className="text-sm text-muted">{history.length} {t('history.visited')}</p>
             </div>
             <button
               onClick={onClose}
@@ -126,9 +128,9 @@ export function HistoryView({ isOpen, onClose, onPlayPOI, onViewPOI }: HistoryVi
           ) : history.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-center">
               <span className="material-symbols-outlined text-6xl text-muted mb-4">headphones_off</span>
-              <h3 className="text-white font-bold text-lg mb-2">Chưa có lịch sử</h3>
+              <h3 className="text-white font-bold text-lg mb-2">{t('history.empty')}</h3>
               <p className="text-muted text-sm">
-                Bắt đầu tour để nghe thuyết minh về các địa điểm ẩm thực.
+                {t('welcome.step3')}
               </p>
             </div>
           ) : (

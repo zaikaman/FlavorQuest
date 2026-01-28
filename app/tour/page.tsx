@@ -1,6 +1,7 @@
 /**
  * Main Tour Page
  * Phase 5 - Manual mode, settings, history, bottom nav integration
+ * Phase 6 - Multi-language support
  * 
  * Features:
  * - Auto/Manual mode toggle (T104-T105)
@@ -8,6 +9,7 @@
  * - Settings panel (T094-T098)
  * - History view (T099-T101)
  * - Map interactions (T106-T108)
+ * - Multi-language UI (T114-T117)
  */
 
 'use client';
@@ -20,6 +22,7 @@ import { useAudioPlayer } from '@/lib/hooks/useAudioPlayer';
 import { usePOIManager } from '@/lib/hooks/usePOIManager';
 import { useOfflineSync } from '@/lib/hooks/useOfflineSync';
 import { useLanguage } from '@/lib/contexts/LanguageContext';
+import { useTranslations } from '@/lib/hooks/useTranslations';
 import { InteractiveMap } from '@/components/tour/InteractiveMap';
 import { NarrationOverlay } from '@/components/tour/NarrationOverlay';
 import { AudioPlayer } from '@/components/tour/AudioPlayer';
@@ -41,6 +44,7 @@ import { GEOFENCE_TRIGGER_RADIUS_M, MAX_WALKING_SPEED_KMH } from '@/lib/constant
 export default function TourPage() {
   const router = useRouter();
   const { language } = useLanguage();
+  const { t } = useTranslations();
 
   // Geolocation
   const { coordinates, accuracy, heading, error: geoError, permissionState } = useGeolocation();
@@ -52,11 +56,11 @@ export default function TourPage() {
     autoSync: true,
     onSyncSuccess: (count) => {
       if (count > 0) {
-        showToastMessage(`Đã đồng bộ ${count} sự kiện`);
+        showToastMessage(t('tour.syncedEvents', { count: String(count) }));
       }
     },
     onOfflineReady: () => {
-      showToastMessage('Sẵn sàng sử dụng ngoại tuyến');
+      showToastMessage(t('tour.offlineReady'));
     },
   });
 
@@ -72,7 +76,7 @@ export default function TourPage() {
     preloadRadius: 500,
     onOfflineReady: () => {
       setIsOfflineReady(true);
-      showToastMessage('Dữ liệu đã được lưu, sẵn sàng ngoại tuyến');
+      showToastMessage(t('tour.dataSaved'));
     },
   });
 
@@ -99,10 +103,16 @@ export default function TourPage() {
   // Load settings on mount
   useEffect(() => {
     loadSettings().then(s => {
+      console.log('[TourPage] Loaded settings with language:', s.language);
       setSettings(s);
       setIsAutoMode(s.autoPlayEnabled);
     });
   }, []);
+
+  // Log current language for debugging
+  useEffect(() => {
+    console.log('[TourPage] Current language from context:', language);
+  }, [language]);
 
   // Toast helper
   const showToastMessage = useCallback((message: string) => {
@@ -113,8 +123,8 @@ export default function TourPage() {
 
   // Handle TTS fallback
   const handleTTSFallback = useCallback(() => {
-    showToastMessage('Đang sử dụng giọng đọc tổng hợp (offline)');
-  }, [showToastMessage]);
+    showToastMessage(t('tour.usingTTS'));
+  }, [showToastMessage, t]);
 
   // Handle audio ended
   const handleAudioEnded = useCallback(async () => {
@@ -163,7 +173,7 @@ export default function TourPage() {
     // Check speed
     const currentSpeed = speedCalculatorRef.current.getSpeedKmh();
     if (currentSpeed !== null && currentSpeed > MAX_WALKING_SPEED_KMH) {
-      showToastMessage(`Di chuyển quá nhanh. Vui lòng đi bộ để nghe thuyết minh.`);
+      showToastMessage(t('tour.tooFast'));
       return;
     }
 
@@ -194,8 +204,8 @@ export default function TourPage() {
       listened: true,
     });
 
-    showToastMessage(`Đang phát: ${localizedPOI.name}`);
-  }, [isAutoMode, language, enqueue, showToastMessage]);
+    showToastMessage(t('tour.nowPlaying', { name: localizedPOI.name }));
+  }, [isAutoMode, language, enqueue, showToastMessage, t]);
 
   // Geofencing - detect POI entry
   const { nearbyPOIs } = useGeofencing(
@@ -235,10 +245,10 @@ export default function TourPage() {
   // Handle permission denied
   useEffect(() => {
     if (permissionState === 'denied') {
-      showToastMessage('Vị trí bị từ chối. Chuyển sang chế độ thủ công.');
+      showToastMessage(t('tour.locationDenied'));
       setIsAutoMode(false);
     }
-  }, [permissionState, showToastMessage]);
+  }, [permissionState, showToastMessage, t]);
 
   // Handle geolocation error
   useEffect(() => {
@@ -252,7 +262,7 @@ export default function TourPage() {
       // Check for insecure origin (common issue on local network testing)
       if (typeof window !== 'undefined' && window.location.protocol === 'http:' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
         console.warn('Geolocation requires a secure context (HTTPS) or localhost.');
-        showToastMessage('Lỗi: GPS yêu cầu HTTPS. Vui lòng dùng localhost hoặc cài đặt SSL.');
+        showToastMessage(t('tour.httpsRequired'));
         return;
       }
 
@@ -260,12 +270,12 @@ export default function TourPage() {
       // 1 = PERMISSION_DENIED (handled by permissionState effect)
       // 3 = TIMEOUT (suppressed per user request as it happens during idle)
       if (errorCode !== 1 && errorCode !== 3) {
-        showToastMessage(`Lỗi GPS: ${errorMsg}`);
+        showToastMessage(t('tour.gpsError', { message: errorMsg }));
       } else if (errorCode === 3) {
         console.warn(`Geolocation timeout (background/idle): ${errorMsg}`);
       }
     }
-  }, [geoError, showToastMessage]);
+  }, [geoError, showToastMessage, t]);
 
   // Handle skip
   const handleSkip = useCallback(async () => {
@@ -295,7 +305,7 @@ export default function TourPage() {
     console.log('[handlePlayPOI] Audio URL:', audioUrl);
 
     if (!audioUrl) {
-      showToastMessage('Không có audio cho địa điểm này');
+      showToastMessage(t('tour.noAudioForPOI'));
       return;
     }
 
@@ -322,8 +332,8 @@ export default function TourPage() {
       listened: true,
     });
 
-    showToastMessage(`Đang phát: ${localizedPOI.name}`);
-  }, [language, enqueue, showToastMessage, accuracy]);
+    showToastMessage(t('tour.nowPlaying', { name: localizedPOI.name }));
+  }, [language, enqueue, showToastMessage, accuracy, t]);
 
   // Handle view POI detail
   const handleViewPOI = useCallback((poi: POI) => {
@@ -345,10 +355,10 @@ export default function TourPage() {
   const toggleAutoMode = useCallback(() => {
     setIsAutoMode(prev => {
       const newMode = !prev;
-      showToastMessage(newMode ? 'Chế độ tự động' : 'Chế độ thủ công');
+      showToastMessage(newMode ? t('tour.autoMode') : t('tour.manualMode'));
       return newMode;
     });
-  }, [showToastMessage]);
+  }, [showToastMessage, t]);
 
   // Check offline readiness
   useEffect(() => {

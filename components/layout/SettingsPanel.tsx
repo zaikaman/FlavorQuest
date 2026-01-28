@@ -7,6 +7,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useLanguage } from '@/lib/contexts/LanguageContext';
+import { useTranslations } from '@/lib/hooks/useTranslations';
 import { loadSettings, saveSettings } from '@/lib/services/storage';
 import type { UserSettings, Language } from '@/lib/types/index';
 import { GEOFENCE_RADIUS_METERS } from '@/lib/constants/index';
@@ -27,6 +28,7 @@ const LANGUAGE_FLAGS: Record<Language, string> = {
 
 export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
   const { language, setLanguage, availableLanguages } = useLanguage();
+  const { t } = useTranslations();
   const [settings, setSettings] = useState<UserSettings>({
     language: 'vi',
     volume: 0.8,
@@ -80,7 +82,7 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
         {/* Header */}
         <div className="sticky top-0 z-10 bg-background-dark border-b border-white/5 px-4 py-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-bold text-white">Cài đặt</h2>
+            <h2 className="text-xl font-bold text-white">{t('settings.title')}</h2>
             <button
               onClick={onClose}
               className="flex h-10 w-10 items-center justify-center rounded-full bg-white/5 text-white hover:bg-white/10"
@@ -100,7 +102,7 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
             <>
               {/* Language Section */}
               <section className="mb-6">
-                <h3 className="text-white font-bold text-lg mb-3">Ngôn ngữ</h3>
+                <h3 className="text-white font-bold text-lg mb-3">{t('settings.language')}</h3>
                 <div className="grid grid-cols-3 gap-2">
                   {availableLanguages.map((lang) => (
                     <button
@@ -124,13 +126,13 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
 
               {/* Tour Experience Section */}
               <section className="mb-6">
-                <h3 className="text-white font-bold text-lg mb-3">Trải nghiệm Tour</h3>
+                <h3 className="text-white font-bold text-lg mb-3">{t('settings.title')}</h3>
                 
                 {/* Auto Play Toggle */}
                 <div className="flex items-center justify-between py-3">
                   <div>
-                    <p className="text-white font-medium">Tự động phát</p>
-                    <p className="text-sm text-muted">Phát thuyết minh khi đến gần địa điểm</p>
+                    <p className="text-white font-medium">{t('settings.autoMode')}</p>
+                    <p className="text-sm text-muted">{t('tour.autoMode')}</p>
                   </div>
                   <label className="relative inline-flex items-center cursor-pointer">
                     <input
@@ -146,7 +148,7 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
                 {/* Volume Slider */}
                 <div className="py-3">
                   <div className="flex items-center justify-between mb-2">
-                    <p className="text-white font-medium">Âm lượng</p>
+                    <p className="text-white font-medium">{t('settings.volume')}</p>
                     <span className="text-sm text-muted">{Math.round(settings.volume * 100)}%</span>
                   </div>
                   <div className="flex items-center gap-3">
@@ -166,7 +168,7 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
                 {/* Geofence Radius Slider */}
                 <div className="py-3">
                   <div className="flex items-center justify-between mb-2">
-                    <p className="text-white font-medium">Bán kính kích hoạt</p>
+                    <p className="text-white font-medium">{t('settings.geofenceRadius')}</p>
                     <span className="text-sm text-muted">{settings.geofenceRadius}m</span>
                   </div>
                   <input
@@ -190,12 +192,12 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
 
               {/* Battery Section */}
               <section className="mb-6">
-                <h3 className="text-white font-bold text-lg mb-3">Tiết kiệm pin</h3>
+                <h3 className="text-white font-bold text-lg mb-3">{t('battery.lowPowerMode')}</h3>
                 
                 <div className="flex items-center justify-between py-3">
                   <div>
-                    <p className="text-white font-medium">Chế độ tiết kiệm pin</p>
-                    <p className="text-sm text-muted">Giảm độ chính xác GPS để tiết kiệm pin</p>
+                    <p className="text-white font-medium">{t('settings.batteryOptimization')}</p>
+                    <p className="text-sm text-muted">{t('battery.recommendation')}</p>
                   </div>
                   <label className="relative inline-flex items-center cursor-pointer">
                     <input

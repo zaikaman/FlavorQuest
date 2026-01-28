@@ -22,12 +22,22 @@
     "pauseTour": "Pause",
     "resumeTour": "Resume",
     "stopTour": "Stop Tour",
-    "autoMode": "Auto Play",
+    "autoMode": "Auto Mode",
     "manualMode": "Manual Mode",
     "nearbyPOIs": "Nearby Points",
     "currentLocation": "Current Location",
     "distance": "Distance",
-    "priority": "Priority"
+    "priority": "Priority",
+    "nowPlaying": "Now Playing: {name}",
+    "syncedEvents": "Synced {count} events",
+    "offlineReady": "Ready for offline use",
+    "dataSaved": "Data saved, ready for offline",
+    "usingTTS": "Using text-to-speech (offline)",
+    "tooFast": "Moving too fast. Please walk to listen to narration.",
+    "locationDenied": "Location denied. Switching to manual mode.",
+    "httpsRequired": "Error: GPS requires HTTPS. Please use localhost or install SSL.",
+    "gpsError": "GPS Error: {message}",
+    "noAudioForPOI": "No audio available for this location"
   },
   "audio": {
     "play": "Play",
@@ -127,5 +137,28 @@
     "step2": "Walk to Vinh Khanh street",
     "step3": "Audio narration plays automatically near food stalls",
     "getStarted": "Get Started"
-  }
+  },
+  "splash": {
+    "subtitle": "Discover Vinh Khanh Culinary Journey",
+    "startTour": "Start Tour",
+    "browse": "Browse manually",
+    "settings": "Settings"  },
+  "login": {
+    "title": "FlavorQuest Login",
+    "subtitle": "Save your progress and sync your experience",
+    "prompt": "Sign in with your Google account to continue",
+    "signInWithGoogle": "Sign in with Google",
+    "or": "or",
+    "backToHome": "Back to Home",
+    "error": "Sign in failed. Please try again."
+  },
+  "poiDetail": {
+    "notFound": "Location Not Found",
+    "notFoundMessage": "This location may have been deleted or doesn't exist.",
+    "playNarration": "Play Narration",
+    "introduction": "Introduction",
+    "noDescription": "No description available for this location.",
+    "didYouKnow": "Did You Know?",
+    "nowPlaying": "Now Playing: {name}",
+    "errorPlaying": "Audio error, using text-to-speech"  }
 }

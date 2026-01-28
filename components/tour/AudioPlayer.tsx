@@ -9,6 +9,7 @@
 import { useCallback } from 'react';
 import type { POI } from '@/lib/types/index';
 import { useLanguage } from '@/lib/contexts/LanguageContext';
+import { useTranslations } from '@/lib/hooks/useTranslations';
 import { getLocalizedPOI } from '@/lib/utils/localization';
 
 export interface AudioPlayerProps {
@@ -50,6 +51,7 @@ export function AudioPlayer({
   onClose,
 }: AudioPlayerProps) {
   const { language } = useLanguage();
+  const { t } = useTranslations();
 
   const handleSeek = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -85,8 +87,8 @@ export function AudioPlayer({
           <span className="material-symbols-outlined text-3xl">keyboard_arrow_down</span>
         </button>
         <div className="flex flex-col items-center">
-          <span className="text-xs font-medium text-white/60 uppercase tracking-widest">Now Playing</span>
-          <span className="text-sm font-bold text-white">Vinh Khanh Street Tour</span>
+          <span className="text-xs font-medium text-white/60 uppercase tracking-widest">{t('audio.play')}</span>
+          <span className="text-sm font-bold text-white">{t('app.tagline')}</span>
         </div>
         <button className="flex items-center justify-center size-10 rounded-full bg-white/5 active:bg-white/10 transition-colors text-white">
           <span className="material-symbols-outlined">queue_music</span>

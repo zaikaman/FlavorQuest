@@ -7,6 +7,7 @@
 
 import { useState, useMemo } from 'react';
 import { useLanguage } from '@/lib/contexts/LanguageContext';
+import { useTranslations } from '@/lib/hooks/useTranslations';
 import { getLocalizedPOI } from '@/lib/utils/localization';
 import { calculateDistance } from '@/lib/utils/distance';
 import type { POI, Coordinates } from '@/lib/types/index';
@@ -31,6 +32,7 @@ export function POIListView({
   isOfflineReady = false,
 }: POIListViewProps) {
   const { language } = useLanguage();
+  const { t } = useTranslations();
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<SortOption>('distance');
   const [filterCategory, setFilterCategory] = useState<string>('all');
@@ -84,14 +86,14 @@ export function POIListView({
       {/* Header */}
       <div className="sticky top-16 z-20 bg-background-dark/95 backdrop-blur-md border-b border-white/5 px-4 py-3">
         <div className="flex items-center justify-between mb-3">
-          <h1 className="text-xl font-bold text-white">Khám phá Vĩnh Khánh</h1>
+          <h1 className="text-xl font-bold text-white">{t('splash.subtitle')}</h1>
           <button 
             onClick={() => setSortBy(sortBy === 'distance' ? 'priority' : sortBy === 'priority' ? 'name' : 'distance')}
             className="flex items-center gap-1.5 text-primary"
           >
             <span className="material-symbols-outlined text-lg">sort</span>
             <span className="text-sm font-bold uppercase">
-              {sortBy === 'distance' ? 'Gần nhất' : sortBy === 'priority' ? 'Nổi bật' : 'A-Z'}
+              {sortBy === 'distance' ? t('tour.distance') : sortBy === 'priority' ? t('tour.priority') : 'A-Z'}
             </span>
           </button>
         </div>

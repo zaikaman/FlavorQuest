@@ -22,12 +22,22 @@
     "pauseTour": "일시 정지",
     "resumeTour": "재개",
     "stopTour": "투어 종료",
-    "autoMode": "자동 재생",
+    "autoMode": "자동 모드",
     "manualMode": "수동 모드",
     "nearbyPOIs": "근처 장소",
     "currentLocation": "현재 위치",
     "distance": "거리",
-    "priority": "우선순위"
+    "priority": "우선순위",
+    "nowPlaying": "재생 중: {name}",
+    "syncedEvents": "{count}개의 이벤트 동기화 완료",
+    "offlineReady": "오프라인 사용 가능",
+    "dataSaved": "데이터 저장됨, 오프라인 준비 완료",
+    "usingTTS": "음성 합성 사용 중 (오프라인)",
+    "tooFast": "너무 빠르게 이동 중입니다. 오디오 가이드를 듣기 위해 걸어주세요.",
+    "locationDenied": "위치 권한이 거부되었습니다. 수동 모드로 전환합니다.",
+    "httpsRequired": "오류: GPS에는 HTTPS가 필요합니다. localhost 또는 SSL을 사용하세요.",
+    "gpsError": "GPS 오류: {message}",
+    "noAudioForPOI": "이 장소의 오디오가 없습니다"
   },
   "audio": {
     "play": "재생",
@@ -127,5 +137,28 @@
     "step2": "빈칸 거리로 걸어가기",
     "step3": "음식점 근처에서 오디오 내레이션이 자동 재생됩니다",
     "getStarted": "시작하기"
-  }
+  },
+  "splash": {
+    "subtitle": "빈칸 미식 여행을 발견하세요",
+    "startTour": "투어 시작",
+    "browse": "수동 탐색",
+    "settings": "설정"  },
+  "login": {
+    "title": "FlavorQuest 로그인",
+    "subtitle": "진행 상황을 저장하고 경험을 동기화하세요",
+    "prompt": "계속하려면 Google 계정으로 로그인하세요",
+    "signInWithGoogle": "Google로 로그인",
+    "or": "또는",
+    "backToHome": "홈으로 돌아가기",
+    "error": "로그인 실패. 다시 시도하세요."
+  },
+  "poiDetail": {
+    "notFound": "위치를 찾을 수 없음",
+    "notFoundMessage": "이 위치가 삭제되었거나 존재하지 않습니다.",
+    "playNarration": "나레이션 재생",
+    "introduction": "소개",
+    "noDescription": "이 위치에 대한 설명이 없습니다.",
+    "didYouKnow": "아시나요?",
+    "nowPlaying": "재생 중: {name}",
+    "errorPlaying": "오디오 오류, 음성 합성 사용 중"  }
 }

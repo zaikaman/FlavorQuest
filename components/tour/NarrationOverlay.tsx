@@ -8,6 +8,7 @@
 
 import type { POI } from '@/lib/types/index';
 import { useLanguage } from '@/lib/contexts/LanguageContext';
+import { useTranslations } from '@/lib/hooks/useTranslations';
 import { getLocalizedPOI } from '@/lib/utils/localization';
 
 export interface NarrationOverlayProps {
@@ -35,6 +36,7 @@ export function NarrationOverlay({
   onExpand,
 }: NarrationOverlayProps) {
   const { language } = useLanguage();
+  const { t } = useTranslations();
   const localizedPOI = getLocalizedPOI(currentPOI, language);
   const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
 
@@ -55,7 +57,7 @@ export function NarrationOverlay({
         {/* Content */}
         <div className="flex flex-col min-w-0 flex-1">
           <span className="text-[10px] font-bold uppercase tracking-wider text-seafood-green">
-            {isPlaying ? 'Now Playing' : 'Approaching Next Stop'}
+            {isPlaying ? t('audio.play') : t('tour.nearbyPOIs')}
           </span>
           <span className="truncate text-sm font-semibold text-white">
             {localizedPOI.name}

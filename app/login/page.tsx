@@ -8,12 +8,14 @@
 import { useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/lib/contexts/AuthContext';
+import { useTranslations } from '@/lib/hooks/useTranslations';
 import { signInWithGoogle } from '@/lib/services/auth';
 
 export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, isLoading } = useAuth();
+  const { t } = useTranslations();
   const error = searchParams.get('error');
 
   useEffect(() => {
@@ -57,8 +59,8 @@ export default function LoginPage() {
           <div className="inline-block p-4 bg-primary/10 rounded-full shadow-[0_0_15px_rgba(242,108,13,0.3)] mb-4 border border-primary/20 backdrop-blur-sm">
             <span className="material-symbols-outlined text-primary text-5xl drop-shadow-lg">restaurant</span>
           </div>
-          <h1 className="text-3xl font-extrabold text-white mb-2 tracking-tight drop-shadow-md">Đăng nhập FlavorQuest</h1>
-          <p className="text-gray-400 font-medium">Lưu tiến độ và đồng bộ trải nghiệm của bạn</p>
+          <h1 className="text-3xl font-extrabold text-white mb-2 tracking-tight drop-shadow-md">{t('login.title')}</h1>
+          <p className="text-gray-400 font-medium">{t('login.subtitle')}</p>
         </div>
 
         {/* Error Message */}
@@ -66,7 +68,7 @@ export default function LoginPage() {
           <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-xl backdrop-blur-md">
             <p className="text-red-400 text-sm text-center font-medium flex items-center justify-center gap-2">
               <span className="material-symbols-outlined text-lg">error</span>
-              Đăng nhập thất bại. Vui lòng thử lại.
+              {t('login.error')}
             </p>
           </div>
         )}
@@ -77,7 +79,7 @@ export default function LoginPage() {
             {/* Info */}
             <div className="text-center">
               <p className="text-sm text-gray-300">
-                Đăng nhập bằng tài khoản Google để tiếp tục
+                {t('login.prompt')}
               </p>
             </div>
 
@@ -104,7 +106,7 @@ export default function LoginPage() {
                   d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
                 />
               </svg>
-              <span>Đăng nhập với Google</span>
+              <span>{t('login.signInWithGoogle')}</span>
             </button>
 
             {/* Divider */}
@@ -113,7 +115,7 @@ export default function LoginPage() {
                 <div className="w-full border-t border-white/10"></div>
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-4 bg-transparent text-gray-500 font-medium">hoặc</span>
+                <span className="px-4 bg-transparent text-gray-500 font-medium">{t('login.or')}</span>
               </div>
             </div>
 
@@ -123,7 +125,7 @@ export default function LoginPage() {
               className="w-full flex items-center justify-center gap-2 text-primary font-bold py-3 px-6 rounded-xl hover:bg-primary/10 transition-all duration-200 border border-transparent hover:border-primary/20"
             >
               <span className="material-symbols-outlined text-xl">arrow_back</span>
-              <span>Quay lại trang chủ</span>
+              <span>{t('login.backToHome')}</span>
             </button>
           </div>
         </div>

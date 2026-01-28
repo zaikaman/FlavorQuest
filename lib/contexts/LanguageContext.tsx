@@ -89,7 +89,14 @@ export function LanguageProvider({ children, defaultLanguage = 'vi' }: LanguageP
       try {
         const settings = await loadSettings();
         if (settings.language) {
+          console.log('[LanguageContext] Loading saved language:', settings.language);
           setLanguageState(settings.language);
+          // Update HTML lang attribute
+          if (typeof document !== 'undefined') {
+            document.documentElement.lang = settings.language;
+          }
+        } else {
+          console.log('[LanguageContext] No saved language, using default: vi');
         }
       } catch (error) {
         console.error('Failed to load language from storage:', error);
@@ -106,6 +113,8 @@ export function LanguageProvider({ children, defaultLanguage = 'vi' }: LanguageP
    */
   const setLanguage = useCallback(async (newLanguage: Language) => {
     try {
+      console.log('[LanguageContext] Changing language to:', newLanguage);
+      
       // Update state
       setLanguageState(newLanguage);
 
@@ -116,6 +125,8 @@ export function LanguageProvider({ children, defaultLanguage = 'vi' }: LanguageP
       if (typeof document !== 'undefined') {
         document.documentElement.lang = newLanguage;
       }
+      
+      console.log('[LanguageContext] Language changed successfully to:', newLanguage);
     } catch (error) {
       console.error('Failed to save language to storage:', error);
       // Still update state even if storage fails

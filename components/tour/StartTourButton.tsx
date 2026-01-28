@@ -14,6 +14,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { logTourStart } from '@/lib/services/analytics';
 import { useLanguage } from '@/lib/contexts/LanguageContext';
+import { useTranslations } from '@/lib/hooks/useTranslations';
 
 export interface StartTourButtonProps {
   onStart?: () => void;
@@ -25,6 +26,7 @@ export interface StartTourButtonProps {
 export function StartTourButton({ onStart, className = '', disabled = false, isAuthenticated }: StartTourButtonProps) {
   const router = useRouter();
   const { language } = useLanguage();
+  const { t } = useTranslations();
   const [isLoading, setIsLoading] = useState(false);
 
   const handleStart = async () => {
@@ -33,6 +35,12 @@ export function StartTourButton({ onStart, className = '', disabled = false, isA
     setIsLoading(true);
 
     try {
+      console.log('[StartTourButton] Starting tour with language:', language);
+      
+      // Đảm bảo language đã được lưu vào IndexedDB
+      // Thêm delay nhỏ để tránh race condition với setLanguage
+      await new Promise(resolve => setTimeout(resolve, 150));
+
       // Log analytics
       await logTourStart(language);
 
@@ -40,6 +48,8 @@ export function StartTourButton({ onStart, className = '', disabled = false, isA
       if (onStart) {
         onStart();
       }
+
+      console.log('[StartTourButton] Navigating to tour page...');
 
       // Navigate based on auth state
       if (isAuthenticated) {
@@ -72,7 +82,7 @@ export function StartTourButton({ onStart, className = '', disabled = false, isA
       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]"></div>
 
       <span className="mr-2">
-        {isLoading ? 'Đang tải...' : 'Bắt đầu Tour'}
+        {isLoading ? t('common.loading') : t('splash.startTour')}
       </span>
 
       {!isLoading && (
