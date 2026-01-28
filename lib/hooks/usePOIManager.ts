@@ -269,7 +269,8 @@ export function usePOIManager(options: UsePOIManagerOptions = {}) {
     if (opts.autoFetch) {
       loadPOIsWithCache();
     }
-  }, [opts.autoFetch, loadPOIsWithCache]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Listen for online/offline events
   useEffect(() => {

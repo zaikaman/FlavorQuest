@@ -230,7 +230,7 @@ export function InteractiveMap({
       {/* Map Container */}
       <div 
         ref={mapContainerRef} 
-        className="absolute inset-0 map-bg"
+        className="h-full w-full map-bg z-1"
       />
 
       {/* Loading State */}
@@ -243,26 +243,10 @@ export function InteractiveMap({
         </div>
       )}
 
-      {/* Top Status Bar */}
-      <div className="absolute top-0 left-0 right-0 z-[1000] flex items-start justify-between p-4 pt-12 pointer-events-none">
-        {/* Offline Status Chip */}
-        <div className="pointer-events-auto flex h-9 items-center gap-x-2 rounded-full bg-[#3a2d25]/90 backdrop-blur-md border border-white/10 pl-3 pr-4 shadow-lg">
-          <span className={`material-symbols-outlined text-[18px] ${isOfflineReady ? 'text-green-500' : 'text-yellow-500'}`}>
-            {isOfflineReady ? 'check_circle' : 'cloud_off'}
-          </span>
-          <p className="text-white text-xs font-medium tracking-wide">
-            {isOfflineReady ? 'Sẵn sàng Offline' : 'Đang tải...'}
-          </p>
-        </div>
 
-        {/* Settings Button */}
-        <button className="pointer-events-auto flex h-10 w-10 items-center justify-center rounded-full bg-[#3a2d25]/90 backdrop-blur-md border border-white/10 shadow-lg text-[#cba990] hover:bg-[#493222] transition-colors">
-          <span className="material-symbols-outlined text-[20px]">tune</span>
-        </button>
-      </div>
 
       {/* Right Side Controls */}
-      <div className="absolute right-4 top-1/2 z-[1000] flex -translate-y-1/2 flex-col gap-3 pointer-events-none">
+      <div className="absolute right-4 top-1/2 z-20 flex -translate-y-1/2 flex-col gap-3 pointer-events-none">
         {/* Zoom Controls */}
         <div className="flex flex-col gap-0.5 rounded-lg bg-[#342418]/90 backdrop-blur shadow-lg pointer-events-auto border border-white/5">
           <button 
@@ -291,7 +275,7 @@ export function InteractiveMap({
 
       {/* Selected POI Card */}
       {selectedPOI && (
-        <div className="absolute bottom-24 left-4 right-4 z-[1000] animate-slideInUp">
+        <div className="absolute bottom-20 left-4 right-4 z-20 animate-slideInUp">
           <div className="relative flex items-center gap-4 rounded-xl bg-[#2a1e16]/95 backdrop-blur-xl border border-white/5 p-3 shadow-2xl ring-1 ring-black/20">
             {/* Close Button */}
             <button 
