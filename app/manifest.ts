@@ -1,11 +1,11 @@
 import type { MetadataRoute } from 'next';
+import vi from '@/locales/vi.json';
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'FlavorQuest - Trải Nghiệm Thuyết Minh Âm Thanh Tự Động',
-    short_name: 'FlavorQuest',
-    description:
-      'Khám phá phố ẩm thực Vĩnh Khánh với thuyết minh âm thanh tự động dựa trên vị trí. Hỗ trợ 6 ngôn ngữ, hoạt động offline.',
+    name: vi.manifest.name,
+    short_name: vi.manifest.shortName,
+    description: vi.manifest.description,
     start_url: '/',
     display: 'standalone',
     background_color: '#ffffff',
@@ -98,16 +98,16 @@ export default function manifest(): MetadataRoute.Manifest {
     },
     shortcuts: [
       {
-        name: 'Bắt đầu tour',
+        name: vi.manifest.shortcuts.startTour.name,
         short_name: 'Tour',
-        description: 'Bắt đầu tour tự động',
+        description: vi.manifest.shortcuts.startTour.description,
         url: '/tour',
         icons: [{ src: '/icons/icon-96x96.png', sizes: '96x96' }],
       },
       {
-        name: 'Xem bản đồ',
+        name: vi.manifest.shortcuts.viewMap.name,
         short_name: 'Bản đồ',
-        description: 'Xem bản đồ điểm tham quan',
+        description: vi.manifest.shortcuts.viewMap.description,
         url: '/tour?view=map',
         icons: [{ src: '/icons/icon-96x96.png', sizes: '96x96' }],
       },

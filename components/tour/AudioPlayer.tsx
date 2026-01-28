@@ -110,14 +110,14 @@ export function AudioPlayer({
             ) : (
               <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-background-dark"></div>
             )}
-            
+
             {/* Gradient Overlay */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
-            
+
             {/* Location Badge */}
             <div className="absolute bottom-4 left-4 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-lg flex items-center gap-1.5 border border-white/10">
               <span className="material-symbols-outlined text-primary text-sm">location_on</span>
-              <span className="text-xs font-medium text-white">District 4, HCMC</span>
+              <span className="text-xs font-medium text-white">{t('poi.district4')}</span>
             </div>
           </div>
         </div>
@@ -216,7 +216,7 @@ export function AudioPlayer({
             <div className="bg-surface-dark/50 rounded-xl p-5 border border-white/5">
               <div className="flex items-center gap-2 mb-3">
                 <span className="material-symbols-outlined text-primary text-lg">description</span>
-                <h3 className="text-sm font-bold text-white uppercase tracking-wider">Transcript</h3>
+                <h3 className="text-sm font-bold text-white uppercase tracking-wider">{t('poi.transcript')}</h3>
               </div>
               <div className="prose prose-invert prose-sm max-w-none">
                 <p className="text-white/70 leading-relaxed whitespace-pre-line">
@@ -233,8 +233,8 @@ export function AudioPlayer({
         <div className="absolute bottom-0 left-0 w-full z-30">
           <div className="bg-[rgba(46,33,26,0.6)] backdrop-blur-md border-t border-white/10 p-4 pb-8">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-primary">POI gần tiếp theo (Up Next)</span>
-              <span className="text-[10px] font-medium text-white/40">3 min walk</span>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-primary">{t('poi.upNext')}</span>
+              <span className="text-[10px] font-medium text-white/40">{t('poi.estimatedWalk')}</span>
             </div>
             <div className="flex items-center gap-3 bg-white/5 p-2 rounded-lg border border-white/5 hover:bg-white/10 transition-colors cursor-pointer">
               {/* Thumbnail */}
@@ -247,7 +247,7 @@ export function AudioPlayer({
               ) : (
                 <div className="size-12 rounded bg-primary/20 shrink-0"></div>
               )}
-              
+
               {/* Text Info */}
               <div className="flex-1 min-w-0">
                 <h4 className="text-sm font-bold text-white truncate">
@@ -257,7 +257,7 @@ export function AudioPlayer({
                   {getLocalizedPOI(nextPOI, language).description}
                 </p>
               </div>
-              
+
               {/* Action */}
               <button className="size-8 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-primary hover:text-white transition-colors">
                 <span className="material-symbols-outlined text-lg">play_arrow</span>

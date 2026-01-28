@@ -3,6 +3,33 @@
     "name": "FlavorQuest",
     "tagline": "Khám phá ẩm thực Vĩnh Khánh qua âm thanh"
   },
+  "metadata": {
+    "title": "FlavorQuest - Khám Phá Ẩm Thực Vĩnh Khánh",
+    "description": "Tour âm thanh tự động dẫn đường khám phá ẩm thực phố Vĩnh Khánh, Cần Thơ. Offline-first PWA với hỗ trợ đa ngôn ngữ.",
+    "keywords": [
+      "food tour",
+      "audio guide",
+      "Vĩnh Khánh",
+      "Cần Thơ",
+      "ẩm thực",
+      "PWA"
+    ]
+  },
+  "manifest": {
+    "name": "FlavorQuest - Trải Nghiệm Thuyết Minh Âm Thanh Tự Động",
+    "shortName": "FlavorQuest",
+    "description": "Khám phá phố ẩm thực Vĩnh Khánh với thuyết minh âm thanh tự động dựa trên vị trí. Hỗ trợ 6 ngôn ngữ, hoạt động offline.",
+    "shortcuts": {
+      "startTour": {
+        "name": "Bắt đầu tour",
+        "description": "Bắt đầu tour tự động"
+      },
+      "viewMap": {
+        "name": "Xem bản đồ",
+        "description": "Xem bản đồ điểm tham quan"
+      }
+    }
+  },
   "common": {
     "loading": "Đang tải...",
     "error": "Lỗi",
@@ -15,7 +42,24 @@
     "next": "Tiếp theo",
     "done": "Hoàn thành",
     "yes": "Có",
-    "no": "Không"
+    "no": "Không",
+    "allow": "Cho phép",
+    "deny": "Từ chối",
+    "browse": "Khám phá",
+    "privacyPolicy": "Chính sách bảo mật"
+  },
+  "list": {
+    "searchPlaceholder": "Tìm ốc, hải sản, bánh mì...",
+    "notFoundTitle": "Không tìm thấy",
+    "notFoundDesc": "Thử tìm kiếm với từ khóa khác",
+    "offlineBadge": "Offline"
+  },
+  "categories": {
+    "all": "Tất cả",
+    "snails": "Ốc",
+    "seafood": "Hải sản",
+    "grill": "Nướng",
+    "nearMe": "Gần tôi"
   },
   "tour": {
     "startTour": "Bắt đầu Tour",
@@ -24,6 +68,10 @@
     "stopTour": "Dừng Tour",
     "autoMode": "Chế độ tự động",
     "manualMode": "Chế độ thủ công",
+    "auto": "Tự động",
+    "manual": "Thủ công",
+    "loadingPOIs": "Đang tải địa điểm...",
+    "searchingPOIs": "Đang tìm điểm gần đây...",
     "nearbyPOIs": "Điểm gần đây",
     "currentLocation": "Vị trí hiện tại",
     "distance": "Khoảng cách",
@@ -71,7 +119,9 @@
     "ttsPitch": "Cao độ giọng",
     "mapType": "Loại bản đồ",
     "showVisitedPOIs": "Hiện điểm đã thăm",
-    "batteryOptimization": "Tối ưu pin"
+    "batteryOptimization": "Tối ưu pin",
+    "geofenceClose": "Gần (chính xác)",
+    "geofenceFar": "Xa (rộng)"
   },
   "history": {
     "title": "Lịch sử",
@@ -79,7 +129,13 @@
     "notVisited": "Chưa thăm",
     "visitedAt": "Thăm lúc",
     "clear": "Xóa lịch sử",
-    "empty": "Chưa có lịch sử"
+    "empty": "Chưa có lịch sử",
+    "justNow": "Vừa xong",
+    "minsAgo": "{mins} phút trước",
+    "hoursAgo": "{hours} giờ trước",
+    "today": "Hôm nay, {time}",
+    "yesterday": "Hôm qua, {time}",
+    "listened": "Đã nghe"
   },
   "map": {
     "title": "Bản đồ",
@@ -87,7 +143,8 @@
     "zoomOut": "Thu nhỏ",
     "centerMap": "Về vị trí hiện tại",
     "fullscreen": "Toàn màn hình",
-    "layers": "Lớp bản đồ"
+    "layers": "Lớp bản đồ",
+    "loadingMap": "Đang tải bản đồ..."
   },
   "poi": {
     "details": "Chi tiết",
@@ -96,7 +153,12 @@
     "estimatedHours": "Giờ mở cửa",
     "directions": "Chỉ đường",
     "playAudio": "Nghe thuyết minh",
-    "viewOnMap": "Xem trên bản đồ"
+    "viewOnMap": "Xem trên bản đồ",
+    "cuisine": "Ẩm thực",
+    "upNext": "POI gần tiếp theo",
+    "district4": "Quận 4, TP.HCM",
+    "transcript": "Nội dung thuyết minh",
+    "estimatedWalk": "3 phút đi bộ"
   },
   "offline": {
     "status": "Ngoại tuyến",
@@ -104,7 +166,23 @@
     "syncing": "Đang đồng bộ...",
     "syncComplete": "Đã đồng bộ",
     "cacheSize": "Dung lượng bộ nhớ đệm",
-    "clearCache": "Xóa bộ nhớ đệm"
+    "clearCache": "Xóa bộ nhớ đệm",
+    "usingCachedData": "Đang sử dụng dữ liệu đã lưu",
+    "limitedFeatures": "Một số tính năng không khả dụng",
+    "uploading": "Đang tải dữ liệu lên máy chủ",
+    "syncError": "Lỗi đồng bộ",
+    "retrySync": "Nhấn để thử lại",
+    "pendingSync": "Chờ đồng bộ",
+    "pendingItems": "{count} mục đang chờ",
+    "online": "Trực tuyến",
+    "synced": "Đã đồng bộ",
+    "offlineMode": "Chế độ ngoại tuyến",
+    "noConnection": "Không có kết nối",
+    "statusLabel": "Trạng thái",
+    "lastSync": "Đồng bộ lần cuối",
+    "notSyncedYet": "Chưa đồng bộ",
+    "syncNow": "Đồng bộ ngay",
+    "tapToSync": "Nhấn để đồng bộ"
   },
   "battery": {
     "level": "Mức pin",
@@ -162,5 +240,20 @@
     "didYouKnow": "Bạn có biết?",
     "nowPlaying": "Đang phát: {name}",
     "errorPlaying": "Lỗi phát audio, đang dùng giọng đọc tổng hợp"
+  },
+  "permissions": {
+    "checking": "Đang kiểm tra quyền truy cập...",
+    "locationTitle": "Cho phép vị trí để tự động phát thuyết minh gần quán ăn",
+    "locationDesc": "Trải nghiệm tốt nhất khi ứng dụng tự động nhận diện vị trí của bạn trên đường Vĩnh Khánh.",
+    "denyPrompt": "Không cho phép?",
+    "switchToManual": "Chuyển sang chế độ thủ công"
+  },
+  "units": {
+    "meters": "m",
+    "kilometers": "km",
+    "number": "Số"
+  },
+  "sort": {
+    "az": "A-Z"
   }
 }

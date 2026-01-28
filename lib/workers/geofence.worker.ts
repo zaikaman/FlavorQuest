@@ -30,69 +30,69 @@ import { calculateDistance, filterPOIsWithinRadius } from '@/lib/utils/distance'
  */
 type WorkerRequest =
   | {
-      type: 'CHECK_GEOFENCE';
-      payload: {
-        userPosition: Coordinates;
-        pois: POI[];
-        geofenceRadius: number;
-        cooldownTracker: Record<string, number>;
-        cooldownPeriod: number;
-      };
-    }
-  | {
-      type: 'CALCULATE_DISTANCE';
-      payload: {
-        from: Coordinates;
-        to: Coordinates;
-      };
-    }
-  | {
-      type: 'FILTER_NEARBY';
-      payload: {
-        userPosition: Coordinates;
-        pois: POI[];
-        radius: number;
-      };
+    type: 'CHECK_GEOFENCE';
+    payload: {
+      userPosition: Coordinates;
+      pois: POI[];
+      geofenceRadius: number;
+      cooldownTracker: Record<string, number>;
+      cooldownPeriod: number;
     };
+  }
+  | {
+    type: 'CALCULATE_DISTANCE';
+    payload: {
+      from: Coordinates;
+      to: Coordinates;
+    };
+  }
+  | {
+    type: 'FILTER_NEARBY';
+    payload: {
+      userPosition: Coordinates;
+      pois: POI[];
+      radius: number;
+    };
+  };
 
 /**
  * Response types trả về main thread
  */
 type WorkerResponse =
   | {
-      type: 'GEOFENCE_RESULT';
-      payload: {
-        triggeredPOIs: Array<{
-          poi: POI;
-          distance: number;
-        }>;
-        nearbyPOIs: Array<{
-          poi: POI;
-          distance: number;
-        }>;
-      };
-    }
-  | {
-      type: 'DISTANCE_RESULT';
-      payload: {
+    type: 'GEOFENCE_RESULT';
+    payload: {
+      triggeredPOIs: Array<{
+        poi: POI;
         distance: number;
-      };
-    }
-  | {
-      type: 'NEARBY_POIS';
-      payload: {
-        pois: Array<{
-          poi: POI;
-          distance: number;
-        }>;
-      };
-    }
-  | {
-      type: 'ERROR';
-      payload: {
-        message: string;
-      };
+      }>;
+      nearbyPOIs: Array<{
+        poi: POI;
+        distance: number;
+      }>;
     };
+  }
+  | {
+    type: 'DISTANCE_RESULT';
+    payload: {
+      distance: number;
+    };
+  }
+  | {
+    type: 'NEARBY_POIS';
+    payload: {
+      pois: Array<{
+        poi: POI;
+        distance: number;
+      }>;
+    };
+  }
+  | {
+    type: 'ERROR';
+    payload: {
+      message: string;
+    };
+  };
 
 /**
  * Check if POI can be played (not in cooldown)
@@ -139,7 +139,7 @@ function processGeofenceCheck(request: WorkerRequest): WorkerResponse {
     const triggeredPOIs = nearbyPOIs
       .filter(({ poi, distance }: { poi: POI; distance: number }) => {
         // Check if within POI's own radius
-        return distance <= poi.radius;
+        return distance <= Math.max(poi.radius || 0, geofenceRadius);
       })
       .filter(({ poi }: { poi: POI; distance: number }) => {
         // Check cooldown

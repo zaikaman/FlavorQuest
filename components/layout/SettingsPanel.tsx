@@ -74,13 +74,13 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm" onClick={onClose}>
-      <div 
-        className="absolute bottom-0 left-0 right-0 bg-background-dark rounded-t-2xl max-h-[85vh] overflow-hidden animate-slideUp"
+    <div className="fixed inset-0 z-[60] bg-black/60 backdrop-blur-sm" onClick={onClose}>
+      <div
+        className="absolute inset-0 bg-background-dark overflow-hidden animate-slideUp flex flex-col"
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="sticky top-0 z-10 bg-background-dark border-b border-white/5 px-4 py-4">
+        <div className="sticky top-0 z-10 bg-background-dark border-b border-white/5 px-4 py-4 shrink-0">
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-bold text-white">{t('settings.title')}</h2>
             <button
@@ -93,7 +93,7 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
         </div>
 
         {/* Content */}
-        <div className="overflow-y-auto p-4 pb-12">
+        <div className="overflow-y-auto p-4 pb-12 flex-1">
           {isLoading ? (
             <div className="flex justify-center py-8">
               <span className="material-symbols-outlined text-primary animate-spin text-3xl">sync</span>
@@ -108,11 +108,10 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
                     <button
                       key={lang.code}
                       onClick={() => handleLanguageChange(lang.code)}
-                      className={`flex items-center justify-center gap-2 p-3 rounded-xl border transition-all ${
-                        language === lang.code
-                          ? 'bg-primary border-primary text-white'
-                          : 'bg-white/5 border-white/10 text-white hover:bg-white/10'
-                      }`}
+                      className={`flex items-center justify-center gap-2 p-3 rounded-xl border transition-all ${language === lang.code
+                        ? 'bg-primary border-primary text-white'
+                        : 'bg-white/5 border-white/10 text-white hover:bg-white/10'
+                        }`}
                     >
                       <span className="text-lg">{LANGUAGE_FLAGS[lang.code]}</span>
                       <span className="text-sm font-medium">{lang.code.toUpperCase()}</span>
@@ -127,7 +126,7 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
               {/* Tour Experience Section */}
               <section className="mb-6">
                 <h3 className="text-white font-bold text-lg mb-3">{t('settings.title')}</h3>
-                
+
                 {/* Auto Play Toggle */}
                 <div className="flex items-center justify-between py-3">
                   <div>
@@ -181,8 +180,8 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
                     className="w-full h-2 bg-white/10 rounded-lg appearance-none cursor-pointer accent-primary"
                   />
                   <div className="flex justify-between text-xs text-muted mt-1">
-                    <span>Gần (chính xác)</span>
-                    <span>Xa (rộng)</span>
+                    <span>{t('settings.geofenceClose')}</span>
+                    <span>{t('settings.geofenceFar')}</span>
                   </div>
                 </div>
               </section>
@@ -193,7 +192,7 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
               {/* Battery Section */}
               <section className="mb-6">
                 <h3 className="text-white font-bold text-lg mb-3">{t('battery.lowPowerMode')}</h3>
-                
+
                 <div className="flex items-center justify-between py-3">
                   <div>
                     <p className="text-white font-medium">{t('settings.batteryOptimization')}</p>
@@ -214,7 +213,7 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
               {/* App Info */}
               <div className="text-center pt-4 pb-8">
                 <p className="text-muted text-sm">FlavorQuest v1.0.0</p>
-                <a href="#" className="text-primary text-sm hover:underline">Chính sách bảo mật</a>
+                <a href="#" className="text-primary text-sm hover:underline">{t('common.privacyPolicy')}</a>
               </div>
             </>
           )}

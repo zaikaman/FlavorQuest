@@ -37,16 +37,16 @@ export function HistoryView({ isOpen, onClose, onPlayPOI, onViewPOI }: HistoryVi
       try {
         setIsLoading(true);
         const entries = await loadVisitHistory();
-        
+
         // Merge with POI data
         const withPOI = entries.map(entry => ({
           ...entry,
           poi: pois.find(p => p.id === entry.poi_id),
         }));
-        
+
         // Sort by visited_at descending (most recent first)
         withPOI.sort((a, b) => new Date(b.visited_at).getTime() - new Date(a.visited_at).getTime());
-        
+
         // Remove duplicates (keep most recent for each POI)
         const seen = new Set<string>();
         const unique = withPOI.filter(item => {
@@ -54,7 +54,7 @@ export function HistoryView({ isOpen, onClose, onPlayPOI, onViewPOI }: HistoryVi
           seen.add(item.poi_id);
           return true;
         });
-        
+
         setHistory(unique);
       } catch (error) {
         console.error('Failed to load history:', error);
@@ -62,7 +62,7 @@ export function HistoryView({ isOpen, onClose, onPlayPOI, onViewPOI }: HistoryVi
         setIsLoading(false);
       }
     };
-    
+
     if (isOpen && pois.length > 0) {
       load();
     }
@@ -72,34 +72,34 @@ export function HistoryView({ isOpen, onClose, onPlayPOI, onViewPOI }: HistoryVi
     const date = new Date(dateStr);
     const now = new Date();
     const diff = now.getTime() - date.getTime();
-    
+
     // Less than 1 hour
     if (diff < 60 * 60 * 1000) {
       const mins = Math.floor(diff / 60000);
-      return mins <= 1 ? 'Vừa xong' : `${mins} phút trước`;
+      return mins <= 1 ? t('history.justNow') : t('history.minsAgo', { mins });
     }
-    
+
     // Today
     if (date.toDateString() === now.toDateString()) {
-      return `Hôm nay, ${date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}`;
+      return t('history.today', { time: date.toLocaleTimeString(language === 'vi' ? 'vi-VN' : 'en-US', { hour: '2-digit', minute: '2-digit' }) });
     }
-    
+
     // Yesterday
     const yesterday = new Date(now);
     yesterday.setDate(yesterday.getDate() - 1);
     if (date.toDateString() === yesterday.toDateString()) {
-      return `Hôm qua, ${date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}`;
+      return t('history.yesterday', { time: date.toLocaleTimeString(language === 'vi' ? 'vi-VN' : 'en-US', { hour: '2-digit', minute: '2-digit' }) });
     }
-    
+
     // Older
-    return date.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    return date.toLocaleDateString(language === 'vi' ? 'vi-VN' : 'en-US', { day: '2-digit', month: '2-digit', year: 'numeric' });
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm" onClick={onClose}>
-      <div 
+    <div className="fixed inset-0 z-[60] bg-black/60 backdrop-blur-sm" onClick={onClose}>
+      <div
         className="absolute bottom-0 left-0 right-0 bg-background-dark rounded-t-2xl max-h-[85vh] overflow-hidden animate-slideUp"
         onClick={e => e.stopPropagation()}
       >
@@ -137,16 +137,16 @@ export function HistoryView({ isOpen, onClose, onPlayPOI, onViewPOI }: HistoryVi
             <div className="space-y-3">
               {history.map((item) => {
                 if (!item.poi) return null;
-                
+
                 const localized = getLocalizedPOI(item.poi, language);
-                
+
                 return (
                   <div
                     key={`${item.poi_id}-${item.visited_at}`}
                     className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/5"
                   >
                     {/* Image */}
-                    <div 
+                    <div
                       className="h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-[#3a2d25] cursor-pointer"
                       onClick={() => onViewPOI?.(item.poi!)}
                     >
@@ -164,7 +164,7 @@ export function HistoryView({ isOpen, onClose, onPlayPOI, onViewPOI }: HistoryVi
                     </div>
 
                     {/* Content */}
-                    <div 
+                    <div
                       className="flex-1 min-w-0 cursor-pointer"
                       onClick={() => onViewPOI?.(item.poi!)}
                     >
@@ -173,7 +173,7 @@ export function HistoryView({ isOpen, onClose, onPlayPOI, onViewPOI }: HistoryVi
                       {item.listened && (
                         <span className="inline-flex items-center gap-1 text-xs text-green-500 mt-1">
                           <span className="material-symbols-outlined text-sm">check_circle</span>
-                          Đã nghe
+                          {t('history.listened')}
                         </span>
                       )}
                     </div>

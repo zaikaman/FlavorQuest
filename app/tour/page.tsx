@@ -68,7 +68,6 @@ export default function TourPage() {
   const {
     pois,
     isLoading: poisLoading,
-    isOfflineMode,
     preloadNearbyAudio,
   } = usePOIManager({
     language,
@@ -160,7 +159,7 @@ export default function TourPage() {
   // Handle POI entry event
   const handlePOIEnter = useCallback(async (event: { poi: POI; distance: number }) => {
     if (!isAutoMode) return; // Skip if manual mode
-    
+
     const { poi } = event;
 
     // Check cooldown
@@ -197,8 +196,8 @@ export default function TourPage() {
     await setCooldown(poi.id);
     setVisitedPOIs(prev => new Set([...prev, poi.id]));
     await logAutoPlay(poi.id, language, undefined, { distance: event.distance });
-    await saveVisit({ 
-      poi_id: poi.id, 
+    await saveVisit({
+      poi_id: poi.id,
       poi_name: localizedPOI.name,
       visited_at: new Date().toISOString(),
       listened: true,
@@ -325,8 +324,8 @@ export default function TourPage() {
       distance: 0,
       accuracy: accuracy ?? undefined,
     });
-    await saveVisit({ 
-      poi_id: poi.id, 
+    await saveVisit({
+      poi_id: poi.id,
       poi_name: localizedPOI.name,
       visited_at: new Date().toISOString(),
       listened: true,
@@ -380,19 +379,57 @@ export default function TourPage() {
 
   return (
     <div className="relative flex flex-col h-screen w-full overflow-hidden bg-background-dark">      {/* Header */}
-      <div className="absolute top-0 left-0 right-0 z-50 bg-gradient-to-b from-background-dark/95 to-transparent pointer-events-none">
-        <div className="flex items-center justify-between px-4 py-3 pointer-events-auto">
+      {/* Header Controls */}
+      <div className="absolute top-0 left-0 right-0 z-50 pointer-events-none p-4">
+        <div className="relative flex items-start justify-between">
+          {/* Back Button */}
           <button
             onClick={() => router.push('/')}
-            className="p-2 rounded-full hover:bg-white/10 transition-colors"
-            aria-label="Quay lại"
+            className="flex items-center justify-center w-10 h-10 rounded-full bg-black/40 backdrop-blur-md border border-white/10 text-white shadow-lg pointer-events-auto hover:bg-black/60 transition-colors -mt-1"
+            aria-label={t('common.back')}
           >
-            <span className="material-symbols-outlined text-2xl text-white">arrow_back</span>
+            <span className="material-symbols-outlined text-xl">arrow_back</span>
           </button>
 
-          <h1 className="text-lg font-bold text-white">FlavorQuest</h1>
+          {/* Auto/Manual Mode Toggle */}
+          <div className="pointer-events-auto -mt-2 absolute left-1/2 -translate-x-1/2">
+            <button
+              onClick={toggleAutoMode}
+              className={`
+                 relative flex items-center gap-2 px-4 py-2 rounded-full 
+                 backdrop-blur-md border shadow-lg transition-all duration-300
+                 ${isAutoMode
+                  ? 'bg-primary/90 border-primary shadow-[0_4px_20px_rgba(242,108,13,0.4)]'
+                  : 'bg-black/40 border-white/10 hover:bg-black/60'
+                }
+               `}
+            >
+              <span
+                className={`material-symbols-outlined text-lg transition-transform ${isAutoMode ? 'scale-110' : ''}`}
+                style={{ fontVariationSettings: isAutoMode ? "'FILL' 1" : "'FILL' 0" }}
+              >
+                {isAutoMode ? 'sensors' : 'touch_app'}
+              </span>
+              <div className="flex flex-col items-start leading-none">
+                <span className={`text-xs font-bold uppercase tracking-wider ${isAutoMode ? 'text-white' : 'text-white/80'}`}>
+                  {isAutoMode ? t('tour.auto') : t('tour.manual')}
+                </span>
+                {isAutoMode && (
+                  <span className="text-[10px] text-white/80 font-medium mt-0.5">{t('tour.searchingPOIs')}</span>
+                )}
+              </div>
 
-          <OfflineIndicator />
+              {/* Active Pulse */}
+              {isAutoMode && (
+                <span className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-black animate-pulse"></span>
+              )}
+            </button>
+          </div>
+
+          {/* Offline Status */}
+          <div className="pointer-events-auto">
+            <OfflineIndicator compact className="shadow-lg border border-white/10 backdrop-blur-md !bg-black/40" />
+          </div>
         </div>
       </div>
       {/* Main Content Area */}
@@ -408,34 +445,16 @@ export default function TourPage() {
               selectedPOI={selectedPOI}
               onSelectPOI={handleSelectPOI}
               onPlayPOI={handlePlayPOI}
-              isOfflineReady={isOfflineReady || offlineSyncReady}
+
             />
 
             {/* Auto/Manual Mode Toggle */}
-            <div className="absolute top-20 left-1/2 -translate-x-1/2 z-20">
-              <button
-                onClick={toggleAutoMode}
-                className={`flex items-center gap-2 px-4 py-2 rounded-full backdrop-blur-md border transition-all ${
-                  isAutoMode
-                    ? 'bg-primary/90 border-primary text-white'
-                    : 'bg-[#3a2d25]/90 border-white/10 text-white'
-                }`}
-              >
-                <span className="material-symbols-outlined text-lg">
-                  {isAutoMode ? 'sensors' : 'touch_app'}
-                </span>
-                <span className="text-sm font-medium">
-                  {isAutoMode ? 'Tự động' : 'Thủ công'}
-                </span>
-              </button>
-            </div>
+
 
             {/* Offline Mode Indicator */}
-            {isOfflineMode && (
-              <div className="absolute top-24 left-1/2 -translate-x-1/2 z-20 px-3 py-1.5 bg-amber-500/90 rounded-full">
-                <span className="text-xs font-medium text-black">Chế độ ngoại tuyến</span>
-              </div>
-            )}
+            {/* Offline Banner below header if needed, but the indicator handles it. 
+                  Removing extra centralized banner to clean up UI 
+              */}
           </>
         )}
 
@@ -456,7 +475,7 @@ export default function TourPage() {
           <div className="absolute inset-0 z-40 flex items-center justify-center bg-black/60 backdrop-blur-sm">
             <div className="flex flex-col items-center gap-3 text-white">
               <span className="material-symbols-outlined text-5xl animate-spin">sync</span>
-              <p className="text-lg font-medium">Đang tải địa điểm...</p>
+              <p className="text-lg font-medium">{t('tour.loadingPOIs')}</p>
             </div>
           </div>
         )}

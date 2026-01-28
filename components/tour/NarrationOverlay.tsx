@@ -62,7 +62,7 @@ export function NarrationOverlay({
           <span className="truncate text-sm font-semibold text-white">
             {localizedPOI.name}
           </span>
-          
+
           {/* Progress Bar */}
           {isPlaying && duration > 0 && (
             <div className="mt-1 flex items-center gap-2">
@@ -82,7 +82,7 @@ export function NarrationOverlay({
         {/* Distance Badge */}
         {distance !== undefined && (
           <div className="text-xs font-medium text-white/60 bg-white/10 px-2 py-1 rounded">
-            {distance}m
+            {distance}{t('units.meters')}
           </div>
         )}
 
