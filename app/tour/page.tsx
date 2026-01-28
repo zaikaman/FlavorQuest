@@ -31,6 +31,7 @@ import { HistoryView } from '@/components/tour/HistoryView';
 import { BottomNav, type NavTab } from '@/components/layout/BottomNav';
 import { SettingsPanel } from '@/components/layout/SettingsPanel';
 import { OfflineIndicator } from '@/components/layout/OfflineIndicator';
+import { AudioPreloadIndicator } from '@/components/layout/AudioPreloadIndicator';
 import { Toast } from '@/components/ui/Toast';
 import { NoiseFilter } from '@/lib/utils/noise-filter';
 import { SpeedCalculator } from '@/lib/utils/speed';
@@ -543,6 +544,21 @@ export default function TourPage() {
         <div className="fixed top-20 left-4 right-4 z-[60]">
           <Toast message={toastMessage} type="info" onClose={() => setShowToast(false)} />
         </div>
+      )}
+
+      {/* Audio Preload Indicator */}
+      {pois.length > 0 && (
+        <AudioPreloadIndicator
+          pois={pois}
+          language={language}
+          currentPosition={filteredPosition || undefined}
+          preloadRadius={500}
+          autoPreload={true}
+          compact={false}
+          onComplete={() => {
+            showToastMessage(t('offline.audioDownloaded') || 'Audio đã tải xong cho chế độ offline');
+          }}
+        />
       )}
 
       {/* Bottom Navigation */}

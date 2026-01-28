@@ -233,13 +233,25 @@ async function cacheFirstWithTimeout(request, cacheName, timeoutMs = 5000) {
   const cached = await cache.match(request);
 
   if (cached) {
-    // Return cached immediately, optionally update in background
-    updateCacheInBackground(request, cache);
+    // Return cached immediately, optionally update in background nếu online
+    if (navigator.onLine) {
+      updateCacheInBackground(request, cache);
+    }
     return cached;
   }
 
+  // Nếu offline và không có cache, return error ngay
+  if (!navigator.onLine) {
+    console.log('[SW] Offline and no cache for:', request.url);
+    return new Response('Audio không khả dụng offline. Vui lòng kết nối mạng để tải xuống.', {
+      status: 503,
+      statusText: 'Service Unavailable',
+      headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+    });
+  }
+
   try {
-    // Fetch with timeout
+    // Fetch with timeout chỉ khi online
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
@@ -248,18 +260,22 @@ async function cacheFirstWithTimeout(request, cacheName, timeoutMs = 5000) {
 
     // Cache successful responses
     if (response.ok) {
-      cache.put(request, response.clone());
+      // Clone response trước khi cache
+      const responseToCache = response.clone();
+      cache.put(request, responseToCache).catch(err => {
+        console.error('[SW] Failed to cache audio:', err);
+      });
     }
 
     return response;
   } catch (error) {
     console.error('[SW] Fetch with timeout failed:', error);
 
-    // Return offline fallback
-    return new Response('Audio unavailable offline', {
+    // Return offline fallback với thông báo cụ thể
+    return new Response('Không thể tải audio. Vui lòng kiểm tra kết nối mạng.', {
       status: 503,
       statusText: 'Service Unavailable',
-      headers: { 'Content-Type': 'text/plain' },
+      headers: { 'Content-Type': 'text/plain; charset=utf-8' },
     });
   }
 }
@@ -571,17 +587,43 @@ async function preloadAudioFiles(urls) {
         // Check if already cached
         const cached = await cache.match(url);
         if (cached) {
+          console.log('[SW] Already cached:', url);
           return { url, status: 'already-cached' };
         }
 
-        // Fetch and cache
-        const response = await fetch(url);
-        if (response.ok) {
-          await cache.put(url, response);
-          return { url, status: 'cached' };
+        // Fetch and cache với retry
+        let lastError;
+        for (let retry = 0; retry < 3; retry++) {
+          try {
+            const response = await fetch(url, {
+              cache: 'force-cache', // Sử dụng browser cache nếu có
+            });
+            
+            if (response.ok) {
+              // Verify content type
+              const contentType = response.headers.get('content-type') || '';
+              if (!contentType.includes('audio') && !contentType.includes('octet-stream')) {
+                console.warn('[SW] Invalid content type for audio:', contentType, url);
+              }
+              
+              await cache.put(url, response);
+              console.log('[SW] Successfully cached:', url);
+              return { url, status: 'cached' };
+            }
+            lastError = response.statusText;
+          } catch (err) {
+            lastError = err.message;
+            // Wait before retry
+            if (retry < 2) {
+              await new Promise(resolve => setTimeout(resolve, 1000 * (retry + 1)));
+            }
+          }
         }
-        return { url, status: 'failed', reason: response.statusText };
+        
+        console.error('[SW] Failed to cache after retries:', url, lastError);
+        return { url, status: 'failed', reason: lastError };
       } catch (error) {
+        console.error('[SW] Error preloading audio:', url, error);
         return { url, status: 'failed', reason: error.message };
       }
     })
