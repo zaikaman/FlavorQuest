@@ -2,6 +2,12 @@
  * Main Tour Page
  * Auto narration logic với geofencing
  * Based on design_template/interactive_street_map/code.html
+ * 
+ * Features:
+ * - Auto narration khi đi gần POI
+ * - Offline-first với audio preloading
+ * - TTS fallback khi audio không load được
+ * - Background sync cho analytics
  */
 
 'use client';
@@ -12,10 +18,12 @@ import { useGeolocation } from '@/lib/hooks/useGeolocation';
 import { useGeofencing } from '@/lib/hooks/useGeofencing';
 import { useAudioPlayer } from '@/lib/hooks/useAudioPlayer';
 import { usePOIManager } from '@/lib/hooks/usePOIManager';
+import { useOfflineSync } from '@/lib/hooks/useOfflineSync';
 import { useLanguage } from '@/lib/contexts/LanguageContext';
 import { InteractiveMap } from '@/components/tour/InteractiveMap';
 import { NarrationOverlay } from '@/components/tour/NarrationOverlay';
 import { AudioPlayer } from '@/components/tour/AudioPlayer';
+import { OfflineBadge } from '@/components/layout/OfflineIndicator';
 import { Toast } from '@/components/ui/Toast';
 import { NoiseFilter } from '@/lib/utils/noise-filter';
 import { SpeedCalculator } from '@/lib/utils/speed';
@@ -32,8 +40,36 @@ export default function TourPage() {
   // Geolocation
   const { coordinates, accuracy, heading, error: geoError, permissionState } = useGeolocation();
 
-  // POI Management
-  const { pois, isLoading: poisLoading } = usePOIManager({ language });
+  // Offline Sync
+  const {
+    isOfflineReady: offlineSyncReady,
+  } = useOfflineSync({
+    autoSync: true,
+    onSyncSuccess: (count) => {
+      if (count > 0) {
+        showToastMessage(`Đã đồng bộ ${count} sự kiện`);
+      }
+    },
+    onOfflineReady: () => {
+      showToastMessage('Sẵn sàng sử dụng ngoại tuyến');
+    },
+  });
+
+  // POI Management với offline support
+  const {
+    pois,
+    isLoading: poisLoading,
+    isOfflineMode,
+    preloadNearbyAudio,
+  } = usePOIManager({
+    language,
+    autoPreloadAudio: true,
+    preloadRadius: 500,
+    onOfflineReady: () => {
+      setIsOfflineReady(true);
+      showToastMessage('Dữ liệu đã được lưu, sẵn sàng ngoại tuyến');
+    },
+  });
 
   // UI State
   const [showPlayerModal, setShowPlayerModal] = useState(false);
@@ -48,6 +84,7 @@ export default function TourPage() {
   const noiseFilterRef = useRef<NoiseFilter>(new NoiseFilter({ windowSize: 5 })); // 5 samples moving average
   const speedCalculatorRef = useRef<SpeedCalculator>(new SpeedCalculator({ windowSize: 10 }));
   const [filteredPosition, setFilteredPosition] = useState<Coordinates | null>(null);
+  const hasPreloadedRef = useRef(false);
 
   // Toast helper
   const showToastMessage = useCallback((message: string) => {
@@ -55,6 +92,11 @@ export default function TourPage() {
     setShowToast(true);
     setTimeout(() => setShowToast(false), 3000);
   }, []);
+
+  // Handle TTS fallback
+  const handleTTSFallback = useCallback(() => {
+    showToastMessage('Đang sử dụng giọng đọc tổng hợp (offline)');
+  }, [showToastMessage]);
 
   // Handle audio ended
   const handleAudioEnded = useCallback(async () => {
@@ -64,17 +106,28 @@ export default function TourPage() {
   // Handle audio error
   const handleAudioError = useCallback(async (error: string) => {
     console.error('Audio playback error:', error);
-    showToastMessage('Không thể phát audio. Vui lòng thử lại sau.');
-  }, [showToastMessage]);
+    // TTS fallback will be handled by useAudioPlayer
+  }, []);
 
-  // Audio Player
+  // Audio Player with TTS fallback
   const audioPlayer = useAudioPlayer({
     autoPlay: true,
+    enableTTSFallback: true,
+    language,
     onEnded: handleAudioEnded,
     onError: handleAudioError,
+    onTTSFallback: handleTTSFallback,
   });
 
   const { enqueue } = audioPlayer;
+
+  // Preload audio when position changes
+  useEffect(() => {
+    if (filteredPosition && pois.length > 0 && !hasPreloadedRef.current) {
+      preloadNearbyAudio(filteredPosition);
+      hasPreloadedRef.current = true;
+    }
+  }, [filteredPosition, pois, preloadNearbyAudio]);
 
   // Handle POI entry event
   const handlePOIEnter = useCallback(async (event: { poi: POI; distance: number }) => {
@@ -111,6 +164,8 @@ export default function TourPage() {
       poi,
       audioUrl,
       title: localizedPOI.name,
+      description: localizedPOI.description, // For TTS fallback
+      language, // For TTS fallback
     });
 
     // Set cooldown
@@ -237,6 +292,8 @@ export default function TourPage() {
       poi,
       audioUrl,
       title: localizedPOI.name,
+      description: localizedPOI.description, // For TTS fallback
+      language, // For TTS fallback
     });
 
     // Track visited
@@ -271,6 +328,9 @@ export default function TourPage() {
 
   return (
     <div className="relative flex flex-col h-screen w-full overflow-hidden bg-background-dark">
+      {/* Offline Badge */}
+      <OfflineBadge />
+
       {/* Interactive Map - Full Screen */}
       <div className="absolute inset-0 z-0">
         <InteractiveMap
@@ -281,9 +341,16 @@ export default function TourPage() {
           selectedPOI={selectedPOI}
           onSelectPOI={handleSelectPOI}
           onPlayPOI={handlePlayPOI}
-          isOfflineReady={isOfflineReady}
+          isOfflineReady={isOfflineReady || offlineSyncReady}
         />
       </div>
+
+      {/* Offline Mode Indicator */}
+      {isOfflineMode && (
+        <div className="absolute top-16 left-1/2 -translate-x-1/2 z-30 px-3 py-1.5 bg-amber-500/90 rounded-full">
+          <span className="text-xs font-medium text-black">Chế độ ngoại tuyến</span>
+        </div>
+      )}
 
       {/* Loading Overlay */}
       {poisLoading && (

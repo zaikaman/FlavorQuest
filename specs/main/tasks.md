@@ -158,43 +158,43 @@
 
 ### Offline Sync Hook
 
-- [ ] T068 [P] [US2] Implement useOfflineSync hook trong lib/hooks/useOfflineSync.ts (detect online/offline, sync data)
+- [x] T068 [P] [US2] Implement useOfflineSync hook trong lib/hooks/useOfflineSync.ts (detect online/offline, sync data)
 
 ### Service Worker Enhancements
 
-- [ ] T069 [US2] Enhance service worker caching strategies: CacheFirst cho audio files
-- [ ] T070 [US2] Add runtime caching cho Supabase Storage URLs (audio, images)
-- [ ] T071 [US2] Implement background sync cho analytics logs (queue offline events, sync khi online)
+- [x] T069 [US2] Enhance service worker caching strategies: CacheFirst cho audio files
+- [x] T070 [US2] Add runtime caching cho Supabase Storage URLs (audio, images)
+- [x] T071 [US2] Implement background sync cho analytics logs (queue offline events, sync khi online)
 
 ### POI Preloading
 
-- [ ] T072 [US2] Fetch all POIs từ Supabase và save to IndexedDB on first load trong usePOIManager hook
-- [ ] T073 [US2] Preload audio files cho POIs trong bán kính 500m: fetch → cache in service worker
-- [ ] T074 [US2] Implement audio preloader service trong lib/services/audio-preloader.ts
+- [x] T072 [US2] Fetch all POIs từ Supabase và save to IndexedDB on first load trong usePOIManager hook
+- [x] T073 [US2] Preload audio files cho POIs trong bán kính 500m: fetch → cache in service worker
+- [x] T074 [US2] Implement audio preloader service trong lib/services/audio-preloader.ts
 
 ### Offline Indicators
 
-- [ ] T075 [P] [US2] Create OfflineIndicator component trong components/layout/OfflineIndicator.tsx (hiển thị "Offline" badge)
-- [ ] T076 [US2] Display Toast "Sẵn sàng sử dụng offline" sau khi preload hoàn tất
-- [ ] T077 [US2] Display Toast "Đã đồng bộ" khi sync analytics logs thành công sau khi online lại
+- [x] T075 [P] [US2] Create OfflineIndicator component trong components/layout/OfflineIndicator.tsx (hiển thị "Offline" badge)
+- [x] T076 [US2] Display Toast "Sẵn sàng sử dụng offline" sau khi preload hoàn tất
+- [x] T077 [US2] Display Toast "Đã đồng bộ" khi sync analytics logs thành công sau khi online lại
 
 ### IndexedDB Persistence
 
-- [ ] T078 [US2] Implement save/load POI data to/from IndexedDB trong storage service
-- [ ] T079 [US2] Implement save/load user settings to/from IndexedDB
-- [ ] T080 [US2] Implement save/load visit history to/from IndexedDB
+- [x] T078 [US2] Implement save/load POI data to/from IndexedDB trong storage service
+- [x] T079 [US2] Implement save/load user settings to/from IndexedDB
+- [x] T080 [US2] Implement save/load visit history to/from IndexedDB
 
 ### Offline Fallbacks
 
-- [ ] T081 [US2] If audio file không load được (offline + cache miss), fallback to TTS
-- [ ] T082 [US2] If POI images không load được, hiển thị placeholder image
-- [ ] T083 [US2] If Supabase không accessible, load POI data từ IndexedDB cache
+- [x] T081 [US2] If audio file không load được (offline + cache miss), fallback to TTS
+- [x] T082 [US2] If POI images không load được, hiển thị placeholder image
+- [x] T083 [US2] If Supabase không accessible, load POI data từ IndexedDB cache
 
 ### Background Sync
 
-- [ ] T084 [US2] Queue analytics events khi offline vào IndexedDB
-- [ ] T085 [US2] Sync queued events khi detect online trong useOfflineSync hook
-- [ ] T086 [US2] Clear synced events từ queue sau khi thành công
+- [x] T084 [US2] Queue analytics events khi offline vào IndexedDB
+- [x] T085 [US2] Sync queued events khi detect online trong useOfflineSync hook
+- [x] T086 [US2] Clear synced events từ queue sau khi thành công
 
 **Checkpoint**: ✅ At this point, User Stories 1 AND 2 both work independently. User có thể sử dụng tour offline sau lần tải đầu.
 

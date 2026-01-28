@@ -7,7 +7,7 @@ import type { NextRequest } from 'next/server';
  * Fetch single POI
  */
 export async function GET(
-    request: NextRequest,
+    _request: NextRequest,
     { params }: { params: Promise<{ id: string }> }
 ) {
     const { id } = await params;
@@ -77,7 +77,7 @@ export async function PUT(
  * Soft delete POI (admin only)
  */
 export async function DELETE(
-    request: NextRequest,
+    _request: NextRequest,
     { params }: { params: Promise<{ id: string }> }
 ) {
     const { id } = await params;
