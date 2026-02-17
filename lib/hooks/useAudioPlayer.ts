@@ -78,6 +78,7 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const isUnlockedRef = useRef(false);
   const isLoadingRef = useRef(false); // Lock to prevent double loading
+  const playRequestIdRef = useRef(0);
   const currentItemRef = useRef<AudioQueueItem | null>(null);
   const optionsRef = useRef<UseAudioPlayerOptions>(opts);
   const ttsUtteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
@@ -344,10 +345,7 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
   const play = useCallback(async (item?: AudioQueueItem) => {
     if (!audioRef.current) return;
 
-    // Prevent double loading
-    if (item && isLoadingRef.current) {
-      return;
-    }
+    const audio = audioRef.current;
 
     // Wait for any pending play to finish first
     if (playPromiseRef.current) {
@@ -361,47 +359,72 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
 
     // If item provided, load it first
     if (item) {
+      const requestId = ++playRequestIdRef.current;
       isLoadingRef.current = true;
-      setState(prev => ({ ...prev, currentItem: item, isLoading: true, error: null }));
-      
-      // Clear previous source to avoid 304 cache issues
-      audioRef.current.src = '';
-      audioRef.current.load();
-      
-      // Set new source with cache-busting timestamp
-      audioRef.current.src = item.audioUrl + '?t=' + Date.now();
-      audioRef.current.load();
-      
-      // Wait for audio to be ready
-      await new Promise<void>((resolve, reject) => {
-        const handleCanPlay = () => {
-          cleanup();
-          resolve();
-        };
-        const handleError = () => {
-          cleanup();
-          reject(new Error('Failed to load audio'));
-        };
-        const cleanup = () => {
-          audioRef.current?.removeEventListener('canplay', handleCanPlay);
-          audioRef.current?.removeEventListener('error', handleError);
-        };
-        
-        // If already ready, resolve immediately
-        if (audioRef.current?.readyState && audioRef.current.readyState >= 3) { // HAVE_FUTURE_DATA or HAVE_ENOUGH_DATA
-          resolve();
-          return;
+
+      setState(prev => ({
+        ...prev,
+        currentItem: item,
+        isLoading: true,
+        error: null,
+        isTTSFallback: false,
+        currentTime: 0,
+        duration: 0,
+      }));
+
+      // Dừng audio hiện tại (nếu có) trước khi đổi source để tránh tiếp tục phát POI cũ.
+      audio.pause();
+
+      // Reset source để buộc browser load URL mới.
+      audio.src = '';
+      audio.load();
+
+      // Không thêm query cache-busting để không phá offline cache/Service Worker.
+      audio.src = item.audioUrl;
+      audio.load();
+
+      // Wait for audio to be ready (hỗ trợ tap nhanh: request mới sẽ thắng)
+      try {
+        await new Promise<void>((resolve, reject) => {
+          const handleCanPlay = () => {
+            cleanup();
+            resolve();
+          };
+          const handleError = () => {
+            cleanup();
+            reject(new Error('Failed to load audio'));
+          };
+          const cleanup = () => {
+            audio.removeEventListener('canplay', handleCanPlay);
+            audio.removeEventListener('error', handleError);
+          };
+
+          // Nếu request đã bị thay thế bởi lần bấm khác, bỏ qua.
+          if (playRequestIdRef.current !== requestId) {
+            resolve();
+            return;
+          }
+
+          if (audio.readyState && audio.readyState >= 3) {
+            resolve();
+            return;
+          }
+
+          audio.addEventListener('canplay', handleCanPlay, { once: true });
+          audio.addEventListener('error', handleError, { once: true });
+        });
+      } finally {
+        // Chỉ mở lock nếu đây vẫn là request mới nhất.
+        if (playRequestIdRef.current === requestId) {
+          isLoadingRef.current = false;
+          setState(prev => ({ ...prev, isLoading: false }));
         }
-        
-        if (!audioRef.current) {
-          reject(new Error('Audio element not available'));
-          return;
-        }
-        
-        audioRef.current.addEventListener('canplay', handleCanPlay, { once: true });
-        audioRef.current.addEventListener('error', handleError, { once: true });
-      });
-      isLoadingRef.current = false;
+      }
+
+      // Nếu trong lúc load user bấm POI khác, không play request cũ nữa.
+      if (playRequestIdRef.current !== requestId) {
+        return;
+      }
     }
 
     // Ensure audio context is unlocked
@@ -410,7 +433,7 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
     }
 
     try {
-      playPromiseRef.current = audioRef.current.play();
+      playPromiseRef.current = audio.play();
       await playPromiseRef.current;
       playPromiseRef.current = null;
     } catch (error) {
@@ -425,6 +448,15 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
       setState(prev => ({ ...prev, error: (error as Error).message, isLoading: false }));
     }
   }, [unlockAudio]);
+
+  // Phát ngay item (ưu tiên) - dừng cái đang phát và play item mới lập tức
+  const playNow = useCallback(async (item: AudioQueueItem, clearQueue: boolean = false) => {
+    if (clearQueue) {
+      setState(prev => ({ ...prev, queue: [] }));
+    }
+    await safePause();
+    await play(item);
+  }, [play, safePause]);
 
   // Pause audio
   const pause = useCallback(() => {
@@ -511,6 +543,7 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
   return {
     ...state,
     play,
+    playNow,
     pause,
     stop,
     seek,

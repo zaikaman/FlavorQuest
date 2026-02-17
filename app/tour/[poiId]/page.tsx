@@ -52,12 +52,12 @@ export default function POIDetailPage() {
   }, [pois, poiId]);
 
   // Phát audio
-  const handlePlay = useCallback(async () => {
+  const handlePlay = async () => {
     if (!poi) return;
     
     const localized = getLocalizedPOI(poi, language);
-    
-    audioPlayer.enqueue({
+
+    await audioPlayer.playNow({
       poi,
       audioUrl: localized.audio_url,
       title: localized.name,
@@ -77,7 +77,7 @@ export default function POIDetailPage() {
     });
 
     showToastMsg(t('poiDetail.nowPlaying', { name: localized.name }));
-  }, [poi, language, audioPlayer, showToastMsg]);
+  };
 
   // Format time
   const formatTime = (seconds: number) => {
