@@ -307,18 +307,37 @@ export default function TourPage() {
     }
   }, [geoError, showToastMessage, t]);
 
-  // Handle skip
-  const handleSkip = useCallback(async () => {
+  // Handle skip next
+  const handleSkipNext = useCallback(async () => {
     if (audioPlayer.currentItem) {
-      await logSkip(
-        audioPlayer.currentItem.poi.id,
-        language,
-        audioPlayer.currentTime,
-        audioPlayer.duration
-      );
-      audioPlayer.skip();
+      if (audioPlayer.queue.length > 0) {
+        await logSkip(
+          audioPlayer.currentItem.poi.id,
+          language,
+          audioPlayer.currentTime,
+          audioPlayer.duration
+        );
+        audioPlayer.skip();
+        return;
+      }
+
+      const nextTime = Math.min(audioPlayer.duration || 0, audioPlayer.currentTime + 15);
+      audioPlayer.seek(nextTime);
     }
   }, [audioPlayer, language]);
+
+  // Handle skip previous
+  const handleSkipPrevious = useCallback(() => {
+    if (!audioPlayer.currentItem) return;
+
+    if (audioPlayer.currentTime > 3) {
+      audioPlayer.seek(0);
+      return;
+    }
+
+    const previousTime = Math.max(0, audioPlayer.currentTime - 15);
+    audioPlayer.seek(previousTime);
+  }, [audioPlayer]);
 
   // Cycle playback rate: 0.75x -> 1.0x -> 1.25x -> 1.5x
   const handleCyclePlaybackRate = useCallback(() => {
@@ -327,6 +346,22 @@ export default function TourPage() {
     const nextRate = rates[(currentIndex + 1) % rates.length] as number;
     audioPlayer.setPlaybackRate(nextRate);
     showToastMessage(`Tốc độ phát: ${nextRate}x`);
+  }, [audioPlayer, showToastMessage]);
+
+  const handleShuffleQueue = useCallback(() => {
+    if (audioPlayer.queue.length <= 1) {
+      showToastMessage('Danh sách chờ chưa đủ để trộn');
+      return;
+    }
+
+    audioPlayer.shuffleQueue();
+    showToastMessage('Đã trộn danh sách chờ');
+  }, [audioPlayer, showToastMessage]);
+
+  const handleToggleRepeat = useCallback(() => {
+    const nextRepeatState = !audioPlayer.isRepeatEnabled;
+    audioPlayer.toggleRepeat();
+    showToastMessage(nextRepeatState ? 'Đã bật lặp lại' : 'Đã tắt lặp lại');
   }, [audioPlayer, showToastMessage]);
 
   // Handle POI selection from map
@@ -573,14 +608,17 @@ export default function TourPage() {
             duration={audioPlayer.duration}
             volume={audioPlayer.volume}
             playbackRate={audioPlayer.playbackRate}
+            isRepeatEnabled={audioPlayer.isRepeatEnabled}
             nextPOI={nextPOI}
             onPlay={audioPlayer.play}
             onPause={audioPlayer.pause}
             onSeek={audioPlayer.seek}
             onVolumeChange={audioPlayer.setVolume}
             onPlaybackRateChange={handleCyclePlaybackRate}
-            onSkipNext={handleSkip}
-            onSkipPrevious={handleSkip}
+            onShuffleQueue={handleShuffleQueue}
+            onToggleRepeat={handleToggleRepeat}
+            onSkipNext={handleSkipNext}
+            onSkipPrevious={handleSkipPrevious}
             onClose={() => setShowPlayerModal(false)}
           />
         </div>

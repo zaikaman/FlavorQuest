@@ -35,6 +35,7 @@ export interface AudioPlayerState {
   duration: number;
   volume: number;
   playbackRate: number;
+  isRepeatEnabled: boolean;
   error: string | null;
   isTTSFallback: boolean; // Using TTS instead of audio file
 }
@@ -76,6 +77,7 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
     duration: 0,
     volume: opts.volume!,
     playbackRate: opts.playbackRate!,
+    isRepeatEnabled: false,
     error: null,
     isTTSFallback: false,
   });
@@ -86,6 +88,7 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
   const playRequestIdRef = useRef(0);
   const currentItemRef = useRef<AudioQueueItem | null>(null);
   const isPlayingRef = useRef(false);
+  const isRepeatEnabledRef = useRef(false);
   const optionsRef = useRef<UseAudioPlayerOptions>(opts);
   const ttsUtteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
   const playNextRef = useRef<() => void>(() => {});
@@ -98,6 +101,10 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
   useEffect(() => {
     isPlayingRef.current = state.isPlaying;
   }, [state.isPlaying]);
+
+  useEffect(() => {
+    isRepeatEnabledRef.current = state.isRepeatEnabled;
+  }, [state.isRepeatEnabled]);
 
   useEffect(() => {
     optionsRef.current = opts;
@@ -133,6 +140,16 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
 
     const onEnded = () => {
       const currentItem = currentItemRef.current;
+
+      if (currentItem && isRepeatEnabledRef.current) {
+        const replayPromise = audio.play();
+        if (replayPromise) {
+          replayPromise.catch((error) => {
+            console.error('[useAudioPlayer] Failed to replay audio:', error);
+          });
+        }
+        return;
+      }
       
       setState(prev => ({
         ...prev,
@@ -333,6 +350,11 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
     };
 
     utterance.onend = () => {
+      if (isRepeatEnabledRef.current) {
+        playWithTTS(item);
+        return;
+      }
+
       setState(prev => ({
         ...prev,
         isPlaying: false,
@@ -586,6 +608,31 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
     setState(prev => ({ ...prev, playbackRate: clampedRate }));
   }, []);
 
+  // Toggle repeat current item
+  const toggleRepeat = useCallback(() => {
+    setState(prev => ({ ...prev, isRepeatEnabled: !prev.isRepeatEnabled }));
+  }, []);
+
+  // Shuffle queue
+  const shuffleQueue = useCallback(() => {
+    setState(prev => {
+      if (prev.queue.length <= 1) {
+        return prev;
+      }
+
+      const shuffled = [...prev.queue];
+      for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+      }
+
+      return {
+        ...prev,
+        queue: shuffled,
+      };
+    });
+  }, []);
+
   // Add to queue
   const enqueue = useCallback((item: AudioQueueItem) => {
     setState(prev => {
@@ -650,6 +697,8 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
     seek,
     setVolume,
     setPlaybackRate,
+    toggleRepeat,
+    shuffleQueue,
     enqueue,
     skip,
     clearQueue,
