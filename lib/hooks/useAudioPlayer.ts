@@ -14,6 +14,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import type { POI, Language } from '@/lib/types/index';
+import { getLocalizedPOI } from '@/lib/utils/localization';
 
 export interface AudioQueueItem {
   poi: POI;
@@ -346,6 +347,7 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
     if (!audioRef.current) return;
 
     const audio = audioRef.current;
+    let targetItem = item;
 
     // Wait for any pending play to finish first
     if (playPromiseRef.current) {
@@ -357,14 +359,31 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
       playPromiseRef.current = null;
     }
 
+    // Nếu chỉ resume mà language đã đổi, tạo lại item theo language mới
+    if (!targetItem && currentItemRef.current && optionsRef.current.language) {
+      const currentItem = currentItemRef.current;
+      const nextLanguage = optionsRef.current.language;
+
+      if (currentItem.language !== nextLanguage) {
+        const localizedPOI = getLocalizedPOI(currentItem.poi, nextLanguage);
+        targetItem = {
+          poi: currentItem.poi,
+          audioUrl: localizedPOI.audio_url,
+          title: localizedPOI.name,
+          description: localizedPOI.description,
+          language: nextLanguage,
+        };
+      }
+    }
+
     // If item provided, load it first
-    if (item) {
+    if (targetItem) {
       const requestId = ++playRequestIdRef.current;
       isLoadingRef.current = true;
 
       setState(prev => ({
         ...prev,
-        currentItem: item,
+        currentItem: targetItem,
         isLoading: true,
         error: null,
         isTTSFallback: false,
@@ -380,7 +399,7 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
       audio.load();
 
       // Không thêm query cache-busting để không phá offline cache/Service Worker.
-      audio.src = item.audioUrl;
+      audio.src = targetItem.audioUrl;
       audio.load();
 
       // Wait for audio to be ready (hỗ trợ tap nhanh: request mới sẽ thắng)
