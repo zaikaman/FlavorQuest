@@ -20,12 +20,15 @@ export interface AudioPlayerProps {
   duration: number;
   volume: number;
   playbackRate: number;
+  isRepeatEnabled: boolean;
   nextPOI?: POI | null;
   onPlay: () => void;
   onPause: () => void;
   onSeek: (time: number) => void;
   onVolumeChange: (volume: number) => void;
   onPlaybackRateChange: () => void;
+  onShuffleQueue: () => void;
+  onToggleRepeat: () => void;
   onSkipNext: () => void;
   onSkipPrevious: () => void;
   onClose?: () => void;
@@ -45,13 +48,17 @@ export function AudioPlayer({
   duration,
   volume,
   playbackRate,
+  isRepeatEnabled,
   nextPOI,
   onPlay,
   onPause,
   onSeek,
   onVolumeChange,
   onPlaybackRateChange,
+  onShuffleQueue,
+  onToggleRepeat,
   onSkipNext,
+  onSkipPrevious,
   onClose,
 }: AudioPlayerProps) {
   const { language } = useLanguage();
@@ -154,15 +161,19 @@ export function AudioPlayer({
 
           {/* Main Buttons */}
           <div className="flex items-center justify-between mt-6 mb-8">
-            <button className="text-white/40 hover:text-white transition-colors opacity-30 cursor-not-allowed">
+            <button
+              onClick={onShuffleQueue}
+              className="text-white/70 hover:text-primary transition-colors"
+              aria-label="Shuffle queue"
+            >
               <span className="material-symbols-outlined text-2xl">shuffle</span>
             </button>
             <div className="flex items-center gap-6">
               <button
-                onClick={onSkipNext}
+                onClick={onSkipPrevious}
                 className="text-white hover:text-primary transition-colors"
               >
-                <span className="material-symbols-outlined text-4xl fill-1">skip_previous</span>
+                <span className="material-symbols-outlined text-4xl fill-1">replay_10</span>
               </button>
               <button
                 onClick={isPlaying ? onPause : onPlay}
@@ -176,11 +187,20 @@ export function AudioPlayer({
                 onClick={onSkipNext}
                 className="text-white hover:text-primary transition-colors"
               >
-                <span className="material-symbols-outlined text-4xl fill-1">skip_next</span>
+                <span className="material-symbols-outlined text-4xl fill-1">forward_10</span>
               </button>
             </div>
-            <button className="text-primary hover:text-primary/80 transition-colors opacity-30 cursor-not-allowed relative">
+            <button
+              onClick={onToggleRepeat}
+              className={`transition-colors relative ${isRepeatEnabled ? 'text-primary' : 'text-white/70 hover:text-primary'}`}
+              aria-label="Toggle repeat"
+            >
               <span className="material-symbols-outlined text-2xl">repeat</span>
+              {isRepeatEnabled && (
+                <span className="absolute -top-1.5 -right-3 rounded-full bg-primary px-1.5 py-0.5 text-[9px] font-bold leading-none text-white">
+                  ON
+                </span>
+              )}
             </button>
           </div>
 
