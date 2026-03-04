@@ -15,6 +15,7 @@ import { GEOFENCE_RADIUS_METERS } from '@/lib/constants/index';
 interface SettingsPanelProps {
   isOpen: boolean;
   onClose: () => void;
+  onSettingsChange?: (settings: UserSettings) => void;
 }
 
 const LANGUAGE_FLAGS: Record<Language, string> = {
@@ -26,7 +27,7 @@ const LANGUAGE_FLAGS: Record<Language, string> = {
   zh: '🇨🇳',
 };
 
-export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
+export function SettingsPanel({ isOpen, onClose, onSettingsChange }: SettingsPanelProps) {
   const { language, setLanguage, availableLanguages } = useLanguage();
   const { t } = useTranslations();
   const [settings, setSettings] = useState<UserSettings>({
@@ -62,8 +63,9 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
   ) => {
     const newSettings = { ...settings, [key]: value };
     setSettings(newSettings);
+    onSettingsChange?.(newSettings);
     await saveSettings(newSettings);
-  }, [settings]);
+  }, [settings, onSettingsChange]);
 
   // Handle language change
   const handleLanguageChange = async (lang: Language) => {

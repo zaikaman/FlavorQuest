@@ -169,6 +169,7 @@ export default function TourPage() {
   // Audio Player with TTS fallback
   const audioPlayer = useAudioPlayer({
     autoPlay: true,
+    volume: settings?.volume ?? 0.8,
     enableTTSFallback: true,
     language,
     onEnded: handleAudioEnded,
@@ -577,12 +578,18 @@ export default function TourPage() {
       {/* Settings Panel */}
       <SettingsPanel
         isOpen={showSettings}
+        onSettingsChange={(newSettings) => {
+          setSettings(newSettings);
+          setIsAutoMode(newSettings.autoPlayEnabled);
+          audioPlayer.setVolume(newSettings.volume);
+        }}
         onClose={() => {
           setShowSettings(false);
           // Reload settings
           loadSettings().then(s => {
             setSettings(s);
             setIsAutoMode(s.autoPlayEnabled);
+            audioPlayer.setVolume(s.volume);
           });
         }}
       />
