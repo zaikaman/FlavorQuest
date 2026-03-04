@@ -26,6 +26,8 @@ interface InteractiveMapProps {
   selectedPOI: POI | null;
   onSelectPOI: (poi: POI | null) => void;
   onPlayPOI: (poi: POI) => void;
+  playingPOIId?: string | null;
+  isAudioPlaying?: boolean;
 
 }
 
@@ -37,6 +39,8 @@ export function InteractiveMap({
   selectedPOI,
   onSelectPOI,
   onPlayPOI,
+  playingPOIId,
+  isAudioPlaying = false,
 
 
 }: InteractiveMapProps) {
@@ -228,6 +232,10 @@ export function InteractiveMap({
     return Math.round(R * c);
   };
 
+  const isSelectedPOIPlaying = Boolean(
+    selectedPOI && playingPOIId === selectedPOI.id && isAudioPlaying
+  );
+
   return (
     <div className="relative h-full w-full overflow-hidden">
       {/* Map Container */}
@@ -331,8 +339,11 @@ export function InteractiveMap({
             <button
               onClick={() => onPlayPOI(selectedPOI)}
               className="group flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary text-white shadow-lg transition-all active:scale-95 hover:bg-primary/90"
+              aria-label={isSelectedPOIPlaying ? t('audio.pause') : t('audio.play')}
             >
-              <span className="material-symbols-outlined text-[28px] ml-0.5 group-hover:scale-110 transition-transform" style={{ fontVariationSettings: "'FILL' 1" }}>play_arrow</span>
+              <span className="material-symbols-outlined text-[28px] ml-0.5 group-hover:scale-110 transition-transform" style={{ fontVariationSettings: "'FILL' 1" }}>
+                {isSelectedPOIPlaying ? 'pause' : 'play_arrow'}
+              </span>
             </button>
           </div>
         </div>
