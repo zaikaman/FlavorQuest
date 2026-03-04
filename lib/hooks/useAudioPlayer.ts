@@ -623,7 +623,15 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
       const shuffled = [...prev.queue];
       for (let i = shuffled.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
-        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        const current = shuffled[i];
+        const target = shuffled[j];
+
+        if (!current || !target) {
+          continue;
+        }
+
+        shuffled[i] = target;
+        shuffled[j] = current;
       }
 
       return {
