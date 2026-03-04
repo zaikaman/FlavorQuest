@@ -19,11 +19,13 @@ export interface AudioPlayerProps {
   currentTime: number;
   duration: number;
   volume: number;
+  playbackRate: number;
   nextPOI?: POI | null;
   onPlay: () => void;
   onPause: () => void;
   onSeek: (time: number) => void;
   onVolumeChange: (volume: number) => void;
+  onPlaybackRateChange: () => void;
   onSkipNext: () => void;
   onSkipPrevious: () => void;
   onClose?: () => void;
@@ -42,11 +44,13 @@ export function AudioPlayer({
   currentTime,
   duration,
   volume,
+  playbackRate,
   nextPOI,
   onPlay,
   onPause,
   onSeek,
   onVolumeChange,
+  onPlaybackRateChange,
   onSkipNext,
   onClose,
 }: AudioPlayerProps) {
@@ -90,9 +94,7 @@ export function AudioPlayer({
           <span className="text-xs font-medium text-white/60 uppercase tracking-widest">{t('audio.play')}</span>
           <span className="text-sm font-bold text-white">{t('app.tagline')}</span>
         </div>
-        <button className="flex items-center justify-center size-10 rounded-full bg-white/5 active:bg-white/10 transition-colors text-white">
-          <span className="material-symbols-outlined">queue_music</span>
-        </button>
+        <div className="size-10" aria-hidden="true" />
       </header>
 
       {/* Main Scrollable Content */}
@@ -124,17 +126,9 @@ export function AudioPlayer({
 
         {/* Meta Information */}
         <div className="px-6 flex items-start justify-between gap-4">
-          <div className="flex-1">
+          <div className="flex-1 min-w-0">
             <h1 className="text-2xl font-bold text-white leading-tight mb-1">{localizedPOI.name}</h1>
             <p className="text-primary font-medium text-sm">{localizedPOI.description}</p>
-          </div>
-          <div className="flex flex-col gap-3">
-            <button className="text-white/70 hover:text-primary transition-colors">
-              <span className="material-symbols-outlined text-[28px]">favorite_border</span>
-            </button>
-            <button className="text-white/70 hover:text-white transition-colors">
-              <span className="material-symbols-outlined text-[28px]">share</span>
-            </button>
           </div>
         </div>
 
@@ -192,8 +186,11 @@ export function AudioPlayer({
 
           {/* Volume Control */}
           <div className="flex items-center justify-center gap-8 mb-6">
-            <button className="px-3 py-1 rounded-full bg-white/5 border border-white/5 text-xs font-semibold text-white/80 hover:bg-white/10">
-              1.0x
+            <button
+              onClick={onPlaybackRateChange}
+              className="px-3 py-1 rounded-full bg-white/5 border border-white/5 text-xs font-semibold text-white/80 hover:bg-white/10"
+            >
+              {playbackRate}x
             </button>
             <div
               className="flex items-center gap-2 w-24 group/vol cursor-pointer"

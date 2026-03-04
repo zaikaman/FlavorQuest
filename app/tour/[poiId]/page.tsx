@@ -122,9 +122,7 @@ export default function POIDetailPage() {
         >
           <span className="material-symbols-outlined">arrow_back</span>
         </button>
-        <button className="flex items-center justify-center size-10 rounded-full bg-white/10 backdrop-blur-md">
-          <span className="material-symbols-outlined">share</span>
-        </button>
+        <div className="size-10" aria-hidden="true" />
       </header>
 
       {/* Hero Image */}
