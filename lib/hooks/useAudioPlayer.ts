@@ -81,13 +81,19 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
   const isLoadingRef = useRef(false); // Lock to prevent double loading
   const playRequestIdRef = useRef(0);
   const currentItemRef = useRef<AudioQueueItem | null>(null);
+  const isPlayingRef = useRef(false);
   const optionsRef = useRef<UseAudioPlayerOptions>(opts);
   const ttsUtteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
   const playNextRef = useRef<() => void>(() => {});
+  const languageRef = useRef<Language | undefined>(opts.language);
 
   useEffect(() => {
     currentItemRef.current = state.currentItem;
   }, [state.currentItem]);
+
+  useEffect(() => {
+    isPlayingRef.current = state.isPlaying;
+  }, [state.isPlaying]);
 
   useEffect(() => {
     optionsRef.current = opts;
@@ -481,6 +487,60 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
   const pause = useCallback(() => {
     safePause();
   }, [safePause]);
+
+  // Khi đổi ngôn ngữ trong lúc đang phát, tự dừng và chuyển sang audio theo ngôn ngữ mới.
+  useEffect(() => {
+    const previousLanguage = languageRef.current;
+    const nextLanguage = opts.language;
+
+    if (!nextLanguage) {
+      languageRef.current = nextLanguage;
+      return;
+    }
+
+    if (!previousLanguage) {
+      languageRef.current = nextLanguage;
+      return;
+    }
+
+    if (previousLanguage === nextLanguage) {
+      return;
+    }
+
+    languageRef.current = nextLanguage;
+
+    const currentItem = currentItemRef.current;
+    if (!currentItem || currentItem.language === nextLanguage || !isPlayingRef.current) {
+      return;
+    }
+
+    const localizedPOI = getLocalizedPOI(currentItem.poi, nextLanguage);
+    const switchedItem: AudioQueueItem = {
+      poi: currentItem.poi,
+      audioUrl: localizedPOI.audio_url,
+      title: localizedPOI.name,
+      description: localizedPOI.description,
+      language: nextLanguage,
+    };
+
+    let cancelled = false;
+
+    (async () => {
+      await safePause();
+      if (cancelled) return;
+
+      if (!switchedItem.audioUrl) {
+        playWithTTS(switchedItem);
+        return;
+      }
+
+      await play(switchedItem);
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [opts.language, play, playWithTTS, safePause]);
 
   // Stop audio
   const stop = useCallback(async () => {
