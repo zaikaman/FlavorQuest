@@ -187,7 +187,29 @@ export default function POIDetailPage() {
                   <span className="material-symbols-outlined text-3xl">replay_10</span>
                 </button>
                 <button
-                  onClick={() => audioPlayer.isPlaying ? audioPlayer.pause() : audioPlayer.play()}
+                  onClick={async () => {
+                    if (audioPlayer.currentItem?.language !== language) {
+                      if (!localized.audio_url) {
+                        showToastMsg(t('poiDetail.errorPlaying'));
+                        return;
+                      }
+
+                      await audioPlayer.playNow({
+                        poi,
+                        audioUrl: localized.audio_url,
+                        title: localized.name,
+                        description: localized.description,
+                        language,
+                      });
+                      return;
+                    }
+
+                    if (audioPlayer.isPlaying) {
+                      audioPlayer.pause();
+                    } else {
+                      await audioPlayer.play();
+                    }
+                  }}
                   className="size-14 rounded-full bg-primary flex items-center justify-center shadow-lg shadow-primary/30"
                 >
                   <span className="material-symbols-outlined text-3xl" style={{ fontVariationSettings: "'FILL' 1" }}>

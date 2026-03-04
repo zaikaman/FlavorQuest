@@ -326,8 +326,30 @@ export default function TourPage() {
 
   // Handle play POI from map card
   const handlePlayPOI = useCallback(async (poi: POI) => {
+    const localizedPOI = getLocalizedPOI(poi, language);
+    const audioUrl = localizedPOI.audio_url;
+
     // Nếu bấm lại đúng POI đang phát: toggle pause/resume
     if (audioPlayer.currentItem?.poi.id === poi.id) {
+      // Nếu đã đổi ngôn ngữ, phát lại source theo ngôn ngữ mới thay vì resume source cũ
+      if (audioPlayer.currentItem.language !== language) {
+        if (!audioUrl) {
+          showToastMessage(t('tour.noAudioForPOI'));
+          return;
+        }
+
+        await audioPlayer.playNow({
+          poi,
+          audioUrl,
+          title: localizedPOI.name,
+          description: localizedPOI.description,
+          language,
+        });
+
+        showToastMessage(t('tour.nowPlaying', { name: localizedPOI.name }));
+        return;
+      }
+
       if (audioPlayer.isPlaying) {
         audioPlayer.pause();
       } else {
@@ -335,9 +357,6 @@ export default function TourPage() {
       }
       return;
     }
-
-    const localizedPOI = getLocalizedPOI(poi, language);
-    const audioUrl = localizedPOI.audio_url;
 
 
 
