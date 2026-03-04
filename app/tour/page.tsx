@@ -500,6 +500,8 @@ export default function TourPage() {
               selectedPOI={selectedPOI}
               onSelectPOI={handleSelectPOI}
               onPlayPOI={handlePlayPOI}
+              playingPOIId={audioPlayer.currentItem?.poi.id}
+              isAudioPlaying={audioPlayer.isPlaying}
 
             />
 
