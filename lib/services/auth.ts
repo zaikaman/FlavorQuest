@@ -9,13 +9,13 @@ import type { User } from '@supabase/supabase-js';
 /**
  * Sign in với Google OAuth
  */
-export async function signInWithGoogle(): Promise<{ error: Error | null }> {
+export async function signInWithGoogle(accountType: 'customer' | 'owner' = 'customer'): Promise<{ error: Error | null }> {
   const supabase = createClient();
   
   const { error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: {
-      redirectTo: `${window.location.origin}/api/auth/callback`,
+      redirectTo: `${window.location.origin}/api/auth/callback?accountType=${accountType}`,
       queryParams: {
         access_type: 'offline',
         prompt: 'consent',

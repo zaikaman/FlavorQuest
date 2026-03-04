@@ -11,22 +11,24 @@ import { useAuth } from '@/lib/contexts/AuthContext';
 import { useTranslations } from '@/lib/hooks/useTranslations';
 import { signInWithGoogle } from '@/lib/services/auth';
 
+type AccountType = 'customer' | 'owner';
+
 export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, isOwner } = useAuth();
   const { t } = useTranslations();
   const error = searchParams.get('error');
+  const accountType = (searchParams.get('type') === 'owner' ? 'owner' : 'customer') as AccountType;
 
   useEffect(() => {
     if (!isLoading && user) {
-      // Already logged in, always redirect to tour
-      router.push('/tour');
+      router.push(isOwner ? '/owner' : '/tour');
     }
-  }, [user, isLoading, router]);
+  }, [user, isLoading, isOwner, router]);
 
-  const handleGoogleSignIn = async () => {
-    const { error } = await signInWithGoogle();
+  const handleGoogleSignIn = async (type: AccountType) => {
+    const { error } = await signInWithGoogle(type);
     if (error) {
       console.error('Sign in failed:', error);
     }
@@ -85,7 +87,7 @@ export default function LoginPage() {
 
             {/* Google Sign In Button */}
             <button
-              onClick={handleGoogleSignIn}
+              onClick={() => handleGoogleSignIn(accountType)}
               className="group w-full flex items-center justify-center gap-3 bg-white text-gray-900 font-bold py-4 px-6 rounded-xl transition-all duration-200 hover:bg-gray-100 hover:shadow-[0_0_20px_rgba(255,255,255,0.3)] hover:scale-[1.01] active:scale-[0.98]"
             >
               <svg className="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24">
@@ -108,6 +110,32 @@ export default function LoginPage() {
               </svg>
               <span>{t('login.signInWithGoogle')}</span>
             </button>
+
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => router.push('/login?type=customer')}
+                className={`rounded-xl border px-3 py-2 text-sm font-semibold transition-colors ${
+                  accountType === 'customer'
+                    ? 'border-primary bg-primary/15 text-primary'
+                    : 'border-white/10 bg-white/5 text-gray-300 hover:bg-white/10'
+                }`}
+              >
+                {t('login.customer')}
+              </button>
+              <button
+                type="button"
+                onClick={() => router.push('/login?type=owner')}
+                className={`rounded-xl border px-3 py-2 text-sm font-semibold transition-colors ${
+                  accountType === 'owner'
+                    ? 'border-primary bg-primary/15 text-primary'
+                    : 'border-white/10 bg-white/5 text-gray-300 hover:bg-white/10'
+                }`}
+              >
+                {t('login.owner')}
+              </button>
+            </div>
+            <p className="text-xs text-center text-gray-500">{t('login.selectedType', { type: accountType === 'owner' ? t('login.owner') : t('login.customer') })}</p>
 
             {/* Divider */}
             <div className="relative py-2">

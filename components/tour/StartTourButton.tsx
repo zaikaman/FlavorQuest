@@ -15,6 +15,7 @@ import { useRouter } from 'next/navigation';
 import { logTourStart } from '@/lib/services/analytics';
 import { useLanguage } from '@/lib/contexts/LanguageContext';
 import { useTranslations } from '@/lib/hooks/useTranslations';
+import { useAuth } from '@/lib/contexts/AuthContext';
 
 export interface StartTourButtonProps {
   onStart?: () => void;
@@ -27,6 +28,7 @@ export function StartTourButton({ onStart, className = '', disabled = false, isA
   const router = useRouter();
   const { language } = useLanguage();
   const { t } = useTranslations();
+  const { isOwner } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
 
   const handleStart = async () => {
@@ -53,7 +55,7 @@ export function StartTourButton({ onStart, className = '', disabled = false, isA
 
       // Navigate based on auth state
       if (isAuthenticated) {
-        router.push('/tour');
+        router.push(isOwner ? '/owner' : '/tour');
       } else {
         router.push('/login');
       }

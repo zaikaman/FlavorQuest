@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ImageUploader } from './ImageUploader';
 import { TTSGenerator } from './TTSGenerator';
@@ -9,6 +9,12 @@ import type { POI } from '@/lib/types/index';
 interface POIFormProps {
     initialData?: Partial<POI>;
     isNew?: boolean;
+    allowOwnerAssignment?: boolean;
+}
+
+interface OwnerOption {
+    id: string;
+    email: string;
 }
 
 const LANGUAGES = [
@@ -20,9 +26,10 @@ const LANGUAGES = [
     { code: 'zh', label: 'Chinese (中文)' },
 ];
 
-export function POIForm({ initialData, isNew = false }: POIFormProps) {
+export function POIForm({ initialData, isNew = false, allowOwnerAssignment = true }: POIFormProps) {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
+    const [owners, setOwners] = useState<OwnerOption[]>([]);
     const [formData, setFormData] = useState<Partial<POI>>(initialData || {
         lat: 10.759,
         lng: 106.705,
@@ -34,6 +41,23 @@ export function POIForm({ initialData, isNew = false }: POIFormProps) {
     const [activeTab, setActiveTab] = useState('vi');
     const [translating, setTranslating] = useState(false);
     const [genAllLoading, setGenAllLoading] = useState(false);
+
+    useEffect(() => {
+        if (!allowOwnerAssignment) return;
+
+        const loadOwners = async () => {
+            try {
+                const res = await fetch('/api/users/owners');
+                if (!res.ok) return;
+                const data = await res.json();
+                setOwners(data ?? []);
+            } catch (error) {
+                console.error('Load owners failed:', error);
+            }
+        };
+
+        loadOwners();
+    }, [allowOwnerAssignment]);
 
     const handleChange = (field: keyof POI, value: any) => {
         setFormData(prev => ({ ...prev, [field]: value }));
@@ -179,6 +203,24 @@ export function POIForm({ initialData, isNew = false }: POIFormProps) {
                             onImageUploaded={(url) => handleChange('image_url', url)}
                         />
                     </div>
+
+                    {allowOwnerAssignment && (
+                        <div>
+                            <label className="block text-sm font-medium text-gray-400 mb-1">Chủ quán phụ trách</label>
+                            <select
+                                value={(formData.owner_id as string) || ''}
+                                onChange={e => handleChange('owner_id' as keyof POI, e.target.value || null)}
+                                className="w-full bg-black/20 border border-white/10 rounded-lg p-2.5 text-white"
+                            >
+                                <option value="">Chưa gán chủ quán</option>
+                                {owners.map(owner => (
+                                    <option key={owner.id} value={owner.id}>
+                                        {owner.email}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                    )}
 
                     <div className="grid grid-cols-2 gap-4">
                         <div>
