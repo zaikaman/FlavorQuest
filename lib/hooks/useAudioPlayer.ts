@@ -34,6 +34,7 @@ export interface AudioPlayerState {
   currentTime: number;
   duration: number;
   volume: number;
+  playbackRate: number;
   error: string | null;
   isTTSFallback: boolean; // Using TTS instead of audio file
 }
@@ -41,6 +42,7 @@ export interface AudioPlayerState {
 export interface UseAudioPlayerOptions {
   autoPlay?: boolean;
   volume?: number;
+  playbackRate?: number;
   /** Enable TTS fallback khi audio không load được */
   enableTTSFallback?: boolean;
   /** Language mặc định cho TTS */
@@ -56,6 +58,7 @@ export interface UseAudioPlayerOptions {
 const DEFAULT_OPTIONS: UseAudioPlayerOptions = {
   autoPlay: false,
   volume: 1.0,
+  playbackRate: 1.0,
   enableTTSFallback: true,
   language: 'vi',
 };
@@ -72,6 +75,7 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
     currentTime: 0,
     duration: 0,
     volume: opts.volume!,
+    playbackRate: opts.playbackRate!,
     error: null,
     isTTSFallback: false,
   });
@@ -106,6 +110,7 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
     audioRef.current = new Audio();
     audioRef.current.preload = 'auto';
     audioRef.current.volume = opts.volume!;
+    audioRef.current.playbackRate = opts.playbackRate!;
     
     // Append to DOM to ensure proper loading in some browsers
     audioRef.current.style.display = 'none';
@@ -216,6 +221,15 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
     }
   }, [opts.volume]);
 
+  useEffect(() => {
+    if (!audioRef.current) return;
+    if (typeof opts.playbackRate === 'number') {
+      const clampedRate = Math.max(0.5, Math.min(2, opts.playbackRate));
+      audioRef.current.playbackRate = clampedRate;
+      setState(prev => ({ ...prev, playbackRate: clampedRate }));
+    }
+  }, [opts.playbackRate]);
+
   // Track play promise to avoid AbortError
   const playPromiseRef = useRef<Promise<void> | null>(null);
 
@@ -303,7 +317,7 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
 
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = getLangCode(item.language || opts.language);
-    utterance.rate = 1.0;
+    utterance.rate = state.playbackRate;
     utterance.pitch = 1.0;
     utterance.volume = state.volume;
 
@@ -564,6 +578,14 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
     setState(prev => ({ ...prev, volume: clampedVolume }));
   }, []);
 
+  // Set playback rate
+  const setPlaybackRate = useCallback((playbackRate: number) => {
+    if (!audioRef.current) return;
+    const clampedRate = Math.max(0.5, Math.min(2, playbackRate));
+    audioRef.current.playbackRate = clampedRate;
+    setState(prev => ({ ...prev, playbackRate: clampedRate }));
+  }, []);
+
   // Add to queue
   const enqueue = useCallback((item: AudioQueueItem) => {
     setState(prev => {
@@ -627,6 +649,7 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
     stop,
     seek,
     setVolume,
+    setPlaybackRate,
     enqueue,
     skip,
     clearQueue,

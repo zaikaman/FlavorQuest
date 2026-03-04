@@ -320,6 +320,15 @@ export default function TourPage() {
     }
   }, [audioPlayer, language]);
 
+  // Cycle playback rate: 0.75x -> 1.0x -> 1.25x -> 1.5x
+  const handleCyclePlaybackRate = useCallback(() => {
+    const rates = [0.75, 1, 1.25, 1.5];
+    const currentIndex = rates.findIndex(rate => rate === audioPlayer.playbackRate);
+    const nextRate = rates[(currentIndex + 1) % rates.length];
+    audioPlayer.setPlaybackRate(nextRate);
+    showToastMessage(`Tốc độ phát: ${nextRate}x`);
+  }, [audioPlayer, showToastMessage]);
+
   // Handle POI selection from map
   const handleSelectPOI = useCallback((poi: POI | null) => {
     setSelectedPOI(poi);
@@ -563,11 +572,13 @@ export default function TourPage() {
             currentTime={audioPlayer.currentTime}
             duration={audioPlayer.duration}
             volume={audioPlayer.volume}
+            playbackRate={audioPlayer.playbackRate}
             nextPOI={nextPOI}
             onPlay={audioPlayer.play}
             onPause={audioPlayer.pause}
             onSeek={audioPlayer.seek}
             onVolumeChange={audioPlayer.setVolume}
+            onPlaybackRateChange={handleCyclePlaybackRate}
             onSkipNext={handleSkip}
             onSkipPrevious={handleSkip}
             onClose={() => setShowPlayerModal(false)}
