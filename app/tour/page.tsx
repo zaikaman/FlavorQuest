@@ -324,7 +324,7 @@ export default function TourPage() {
   const handleCyclePlaybackRate = useCallback(() => {
     const rates = [0.75, 1, 1.25, 1.5];
     const currentIndex = rates.findIndex(rate => rate === audioPlayer.playbackRate);
-    const nextRate = rates[(currentIndex + 1) % rates.length];
+    const nextRate = rates[(currentIndex + 1) % rates.length] as number;
     audioPlayer.setPlaybackRate(nextRate);
     showToastMessage(`Tốc độ phát: ${nextRate}x`);
   }, [audioPlayer, showToastMessage]);
