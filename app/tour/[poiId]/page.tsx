@@ -9,6 +9,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useLanguage } from '@/lib/contexts/LanguageContext';
 import { useTranslations } from '@/lib/hooks/useTranslations';
+import { useAuth } from '@/lib/contexts/AuthContext';
 import { useAudioPlayer } from '@/lib/hooks/useAudioPlayer';
 import { usePOIManager } from '@/lib/hooks/usePOIManager';
 import { getLocalizedPOI } from '@/lib/utils/localization';
@@ -16,7 +17,7 @@ import { logAutoPlay } from '@/lib/services/analytics';
 import { saveVisit } from '@/lib/services/storage';
 import { Spinner } from '@/components/ui/Spinner';
 import { Toast } from '@/components/ui/Toast';
-import type { POI } from '@/lib/types/index';
+import type { Dish, POI } from '@/lib/types/index';
 
 export default function POIDetailPage() {
   const params = useParams();
@@ -24,9 +25,17 @@ export default function POIDetailPage() {
   const poiId = params.poiId as string;
   const { language } = useLanguage();
   const { t } = useTranslations();
+  const { user } = useAuth();
   
   const { pois, isLoading } = usePOIManager({ language });
   const [poi, setPoi] = useState<POI | null>(null);
+  const [dishes, setDishes] = useState<Dish[]>([]);
+  const [cart, setCart] = useState<Record<string, number>>({});
+  const [customerName, setCustomerName] = useState('');
+  const [customerPhone, setCustomerPhone] = useState('');
+  const [pickupTime, setPickupTime] = useState('');
+  const [orderNote, setOrderNote] = useState('');
+  const [isOrdering, setIsOrdering] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
 
@@ -50,6 +59,23 @@ export default function POIDetailPage() {
       setPoi(found || null);
     }
   }, [pois, poiId]);
+
+  useEffect(() => {
+    if (!poiId) return;
+
+    const loadDishes = async () => {
+      try {
+        const res = await fetch(`/api/dishes?poi_id=${poiId}`);
+        if (!res.ok) return;
+        const data = await res.json();
+        setDishes(data ?? []);
+      } catch (error) {
+        console.error('Load dishes failed:', error);
+      }
+    };
+
+    loadDishes();
+  }, [poiId]);
 
   // Phát audio
   const handlePlay = async () => {
@@ -84,6 +110,70 @@ export default function POIDetailPage() {
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
     return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const addToCart = (dishId: string) => {
+    setCart(prev => ({ ...prev, [dishId]: (prev[dishId] || 0) + 1 }));
+  };
+
+  const removeFromCart = (dishId: string) => {
+    setCart(prev => {
+      const next = { ...prev };
+      const currentQty = next[dishId] || 0;
+      if (currentQty <= 1) {
+        delete next[dishId];
+      } else {
+        next[dishId] = currentQty - 1;
+      }
+      return next;
+    });
+  };
+
+  const orderItems = dishes
+    .filter(dish => (cart[dish.id] || 0) > 0)
+    .map(dish => ({ dish, quantity: cart[dish.id] || 0 }));
+
+  const totalAmount = orderItems.reduce((sum, item) => sum + Number(item.dish.price) * item.quantity, 0);
+
+  const handlePlaceOrder = async () => {
+    if (!poi || orderItems.length === 0) return;
+
+    if (!user) {
+      router.push('/login?type=customer');
+      return;
+    }
+
+    setIsOrdering(true);
+    try {
+      const res = await fetch('/api/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          poi_id: poi.id,
+          customer_name: customerName || null,
+          customer_phone: customerPhone || null,
+          pickup_time: pickupTime ? new Date(pickupTime).toISOString() : null,
+          note: orderNote || null,
+          items: orderItems.map(item => ({ dish_id: item.dish.id, quantity: item.quantity })),
+        }),
+      });
+
+      if (!res.ok) {
+        throw new Error('Order failed');
+      }
+
+      setCart({});
+      setCustomerName('');
+      setCustomerPhone('');
+      setPickupTime('');
+      setOrderNote('');
+      showToastMsg(t('menu.success'));
+    } catch (error) {
+      console.error('Place order failed:', error);
+      showToastMsg(t('errors.generic'));
+    } finally {
+      setIsOrdering(false);
+    }
   };
 
   if (isLoading) {
@@ -262,6 +352,70 @@ export default function POIDetailPage() {
             {poi.estimated_hours}
           </div>
         )}
+
+        <div className="mb-4">
+          <h2 className="text-lg font-bold mb-3 flex items-center gap-2">
+            <span className="material-symbols-outlined text-primary">menu_book</span>
+            {t('menu.title')}
+          </h2>
+
+          <div className="space-y-3">
+            {dishes.map(dish => (
+              <div key={dish.id} className="rounded-xl border border-white/10 bg-[#2a1e16] p-3 flex items-center justify-between gap-3">
+                <div>
+                  <p className="font-semibold">{dish.name}</p>
+                  <p className="text-sm text-gray-400">{dish.description || '-'}</p>
+                  <p className="text-primary text-sm mt-1">{Number(dish.price).toLocaleString('vi-VN')}đ</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button onClick={() => removeFromCart(dish.id)} className="w-8 h-8 rounded-full border border-white/10">-</button>
+                  <span className="w-6 text-center">{cart[dish.id] || 0}</span>
+                  <button onClick={() => addToCart(dish.id)} className="w-8 h-8 rounded-full bg-primary text-white">+</button>
+                </div>
+              </div>
+            ))}
+            {dishes.length === 0 && <p className="text-sm text-gray-400">{t('menu.empty')}</p>}
+          </div>
+        </div>
+
+        <div className="bg-[#2a1e16] rounded-xl border border-white/10 p-4 space-y-3 mb-8">
+          <h3 className="font-bold">{t('menu.cart')}</h3>
+
+          <p className="text-sm text-gray-400">Tổng tạm tính: {totalAmount.toLocaleString('vi-VN')}đ</p>
+
+          <input
+            value={customerName}
+            onChange={event => setCustomerName(event.target.value)}
+            placeholder={t('menu.customerName')}
+            className="w-full rounded-lg bg-black/20 border border-white/10 px-3 py-2"
+          />
+          <input
+            value={customerPhone}
+            onChange={event => setCustomerPhone(event.target.value)}
+            placeholder={t('menu.customerPhone')}
+            className="w-full rounded-lg bg-black/20 border border-white/10 px-3 py-2"
+          />
+          <input
+            type="datetime-local"
+            value={pickupTime}
+            onChange={event => setPickupTime(event.target.value)}
+            className="w-full rounded-lg bg-black/20 border border-white/10 px-3 py-2"
+          />
+          <textarea
+            value={orderNote}
+            onChange={event => setOrderNote(event.target.value)}
+            placeholder={t('menu.note')}
+            className="w-full rounded-lg bg-black/20 border border-white/10 px-3 py-2"
+          />
+
+          <button
+            onClick={handlePlaceOrder}
+            disabled={orderItems.length === 0 || isOrdering}
+            className="w-full py-3 rounded-lg bg-primary text-white font-bold disabled:opacity-50"
+          >
+            {isOrdering ? t('common.loading') : t('menu.placeOrder')}
+          </button>
+        </div>
       </div>
 
       {/* Bottom Safe Area */}

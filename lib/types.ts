@@ -69,6 +69,7 @@ export interface POI {
   signature_dish?: string;
   fun_fact?: string;
   estimated_hours?: string;
+  owner_id?: string | null;
 
   // Timestamps
   created_at: string;
@@ -136,6 +137,62 @@ export interface POIPayload {
   signature_dish?: string;
   fun_fact?: string;
   estimated_hours?: string;
+  owner_id?: string | null;
+}
+
+export interface Dish {
+  id: string;
+  poi_id: string;
+  name: string;
+  description?: string | null;
+  price: number;
+  is_available: boolean;
+  image_url?: string | null;
+  created_at: string;
+  updated_at: string;
+  deleted_at?: string | null;
+}
+
+export interface OrderItem {
+  id: string;
+  order_id: string;
+  dish_id: string;
+  quantity: number;
+  unit_price: number;
+  dishes?: {
+    name: string;
+  };
+}
+
+export interface PreorderOrder {
+  id: string;
+  poi_id: string;
+  customer_id: string;
+  customer_name?: string | null;
+  customer_phone?: string | null;
+  note?: string | null;
+  pickup_time?: string | null;
+  status: 'pending' | 'confirmed' | 'preparing' | 'ready' | 'cancelled';
+  total_amount: number;
+  created_at: string;
+  updated_at: string;
+  pois?: {
+    id: string;
+    name_vi: string;
+    owner_id?: string | null;
+  };
+  preorder_order_items?: OrderItem[];
+}
+
+export interface AppNotification {
+  id: string;
+  user_id: string;
+  order_id?: string | null;
+  title: string;
+  message: string;
+  type: 'order_created' | 'order_update' | 'system';
+  read_at?: string | null;
+  created_at: string;
 }
 
 // ============================================
@@ -282,7 +339,7 @@ export interface AnalyticsSummary {
 /**
  * User role
  */
-export type UserRole = 'user' | 'admin';
+export type UserRole = 'customer' | 'owner' | 'admin';
 
 /**
  * User entity

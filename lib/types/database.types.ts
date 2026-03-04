@@ -33,6 +33,7 @@ export interface Database {
           created_at: string;
           updated_at: string;
           deleted_at: string | null;
+          owner_id: string | null;
           lat: number;
           lng: number;
           radius: number;
@@ -65,6 +66,7 @@ export interface Database {
           created_at?: string;
           updated_at?: string;
           deleted_at?: string | null;
+          owner_id?: string | null;
           lat: number;
           lng: number;
           radius?: number;
@@ -97,6 +99,7 @@ export interface Database {
           created_at?: string;
           updated_at?: string;
           deleted_at?: string | null;
+          owner_id?: string | null;
           lat?: number;
           lng?: number;
           radius?: number;
@@ -124,7 +127,14 @@ export interface Database {
           fun_fact?: string | null;
           estimated_hours?: string | null;
         };
-        Relationships: [];
+        Relationships: [
+          {
+            foreignKeyName: 'pois_owner_id_fkey';
+            columns: ['owner_id'];
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          }
+        ];
       };
       analytics_logs: {
         Row: {
@@ -178,27 +188,214 @@ export interface Database {
           created_at: string;
           updated_at: string;
           email: string;
-          role: 'user' | 'admin';
+          role: 'customer' | 'owner' | 'admin';
         };
         Insert: {
           id: string;
           created_at?: string;
           updated_at?: string;
           email: string;
-          role?: 'user' | 'admin';
+          role?: 'customer' | 'owner' | 'admin';
         };
         Update: {
           id?: string;
           created_at?: string;
           updated_at?: string;
           email?: string;
-          role?: 'user' | 'admin';
+          role?: 'customer' | 'owner' | 'admin';
         };
         Relationships: [
           {
             foreignKeyName: 'users_id_fkey';
             columns: ['id'];
             referencedRelation: 'users';
+            referencedColumns: ['id'];
+          }
+        ];
+      };
+      dishes: {
+        Row: {
+          id: string;
+          poi_id: string;
+          name: string;
+          description: string | null;
+          price: number;
+          is_available: boolean;
+          image_url: string | null;
+          created_at: string;
+          updated_at: string;
+          deleted_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          poi_id: string;
+          name: string;
+          description?: string | null;
+          price: number;
+          is_available?: boolean;
+          image_url?: string | null;
+          created_at?: string;
+          updated_at?: string;
+          deleted_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          poi_id?: string;
+          name?: string;
+          description?: string | null;
+          price?: number;
+          is_available?: boolean;
+          image_url?: string | null;
+          created_at?: string;
+          updated_at?: string;
+          deleted_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'dishes_poi_id_fkey';
+            columns: ['poi_id'];
+            referencedRelation: 'pois';
+            referencedColumns: ['id'];
+          }
+        ];
+      };
+      preorder_orders: {
+        Row: {
+          id: string;
+          poi_id: string;
+          customer_id: string;
+          customer_name: string | null;
+          customer_phone: string | null;
+          note: string | null;
+          pickup_time: string | null;
+          status: 'pending' | 'confirmed' | 'preparing' | 'ready' | 'cancelled';
+          total_amount: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          poi_id: string;
+          customer_id: string;
+          customer_name?: string | null;
+          customer_phone?: string | null;
+          note?: string | null;
+          pickup_time?: string | null;
+          status?: 'pending' | 'confirmed' | 'preparing' | 'ready' | 'cancelled';
+          total_amount?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          poi_id?: string;
+          customer_id?: string;
+          customer_name?: string | null;
+          customer_phone?: string | null;
+          note?: string | null;
+          pickup_time?: string | null;
+          status?: 'pending' | 'confirmed' | 'preparing' | 'ready' | 'cancelled';
+          total_amount?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'preorder_orders_poi_id_fkey';
+            columns: ['poi_id'];
+            referencedRelation: 'pois';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'preorder_orders_customer_id_fkey';
+            columns: ['customer_id'];
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          }
+        ];
+      };
+      preorder_order_items: {
+        Row: {
+          id: string;
+          order_id: string;
+          dish_id: string;
+          quantity: number;
+          unit_price: number;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          order_id: string;
+          dish_id: string;
+          quantity: number;
+          unit_price: number;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          order_id?: string;
+          dish_id?: string;
+          quantity?: number;
+          unit_price?: number;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'preorder_order_items_order_id_fkey';
+            columns: ['order_id'];
+            referencedRelation: 'preorder_orders';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'preorder_order_items_dish_id_fkey';
+            columns: ['dish_id'];
+            referencedRelation: 'dishes';
+            referencedColumns: ['id'];
+          }
+        ];
+      };
+      notifications: {
+        Row: {
+          id: string;
+          user_id: string;
+          order_id: string | null;
+          title: string;
+          message: string;
+          type: 'order_created' | 'order_update' | 'system';
+          read_at: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          order_id?: string | null;
+          title: string;
+          message: string;
+          type?: 'order_created' | 'order_update' | 'system';
+          read_at?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          order_id?: string | null;
+          title?: string;
+          message?: string;
+          type?: 'order_created' | 'order_update' | 'system';
+          read_at?: string | null;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'notifications_user_id_fkey';
+            columns: ['user_id'];
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'notifications_order_id_fkey';
+            columns: ['order_id'];
+            referencedRelation: 'preorder_orders';
             referencedColumns: ['id'];
           }
         ];
@@ -252,10 +449,14 @@ export interface Database {
         };
         Returns: boolean;
       };
+      current_user_role: {
+        Args: Record<PropertyKey, never>;
+        Returns: string;
+      };
     };
     Enums: {
       event_type: 'tour_start' | 'tour_end' | 'auto_play' | 'manual_play' | 'skip' | 'settings_change';
-      user_role: 'user' | 'admin';
+      user_role: 'customer' | 'owner' | 'admin';
     };
     CompositeTypes: {
       [_ in never]: never;

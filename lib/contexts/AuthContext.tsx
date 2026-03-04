@@ -9,9 +9,14 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import type { User } from '@supabase/supabase-js';
 
+type AppUserRole = 'customer' | 'owner' | 'admin';
+
 interface AuthContextType {
   user: User | null;
+  userRole: AppUserRole | null;
   isAdmin: boolean;
+  isOwner: boolean;
+  isCustomer: boolean;
   isLoading: boolean;
   signOut: () => Promise<void>;
 }
@@ -20,6 +25,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [userRole, setUserRole] = useState<AppUserRole | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -27,44 +33,72 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const supabase = createClient();
 
     // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       setUser(session?.user ?? null);
-      checkAdminStatus(session?.user ?? null);
+      await checkUserRole(session?.user ?? null);
       setIsLoading(false);
     });
 
     // Listen for auth changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setUser(session?.user ?? null);
-      checkAdminStatus(session?.user ?? null);
+      await checkUserRole(session?.user ?? null);
       setIsLoading(false);
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
-  const checkAdminStatus = (currentUser: User | null) => {
+  const checkUserRole = async (currentUser: User | null) => {
+    const supabase = createClient();
+
     if (!currentUser?.email) {
+      setUserRole(null);
       setIsAdmin(false);
       return;
     }
 
     const adminEmails = process.env.NEXT_PUBLIC_ADMIN_EMAILS || '';
     const adminList = adminEmails.split(',').map(email => email.trim().toLowerCase());
-    setIsAdmin(adminList.includes(currentUser.email.toLowerCase()));
+    if (adminList.includes(currentUser.email.toLowerCase())) {
+      setUserRole('admin');
+      setIsAdmin(true);
+      return;
+    }
+
+    const { data } = await supabase
+      .from('users')
+      .select('role')
+      .eq('id', currentUser.id)
+      .single();
+
+    const role = data?.role === 'owner' ? 'owner' : 'customer';
+    setUserRole(role);
+    setIsAdmin(false);
   };
 
   const handleSignOut = async () => {
     const supabase = createClient();
     await supabase.auth.signOut();
     setUser(null);
+    setUserRole(null);
     setIsAdmin(false);
   };
 
   return (
-    <AuthContext.Provider value={{ user, isAdmin, isLoading, signOut: handleSignOut }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        userRole,
+        isAdmin,
+        isOwner: userRole === 'owner',
+        isCustomer: userRole === 'customer',
+        isLoading,
+        signOut: handleSignOut,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

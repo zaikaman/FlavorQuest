@@ -1,4 +1,4 @@
-import { createServerClient, isUserAdmin } from '@/lib/supabase/server';
+import { createServerClient, getCurrentUserProfile, isUserAdmin } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
@@ -10,11 +10,22 @@ export async function GET(request: NextRequest) {
     const supabase = await createServerClient();
     const searchParams = request.nextUrl.searchParams;
     const includeDeleted = searchParams.get('include_deleted') === 'true';
+    const ownerOnly = searchParams.get('owner_only') === 'true';
+
+    const profile = ownerOnly ? await getCurrentUserProfile(supabase) : null;
+
+    if (ownerOnly && !profile) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
 
     let query = supabase
         .from('pois')
         .select('*')
         .order('priority', { ascending: false });
+
+    if (ownerOnly) {
+        query = query.eq('owner_id', profile!.id);
+    }
 
     if (!includeDeleted) {
         query = query.is('deleted_at', null);

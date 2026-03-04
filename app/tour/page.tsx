@@ -22,6 +22,7 @@ import { useAudioPlayer } from '@/lib/hooks/useAudioPlayer';
 import { usePOIManager } from '@/lib/hooks/usePOIManager';
 import { useOfflineSync } from '@/lib/hooks/useOfflineSync';
 import { useLanguage } from '@/lib/contexts/LanguageContext';
+import { useAuth } from '@/lib/contexts/AuthContext';
 import { useTranslations } from '@/lib/hooks/useTranslations';
 import { InteractiveMap } from '@/components/tour/InteractiveMap';
 import { NarrationOverlay } from '@/components/tour/NarrationOverlay';
@@ -40,13 +41,14 @@ import { isCooldownActive, setCooldown } from '@/lib/utils/cooldown';
 import { logAutoPlay, logSkip, logTourEnd } from '@/lib/services/analytics';
 import { saveVisit, loadSettings } from '@/lib/services/storage';
 import { getLocalizedPOI } from '@/lib/utils/localization';
-import type { POI, Coordinates, UserSettings } from '@/lib/types/index';
+import type { AppNotification, POI, Coordinates, UserSettings } from '@/lib/types/index';
 import { GEOFENCE_TRIGGER_RADIUS_M, MAX_WALKING_SPEED_KMH } from '@/lib/constants/index';
 
 export default function TourPage() {
   const router = useRouter();
   const { language } = useLanguage();
   const { t } = useTranslations();
+  const { user } = useAuth();
 
   // Geolocation
   const { coordinates, accuracy, heading, error: geoError, permissionState } = useGeolocation();
@@ -96,6 +98,8 @@ export default function TourPage() {
   const [settings, setSettings] = useState<UserSettings | null>(null);
   const [showOfflinePrompt, setShowOfflinePrompt] = useState(false);
   const [shouldPreloadOffline, setShouldPreloadOffline] = useState(false);
+  const [notifications, setNotifications] = useState<AppNotification[]>([]);
+  const [showNotifications, setShowNotifications] = useState(false);
 
   // Refs
   const noiseFilterRef = useRef<NoiseFilter>(new NoiseFilter({ windowSize: 5 })); // 5 samples moving average
@@ -475,6 +479,42 @@ export default function TourPage() {
   // Get next POI
   const nextPOI = nearbyPOIs.find(p => p.id !== audioPlayer.currentItem?.poi.id);
 
+  useEffect(() => {
+    if (!user) return;
+
+    const loadNotifications = async () => {
+      try {
+        const res = await fetch('/api/notifications');
+        if (!res.ok) return;
+        const data = await res.json();
+        setNotifications(data ?? []);
+      } catch (error) {
+        console.error('Load notifications failed:', error);
+      }
+    };
+
+    loadNotifications();
+  }, [user]);
+
+  useEffect(() => {
+    if (!showNotifications || notifications.length === 0) return;
+
+    const hasUnread = notifications.some(item => !item.read_at);
+    if (!hasUnread) return;
+
+    fetch('/api/notifications', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ markAll: true }),
+    }).then(() => {
+      setNotifications(prev => prev.map(item => ({ ...item, read_at: item.read_at ?? new Date().toISOString() })));
+    }).catch(error => {
+      console.error('Mark notifications read failed:', error);
+    });
+  }, [showNotifications, notifications]);
+
+  const unreadCount = notifications.filter(item => !item.read_at).length;
+
 
 
   return (
@@ -527,7 +567,21 @@ export default function TourPage() {
           </div>
 
           {/* Offline Status */}
-          <div className="pointer-events-auto">
+          <div className="pointer-events-auto flex items-center gap-2">
+            {user && (
+              <button
+                onClick={() => setShowNotifications(true)}
+                className="relative flex items-center justify-center w-10 h-10 rounded-full bg-black/40 backdrop-blur-md border border-white/10 text-white shadow-lg"
+                aria-label={t('notifications.title')}
+              >
+                <span className="material-symbols-outlined text-xl">notifications</span>
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 min-w-5 h-5 px-1 rounded-full bg-primary text-[10px] font-bold flex items-center justify-center">
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </span>
+                )}
+              </button>
+            )}
             <OfflineIndicator compact className="shadow-lg border border-white/10 backdrop-blur-md !bg-black/40" />
           </div>
         </div>
@@ -689,6 +743,35 @@ export default function TourPage() {
         onTabChange={handleTabChange}
         className="fixed bottom-0 left-0 right-0 z-50"
       />
+
+      {showNotifications && (
+        <div className="fixed inset-0 z-[70] bg-black/70 backdrop-blur-sm p-4">
+          <div className="max-w-md mx-auto mt-16 rounded-2xl border border-white/10 bg-[#2a1e16] p-4 max-h-[70vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-bold text-white">{t('notifications.title')}</h3>
+              <button onClick={() => setShowNotifications(false)} className="text-gray-400 hover:text-white">
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            </div>
+
+            {notifications.length === 0 && (
+              <p className="text-sm text-gray-400">{t('notifications.empty')}</p>
+            )}
+
+            <div className="space-y-2">
+              {notifications.map(notification => (
+                <div
+                  key={notification.id}
+                  className={`rounded-lg border p-3 ${notification.read_at ? 'border-white/10' : 'border-primary/40 bg-primary/5'}`}
+                >
+                  <p className="text-sm font-semibold">{notification.title}</p>
+                  <p className="text-xs text-gray-300 mt-1">{notification.message}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import { createServerClient, isUserAdmin } from '@/lib/supabase/server';
+import { createServerClient, getCurrentUserProfile } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
@@ -36,18 +36,42 @@ export async function PUT(
 ) {
     const { id } = await params;
     const supabase = await createServerClient();
-    const isAdmin = await isUserAdmin(supabase);
+    const profile = await getCurrentUserProfile(supabase);
 
-    if (!isAdmin) {
+    if (!profile) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
 
     try {
         const body = await request.json();
 
+        const { data: poi, error: poiError } = await supabase
+            .from('pois')
+            .select('id, owner_id')
+            .eq('id', id)
+            .single();
+
+        if (poiError || !poi) {
+            return NextResponse.json({ error: 'POI not found' }, { status: 404 });
+        }
+
+        const canEdit = profile.role === 'admin' || poi.owner_id === profile.id;
+        if (!canEdit) {
+            return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+        }
+
         // Prevent updating id or created_at
         delete body.id;
         delete body.created_at;
+
+        if (profile.role !== 'admin') {
+            delete body.lat;
+            delete body.lng;
+            delete body.priority;
+            delete body.radius;
+            delete body.deleted_at;
+            delete body.owner_id;
+        }
 
         // Update timestamp
         body.updated_at = new Date().toISOString();
@@ -82,9 +106,9 @@ export async function DELETE(
 ) {
     const { id } = await params;
     const supabase = await createServerClient();
-    const isAdmin = await isUserAdmin(supabase);
+    const profile = await getCurrentUserProfile(supabase);
 
-    if (!isAdmin) {
+    if (!profile || profile.role !== 'admin') {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
 

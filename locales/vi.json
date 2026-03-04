@@ -246,9 +246,38 @@
     "subtitle": "Lưu tiến độ và đồng bộ trải nghiệm của bạn",
     "prompt": "Đăng nhập bằng tài khoản Google để tiếp tục",
     "signInWithGoogle": "Đăng nhập với Google",
+    "customer": "Khách hàng",
+    "owner": "Chủ quán",
+    "selectedType": "Loại tài khoản đang chọn: {type}",
     "or": "hoặc",
     "backToHome": "Quay lại trang chủ",
     "error": "Đăng nhập thất bại. Vui lòng thử lại."
+  },
+  "menu": {
+    "title": "Menu món ăn",
+    "empty": "Quán chưa cập nhật menu.",
+    "addToCart": "Thêm món",
+    "quantity": "Số lượng",
+    "cart": "Đơn đặt trước",
+    "placeOrder": "Đặt món trước",
+    "pickupTime": "Giờ nhận món",
+    "customerName": "Tên người nhận",
+    "customerPhone": "Số điện thoại",
+    "note": "Ghi chú",
+    "success": "Đặt món thành công"
+  },
+  "notifications": {
+    "title": "Thông báo",
+    "markAll": "Đánh dấu đã đọc",
+    "empty": "Bạn chưa có thông báo mới"
+  },
+  "owner": {
+    "title": "Bảng điều khiển chủ quán",
+    "subtitle": "Quản lý POI, menu và đơn đặt trước",
+    "myPois": "POI của tôi",
+    "orders": "Đơn đặt trước",
+    "menu": "Menu món ăn",
+    "noPoi": "Bạn chưa được gán POI. Hãy liên hệ admin."
   },
   "poiDetail": {
     "notFound": "Không tìm thấy địa điểm",

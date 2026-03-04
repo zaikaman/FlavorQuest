@@ -13,6 +13,14 @@
 import { createServerClient as createSupabaseServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 
+export type AppUserRole = 'customer' | 'owner' | 'admin';
+
+export interface CurrentUserProfile {
+  id: string;
+  email: string | null;
+  role: AppUserRole;
+}
+
 /**
  * Lấy Supabase environment variables
  * Throw error nếu thiếu để catch lỗi sớm
@@ -214,4 +222,54 @@ export async function isUserAdmin(client: SupabaseServerClient): Promise<boolean
     .single();
 
   return data?.role === 'admin';
+}
+
+export async function getUserRole(client: SupabaseServerClient): Promise<AppUserRole | null> {
+  const { data: { user } } = await client.auth.getUser();
+
+  if (!user) {
+    return null;
+  }
+
+  const adminEmails = process.env.ADMIN_EMAILS || process.env.NEXT_PUBLIC_ADMIN_EMAILS || '';
+  const adminList = adminEmails
+    .split(',')
+    .map(email => email.trim().toLowerCase())
+    .filter(Boolean);
+
+  if (user.email && adminList.includes(user.email.toLowerCase())) {
+    return 'admin';
+  }
+
+  const { data } = await client
+    .from('users')
+    .select('role')
+    .eq('id', user.id)
+    .single();
+
+  if (!data?.role) {
+    return 'customer';
+  }
+
+  if (data.role === 'user') {
+    return 'customer';
+  }
+
+  return data.role as AppUserRole;
+}
+
+export async function getCurrentUserProfile(client: SupabaseServerClient): Promise<CurrentUserProfile | null> {
+  const { data: { user } } = await client.auth.getUser();
+
+  if (!user) {
+    return null;
+  }
+
+  const role = await getUserRole(client);
+
+  return {
+    id: user.id,
+    email: user.email ?? null,
+    role: role ?? 'customer',
+  };
 }
