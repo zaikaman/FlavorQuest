@@ -4,6 +4,8 @@
  * Translate text using OpenAI-compatible API
  */
 
+import OpenAI from 'openai';
+
 interface TranslationResponse {
     en: string;
     ja: string;
@@ -16,46 +18,42 @@ interface TranslationResponse {
 export async function translateText(text: string): Promise<TranslationResponse> {
     const apiKey = process.env.OPENAI_API_KEY;
     const baseUrl = process.env.OPENAI_BASE_URL;
-    const model = process.env.OPENAI_MODEL || 'gemini-2.5-flash-lite-nothinking';
+    const model = process.env.OPENAI_MODEL || 'gemini-3-flash preview';
 
     if (!apiKey || !baseUrl) {
         throw new Error('Missing OPENAI_API_KEY or OPENAI_BASE_URL');
     }
 
+    const client = new OpenAI({
+        apiKey,
+        baseURL: baseUrl,
+        defaultHeaders: {
+            // EzAI yêu cầu User-Agent để xác thực hợp lệ request
+            'User-Agent': 'EzAI/1.0',
+        },
+    });
+
     const systemPrompt = `You are a professional translator. Translate the following Vietnamese text into English (en), Japanese (ja), French (fr), Korean (ko), and Chinese Simplified (zh).
     Return ONLY a valid JSON object with keys: en, ja, fr, ko, zh. Do not add any markdown formatting or extra text.`;
 
     try {
-        const response = await fetch(`${baseUrl}/chat/completions`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${apiKey}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                model: model,
-                messages: [
-                    {
-                        role: 'system',
-                        content: systemPrompt
-                    },
-                    {
-                        role: 'user',
-                        content: text
-                    }
-                ],
-                temperature: 0.1,
-                top_p: 1,
-                stream: false
-            })
+        const data = await client.chat.completions.create({
+            model,
+            messages: [
+                {
+                    role: 'system',
+                    content: systemPrompt,
+                },
+                {
+                    role: 'user',
+                    content: text,
+                },
+            ],
+            temperature: 0.1,
+            top_p: 1,
+            max_tokens: 100000,
         });
 
-        if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.error?.message || 'Translation failed');
-        }
-
-        const data = await response.json();
         const content = data.choices[0]?.message?.content;
 
         if (!content) {
