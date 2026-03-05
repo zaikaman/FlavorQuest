@@ -9,6 +9,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Modal } from '@/components/ui/Modal';
+import { useAuth } from '@/lib/contexts/AuthContext';
 import { useTranslations } from '@/lib/hooks/useTranslations';
 
 export default function TourLayout({
@@ -18,12 +19,20 @@ export default function TourLayout({
 }) {
   const { t } = useTranslations();
   const router = useRouter();
+  const { user, isLoading } = useAuth();
   const [permissionState, setPermissionState] = useState<'prompt' | 'granted' | 'denied' | 'checking'>('checking');
   const [showPermissionModal, setShowPermissionModal] = useState(false);
 
   useEffect(() => {
+    if (isLoading) return;
+
+    if (!user) {
+      router.replace('/login?type=customer');
+      return;
+    }
+
     checkLocationPermission();
-  }, []);
+  }, [isLoading, user, router]);
 
   const checkLocationPermission = async () => {
     if (!('permissions' in navigator)) {
@@ -85,7 +94,7 @@ export default function TourLayout({
     router.push('/browse');
   };
 
-  if (permissionState === 'checking') {
+  if (isLoading || !user || permissionState === 'checking') {
     return (
       <div className="flex items-center justify-center h-screen bg-background-dark">
         <div className="flex flex-col items-center gap-4">
