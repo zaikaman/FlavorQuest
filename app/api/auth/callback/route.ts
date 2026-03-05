@@ -49,9 +49,16 @@ export async function GET(request: NextRequest) {
           },
           { onConflict: 'id' }
         );
+
+      // Redirect dựa trên role của user
+      if (role === 'admin') {
+        return NextResponse.redirect(`${origin}/admin`);
+      } else if (role === 'owner') {
+        return NextResponse.redirect(`${origin}/owner`);
+      }
     }
   }
 
-  // Redirect to tour page after successful login
+  // Redirect to tour page after successful login (mặc định cho customer)
   return NextResponse.redirect(`${origin}/tour`);
 }
