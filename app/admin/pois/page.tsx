@@ -4,12 +4,27 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import type { POI } from '@/lib/types/index';
 
+interface OwnerOption {
+    id: string;
+    email: string;
+}
+
+interface UserRoleItem {
+    id: string;
+    email: string;
+    role: 'customer' | 'owner' | 'admin';
+}
+
 export default function POIsPage() {
     const [pois, setPois] = useState<POI[]>([]);
+    const [owners, setOwners] = useState<OwnerOption[]>([]);
+    const [users, setUsers] = useState<UserRoleItem[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        fetchPOIs();
+        Promise.all([fetchPOIs(), fetchOwners(), fetchUsers()]).finally(() => {
+            setIsLoading(false);
+        });
     }, []);
 
     const fetchPOIs = async () => {
@@ -21,8 +36,30 @@ export default function POIsPage() {
             }
         } catch (error) {
             console.error('Error fetching POIs:', error);
-        } finally {
-            setIsLoading(false);
+        }
+    };
+
+    const fetchOwners = async () => {
+        try {
+            const res = await fetch('/api/users/owners');
+            if (res.ok) {
+                const data = await res.json();
+                setOwners(data ?? []);
+            }
+        } catch (error) {
+            console.error('Error fetching owners:', error);
+        }
+    };
+
+    const fetchUsers = async () => {
+        try {
+            const res = await fetch('/api/users');
+            if (res.ok) {
+                const data = await res.json();
+                setUsers(data ?? []);
+            }
+        } catch (error) {
+            console.error('Error fetching users:', error);
         }
     };
 
@@ -43,6 +80,51 @@ export default function POIsPage() {
         } catch (error) {
             console.error('Error deleting POI:', error);
         }
+    };
+
+    const handleAssignOwner = async (poiId: string, ownerId: string) => {
+        try {
+            const res = await fetch(`/api/pois/${poiId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ owner_id: ownerId || null }),
+            });
+
+            if (!res.ok) {
+                alert('Gán chủ quán thất bại');
+                return;
+            }
+
+            await fetchPOIs();
+        } catch (error) {
+            console.error('Assign owner failed:', error);
+            alert('Có lỗi khi gán chủ quán');
+        }
+    };
+
+    const handleUpdateRole = async (userId: string, role: 'customer' | 'owner') => {
+        try {
+            const res = await fetch('/api/users', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId, role }),
+            });
+
+            if (!res.ok) {
+                alert('Cập nhật vai trò thất bại');
+                return;
+            }
+
+            await Promise.all([fetchOwners(), fetchUsers(), fetchPOIs()]);
+        } catch (error) {
+            console.error('Update role failed:', error);
+            alert('Có lỗi khi cập nhật vai trò');
+        }
+    };
+
+    const getOwnerEmail = (ownerId?: string | null) => {
+        if (!ownerId) return 'Chưa gán';
+        return owners.find(owner => owner.id === ownerId)?.email || 'Không xác định';
     };
 
     if (isLoading) {
@@ -73,6 +155,7 @@ export default function POIsPage() {
                     <thead className="bg-white/5 text-gray-200 uppercase font-bold text-xs">
                         <tr>
                             <th className="px-6 py-4">Tên</th>
+                            <th className="px-6 py-4">Chủ quán</th>
                             <th className="px-6 py-4">Hình ảnh</th>
                             <th className="px-6 py-4">Tọa độ</th>
                             <th className="px-6 py-4">Trạng thái Audio</th>
@@ -85,6 +168,23 @@ export default function POIsPage() {
                                 <td className="px-6 py-4">
                                     <div className="font-medium text-white text-base">{poi.name_vi}</div>
                                     <div className="text-xs">{poi.name_en || '-'}</div>
+                                </td>
+                                <td className="px-6 py-4">
+                                    <div className="space-y-2">
+                                        <div className="text-xs text-gray-400">{getOwnerEmail(poi.owner_id)}</div>
+                                        <select
+                                            value={poi.owner_id || ''}
+                                            onChange={e => handleAssignOwner(poi.id, e.target.value)}
+                                            className="bg-black/20 border border-white/10 rounded-lg px-2 py-1 text-xs text-white min-w-[200px]"
+                                        >
+                                            <option value="">Chưa gán chủ quán</option>
+                                            {owners.map(owner => (
+                                                <option key={owner.id} value={owner.id}>
+                                                    {owner.email}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
                                 </td>
                                 <td className="px-6 py-4">
                                     {poi.image_url ? (
@@ -132,13 +232,43 @@ export default function POIsPage() {
 
                         {pois.length === 0 && (
                             <tr>
-                                <td colSpan={5} className="px-6 py-12 text-center text-gray-500">
+                                <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
                                     Đang kiểm tra dữ liệu... Không tìm thấy địa điểm nào.
                                 </td>
                             </tr>
                         )}
                     </tbody>
                 </table>
+            </div>
+
+            <div className="bg-[#2c1e16] rounded-xl border border-white/5 overflow-hidden">
+                <div className="px-6 py-4 border-b border-white/10">
+                    <h2 className="text-lg font-bold text-white">Quản lý chủ quán</h2>
+                    <p className="text-sm text-gray-400">Chuyển vai trò người dùng sang Chủ quán để có thể liên kết vào POI</p>
+                </div>
+                <div className="divide-y divide-white/5">
+                    {users
+                        .filter(user => user.role !== 'admin')
+                        .map(user => (
+                            <div key={user.id} className="px-6 py-4 flex items-center justify-between gap-4">
+                                <div>
+                                    <p className="text-white text-sm font-medium">{user.email}</p>
+                                    <p className="text-xs text-gray-500">ID: {user.id.slice(0, 8)}...</p>
+                                </div>
+                                <select
+                                    value={user.role}
+                                    onChange={e => handleUpdateRole(user.id, e.target.value as 'customer' | 'owner')}
+                                    className="bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-sm text-white"
+                                >
+                                    <option value="customer">Khách hàng</option>
+                                    <option value="owner">Chủ quán</option>
+                                </select>
+                            </div>
+                        ))}
+                    {users.filter(user => user.role !== 'admin').length === 0 && (
+                        <div className="px-6 py-6 text-sm text-gray-500">Chưa có tài khoản người dùng nào.</div>
+                    )}
+                </div>
             </div>
         </div>
     );
