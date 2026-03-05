@@ -6,7 +6,9 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { useLanguage } from '@/lib/contexts/LanguageContext';
+import { useAuth } from '@/lib/contexts/AuthContext';
 import { useTranslations } from '@/lib/hooks/useTranslations';
 import { loadSettings, saveSettings } from '@/lib/services/storage';
 import type { UserSettings, Language } from '@/lib/types/index';
@@ -28,7 +30,9 @@ const LANGUAGE_FLAGS: Record<Language, string> = {
 };
 
 export function SettingsPanel({ isOpen, onClose, onSettingsChange }: SettingsPanelProps) {
+  const router = useRouter();
   const { language, setLanguage, availableLanguages } = useLanguage();
+  const { user, signOut } = useAuth();
   const { t } = useTranslations();
   const [settings, setSettings] = useState<UserSettings>({
     language: 'vi',
@@ -40,6 +44,7 @@ export function SettingsPanel({ isOpen, onClose, onSettingsChange }: SettingsPan
     preferredMapZoom: 15,
   });
   const [isLoading, setIsLoading] = useState(true);
+  const [isSigningOut, setIsSigningOut] = useState(false);
 
   // Load settings on mount
   useEffect(() => {
@@ -71,6 +76,28 @@ export function SettingsPanel({ isOpen, onClose, onSettingsChange }: SettingsPan
   const handleLanguageChange = async (lang: Language) => {
     await setLanguage(lang);
     await updateSetting('language', lang);
+  };
+
+  const handleSignOut = async () => {
+    if (isSigningOut) return;
+
+    const shouldSignOut = window.confirm(
+      t('settings.signOutConfirm', undefined, 'Bạn có chắc chắn muốn đăng xuất?')
+    );
+    if (!shouldSignOut) return;
+
+    setIsSigningOut(true);
+    try {
+      await signOut();
+      onClose();
+      router.replace('/');
+      router.refresh();
+    } catch (error) {
+      console.error('Sign out failed:', error);
+      window.alert(t('settings.signOutFailed', undefined, 'Đăng xuất thất bại. Vui lòng thử lại.'));
+    } finally {
+      setIsSigningOut(false);
+    }
   };
 
   if (!isOpen) return null;
@@ -211,6 +238,23 @@ export function SettingsPanel({ isOpen, onClose, onSettingsChange }: SettingsPan
                   </label>
                 </div>
               </section>
+
+              {/* App Info */}
+              {user && (
+                <section className="mb-6">
+                  <h3 className="text-white font-bold text-lg mb-3">{t('settings.account', undefined, 'Tài khoản')}</h3>
+                  <button
+                    type="button"
+                    onClick={handleSignOut}
+                    disabled={isSigningOut}
+                    className="w-full rounded-xl border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm font-semibold text-red-300 transition-colors hover:bg-red-500/20 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {isSigningOut
+                      ? t('settings.signingOut', undefined, 'Đang đăng xuất...')
+                      : t('settings.signOut', undefined, 'Đăng xuất')}
+                  </button>
+                </section>
+              )}
 
               {/* App Info */}
               <div className="text-center pt-4 pb-8">

@@ -121,7 +121,12 @@
     "showVisitedPOIs": "방문한 장소 표시",
     "batteryOptimization": "배터리 최적화",
     "geofenceClose": "가깝게 (정확)",
-    "geofenceFar": "멀게 (넓게)"
+    "geofenceFar": "멀게 (넓게)",
+    "account": "계정",
+    "signOut": "로그아웃",
+    "signingOut": "로그아웃 중...",
+    "signOutConfirm": "정말 로그아웃하시겠습니까?",
+    "signOutFailed": "로그아웃에 실패했습니다. 다시 시도해 주세요."
   },
   "history": {
     "title": "기록",
@@ -246,9 +251,38 @@
     "subtitle": "진행 상황을 저장하고 경험을 동기화하세요",
     "prompt": "계속하려면 Google 계정으로 로그인하세요",
     "signInWithGoogle": "Google로 로그인",
+    "customer": "고객",
+    "owner": "점주",
+    "selectedType": "선택한 계정 유형: {type}",
     "or": "또는",
     "backToHome": "홈으로 돌아가기",
     "error": "로그인 실패. 다시 시도하세요."
+  },
+  "menu": {
+    "title": "메뉴",
+    "empty": "이 매장은 아직 메뉴를 업데이트하지 않았습니다.",
+    "addToCart": "추가",
+    "quantity": "수량",
+    "cart": "장바구니",
+    "placeOrder": "주문하기",
+    "pickupTime": "픽업 시간",
+    "customerName": "고객 이름",
+    "customerPhone": "전화번호",
+    "note": "메모",
+    "success": "주문이 완료되었습니다!"
+  },
+  "notifications": {
+    "title": "알림",
+    "markAll": "모두 읽음 처리",
+    "empty": "아직 알림이 없습니다"
+  },
+  "owner": {
+    "title": "점주 대시보드",
+    "subtitle": "POI, 메뉴, 사전 주문을 관리하세요",
+    "myPois": "내 POI",
+    "orders": "주문",
+    "menu": "메뉴",
+    "noPoi": "아직 할당된 POI가 없습니다. 관리자에게 문의하세요."
   },
   "poiDetail": {
     "notFound": "위치를 찾을 수 없음",

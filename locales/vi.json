@@ -121,7 +121,12 @@
     "showVisitedPOIs": "Hiện điểm đã thăm",
     "batteryOptimization": "Tối ưu pin",
     "geofenceClose": "Gần (chính xác)",
-    "geofenceFar": "Xa (rộng)"
+    "geofenceFar": "Xa (rộng)",
+    "account": "Tài khoản",
+    "signOut": "Đăng xuất",
+    "signingOut": "Đang đăng xuất...",
+    "signOutConfirm": "Bạn có chắc chắn muốn đăng xuất?",
+    "signOutFailed": "Đăng xuất thất bại. Vui lòng thử lại."
   },
   "history": {
     "title": "Lịch sử",

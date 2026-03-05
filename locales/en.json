@@ -121,7 +121,12 @@
     "showVisitedPOIs": "Show Visited Points",
     "batteryOptimization": "Battery Optimization",
     "geofenceClose": "Close (Precise)",
-    "geofenceFar": "Far (Wide)"
+    "geofenceFar": "Far (Wide)",
+    "account": "Account",
+    "signOut": "Sign out",
+    "signingOut": "Signing out...",
+    "signOutConfirm": "Are you sure you want to sign out?",
+    "signOutFailed": "Sign out failed. Please try again."
   },
   "history": {
     "title": "History",
@@ -246,9 +251,38 @@
     "subtitle": "Save your progress and sync your experience",
     "prompt": "Sign in with your Google account to continue",
     "signInWithGoogle": "Sign in with Google",
+    "customer": "Customer",
+    "owner": "Owner",
+    "selectedType": "Selected account type: {type}",
     "or": "or",
     "backToHome": "Back to Home",
     "error": "Sign in failed. Please try again."
+  },
+  "menu": {
+    "title": "Menu",
+    "empty": "This place has not updated its menu yet.",
+    "addToCart": "Add",
+    "quantity": "Quantity",
+    "cart": "Cart",
+    "placeOrder": "Place order",
+    "pickupTime": "Pickup time",
+    "customerName": "Customer name",
+    "customerPhone": "Phone number",
+    "note": "Note",
+    "success": "Order placed successfully!"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "markAll": "Mark all as read",
+    "empty": "No notifications yet"
+  },
+  "owner": {
+    "title": "Owner Dashboard",
+    "subtitle": "Manage your POIs, menu, and pre-orders",
+    "myPois": "My POIs",
+    "orders": "Orders",
+    "menu": "Menu",
+    "noPoi": "You have not been assigned any POI yet. Please contact admin."
   },
   "poiDetail": {
     "notFound": "Location Not Found",
