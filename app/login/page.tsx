@@ -23,9 +23,11 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (!isLoading && user) {
-      router.push(isOwner ? '/owner' : '/tour');
+      // Ưu tiên loại tài khoản đã chọn trên màn hình login.
+      // Điều này giúp tài khoản admin vẫn có thể vào luồng chủ quán khi chọn "Chủ quán".
+      router.push(accountType === 'owner' || isOwner ? '/owner' : '/tour');
     }
-  }, [user, isLoading, isOwner, router]);
+  }, [user, isLoading, isOwner, accountType, router]);
 
   const handleGoogleSignIn = async (type: AccountType) => {
     const { error } = await signInWithGoogle(type);

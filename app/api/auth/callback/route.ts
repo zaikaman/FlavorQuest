@@ -50,10 +50,9 @@ export async function GET(request: NextRequest) {
           { onConflict: 'id' }
         );
 
-      // Redirect dựa trên role của user
-      if (role === 'admin') {
-        return NextResponse.redirect(`${origin}/admin`);
-      } else if (role === 'owner') {
+      // Chỉ redirect theo accountType người dùng đã chọn ở màn hình login.
+      // Trang /admin chỉ truy cập thủ công, không auto redirect.
+      if (desiredRole === 'owner') {
         return NextResponse.redirect(`${origin}/owner`);
       }
     }
