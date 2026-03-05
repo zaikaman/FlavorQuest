@@ -121,7 +121,12 @@
     "showVisitedPOIs": "显示已访问景点",
     "batteryOptimization": "电池优化",
     "geofenceClose": "近（精准）",
-    "geofenceFar": "远（广域）"
+    "geofenceFar": "远（广域）",
+    "account": "账户",
+    "signOut": "退出登录",
+    "signingOut": "正在退出...",
+    "signOutConfirm": "确定要退出登录吗？",
+    "signOutFailed": "退出失败，请重试。"
   },
   "history": {
     "title": "历史记录",
@@ -246,9 +251,38 @@
     "subtitle": "保存进度并同步体验",
     "prompt": "使用 Google 账户登录以继续",
     "signInWithGoogle": "使用 Google 登录",
+    "customer": "顾客",
+    "owner": "店主",
+    "selectedType": "当前选择的账户类型: {type}",
     "or": "或",
     "backToHome": "返回首页",
     "error": "登录失败。请重试。"
+  },
+  "menu": {
+    "title": "菜单",
+    "empty": "该店尚未更新菜单。",
+    "addToCart": "添加",
+    "quantity": "数量",
+    "cart": "购物车",
+    "placeOrder": "下单",
+    "pickupTime": "取餐时间",
+    "customerName": "顾客姓名",
+    "customerPhone": "联系电话",
+    "note": "备注",
+    "success": "下单成功！"
+  },
+  "notifications": {
+    "title": "通知",
+    "markAll": "全部标记为已读",
+    "empty": "暂无通知"
+  },
+  "owner": {
+    "title": "店主管理台",
+    "subtitle": "管理你的 POI、菜单和预订单",
+    "myPois": "我的 POI",
+    "orders": "订单",
+    "menu": "菜单",
+    "noPoi": "你还未被分配任何 POI，请联系管理员。"
   },
   "poiDetail": {
     "notFound": "未找到位置",

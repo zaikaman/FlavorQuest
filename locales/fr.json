@@ -121,7 +121,12 @@
     "showVisitedPOIs": "Afficher les points visités",
     "batteryOptimization": "Optimisation de la batterie",
     "geofenceClose": "Proche (Précis)",
-    "geofenceFar": "Loin (Large)"
+    "geofenceFar": "Loin (Large)",
+    "account": "Compte",
+    "signOut": "Se déconnecter",
+    "signingOut": "Déconnexion en cours...",
+    "signOutConfirm": "Voulez-vous vraiment vous déconnecter ?",
+    "signOutFailed": "Échec de la déconnexion. Veuillez réessayer."
   },
   "history": {
     "title": "Historique",
@@ -246,9 +251,38 @@
     "subtitle": "Enregistrez votre progression et synchronisez votre expérience",
     "prompt": "Connectez-vous avec votre compte Google pour continuer",
     "signInWithGoogle": "Se connecter avec Google",
+    "customer": "Client",
+    "owner": "Propriétaire",
+    "selectedType": "Type de compte sélectionné : {type}",
     "or": "ou",
     "backToHome": "Retour à l'accueil",
     "error": "Échec de la connexion. Veuillez réessayer."
+  },
+  "menu": {
+    "title": "Menu",
+    "empty": "Ce lieu n'a pas encore mis à jour son menu.",
+    "addToCart": "Ajouter",
+    "quantity": "Quantité",
+    "cart": "Panier",
+    "placeOrder": "Passer la commande",
+    "pickupTime": "Heure de retrait",
+    "customerName": "Nom du client",
+    "customerPhone": "Téléphone",
+    "note": "Note",
+    "success": "Commande passée avec succès !"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "markAll": "Tout marquer comme lu",
+    "empty": "Aucune notification"
+  },
+  "owner": {
+    "title": "Tableau de bord propriétaire",
+    "subtitle": "Gérez vos POI, menus et précommandes",
+    "myPois": "Mes POI",
+    "orders": "Commandes",
+    "menu": "Menu",
+    "noPoi": "Aucun POI ne vous a encore été attribué. Contactez l'admin."
   },
   "poiDetail": {
     "notFound": "Emplacement introuvable",

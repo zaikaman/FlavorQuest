@@ -121,7 +121,12 @@
     "showVisitedPOIs": "訪問済みポイントを表示",
     "batteryOptimization": "バッテリー最適化",
     "geofenceClose": "近い (正確)",
-    "geofenceFar": "遠い (広範囲)"
+    "geofenceFar": "遠い (広範囲)",
+    "account": "アカウント",
+    "signOut": "ログアウト",
+    "signingOut": "ログアウト中...",
+    "signOutConfirm": "ログアウトしてもよろしいですか？",
+    "signOutFailed": "ログアウトに失敗しました。もう一度お試しください。"
   },
   "history": {
     "title": "履歴",
@@ -246,9 +251,38 @@
     "subtitle": "進行状況を保存して体験を同期",
     "prompt": "続行するにはGoogleアカウントでサインインしてください",
     "signInWithGoogle": "Googleでサインイン",
+    "customer": "利用者",
+    "owner": "店舗オーナー",
+    "selectedType": "選択中のアカウント種別: {type}",
     "or": "または",
     "backToHome": "ホームに戻る",
     "error": "サインインに失敗しました。もう一度お試しください。"
+  },
+  "menu": {
+    "title": "メニュー",
+    "empty": "この店舗はまだメニューを更新していません。",
+    "addToCart": "追加",
+    "quantity": "数量",
+    "cart": "カート",
+    "placeOrder": "注文する",
+    "pickupTime": "受け取り時間",
+    "customerName": "お名前",
+    "customerPhone": "電話番号",
+    "note": "メモ",
+    "success": "注文が完了しました。"
+  },
+  "notifications": {
+    "title": "通知",
+    "markAll": "すべて既読にする",
+    "empty": "通知はまだありません"
+  },
+  "owner": {
+    "title": "オーナーダッシュボード",
+    "subtitle": "POI、メニュー、事前注文を管理",
+    "myPois": "私のPOI",
+    "orders": "注文",
+    "menu": "メニュー",
+    "noPoi": "まだPOIが割り当てられていません。管理者に連絡してください。"
   },
   "poiDetail": {
     "notFound": "場所が見つかりません",
