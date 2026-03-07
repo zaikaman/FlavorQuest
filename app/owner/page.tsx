@@ -58,8 +58,9 @@ export default function OwnerDashboardPage() {
       if (poiResult.status === 'fulfilled') {
         const poiData = poiResult.value;
         setPois(poiData ?? []);
-        if (poiData?.length > 0) {
-          setSelectedPoiId(poiData[0].id);
+          const firstPoi = poiData?.[0];
+          if (firstPoi) {
+            setSelectedPoiId(firstPoi.id);
         }
       } else {
         console.error('[OwnerPage] load POIs failed:', poiResult.reason);
