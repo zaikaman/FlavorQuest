@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import type { POI } from '@/lib/types/index';
+import { useAuth } from '@/lib/contexts/AuthContext';
 
 interface OwnerOption {
     id: string;
@@ -16,6 +17,7 @@ interface UserRoleItem {
 }
 
 export default function POIsPage() {
+    const { user, refreshUserRole } = useAuth();
     const [pois, setPois] = useState<POI[]>([]);
     const [owners, setOwners] = useState<OwnerOption[]>([]);
     const [users, setUsers] = useState<UserRoleItem[]>([]);
@@ -27,12 +29,35 @@ export default function POIsPage() {
         });
     }, []);
 
+    useEffect(() => {
+        console.log('[AdminPOIs] Users loaded:', users);
+    }, [users]);
+
+    useEffect(() => {
+        console.log('[AdminPOIs] Owners loaded:', owners);
+    }, [owners]);
+
+    useEffect(() => {
+        console.log('[AdminPOIs] POIs loaded:', pois);
+    }, [pois]);
+
     const fetchPOIs = async () => {
         try {
-            const res = await fetch('/api/pois?include_deleted=false');
+            const res = await fetch(`/api/pois?include_deleted=false&t=${Date.now()}`, {
+                cache: 'no-store',
+                headers: {
+                    'Cache-Control': 'no-cache, no-store, must-revalidate',
+                    Pragma: 'no-cache',
+                },
+            });
+            console.log('[AdminPOIs] fetchPOIs status:', res.status);
             if (res.ok) {
                 const data = await res.json();
+                console.log('[AdminPOIs] fetchPOIs data:', data);
                 setPois(data);
+            } else {
+                const errorText = await res.text();
+                console.error('[AdminPOIs] fetchPOIs failed:', errorText);
             }
         } catch (error) {
             console.error('Error fetching POIs:', error);
@@ -41,10 +66,21 @@ export default function POIsPage() {
 
     const fetchOwners = async () => {
         try {
-            const res = await fetch('/api/users/owners');
+            const res = await fetch(`/api/users/owners?t=${Date.now()}`, {
+                cache: 'no-store',
+                headers: {
+                    'Cache-Control': 'no-cache, no-store, must-revalidate',
+                    Pragma: 'no-cache',
+                },
+            });
+            console.log('[AdminPOIs] fetchOwners status:', res.status);
             if (res.ok) {
                 const data = await res.json();
+                console.log('[AdminPOIs] fetchOwners data:', data);
                 setOwners(data ?? []);
+            } else {
+                const errorText = await res.text();
+                console.error('[AdminPOIs] fetchOwners failed:', errorText);
             }
         } catch (error) {
             console.error('Error fetching owners:', error);
@@ -53,10 +89,21 @@ export default function POIsPage() {
 
     const fetchUsers = async () => {
         try {
-            const res = await fetch('/api/users');
+            const res = await fetch(`/api/users?t=${Date.now()}`, {
+                cache: 'no-store',
+                headers: {
+                    'Cache-Control': 'no-cache, no-store, must-revalidate',
+                    Pragma: 'no-cache',
+                },
+            });
+            console.log('[AdminPOIs] fetchUsers status:', res.status);
             if (res.ok) {
                 const data = await res.json();
+                console.log('[AdminPOIs] fetchUsers data:', data);
                 setUsers(data ?? []);
+            } else {
+                const errorText = await res.text();
+                console.error('[AdminPOIs] fetchUsers failed:', errorText);
             }
         } catch (error) {
             console.error('Error fetching users:', error);
@@ -84,17 +131,28 @@ export default function POIsPage() {
 
     const handleAssignOwner = async (poiId: string, ownerId: string) => {
         try {
+            console.group('[AdminPOIs] Assign owner');
+            console.log('poiId:', poiId);
+            console.log('ownerId:', ownerId || null);
+
             const res = await fetch(`/api/pois/${poiId}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ owner_id: ownerId || null }),
             });
 
+            console.log('status:', res.status);
+            const responseText = await res.text();
+            console.log('response:', responseText);
+            console.groupEnd();
+
             if (!res.ok) {
-                alert('Gán chủ quán thất bại');
+                alert(`Gán chủ quán thất bại: ${responseText}`);
                 return;
             }
 
+            const updatedPoi = JSON.parse(responseText) as POI;
+            setPois(prev => prev.map(poi => (poi.id === poiId ? { ...poi, owner_id: updatedPoi.owner_id ?? null } : poi)));
             await fetchPOIs();
         } catch (error) {
             console.error('Assign owner failed:', error);
@@ -104,15 +162,38 @@ export default function POIsPage() {
 
     const handleUpdateRole = async (userId: string, role: 'customer' | 'owner') => {
         try {
+            console.group('[AdminPOIs] Update role');
+            console.log('userId:', userId);
+            console.log('nextRole:', role);
+
             const res = await fetch('/api/users', {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ userId, role }),
             });
 
+            console.log('status:', res.status);
+            const responseText = await res.text();
+            console.log('response:', responseText);
+            console.groupEnd();
+
             if (!res.ok) {
-                alert('Cập nhật vai trò thất bại');
+                alert(`Cập nhật vai trò thất bại: ${responseText}`);
                 return;
+            }
+
+            const updatedUser = JSON.parse(responseText) as UserRoleItem;
+            setUsers(prev => prev.map(item => (item.id === userId ? { ...item, role: updatedUser.role } : item)));
+            setOwners(prev => {
+                const withoutUpdatedUser = prev.filter(item => item.id !== userId);
+                if (updatedUser.role === 'owner') {
+                    return [...withoutUpdatedUser, { id: updatedUser.id, email: updatedUser.email }].sort((a, b) => a.email.localeCompare(b.email));
+                }
+                return withoutUpdatedUser;
+            });
+
+            if (user?.id === userId) {
+                await refreshUserRole();
             }
 
             await Promise.all([fetchOwners(), fetchUsers(), fetchPOIs()]);
