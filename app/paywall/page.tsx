@@ -28,8 +28,6 @@ interface StatusResponse {
   payment: CustomerAccessPayment | null;
 }
 
-const POLLABLE_STATUSES: PaymentStatus[] = ['PENDING', 'PROCESSING', 'UNDERPAID'];
-
 function isLocalhostHostname(hostname: string) {
   return hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1';
 }
@@ -98,6 +96,7 @@ export default function PaywallPage() {
   const [isCreating, setIsCreating] = useState(false);
   const [isChecking, setIsChecking] = useState(false);
   const [isCompletingAccess, setIsCompletingAccess] = useState(false);
+  const [isStatusUnauthorized, setIsStatusUnauthorized] = useState(false);
   const [scriptReady, setScriptReady] = useState(false);
   const checkoutInstanceRef = useRef<{ open: () => void; exit: () => void } | null>(null);
 
@@ -206,6 +205,10 @@ export default function PaywallPage() {
   }, [fallbackToHostedCheckout, fitEmbeddedContainer]);
 
   const refreshStatus = useCallback(async (orderCode?: number | null, force = true) => {
+    if (isStatusUnauthorized) {
+      return;
+    }
+
     setIsChecking(true);
 
     try {
@@ -221,11 +224,19 @@ export default function PaywallPage() {
         cache: 'no-store',
       });
 
+      if (response.status === 401) {
+        setIsStatusUnauthorized(true);
+        setPayment(null);
+        setStatusMessage('Phiên đăng nhập đã hết hạn hoặc chưa sẵn sàng. Vui lòng đăng nhập lại rồi tiếp tục thanh toán.');
+        return;
+      }
+
       if (!response.ok) {
         throw new Error('Không thể kiểm tra trạng thái thanh toán');
       }
 
       const result = await response.json() as StatusResponse;
+      setIsStatusUnauthorized(false);
       setPayment(result.payment);
 
       if (result.hasAccess) {
@@ -243,7 +254,7 @@ export default function PaywallPage() {
       } else if (result.payment?.status === 'PAID') {
         setStatusMessage('Thanh toán đã ghi nhận. Đang đồng bộ quyền truy cập...');
       } else if (result.payment?.status) {
-        setStatusMessage(`Trạng thái hiện tại: ${result.payment.status}. Hệ thống sẽ tự kiểm tra lại.`);
+        setStatusMessage(`Trạng thái hiện tại: ${result.payment.status}. Webhook sẽ tự mở khóa, hoặc bạn có thể bấm kiểm tra thủ công.`);
       }
     } catch (error) {
       console.error(error);
@@ -251,7 +262,7 @@ export default function PaywallPage() {
     } finally {
       setIsChecking(false);
     }
-  }, [refreshUserRole, router]);
+  }, [isStatusUnauthorized, refreshUserRole, router]);
 
   const handleCreatePayment = useCallback(async () => {
     if (isCreating) return;
@@ -260,6 +271,7 @@ export default function PaywallPage() {
     setStatusMessage('Đang tạo giao dịch payOS...');
 
     try {
+      setIsStatusUnauthorized(false);
       const response = await fetch('/api/payments/customer-access/create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -324,29 +336,19 @@ export default function PaywallPage() {
       return;
     }
 
+    if (isStatusUnauthorized) {
+      return;
+    }
+
     refreshStatus(orderCodeFromQuery, true).catch(error => {
       console.error('[Paywall] init status failed:', error);
     });
-  }, [hasCustomerAccess, isAdmin, isCompletingAccess, isLoading, isOwner, isRoleReady, orderCodeFromQuery, refreshStatus, router, user]);
+  }, [hasCustomerAccess, isAdmin, isCompletingAccess, isLoading, isOwner, isRoleReady, isStatusUnauthorized, orderCodeFromQuery, refreshStatus, router, user]);
 
   useEffect(() => {
     if (!scriptReady || !payment?.checkout_url) return;
     openEmbedded(payment.checkout_url);
   }, [scriptReady, payment?.checkout_url, openEmbedded]);
-
-  useEffect(() => {
-    if (!payment || !POLLABLE_STATUSES.includes(payment.status)) {
-      return;
-    }
-
-    const interval = window.setInterval(() => {
-      refreshStatus(payment.order_code, true).catch(error => {
-        console.error('[Paywall] poll status failed:', error);
-      });
-    }, 5000);
-
-    return () => window.clearInterval(interval);
-  }, [payment, refreshStatus]);
 
   useEffect(() => {
     return () => {
