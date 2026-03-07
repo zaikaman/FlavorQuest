@@ -12,7 +12,7 @@ export default async function Home() {
   const isAuth = await isAuthenticated(supabase);
 
   return (
-    <div className="relative flex flex-col h-screen w-full overflow-hidden bg-background-dark text-white font-display selection:bg-primary selection:text-white">
+    <div className="relative flex min-h-screen w-full overflow-x-hidden bg-background-dark text-white font-display selection:bg-primary selection:text-white">
       {/* Full Screen Background Image with Overlay */}
       <div className="absolute inset-0 z-0 select-none pointer-events-none">
         {/* Main Image */}
@@ -32,7 +32,7 @@ export default async function Home() {
       </div>
 
       {/* Main Content Container */}
-      <div className="relative z-10 flex flex-col h-full w-full justify-between safe-pt safe-pb px-6">
+      <div className="relative z-10 flex min-h-screen w-full flex-col safe-pt safe-pb px-6">
         <SplashContent isAuthenticated={isAuth} />
       </div>
     </div>
