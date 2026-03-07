@@ -101,6 +101,30 @@ export default function PaywallPage() {
   const [scriptReady, setScriptReady] = useState(false);
   const checkoutInstanceRef = useRef<{ open: () => void; exit: () => void } | null>(null);
 
+  const stretchEmbeddedContainer = useCallback(() => {
+    const container = document.getElementById('payos-embedded-container');
+    if (!container) return;
+
+    container.style.height = '100%';
+    container.style.minHeight = '540px';
+
+    const directChildren = Array.from(container.children) as HTMLElement[];
+    for (const child of directChildren) {
+      child.style.height = '100%';
+      child.style.minHeight = '540px';
+      child.style.width = '100%';
+    }
+
+    const iframe = container.querySelector('iframe');
+    if (iframe) {
+      iframe.style.width = '100%';
+      iframe.style.height = '100%';
+      iframe.style.minHeight = '540px';
+      iframe.style.display = 'block';
+      iframe.setAttribute('scrolling', 'auto');
+    }
+  }, []);
+
   const fallbackToHostedCheckout = useCallback((checkoutUrl: string, reason?: string) => {
     if (reason) {
       console.warn('[Paywall] embedded checkout fallback:', reason);
@@ -160,11 +184,14 @@ export default function PaywallPage() {
 
       checkoutInstanceRef.current = instance;
       instance.open();
+      window.setTimeout(() => {
+        stretchEmbeddedContainer();
+      }, 250);
     } catch (error) {
       console.error('[Paywall] open embedded checkout failed:', error);
       fallbackToHostedCheckout(normalizedCheckoutUrl, error instanceof Error ? error.message : 'Unknown error');
     }
-  }, [fallbackToHostedCheckout]);
+  }, [fallbackToHostedCheckout, stretchEmbeddedContainer]);
 
   const refreshStatus = useCallback(async (orderCode?: number | null, force = true) => {
     setIsChecking(true);
@@ -315,6 +342,25 @@ export default function PaywallPage() {
     };
   }, []);
 
+  useEffect(() => {
+    const container = document.getElementById('payos-embedded-container');
+    if (!container) return;
+
+    stretchEmbeddedContainer();
+
+    const observer = new MutationObserver(() => {
+      stretchEmbeddedContainer();
+    });
+
+    observer.observe(container, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+    });
+
+    return () => observer.disconnect();
+  }, [stretchEmbeddedContainer]);
+
   if (isLoading || !isRoleReady) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background-dark text-white">
@@ -432,7 +478,7 @@ export default function PaywallPage() {
 
           <div
             id="payos-embedded-container"
-            className="min-h-[540px] rounded-2xl border border-dashed border-white/15 bg-black/20 overflow-hidden"
+            className="payos-embedded-shell min-h-[540px] h-[70vh] max-h-[820px] rounded-2xl border border-dashed border-white/15 bg-black/20 overflow-hidden"
           />
 
           {!payment?.checkout_url && (

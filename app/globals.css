@@ -171,3 +171,22 @@ body {
 .animate-slideInUp {
   animation: slideInUp 0.3s ease-out;
 }
+
+.payos-embedded-shell,
+.payos-embedded-shell > * {
+  width: 100%;
+}
+
+.payos-embedded-shell > * {
+  min-height: 540px;
+  height: 100%;
+}
+
+.payos-embedded-shell iframe {
+  width: 100% !important;
+  min-height: 540px !important;
+  height: 100% !important;
+  display: block;
+  border: 0;
+  background: #fff;
+}
