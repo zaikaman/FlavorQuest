@@ -11,9 +11,11 @@
 'use client';
 
 
+import { useEffect } from 'react';
 import { StartTourButton } from '@/components/tour/StartTourButton';
 import { LanguageSelector } from '@/components/layout/LanguageSelector';
 import { useTranslations } from '@/lib/hooks/useTranslations';
+import { useAuth } from '@/lib/contexts/AuthContext';
 
 interface SplashContentProps {
   isAuthenticated: boolean;
@@ -21,6 +23,16 @@ interface SplashContentProps {
 
 export function SplashContent({ isAuthenticated }: SplashContentProps) {
   const { t } = useTranslations();
+  const { user, userRole, isLoading } = useAuth();
+
+  useEffect(() => {
+    console.log('[SplashContent] state:', {
+      isAuthenticated,
+      authUser: user?.email ?? null,
+      userRole,
+      isLoading,
+    });
+  }, [isAuthenticated, user, userRole, isLoading]);
 
   return (
     <>

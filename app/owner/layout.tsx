@@ -1,25 +1,41 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/contexts/AuthContext';
 
 export default function OwnerLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  const { user, isOwner, isAdmin, isLoading } = useAuth();
+  const { user, isOwner, isAdmin, isLoading, isRoleReady, refreshUserRole } = useAuth();
+  const refreshedUserIdRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!user?.id) return;
+    if (refreshedUserIdRef.current === user.id) return;
+
+    refreshedUserIdRef.current = user.id;
+
+    refreshUserRole().catch(error => {
+      console.error('[OwnerLayout] refreshUserRole failed:', error);
+    });
+  }, [user?.id, refreshUserRole]);
 
   useEffect(() => {
     if (isLoading) return;
 
     if (!user) {
-      router.push('/login?type=owner');
+      router.replace('/login?type=owner');
+      return;
+    }
+
+    if (!isRoleReady) {
       return;
     }
 
     if (!isOwner && !isAdmin) {
-      router.push('/tour');
+      router.replace('/tour');
     }
-  }, [isLoading, user, isOwner, isAdmin, router]);
+  }, [isLoading, user, isOwner, isAdmin, isRoleReady, router]);
 
   if (isLoading) {
     return (
@@ -29,7 +45,7 @@ export default function OwnerLayout({ children }: { children: React.ReactNode })
     );
   }
 
-  if (!user || (!isOwner && !isAdmin)) {
+  if (isLoading || (user && !isRoleReady) || (user && isRoleReady && !isOwner && !isAdmin)) {
     return null;
   }
 

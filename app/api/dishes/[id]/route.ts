@@ -1,37 +1,39 @@
 import { createServerClient, getCurrentUserProfile } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 async function canManageDish(dishId: string) {
   const supabase = await createServerClient();
+  const adminClient = createAdminClient();
   const profile = await getCurrentUserProfile(supabase);
 
   if (!profile) {
-    return { allowed: false as const, supabase, profile: null, dish: null };
+    return { allowed: false as const, adminClient, profile: null, dish: null };
   }
 
-  const { data: dish, error: dishError } = await supabase
+  const { data: dish, error: dishError } = await adminClient
     .from('dishes')
     .select('id, poi_id')
     .eq('id', dishId)
     .single();
 
   if (dishError || !dish) {
-    return { allowed: false as const, supabase, profile, dish: null };
+    return { allowed: false as const, adminClient, profile, dish: null };
   }
 
   if (profile.role === 'admin') {
-    return { allowed: true as const, supabase, profile, dish };
+    return { allowed: true as const, adminClient, profile, dish };
   }
 
-  const { data: poi } = await supabase
+  const { data: poi } = await adminClient
     .from('pois')
     .select('owner_id')
     .eq('id', dish.poi_id)
     .single();
 
   const allowed = poi?.owner_id === profile.id;
-  return { allowed, supabase, profile, dish };
+  return { allowed, adminClient, profile, dish };
 }
 
 export async function PUT(
@@ -61,7 +63,7 @@ export async function PUT(
       updated_at: new Date().toISOString(),
     };
 
-    const { data, error } = await access.supabase
+    const { data, error } = await access.adminClient
       .from('dishes')
       .update(payload)
       .eq('id', id)
@@ -93,7 +95,7 @@ export async function DELETE(
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
-  const { error } = await access.supabase
+  const { error } = await access.adminClient
     .from('dishes')
     .update({ deleted_at: new Date().toISOString(), updated_at: new Date().toISOString() })
     .eq('id', id);
