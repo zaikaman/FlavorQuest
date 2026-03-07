@@ -28,7 +28,7 @@ export function StartTourButton({ onStart, className = '', disabled = false, isA
   const router = useRouter();
   const { language } = useLanguage();
   const { t } = useTranslations();
-  const { isOwner } = useAuth();
+  const { isOwner, user, userRole, isLoading: authLoading } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
 
   const handleStart = async () => {
@@ -37,7 +37,14 @@ export function StartTourButton({ onStart, className = '', disabled = false, isA
     setIsLoading(true);
 
     try {
-      console.log('[StartTourButton] Starting tour with language:', language);
+      console.log('[StartTourButton] click:', {
+        language,
+        isAuthenticated,
+        authUser: user?.email ?? null,
+        userRole,
+        isOwner,
+        authLoading,
+      });
       
       // Đảm bảo language đã được lưu vào IndexedDB
       // Thêm delay nhỏ để tránh race condition với setLanguage
@@ -51,12 +58,15 @@ export function StartTourButton({ onStart, className = '', disabled = false, isA
         onStart();
       }
 
-      console.log('[StartTourButton] Navigating to tour page...');
+      console.log('[StartTourButton] deciding navigation');
 
       // Navigate based on auth state
       if (isAuthenticated) {
-        router.push(isOwner ? '/owner' : '/tour');
+        const destination = isOwner ? '/owner' : '/tour';
+        console.log('[StartTourButton] push:', destination);
+        router.push(destination);
       } else {
+        console.log('[StartTourButton] push: /login');
         router.push('/login');
       }
     } catch (error) {

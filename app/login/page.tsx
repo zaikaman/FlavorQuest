@@ -16,18 +16,18 @@ type AccountType = 'customer' | 'owner';
 export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { user, isLoading, isOwner } = useAuth();
+  const { user, isLoading, isOwner, isRoleReady } = useAuth();
   const { t } = useTranslations();
   const error = searchParams.get('error');
   const accountType = (searchParams.get('type') === 'owner' ? 'owner' : 'customer') as AccountType;
 
   useEffect(() => {
-    if (!isLoading && user) {
+    if (!isLoading && user && isRoleReady) {
       // Ưu tiên loại tài khoản đã chọn trên màn hình login.
       // Điều này giúp tài khoản admin vẫn có thể vào luồng chủ quán khi chọn "Chủ quán".
       router.push(accountType === 'owner' || isOwner ? '/owner' : '/tour');
     }
-  }, [user, isLoading, isOwner, accountType, router]);
+  }, [user, isLoading, isOwner, isRoleReady, accountType, router]);
 
   const handleGoogleSignIn = async (type: AccountType) => {
     const { error } = await signInWithGoogle(type);

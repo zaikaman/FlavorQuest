@@ -5,6 +5,33 @@ import type { AppNotification, Dish, POI, PreorderOrder } from '@/lib/types';
 
 type OwnerTab = 'pois' | 'menu' | 'orders' | 'notifications';
 
+const REQUEST_TIMEOUT_MS = 10000;
+
+async function fetchJsonWithTimeout<T>(url: string): Promise<T> {
+  const controller = new AbortController();
+  const timeoutId = window.setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+
+  try {
+    const response = await fetch(`${url}${url.includes('?') ? '&' : '?'}t=${Date.now()}`, {
+      cache: 'no-store',
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        Pragma: 'no-cache',
+      },
+      signal: controller.signal,
+    });
+
+    if (!response.ok) {
+      const message = await response.text();
+      throw new Error(`${url} -> ${response.status}: ${message}`);
+    }
+
+    return await response.json() as T;
+  } finally {
+    window.clearTimeout(timeoutId);
+  }
+}
+
 export default function OwnerDashboardPage() {
   const [activeTab, setActiveTab] = useState<OwnerTab>('pois');
   const [pois, setPois] = useState<POI[]>([]);
@@ -13,36 +40,53 @@ export default function OwnerDashboardPage() {
   const [orders, setOrders] = useState<PreorderOrder[]>([]);
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [newDish, setNewDish] = useState({ name: '', description: '', price: '' });
 
   const selectedPoi = useMemo(() => pois.find(poi => poi.id === selectedPoiId) ?? null, [pois, selectedPoiId]);
 
   const loadInitialData = async () => {
     setIsLoading(true);
+    setLoadError(null);
     try {
-      const [poiRes, orderRes, notifRes] = await Promise.all([
-        fetch('/api/pois?owner_only=true'),
-        fetch('/api/orders'),
-        fetch('/api/notifications'),
+      const [poiResult, orderResult, notifResult] = await Promise.allSettled([
+        fetchJsonWithTimeout<POI[]>('/api/pois?owner_only=true'),
+        fetchJsonWithTimeout<PreorderOrder[]>('/api/orders'),
+        fetchJsonWithTimeout<AppNotification[]>('/api/notifications'),
       ]);
 
-      if (poiRes.ok) {
-        const poiData = await poiRes.json();
+      if (poiResult.status === 'fulfilled') {
+        const poiData = poiResult.value;
         setPois(poiData ?? []);
         if (poiData?.length > 0) {
           setSelectedPoiId(poiData[0].id);
         }
+      } else {
+        console.error('[OwnerPage] load POIs failed:', poiResult.reason);
+        setPois([]);
       }
 
-      if (orderRes.ok) {
-        setOrders(await orderRes.json());
+      if (orderResult.status === 'fulfilled') {
+        setOrders(orderResult.value ?? []);
+      } else {
+        console.error('[OwnerPage] load orders failed:', orderResult.reason);
+        setOrders([]);
       }
 
-      if (notifRes.ok) {
-        setNotifications(await notifRes.json());
+      if (notifResult.status === 'fulfilled') {
+        setNotifications(notifResult.value ?? []);
+      } else {
+        console.error('[OwnerPage] load notifications failed:', notifResult.reason);
+        setNotifications([]);
+      }
+
+      const failedRequests = [poiResult, orderResult, notifResult].filter(result => result.status === 'rejected');
+      if (failedRequests.length > 0) {
+        setLoadError('Một phần dữ liệu chủ quán tải chưa hoàn tất. Trang vẫn hiển thị dữ liệu khả dụng.');
       }
     } catch (error) {
       console.error('Load owner data failed:', error);
+      setLoadError('Không thể tải dữ liệu chủ quán. Vui lòng thử tải lại trang.');
     } finally {
       setIsLoading(false);
     }
@@ -50,12 +94,11 @@ export default function OwnerDashboardPage() {
 
   const loadDishes = async (poiId: string) => {
     try {
-      const res = await fetch(`/api/dishes?poi_id=${poiId}`);
-      if (res.ok) {
-        setDishes(await res.json());
-      }
+      const data = await fetchJsonWithTimeout<Dish[]>(`/api/dishes?poi_id=${poiId}`);
+      setDishes(data ?? []);
     } catch (error) {
       console.error('Load dishes failed:', error);
+      setDishes([]);
     }
   };
 
@@ -131,6 +174,12 @@ export default function OwnerDashboardPage() {
 
   return (
     <div className="space-y-6">
+      {loadError && (
+        <div className="rounded-xl border border-yellow-500/30 bg-yellow-500/10 p-4 text-sm text-yellow-200">
+          {loadError}
+        </div>
+      )}
+
       <div>
         <h2 className="text-2xl font-bold">Bảng điều khiển chủ quán</h2>
         <p className="text-gray-400">Quản lý POI, menu và đơn đặt trước</p>
