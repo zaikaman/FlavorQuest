@@ -101,26 +101,38 @@ export default function PaywallPage() {
   const [scriptReady, setScriptReady] = useState(false);
   const checkoutInstanceRef = useRef<{ open: () => void; exit: () => void } | null>(null);
 
-  const stretchEmbeddedContainer = useCallback(() => {
+  const fitEmbeddedContainer = useCallback(() => {
     const container = document.getElementById('payos-embedded-container');
     if (!container) return;
 
-    container.style.height = '100%';
-    container.style.minHeight = '720px';
+    const containerWidth = container.clientWidth;
+    const isMobile = window.innerWidth < 768;
+    const designWidth = isMobile ? 390 : Math.max(containerWidth, 420);
+    const designHeight = isMobile ? 980 : 920;
+    const scale = Math.min(containerWidth / designWidth, 1);
+    const fittedHeight = Math.ceil(designHeight * scale);
+
+    container.style.height = `${fittedHeight}px`;
+    container.style.minHeight = `${fittedHeight}px`;
 
     const directChildren = Array.from(container.children) as HTMLElement[];
     for (const child of directChildren) {
-      child.style.height = '100%';
-      child.style.minHeight = '720px';
-      child.style.width = '100%';
+      child.style.width = `${designWidth}px`;
+      child.style.height = `${designHeight}px`;
+      child.style.minHeight = `${designHeight}px`;
+      child.style.maxWidth = 'none';
+      child.style.transform = `scale(${scale})`;
+      child.style.transformOrigin = 'top center';
+      child.style.margin = '0 auto';
     }
 
-    const iframe = container.querySelector('iframe');
+    const iframe = container.querySelector('iframe') as HTMLIFrameElement | null;
     if (iframe) {
-      iframe.style.width = '100%';
-      iframe.style.height = '100%';
-      iframe.style.minHeight = '720px';
+      iframe.style.width = `${designWidth}px`;
+      iframe.style.height = `${designHeight}px`;
+      iframe.style.minHeight = `${designHeight}px`;
       iframe.style.display = 'block';
+      iframe.style.margin = '0 auto';
       iframe.setAttribute('scrolling', 'auto');
     }
   }, []);
@@ -185,13 +197,13 @@ export default function PaywallPage() {
       checkoutInstanceRef.current = instance;
       instance.open();
       window.setTimeout(() => {
-        stretchEmbeddedContainer();
+        fitEmbeddedContainer();
       }, 250);
     } catch (error) {
       console.error('[Paywall] open embedded checkout failed:', error);
       fallbackToHostedCheckout(normalizedCheckoutUrl, error instanceof Error ? error.message : 'Unknown error');
     }
-  }, [fallbackToHostedCheckout, stretchEmbeddedContainer]);
+  }, [fallbackToHostedCheckout, fitEmbeddedContainer]);
 
   const refreshStatus = useCallback(async (orderCode?: number | null, force = true) => {
     setIsChecking(true);
@@ -346,10 +358,10 @@ export default function PaywallPage() {
     const container = document.getElementById('payos-embedded-container');
     if (!container) return;
 
-    stretchEmbeddedContainer();
+    fitEmbeddedContainer();
 
     const observer = new MutationObserver(() => {
-      stretchEmbeddedContainer();
+      fitEmbeddedContainer();
     });
 
     observer.observe(container, {
@@ -358,8 +370,17 @@ export default function PaywallPage() {
       attributes: true,
     });
 
-    return () => observer.disconnect();
-  }, [stretchEmbeddedContainer]);
+    const resizeHandler = () => {
+      fitEmbeddedContainer();
+    };
+
+    window.addEventListener('resize', resizeHandler);
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('resize', resizeHandler);
+    };
+  }, [fitEmbeddedContainer]);
 
   if (isLoading || !isRoleReady) {
     return (
@@ -478,7 +499,7 @@ export default function PaywallPage() {
 
           <div
             id="payos-embedded-container"
-            className="payos-embedded-shell min-h-[720px] h-[82vh] max-h-[1100px] rounded-2xl border border-dashed border-white/15 bg-black/20 overflow-hidden"
+            className="payos-embedded-shell min-h-[820px] rounded-2xl border border-dashed border-white/15 bg-black/20 overflow-hidden"
           />
 
           {!payment?.checkout_url && (
