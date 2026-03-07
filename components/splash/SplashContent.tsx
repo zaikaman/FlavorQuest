@@ -14,7 +14,10 @@
 import { useEffect } from 'react';
 import { StartTourButton } from '@/components/tour/StartTourButton';
 import { LanguageSelector } from '@/components/layout/LanguageSelector';
-import { IPhoneBrowserInstallGuide } from '@/components/splash/IPhoneBrowserInstallGuide';
+import {
+  IPhoneBrowserInstallGuide,
+  useShouldShowIPhoneInstallGuide,
+} from '@/components/splash/IPhoneBrowserInstallGuide';
 import { useTranslations } from '@/lib/hooks/useTranslations';
 import { useAuth } from '@/lib/contexts/AuthContext';
 
@@ -25,6 +28,7 @@ interface SplashContentProps {
 export function SplashContent({ isAuthenticated }: SplashContentProps) {
   const { t } = useTranslations();
   const { user, userRole, isLoading } = useAuth();
+  const shouldShowIPhoneInstallGuide = useShouldShowIPhoneInstallGuide();
 
   useEffect(() => {
     console.log('[SplashContent] state:', {
@@ -34,6 +38,10 @@ export function SplashContent({ isAuthenticated }: SplashContentProps) {
       isLoading,
     });
   }, [isAuthenticated, user, userRole, isLoading]);
+
+  if (shouldShowIPhoneInstallGuide) {
+    return <IPhoneBrowserInstallGuide />;
+  }
 
   return (
     <>
@@ -69,8 +77,6 @@ export function SplashContent({ isAuthenticated }: SplashContentProps) {
           <StartTourButton isAuthenticated={isAuthenticated} />
         </div>
       </section>
-
-      <IPhoneBrowserInstallGuide />
     </>
   );
 }
