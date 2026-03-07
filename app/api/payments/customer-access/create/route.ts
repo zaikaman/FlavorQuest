@@ -74,7 +74,7 @@ export async function POST(request: Request) {
         raw_payment_data: paymentLink,
       });
 
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || origin;
+    const appUrl = resolveAppBaseUrl(request.url);
     if (canConfirmWebhook(appUrl)) {
       payOS.webhooks.confirm(`${appUrl}/api/payments/customer-access/webhook`).catch(error => {
         console.error('[PayOS] confirm webhook failed:', error);
