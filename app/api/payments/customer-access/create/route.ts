@@ -13,8 +13,17 @@ function canConfirmWebhook(appUrl: string) {
   return /^https:\/\//i.test(appUrl) && !/localhost|127\.0\.0\.1/i.test(appUrl);
 }
 
+function isPublicHttpsOrigin(origin: string) {
+  return /^https:\/\//i.test(origin) && !/localhost|127\.0\.0\.1/i.test(origin);
+}
+
 function resolveAppBaseUrl(requestUrl: string) {
+  const requestOrigin = new URL(requestUrl).origin;
   const configuredAppUrl = process.env.NEXT_PUBLIC_APP_URL;
+
+  if (isPublicHttpsOrigin(requestOrigin)) {
+    return requestOrigin;
+  }
 
   if (configuredAppUrl) {
     try {
@@ -24,7 +33,7 @@ function resolveAppBaseUrl(requestUrl: string) {
     }
   }
 
-  return new URL(requestUrl).origin;
+  return requestOrigin;
 }
 
 export async function POST(request: Request) {

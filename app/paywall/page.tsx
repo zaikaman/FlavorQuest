@@ -34,18 +34,37 @@ function isLocalhostHostname(hostname: string) {
   return hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1';
 }
 
+function isEmbeddableBaseUrl(url: URL) {
+  return url.protocol === 'https:' && !isLocalhostHostname(url.hostname);
+}
+
 function resolveAppBaseUrl() {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL;
+  const currentOrigin = window.location.origin;
+
+  try {
+    const currentUrl = new URL(currentOrigin);
+    if (isEmbeddableBaseUrl(currentUrl)) {
+      return currentUrl.origin;
+    }
+  } catch (error) {
+    console.warn('[Paywall] window.location.origin không hợp lệ:', error);
+  }
 
   if (appUrl) {
     try {
-      return new URL(appUrl).origin;
+      const configuredUrl = new URL(appUrl);
+      if (isEmbeddableBaseUrl(configuredUrl)) {
+        return configuredUrl.origin;
+      }
+
+      return configuredUrl.origin;
     } catch (error) {
       console.warn('[Paywall] NEXT_PUBLIC_APP_URL không hợp lệ:', error);
     }
   }
 
-  return window.location.origin;
+  return currentOrigin;
 }
 
 function resolveReturnUrl() {
@@ -55,7 +74,7 @@ function resolveReturnUrl() {
 function shouldUseEmbeddedCheckout(returnUrl: string) {
   try {
     const url = new URL(returnUrl);
-    return url.protocol === 'https:' && !isLocalhostHostname(url.hostname);
+    return isEmbeddableBaseUrl(url);
   } catch {
     return false;
   }
@@ -88,10 +107,10 @@ export default function PaywallPage() {
     }
 
     setStatusMessage(
-      'Môi trường hiện tại không hỗ trợ payOS embedded ổn định. Đang mở trang thanh toán payOS ở tab mới để bạn tiếp tục.'
+      'Thiết bị hiện tại chưa mở được payOS embedded ổn định. Đang chuyển thẳng sang trang thanh toán payOS để bạn tiếp tục ngay.'
     );
 
-    window.open(checkoutUrl, '_blank', 'noopener,noreferrer');
+    window.location.assign(checkoutUrl);
   }, []);
 
   const orderCodeFromQuery = useMemo(() => {
