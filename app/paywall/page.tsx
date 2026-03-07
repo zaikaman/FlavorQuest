@@ -30,6 +30,33 @@ interface StatusResponse {
 
 const POLLABLE_STATUSES: PaymentStatus[] = ['PENDING', 'PROCESSING', 'UNDERPAID'];
 
+function isLocalhostHostname(hostname: string) {
+  return hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1';
+}
+
+function resolveReturnUrl() {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL;
+
+  if (appUrl) {
+    try {
+      return new URL('/paywall', appUrl).toString();
+    } catch (error) {
+      console.warn('[Paywall] NEXT_PUBLIC_APP_URL không hợp lệ:', error);
+    }
+  }
+
+  return new URL('/paywall', window.location.origin).toString();
+}
+
+function shouldUseEmbeddedCheckout(returnUrl: string) {
+  try {
+    const url = new URL(returnUrl);
+    return url.protocol === 'https:' && !isLocalhostHostname(url.hostname);
+  } catch {
+    return false;
+  }
+}
+
 export default function PaywallPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -51,6 +78,18 @@ export default function PaywallPage() {
   const [scriptReady, setScriptReady] = useState(false);
   const checkoutInstanceRef = useRef<{ open: () => void; exit: () => void } | null>(null);
 
+  const fallbackToHostedCheckout = useCallback((checkoutUrl: string, reason?: string) => {
+    if (reason) {
+      console.warn('[Paywall] embedded checkout fallback:', reason);
+    }
+
+    setStatusMessage(
+      'Môi trường hiện tại không hỗ trợ payOS embedded ổn định. Đang mở trang thanh toán payOS ở tab mới để bạn tiếp tục.'
+    );
+
+    window.open(checkoutUrl, '_blank', 'noopener,noreferrer');
+  }, []);
+
   const orderCodeFromQuery = useMemo(() => {
     const raw = searchParams.get('orderCode');
     if (!raw) return null;
@@ -59,25 +98,50 @@ export default function PaywallPage() {
   }, [searchParams]);
 
   const openEmbedded = useCallback((checkoutUrl: string) => {
+    let normalizedCheckoutUrl = '';
+    let returnUrl = '';
+
+    try {
+      normalizedCheckoutUrl = new URL(checkoutUrl).toString();
+      returnUrl = resolveReturnUrl();
+    } catch (error) {
+      console.error('[Paywall] invalid payOS url:', error);
+      setStatusMessage('Link thanh toán payOS không hợp lệ. Vui lòng tạo lại giao dịch mới.');
+      return;
+    }
+
+    if (!shouldUseEmbeddedCheckout(returnUrl)) {
+      fallbackToHostedCheckout(
+        normalizedCheckoutUrl,
+        'RETURN_URL không phải HTTPS public hoặc đang chạy trên localhost.'
+      );
+      return;
+    }
+
     if (!window.PayOSCheckout) {
       setStatusMessage('Chưa tải xong tiện ích thanh toán payOS. Vui lòng thử lại sau vài giây.');
       return;
     }
 
-    checkoutInstanceRef.current?.exit();
-    const instance = window.PayOSCheckout.usePayOS({
-      RETURN_URL: `${window.location.origin}/paywall`,
-      ELEMENT_ID: 'payos-embedded-container',
-      CHECKOUT_URL: checkoutUrl,
-      embedded: true,
-      onSuccess: () => {
-        setStatusMessage('Đã nhận tín hiệu thành công. Đang xác nhận thanh toán...');
-      },
-    });
+    try {
+      checkoutInstanceRef.current?.exit();
+      const instance = window.PayOSCheckout.usePayOS({
+        RETURN_URL: returnUrl,
+        ELEMENT_ID: 'payos-embedded-container',
+        CHECKOUT_URL: normalizedCheckoutUrl,
+        embedded: true,
+        onSuccess: () => {
+          setStatusMessage('Đã nhận tín hiệu thành công. Đang xác nhận thanh toán...');
+        },
+      });
 
-    checkoutInstanceRef.current = instance;
-    instance.open();
-  }, []);
+      checkoutInstanceRef.current = instance;
+      instance.open();
+    } catch (error) {
+      console.error('[Paywall] open embedded checkout failed:', error);
+      fallbackToHostedCheckout(normalizedCheckoutUrl, error instanceof Error ? error.message : 'Unknown error');
+    }
+  }, [fallbackToHostedCheckout]);
 
   const refreshStatus = useCallback(async (orderCode?: number | null, force = true) => {
     setIsChecking(true);
