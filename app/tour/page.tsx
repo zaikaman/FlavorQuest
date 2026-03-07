@@ -50,39 +50,6 @@ export default function TourPage() {
   const { t } = useTranslations();
   const { user } = useAuth();
 
-  // Geolocation
-  const { coordinates, accuracy, heading, error: geoError, permissionState } = useGeolocation();
-
-  // Offline Sync
-  const {
-    isOfflineReady: offlineSyncReady,
-  } = useOfflineSync({
-    autoSync: true,
-    onSyncSuccess: (count) => {
-      if (count > 0) {
-        showToastMessage(t('tour.syncedEvents', { count: String(count) }));
-      }
-    },
-    onOfflineReady: () => {
-      showToastMessage(t('tour.offlineReady'));
-    },
-  });
-
-  // POI Management với offline support
-  const {
-    pois,
-    isLoading: poisLoading,
-    preloadNearbyAudio,
-  } = usePOIManager({
-    language,
-    autoPreloadAudio: true,
-    preloadRadius: 500,
-    onOfflineReady: () => {
-      setIsOfflineReady(true);
-      showToastMessage(t('tour.dataSaved'));
-    },
-  });
-
   // UI State
   const [activeTab, setActiveTab] = useState<NavTab>('map');
   const [showPlayerModal, setShowPlayerModal] = useState(false);
@@ -100,6 +67,9 @@ export default function TourPage() {
   const [shouldPreloadOffline, setShouldPreloadOffline] = useState(false);
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [showNotifications, setShowNotifications] = useState(false);
+
+  // Geolocation
+  const { coordinates, accuracy, heading, error: geoError, permissionState } = useGeolocation();
 
   // Refs
   const noiseFilterRef = useRef<NoiseFilter>(new NoiseFilter({ windowSize: 5 })); // 5 samples moving average
@@ -141,6 +111,42 @@ export default function TourPage() {
     setShowToast(true);
     setTimeout(() => setShowToast(false), 3000);
   }, [setToastMessage, setShowToast]);
+
+  const handleOfflineSyncSuccess = useCallback((count: number) => {
+    if (count > 0) {
+      showToastMessage(t('tour.syncedEvents', { count: String(count) }));
+    }
+  }, [showToastMessage, t]);
+
+  const handleOfflineReady = useCallback(() => {
+    showToastMessage(t('tour.offlineReady'));
+  }, [showToastMessage, t]);
+
+  const handlePOIOfflineReady = useCallback(() => {
+    setIsOfflineReady(true);
+    showToastMessage(t('tour.dataSaved'));
+  }, [showToastMessage, t]);
+
+  // Offline Sync
+  const {
+    isOfflineReady: offlineSyncReady,
+  } = useOfflineSync({
+    autoSync: true,
+    onSyncSuccess: handleOfflineSyncSuccess,
+    onOfflineReady: handleOfflineReady,
+  });
+
+  // POI Management với offline support
+  const {
+    pois,
+    isLoading: poisLoading,
+    preloadNearbyAudio,
+  } = usePOIManager({
+    language,
+    autoPreloadAudio: true,
+    preloadRadius: 500,
+    onOfflineReady: handlePOIOfflineReady,
+  });
 
   // Handle offline download acceptance
   const handleOfflineAccept = useCallback(() => {
