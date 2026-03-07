@@ -13,6 +13,20 @@ function canConfirmWebhook(appUrl: string) {
   return /^https:\/\//i.test(appUrl) && !/localhost|127\.0\.0\.1/i.test(appUrl);
 }
 
+function resolveAppBaseUrl(requestUrl: string) {
+  const configuredAppUrl = process.env.NEXT_PUBLIC_APP_URL;
+
+  if (configuredAppUrl) {
+    try {
+      return new URL(configuredAppUrl).origin;
+    } catch (error) {
+      console.warn('[PayOS] NEXT_PUBLIC_APP_URL không hợp lệ:', error);
+    }
+  }
+
+  return new URL(requestUrl).origin;
+}
+
 export async function POST(request: Request) {
   const supabase = await createServerClient();
   const profile = await getCurrentUserProfile(supabase);
@@ -29,7 +43,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ hasAccess: true, message: 'Tài khoản đã được mở khóa trước đó.' });
   }
 
-  const origin = new URL(request.url).origin;
+  const origin = resolveAppBaseUrl(request.url);
   const orderCode = createCustomerAccessOrderCode();
   const paywallUrl = getPaywallUrl(origin);
   const payOS = getPayOSClient();
