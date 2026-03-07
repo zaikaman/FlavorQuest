@@ -34,18 +34,22 @@ function isLocalhostHostname(hostname: string) {
   return hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1';
 }
 
-function resolveReturnUrl() {
+function resolveAppBaseUrl() {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL;
 
   if (appUrl) {
     try {
-      return new URL('/paywall', appUrl).toString();
+      return new URL(appUrl).origin;
     } catch (error) {
       console.warn('[Paywall] NEXT_PUBLIC_APP_URL không hợp lệ:', error);
     }
   }
 
-  return new URL('/paywall', window.location.origin).toString();
+  return window.location.origin;
+}
+
+function resolveReturnUrl() {
+  return new URL('/paywall', resolveAppBaseUrl()).toString();
 }
 
 function shouldUseEmbeddedCheckout(returnUrl: string) {
@@ -113,7 +117,7 @@ export default function PaywallPage() {
     if (!shouldUseEmbeddedCheckout(returnUrl)) {
       fallbackToHostedCheckout(
         normalizedCheckoutUrl,
-        'RETURN_URL không phải HTTPS public hoặc đang chạy trên localhost.'
+        `RETURN_URL không hợp lệ cho embedded: ${returnUrl}`
       );
       return;
     }
