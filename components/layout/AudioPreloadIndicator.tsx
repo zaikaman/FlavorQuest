@@ -55,6 +55,7 @@ export function AudioPreloadIndicator({
   const [isPreloading, setIsPreloading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showSuccessToast, setShowSuccessToast] = useState(false);
+  const [isDismissed, setIsDismissed] = useState(false);
 
   // Load preload status on mount
   useEffect(() => {
@@ -96,6 +97,7 @@ export function AudioPreloadIndicator({
     setIsPreloading(true);
     setError(null);
     setShowSuccessToast(false);
+    setIsDismissed(false);
 
     // Calculate total: audio + images
     const totalItems = pois.length * 2; // audio + image per POI
@@ -208,12 +210,22 @@ export function AudioPreloadIndicator({
   }
 
   // Nếu đang preload, hiển thị progress
-  if (progress && progress.total > 0) {
+  if (progress && progress.total > 0 && !isDismissed) {
     return (
       <div className={`fixed ${compact ? 'bottom-20 right-4 w-auto' : 'bottom-24 left-4 right-4 md:left-auto md:right-4 md:w-80'} 
         bg-white/95 dark:bg-[#221710]/95 backdrop-blur-md rounded-2xl shadow-xl shadow-black/10 p-4 z-50 
         border border-orange-100 dark:border-orange-900/30 animate-slideInUp`}>
-        <div className="flex items-center justify-between mb-3">
+        <button
+          onClick={() => setIsDismissed(true)}
+          className="absolute top-2 right-2 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition-colors z-10 rounded-full p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800"
+          aria-label={t('common.close') || 'Close'}
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+        <div className="flex items-center justify-between mb-3 pr-6">
           <div className="flex items-center gap-3">
             <div className="relative flex items-center justify-center w-5 h-5">
               <svg className="animate-spin text-orange-600 dark:text-orange-500 w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
