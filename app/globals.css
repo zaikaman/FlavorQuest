@@ -178,15 +178,23 @@ body {
 }
 
 .payos-embedded-shell > * {
-  min-height: 540px;
+  min-height: 720px;
   height: 100%;
 }
 
 .payos-embedded-shell iframe {
   width: 100% !important;
-  min-height: 540px !important;
+  min-height: 720px !important;
   height: 100% !important;
   display: block;
   border: 0;
   background: #fff;
+}
+
+@media (max-width: 768px) {
+  .payos-embedded-shell,
+  .payos-embedded-shell > *,
+  .payos-embedded-shell iframe {
+    min-height: 780px !important;
+  }
 }
