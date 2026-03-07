@@ -18,6 +18,7 @@ interface AuthContextType {
   isOwner: boolean;
   isCustomer: boolean;
   isLoading: boolean;
+  refreshUserRole: () => Promise<void>;
   signOut: () => Promise<void>;
 }
 
@@ -87,6 +88,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setIsAdmin(false);
   };
 
+  const refreshUserRole = async () => {
+    const supabase = createClient();
+    const {
+      data: { user: currentUser },
+    } = await supabase.auth.getUser();
+
+    setUser(currentUser ?? null);
+    await checkUserRole(currentUser ?? null);
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -96,6 +107,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         isOwner: userRole === 'owner',
         isCustomer: userRole === 'customer',
         isLoading,
+        refreshUserRole,
         signOut: handleSignOut,
       }}
     >
