@@ -6,7 +6,8 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/contexts/AuthContext';
 
 export default function AdminLayout({
@@ -15,7 +16,15 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
+  const pathname = usePathname();
   const { user, isAdmin, isLoading } = useAuth();
+
+  const navItems = [
+    { href: '/admin', label: 'Dashboard' },
+    { href: '/admin/pois', label: 'POI' },
+    { href: '/admin/analytics', label: 'Analytics' },
+    { href: '/admin/payments', label: 'Thanh toán' },
+  ];
 
   useEffect(() => {
     if (!isLoading) {
@@ -68,7 +77,7 @@ export default function AdminLayout({
       {/* Admin Header */}
       <header className="bg-[#2c1e16]/80 border-b border-white/10 sticky top-0 z-20 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
+          <div className="flex flex-col gap-4 py-4 md:h-16 md:flex-row md:items-center md:justify-between md:py-0">
             {/* Logo & Title */}
             <div className="flex items-center gap-3">
               <div className="p-2 bg-primary/20 rounded-lg">
@@ -81,6 +90,26 @@ export default function AdminLayout({
                 <p className="text-xs text-gray-400">Quản lý nội dung</p>
               </div>
             </div>
+
+            <nav className="flex flex-wrap items-center gap-2">
+              {navItems.map(item => {
+                const isActive = pathname === item.href || (item.href !== '/admin' && pathname.startsWith(item.href));
+
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={`rounded-full border px-4 py-2 text-sm font-semibold transition-colors ${
+                      isActive
+                        ? 'border-primary bg-primary/15 text-primary'
+                        : 'border-white/10 bg-white/5 text-gray-300 hover:bg-white/10'
+                    }`}
+                  >
+                    {item.label}
+                  </Link>
+                );
+              })}
+            </nav>
 
             {/* User Info & Sign Out */}
             <div className="flex items-center gap-4">

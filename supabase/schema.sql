@@ -16,6 +16,25 @@ CREATE TABLE public.analytics_logs (
   CONSTRAINT analytics_logs_pkey PRIMARY KEY (id),
   CONSTRAINT analytics_logs_poi_id_fkey FOREIGN KEY (poi_id) REFERENCES public.pois(id)
 );
+CREATE TABLE public.customer_access_payments (
+  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  user_id uuid NOT NULL,
+  order_code bigint NOT NULL UNIQUE,
+  payment_link_id text UNIQUE,
+  amount integer NOT NULL CHECK (amount > 0),
+  status character varying NOT NULL DEFAULT 'PENDING'::character varying CHECK (status::text = ANY (ARRAY['PENDING'::character varying, 'PROCESSING'::character varying, 'PAID'::character varying, 'CANCELLED'::character varying, 'EXPIRED'::character varying, 'FAILED'::character varying, 'UNDERPAID'::character varying]::text[])),
+  checkout_url text,
+  qr_code text,
+  description text NOT NULL,
+  return_query jsonb,
+  raw_payment_data jsonb,
+  webhook_payload jsonb,
+  paid_at timestamp with time zone,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  updated_at timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT customer_access_payments_pkey PRIMARY KEY (id),
+  CONSTRAINT customer_access_payments_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id)
+);
 CREATE TABLE public.dishes (
   id uuid NOT NULL DEFAULT uuid_generate_v4(),
   poi_id uuid NOT NULL,
@@ -111,6 +130,10 @@ CREATE TABLE public.users (
   role character varying NOT NULL DEFAULT 'customer'::character varying CHECK (role::text = ANY (ARRAY['customer'::character varying, 'owner'::character varying, 'admin'::character varying]::text[])),
   created_at timestamp with time zone NOT NULL DEFAULT now(),
   updated_at timestamp with time zone NOT NULL DEFAULT now(),
+  customer_access_granted boolean NOT NULL DEFAULT false,
+  customer_access_granted_at timestamp with time zone,
+  customer_access_payment_order_code bigint,
+  customer_access_payment_link_id text,
   CONSTRAINT users_pkey PRIMARY KEY (id),
   CONSTRAINT users_id_fkey FOREIGN KEY (id) REFERENCES auth.users(id)
 );
