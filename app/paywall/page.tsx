@@ -106,12 +106,12 @@ export default function PaywallPage() {
     if (!container) return;
 
     container.style.height = '100%';
-    container.style.minHeight = '540px';
+    container.style.minHeight = '720px';
 
     const directChildren = Array.from(container.children) as HTMLElement[];
     for (const child of directChildren) {
       child.style.height = '100%';
-      child.style.minHeight = '540px';
+      child.style.minHeight = '720px';
       child.style.width = '100%';
     }
 
@@ -119,7 +119,7 @@ export default function PaywallPage() {
     if (iframe) {
       iframe.style.width = '100%';
       iframe.style.height = '100%';
-      iframe.style.minHeight = '540px';
+      iframe.style.minHeight = '720px';
       iframe.style.display = 'block';
       iframe.setAttribute('scrolling', 'auto');
     }
@@ -478,7 +478,7 @@ export default function PaywallPage() {
 
           <div
             id="payos-embedded-container"
-            className="payos-embedded-shell min-h-[540px] h-[70vh] max-h-[820px] rounded-2xl border border-dashed border-white/15 bg-black/20 overflow-hidden"
+            className="payos-embedded-shell min-h-[720px] h-[82vh] max-h-[1100px] rounded-2xl border border-dashed border-white/15 bg-black/20 overflow-hidden"
           />
 
           {!payment?.checkout_url && (
