@@ -25,7 +25,7 @@ export async function GET() {
 
   if (user.email && adminEmails.includes(user.email.toLowerCase())) {
     return NextResponse.json(
-      { id: user.id, email: user.email, role: 'admin' },
+      { id: user.id, email: user.email, role: 'admin', customerAccessGranted: true, customerAccessGrantedAt: null },
       { headers: NO_STORE_HEADERS }
     );
   }
@@ -33,22 +33,33 @@ export async function GET() {
   const adminClient = createAdminClient();
   const { data, error } = await adminClient
     .from('users')
-    .select('role')
+    .select('role, customer_access_granted, customer_access_granted_at')
     .eq('id', user.id)
     .single();
 
   if (error) {
     return NextResponse.json(
-      { id: user.id, email: user.email, role: 'customer', warning: error.message },
+      {
+        id: user.id,
+        email: user.email,
+        role: 'customer',
+        customerAccessGranted: false,
+        customerAccessGrantedAt: null,
+        warning: error.message,
+      },
       { headers: NO_STORE_HEADERS }
     );
   }
+
+  const resolvedRole = data?.role === 'owner' ? 'owner' : 'customer';
 
   return NextResponse.json(
     {
       id: user.id,
       email: user.email,
-      role: data?.role === 'owner' ? 'owner' : 'customer',
+      role: resolvedRole,
+      customerAccessGranted: resolvedRole === 'customer' ? data?.customer_access_granted ?? false : true,
+      customerAccessGrantedAt: data?.customer_access_granted_at ?? null,
     },
     { headers: NO_STORE_HEADERS }
   );

@@ -28,7 +28,7 @@ export function StartTourButton({ onStart, className = '', disabled = false, isA
   const router = useRouter();
   const { language } = useLanguage();
   const { t } = useTranslations();
-  const { isOwner, user, userRole, isLoading: authLoading } = useAuth();
+  const { isOwner, user, userRole, hasCustomerAccess, isLoading: authLoading } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
 
   const handleStart = async () => {
@@ -43,6 +43,7 @@ export function StartTourButton({ onStart, className = '', disabled = false, isA
         authUser: user?.email ?? null,
         userRole,
         isOwner,
+        hasCustomerAccess,
         authLoading,
       });
       
@@ -62,7 +63,7 @@ export function StartTourButton({ onStart, className = '', disabled = false, isA
 
       // Navigate based on auth state
       if (isAuthenticated) {
-        const destination = isOwner ? '/owner' : '/tour';
+        const destination = isOwner ? '/owner' : hasCustomerAccess ? '/tour' : '/paywall';
         console.log('[StartTourButton] push:', destination);
         router.push(destination);
       } else {

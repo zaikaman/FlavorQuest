@@ -19,22 +19,11 @@ export default function TourLayout({
 }) {
   const { t } = useTranslations();
   const router = useRouter();
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, isRoleReady, isOwner, isAdmin, hasCustomerAccess } = useAuth();
   const [permissionState, setPermissionState] = useState<'prompt' | 'granted' | 'denied' | 'checking'>('checking');
   const [showPermissionModal, setShowPermissionModal] = useState(false);
 
-  useEffect(() => {
-    if (isLoading) return;
-
-    if (!user) {
-      router.replace('/login?type=customer');
-      return;
-    }
-
-    checkLocationPermission();
-  }, [isLoading, user, router]);
-
-  const checkLocationPermission = async () => {
+  async function checkLocationPermission() {
     if (!('permissions' in navigator)) {
       // Assume granted if Permissions API not available
       setPermissionState('granted');
@@ -64,7 +53,32 @@ export default function TourLayout({
       console.warn('Permission API not supported:', error);
       setPermissionState('granted');
     }
-  };
+  }
+
+  useEffect(() => {
+    if (isLoading) return;
+
+    if (!user) {
+      router.replace('/login?type=customer');
+      return;
+    }
+
+    if (!isRoleReady) {
+      return;
+    }
+
+    if (isOwner || isAdmin) {
+      router.replace('/owner');
+      return;
+    }
+
+    if (!hasCustomerAccess) {
+      router.replace('/paywall');
+      return;
+    }
+
+    checkLocationPermission();
+  }, [isLoading, user, isRoleReady, isOwner, isAdmin, hasCustomerAccess, router]);
 
   const handleAllowLocation = async () => {
     try {
@@ -94,7 +108,7 @@ export default function TourLayout({
     router.push('/browse');
   };
 
-  if (isLoading || !user || permissionState === 'checking') {
+  if (isLoading || !user || !isRoleReady || permissionState === 'checking') {
     return (
       <div className="flex items-center justify-center h-screen bg-background-dark">
         <div className="flex flex-col items-center gap-4">

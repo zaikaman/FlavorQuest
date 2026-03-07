@@ -151,7 +151,7 @@ export default function AdminDashboard() {
       {/* Quick Actions */}
       <div>
         <h3 className="text-lg font-bold text-white mb-4">Thao tác nhanh</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Manage POIs */}
           <button
             onClick={() => router.push('/admin/pois')}
@@ -198,6 +198,21 @@ export default function AdminDashboard() {
             <div>
               <h4 className="font-semibold text-white mb-1 group-hover:text-purple-500 transition-colors">Xem Analytics</h4>
               <p className="text-sm text-gray-400">Thống kê sử dụng</p>
+            </div>
+          </button>
+
+          <button
+            onClick={() => router.push('/admin/payments')}
+            className="flex items-center gap-4 p-6 bg-[#2c1e16] rounded-xl shadow-lg border border-white/5 hover:border-emerald-500/50 hover:bg-[#3bf1f0d] transition-all duration-200 text-left group"
+          >
+            <div className="p-3 bg-emerald-500/10 rounded-lg group-hover:bg-emerald-500/20 transition-colors">
+              <svg className="w-6 h-6 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a5 5 0 00-10 0v2M5 9h14l1 10H4L5 9zm4 4h6" />
+              </svg>
+            </div>
+            <div>
+              <h4 className="font-semibold text-white mb-1 group-hover:text-emerald-400 transition-colors">Lịch sử thanh toán</h4>
+              <p className="text-sm text-gray-400">Theo dõi giao dịch paywall</p>
             </div>
           </button>
         </div>

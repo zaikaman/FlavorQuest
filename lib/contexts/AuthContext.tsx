@@ -16,6 +16,8 @@ interface MeResponse {
   id: string;
   email: string | null;
   role: AppUserRole;
+  customerAccessGranted?: boolean;
+  customerAccessGrantedAt?: string | null;
 }
 
 interface AuthContextType {
@@ -24,6 +26,8 @@ interface AuthContextType {
   isAdmin: boolean;
   isOwner: boolean;
   isCustomer: boolean;
+  hasCustomerAccess: boolean;
+  customerAccessGrantedAt: string | null;
   isLoading: boolean;
   isRoleReady: boolean;
   refreshUserRole: () => Promise<void>;
@@ -36,6 +40,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [userRole, setUserRole] = useState<AppUserRole | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [hasCustomerAccess, setHasCustomerAccess] = useState(false);
+  const [customerAccessGrantedAt, setCustomerAccessGrantedAt] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isRoleReady, setIsRoleReady] = useState(false);
 
@@ -50,7 +56,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     ]);
   }, []);
 
-  const fetchRoleFromApi = useCallback(async (): Promise<AppUserRole | null> => {
+  const fetchRoleFromApi = useCallback(async (): Promise<MeResponse> => {
     const response = await withTimeout(
       fetch(`/api/users/me?t=${Date.now()}`, {
         cache: 'no-store',
@@ -67,8 +73,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       throw new Error(`/api/users/me -> ${response.status}: ${errorText}`);
     }
 
-    const data = await response.json() as MeResponse;
-    return data.role;
+    return await response.json() as MeResponse;
   }, [withTimeout]);
 
   const checkUserRole = useCallback(async (currentUser: User | null) => {
@@ -79,6 +84,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.log('No current user email, reset role state');
       setUserRole(null);
       setIsAdmin(false);
+      setHasCustomerAccess(false);
+      setCustomerAccessGrantedAt(null);
       setIsRoleReady(true);
       console.groupEnd();
       return;
@@ -90,22 +97,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.log('Matched admin via env list');
       setUserRole('admin');
       setIsAdmin(true);
+      setHasCustomerAccess(true);
+      setCustomerAccessGrantedAt(null);
       setIsRoleReady(true);
       console.groupEnd();
       return;
     }
 
     try {
-      const role = await fetchRoleFromApi();
-      console.log('role api result:', role);
-      setUserRole(role);
-      setIsAdmin(role === 'admin');
+      const me = await fetchRoleFromApi();
+      console.log('role api result:', me.role, me.customerAccessGranted);
+      setUserRole(me.role);
+      setIsAdmin(me.role === 'admin');
+      setHasCustomerAccess(me.role === 'customer' ? Boolean(me.customerAccessGranted) : true);
+      setCustomerAccessGrantedAt(me.customerAccessGrantedAt ?? null);
       setIsRoleReady(true);
-      console.log('resolved role:', role);
+      console.log('resolved role:', me.role);
     } catch (error) {
       console.error('[AuthContext] checkUserRole failed, fallback to customer:', error);
       setUserRole('customer');
       setIsAdmin(false);
+      setHasCustomerAccess(false);
+      setCustomerAccessGrantedAt(null);
       setIsRoleReady(true);
     } finally {
       console.groupEnd();
@@ -145,6 +158,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
     setUserRole(null);
     setIsAdmin(false);
+    setHasCustomerAccess(false);
+    setCustomerAccessGrantedAt(null);
     setIsRoleReady(true);
   };
 
@@ -166,6 +181,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         isAdmin,
         isOwner: userRole === 'owner',
         isCustomer: userRole === 'customer',
+        hasCustomerAccess,
+        customerAccessGrantedAt,
         isLoading,
         isRoleReady,
         refreshUserRole,

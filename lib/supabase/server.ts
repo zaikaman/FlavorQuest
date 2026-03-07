@@ -19,6 +19,8 @@ export interface CurrentUserProfile {
   id: string;
   email: string | null;
   role: AppUserRole;
+  customerAccessGranted: boolean;
+  customerAccessGrantedAt: string | null;
 }
 
 /**
@@ -267,9 +269,17 @@ export async function getCurrentUserProfile(client: SupabaseServerClient): Promi
 
   const role = await getUserRole(client);
 
+  const { data } = await client
+    .from('users')
+    .select('customer_access_granted, customer_access_granted_at')
+    .eq('id', user.id)
+    .single();
+
   return {
     id: user.id,
     email: user.email ?? null,
     role: role ?? 'customer',
+    customerAccessGranted: role === 'customer' ? data?.customer_access_granted ?? false : true,
+    customerAccessGrantedAt: data?.customer_access_granted_at ?? null,
   };
 }
