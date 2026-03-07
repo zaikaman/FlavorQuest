@@ -6,6 +6,7 @@
 
 'use client';
 
+import Image from 'next/image';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import type { POI, Coordinates } from '@/lib/types/index';
 import { getLocalizedPOI } from '@/lib/utils/localization';
@@ -51,7 +52,13 @@ export function InteractiveMap({
   const userMarkerRef = useRef<L.Marker | null>(null);
   const userCircleRef = useRef<L.Circle | null>(null);
   const poiMarkersRef = useRef<Map<string, L.Marker>>(new Map());
+  const initialCenterRef = useRef<[number, number]>(userLocation ? [userLocation.lat, userLocation.lng] : [10.7610, 106.7040]);
+  const onSelectPOIRef = useRef(onSelectPOI);
   const [mapLoaded, setMapLoaded] = useState(false);
+
+  useEffect(() => {
+    onSelectPOIRef.current = onSelectPOI;
+  }, [onSelectPOI]);
 
   // Khởi tạo Leaflet Map
   useEffect(() => {
@@ -59,9 +66,7 @@ export function InteractiveMap({
 
     // Tạo map với style tối
     const map = L.map(mapContainerRef.current, {
-      center: userLocation
-        ? [userLocation.lat, userLocation.lng]
-        : [10.7610, 106.7040], // Vĩnh Khánh street - center of POIs
+      center: initialCenterRef.current, // Vĩnh Khánh street - center of POIs
       zoom: 16,
       zoomControl: false,
       attributionControl: false,
@@ -75,11 +80,13 @@ export function InteractiveMap({
 
     // Click vào map để deselect POI
     map.on('click', () => {
-      onSelectPOI(null);
+      onSelectPOIRef.current(null);
     });
 
     mapRef.current = map;
-    setMapLoaded(true);
+    map.whenReady(() => {
+      setMapLoaded(true);
+    });
 
     return () => {
       map.remove();
@@ -299,10 +306,12 @@ export function InteractiveMap({
             {/* POI Image */}
             <div className="h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-gray-700 relative shadow-inner">
               {selectedPOI.image_url ? (
-                <img
+                <Image
                   src={selectedPOI.image_url}
                   alt={getLocalizedPOI(selectedPOI, language).name}
-                  className="absolute inset-0 w-full h-full object-cover"
+                  fill
+                  unoptimized
+                  className="absolute inset-0 object-cover"
                 />
               ) : (
                 <div className="absolute inset-0 flex items-center justify-center bg-[#3a2d25]">

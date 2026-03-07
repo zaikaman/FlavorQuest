@@ -11,7 +11,7 @@
 
 'use client';
 
-import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import type { Coordinates } from '@/lib/types/index';
 
 export interface GeolocationState {
@@ -40,16 +40,13 @@ const DEFAULT_OPTIONS: UseGeolocationOptions = {
 };
 
 export function useGeolocation(options: UseGeolocationOptions = {}) {
-  // Memoize options to prevent infinite loop
-  const opts = useMemo(() => ({ ...DEFAULT_OPTIONS, ...options }), [
-    options.enableHighAccuracy,
-    options.timeout,
-    options.maximumAge,
-    options.watch
-  ]);
+  const enableHighAccuracy = options.enableHighAccuracy ?? DEFAULT_OPTIONS.enableHighAccuracy;
+  const timeout = options.timeout ?? DEFAULT_OPTIONS.timeout;
+  const maximumAge = options.maximumAge ?? DEFAULT_OPTIONS.maximumAge;
+  const watch = options.watch ?? DEFAULT_OPTIONS.watch;
 
   // State for accuracy mode (allow fallback to low accuracy)
-  const [useHighAccuracy, setUseHighAccuracy] = useState(options.enableHighAccuracy ?? DEFAULT_OPTIONS.enableHighAccuracy);
+  const [useHighAccuracy, setUseHighAccuracy] = useState(enableHighAccuracy);
 
   const [state, setState] = useState<GeolocationState>({
     coordinates: null,
@@ -142,11 +139,11 @@ export function useGeolocation(options: UseGeolocationOptions = {}) {
     // Use longer timeout for low accuracy mode (20s) to give it a fair chance
     const watchOptions = {
       enableHighAccuracy: useHighAccuracy,
-      timeout: useHighAccuracy ? opts.timeout : 20000,
-      maximumAge: opts.maximumAge,
+      timeout: useHighAccuracy ? timeout : 20000,
+      maximumAge,
     };
 
-    if (opts.watch) {
+    if (watch) {
       watchIdRef.current = navigator.geolocation.watchPosition(
         onSuccess,
         onError,
@@ -159,7 +156,7 @@ export function useGeolocation(options: UseGeolocationOptions = {}) {
         watchOptions
       );
     }
-  }, [opts, onSuccess, onError, useHighAccuracy]);
+  }, [maximumAge, onError, onSuccess, timeout, useHighAccuracy, watch]);
 
   // Stop watching position
   const stopWatching = useCallback(() => {
@@ -171,10 +168,13 @@ export function useGeolocation(options: UseGeolocationOptions = {}) {
 
   // Initialize
   useEffect(() => {
-    checkPermission();
-    startWatching();
+    const initTimer = window.setTimeout(() => {
+      void checkPermission();
+      startWatching();
+    }, 0);
 
     return () => {
+      window.clearTimeout(initTimer);
       stopWatching();
     };
   }, [checkPermission, startWatching, stopWatching]);

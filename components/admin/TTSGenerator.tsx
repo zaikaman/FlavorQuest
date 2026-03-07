@@ -55,9 +55,10 @@ export function TTSGenerator({
             const data = await res.json();
             setAudioUrl(data.url);
             onAudioGenerated(data.url);
-        } catch (error: any) {
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'Generation failed';
             console.error('TTS Error:', error);
-            alert(`Error: ${error.message}`);
+            alert(`Error: ${message}`);
         } finally {
             setIsGenerating(false);
         }

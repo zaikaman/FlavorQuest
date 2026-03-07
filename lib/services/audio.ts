@@ -32,11 +32,13 @@ export type AudioPlayerEvent =
   | 'loadedmetadata'
   | 'volumechange';
 
+type AudioPlayerListener = (...args: unknown[]) => void;
+
 export class AudioPlayer {
   private audio: HTMLAudioElement;
   private queue: AudioTrack[] = [];
   private currentTrack: AudioTrack | null = null;
-  private listeners: Map<AudioPlayerEvent, Set<Function>> = new Map();
+  private listeners: Map<AudioPlayerEvent, Set<AudioPlayerListener>> = new Map();
   private isUnlocked = false;
 
   constructor(options: AudioPlayerOptions = {}) {
@@ -219,7 +221,7 @@ export class AudioPlayer {
   /**
    * Add event listener
    */
-  on(event: AudioPlayerEvent, callback: Function): void {
+  on(event: AudioPlayerEvent, callback: AudioPlayerListener): void {
     if (!this.listeners.has(event)) {
       this.listeners.set(event, new Set());
     }
@@ -229,7 +231,7 @@ export class AudioPlayer {
   /**
    * Remove event listener
    */
-  off(event: AudioPlayerEvent, callback: Function): void {
+  off(event: AudioPlayerEvent, callback: AudioPlayerListener): void {
     const callbacks = this.listeners.get(event);
     if (callbacks) {
       callbacks.delete(callback);

@@ -105,7 +105,7 @@ async function resolveProfile(request: NextRequest) {
   };
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const { response, profile } = await resolveProfile(request);
 

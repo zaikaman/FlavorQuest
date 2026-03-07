@@ -48,7 +48,7 @@ export async function generateTTSAudio({ text, languageCode, name }: TTSRequest)
         try {
             const error = await response.json();
             errorMessage = error.error?.message || JSON.stringify(error);
-        } catch (e) {
+        } catch {
             errorMessage = await response.text();
         }
         throw new Error(`Azure TTS Error (${response.status}): ${errorMessage}`);

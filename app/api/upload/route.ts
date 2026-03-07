@@ -56,10 +56,12 @@ export async function POST(request: NextRequest) {
             .getPublicUrl(fileName);
 
         return NextResponse.json({ url: publicUrl });
-    } catch (error: any) {
+    } catch (error) {
+        const message = error instanceof Error ? error.message : 'Upload failed';
+        const details = error instanceof Error ? error.stack ?? error.message : JSON.stringify(error);
         console.error('Upload handler error:', error);
         return NextResponse.json(
-            { error: error.message || 'Upload failed', details: JSON.stringify(error) },
+            { error: message, details },
             { status: 500 }
         );
     }

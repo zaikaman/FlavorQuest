@@ -26,6 +26,15 @@ import {
 } from '@/lib/services/storage';
 import { createClient } from '@/lib/supabase/client';
 import type { POI, AnalyticsLog } from '@/lib/types/index';
+import type { Json } from '@/lib/types/database.types';
+
+interface SyncManager {
+  register: (tag: string) => Promise<void>;
+}
+
+interface ServiceWorkerRegistrationWithSync extends ServiceWorkerRegistration {
+  sync: SyncManager;
+}
 
 export type SyncStatus = 'idle' | 'syncing' | 'success' | 'error';
 export type OfflineStatus = 'online' | 'offline' | 'checking';
@@ -74,7 +83,12 @@ export interface UseOfflineSyncReturn {
 }
 
 export function useOfflineSync(options: UseOfflineSyncOptions = {}): UseOfflineSyncReturn {
-  const opts = { ...DEFAULT_OPTIONS, ...options };
+  const autoSync = options.autoSync ?? DEFAULT_OPTIONS.autoSync ?? true;
+  const syncThrottle = options.syncThrottle ?? DEFAULT_OPTIONS.syncThrottle ?? 5000;
+  const onSyncSuccess = options.onSyncSuccess;
+  const onSyncError = options.onSyncError;
+  const onNetworkChange = options.onNetworkChange;
+  const onOfflineReady = options.onOfflineReady;
 
   // State
   const [isOnline, setIsOnline] = useState<boolean>(() => {
@@ -116,27 +130,26 @@ export function useOfflineSync(options: UseOfflineSyncOptions = {}): UseOfflineS
       return 0;
     }
 
-    const supabase = createClient();
-
-    // Transform queue items to match database schema
-    const dbEvents = queue.map((event: AnalyticsLog) => ({
-      poi_id: event.poi_id || null,
-      session_id: event.session_id,
-      rounded_lat: event.rounded_lat ?? null,
-      rounded_lng: event.rounded_lng ?? null,
-      language: event.language || null,
-      event_type: event.event_type,
-      listen_duration: event.listen_duration ?? null,
-      completed: event.completed ?? null,
-      user_agent: event.user_agent || null,
+    const payload = queue.map((event: AnalyticsLog) => ({
+      ...event,
+      metadata: {
+        timestamp: event.timestamp,
+        listen_duration: event.listen_duration ?? null,
+        completed: event.completed ?? null,
+      } as Json,
     }));
 
-    const { error } = await supabase
-      .from('analytics_logs')
-      .insert(dbEvents);
+    const response = await fetch('/api/analytics/batch', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ events: payload }),
+    });
 
-    if (error) {
-      throw new Error(`Failed to sync analytics: ${error.message}`);
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Failed to sync analytics: ${errorText}`);
     }
 
     // Clear synced events
@@ -151,7 +164,7 @@ export function useOfflineSync(options: UseOfflineSyncOptions = {}): UseOfflineS
   const syncNow = useCallback(async () => {
     // Throttle check
     const now = Date.now();
-    if (now - lastSyncAttemptRef.current < opts.syncThrottle!) {
+    if (now - lastSyncAttemptRef.current < syncThrottle) {
       console.log('Sync throttled, skipping...');
       return;
     }
@@ -184,21 +197,21 @@ export function useOfflineSync(options: UseOfflineSyncOptions = {}): UseOfflineS
       await loadPendingCount();
 
       setSyncStatus('success');
-      opts.onSyncSuccess?.(syncedCount);
+      onSyncSuccess?.(syncedCount);
 
       // Reset status after short delay
       setTimeout(() => setSyncStatus('idle'), 3000);
     } catch (error) {
       console.error('Sync failed:', error);
       setSyncStatus('error');
-      opts.onSyncError?.(error as Error);
+      onSyncError?.(error as Error);
 
       // Reset status after short delay
       setTimeout(() => setSyncStatus('idle'), 5000);
     } finally {
       isSyncingRef.current = false;
     }
-  }, [opts, syncAnalyticsEvents, loadPendingCount]);
+  }, [loadPendingCount, onSyncError, onSyncSuccess, syncAnalyticsEvents, syncThrottle]);
 
   /**
    * Refresh POI data from server
@@ -216,7 +229,7 @@ export function useOfflineSync(options: UseOfflineSyncOptions = {}): UseOfflineS
       throw new Error(`Failed to fetch POIs: ${error.message}`);
     }
 
-    const pois = (data || []) as POI[];
+    const pois = (data ?? []) as unknown as POI[];
 
     // Save to IndexedDB
     await savePOIs(pois);
@@ -269,7 +282,7 @@ export function useOfflineSync(options: UseOfflineSyncOptions = {}): UseOfflineS
 
     try {
       const registration = await navigator.serviceWorker.ready;
-      await (registration as any).sync.register('sync-analytics');
+      await (registration as ServiceWorkerRegistrationWithSync).sync.register('sync-analytics');
       console.log('Background sync registered');
     } catch (error) {
       console.error('Failed to register background sync:', error);
@@ -282,13 +295,13 @@ export function useOfflineSync(options: UseOfflineSyncOptions = {}): UseOfflineS
   const handleOnline = useCallback(() => {
     setIsOnline(true);
     setOfflineStatus('online');
-    opts.onNetworkChange?.(true);
+    onNetworkChange?.(true);
 
     // Auto sync when back online
-    if (opts.autoSync) {
-      syncNow();
+    if (autoSync) {
+      void syncNow();
     }
-  }, [opts, syncNow]);
+  }, [autoSync, onNetworkChange, syncNow]);
 
   /**
    * Handle offline event
@@ -296,11 +309,11 @@ export function useOfflineSync(options: UseOfflineSyncOptions = {}): UseOfflineS
   const handleOffline = useCallback(() => {
     setIsOnline(false);
     setOfflineStatus('offline');
-    opts.onNetworkChange?.(false);
+    onNetworkChange?.(false);
 
     // Register for background sync
-    registerBackgroundSync();
-  }, [opts, registerBackgroundSync]);
+    void registerBackgroundSync();
+  }, [onNetworkChange, registerBackgroundSync]);
 
   // Initialize và listen to network events
   useEffect(() => {
@@ -319,8 +332,8 @@ export function useOfflineSync(options: UseOfflineSyncOptions = {}): UseOfflineS
     loadPendingCount();
     loadLastSync().then(setLastSyncTime);
     checkOfflineReady().then((ready) => {
-      if (ready && opts.onOfflineReady) {
-        opts.onOfflineReady();
+      if (ready && onOfflineReady) {
+        onOfflineReady();
       }
     });
 
@@ -328,15 +341,14 @@ export function useOfflineSync(options: UseOfflineSyncOptions = {}): UseOfflineS
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [checkOfflineReady, handleOffline, handleOnline, loadPendingCount, onOfflineReady]);
 
   // Auto sync on mount if online và có pending events
   useEffect(() => {
-    if (opts.autoSync && isOnline && pendingEventsCount > 0) {
-      syncNow();
+    if (autoSync && isOnline && pendingEventsCount > 0) {
+      void syncNow();
     }
-  }, [opts.autoSync, isOnline]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [autoSync, isOnline, pendingEventsCount, syncNow]);
 
   // Periodically check pending count
   useEffect(() => {

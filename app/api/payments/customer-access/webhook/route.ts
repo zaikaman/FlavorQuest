@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { getPayOSClient, grantCustomerAccess } from '@/lib/server/payos';
+import { extractPaymentLinkId, getPayOSClient, grantCustomerAccess } from '@/lib/server/payos';
 
 export async function GET() {
   return NextResponse.json({ success: true });
@@ -24,13 +24,13 @@ export async function POST(request: Request) {
     }
 
     let remoteStatus = 'PAID';
-    let remotePaymentLinkId = verified.paymentLinkId ?? payment.payment_link_id;
+  let remotePaymentLinkId: string | null = verified.paymentLinkId ?? payment.payment_link_id;
     let remotePaymentData: Record<string, unknown> = verified as unknown as Record<string, unknown>;
 
     try {
       const paymentDetail = await payOS.paymentRequests.get(verified.orderCode);
       remoteStatus = paymentDetail.status;
-      remotePaymentLinkId = paymentDetail.paymentLinkId;
+      remotePaymentLinkId = extractPaymentLinkId(paymentDetail as unknown as Record<string, unknown>);
       remotePaymentData = paymentDetail as unknown as Record<string, unknown>;
     } catch (error) {
       console.error('[PayOS] get payment detail from webhook failed:', error);

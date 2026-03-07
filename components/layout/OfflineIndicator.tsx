@@ -271,12 +271,22 @@ export function SyncStatusIndicator({ className = '' }: { className?: string }) 
   } = useOfflineSync();
   const { t } = useTranslations();
   const { language } = useLanguage();
+  const [currentTimestamp, setCurrentTimestamp] = useState(() => Date.now());
+
+  useEffect(() => {
+    const interval = window.setInterval(() => {
+      setCurrentTimestamp(Date.now());
+    }, 60000);
+
+    return () => {
+      window.clearInterval(interval);
+    };
+  }, []);
 
   const formatLastSync = (timestamp: number | null): string => {
     if (!timestamp) return t('offline.notSyncedYet');
 
-    const now = Date.now();
-    const diff = now - timestamp;
+    const diff = currentTimestamp - timestamp;
 
     if (diff < 60000) return t('history.justNow');
     if (diff < 3600000) return t('history.minsAgo', { mins: Math.floor(diff / 60000) });

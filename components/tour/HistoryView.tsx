@@ -5,6 +5,7 @@
 
 'use client';
 
+import Image from 'next/image';
 import { useState, useEffect } from 'react';
 import { useLanguage } from '@/lib/contexts/LanguageContext';
 import { useTranslations } from '@/lib/hooks/useTranslations';
@@ -151,10 +152,12 @@ export function HistoryView({ isOpen, onClose, onPlayPOI, onViewPOI }: HistoryVi
                       onClick={() => onViewPOI?.(item.poi!)}
                     >
                       {item.poi.image_url ? (
-                        <img
+                        <Image
                           src={item.poi.image_url}
                           alt={localized.name}
-                          className="w-full h-full object-cover"
+                          fill
+                          unoptimized
+                          className="object-cover"
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center">

@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import type { POI } from '@/lib/types/index';
@@ -16,6 +17,27 @@ interface UserRoleItem {
     role: 'customer' | 'owner' | 'admin';
 }
 
+type AudioFieldKey = 'audio_url_vi' | 'audio_url_en' | 'audio_url_ja' | 'audio_url_fr' | 'audio_url_ko' | 'audio_url_zh';
+
+function getAudioFieldKey(lang: string): AudioFieldKey {
+    switch (lang) {
+        case 'vi':
+            return 'audio_url_vi';
+        case 'en':
+            return 'audio_url_en';
+        case 'ja':
+            return 'audio_url_ja';
+        case 'fr':
+            return 'audio_url_fr';
+        case 'ko':
+            return 'audio_url_ko';
+        case 'zh':
+            return 'audio_url_zh';
+        default:
+            return 'audio_url_vi';
+    }
+}
+
 export default function POIsPage() {
     const { user, refreshUserRole } = useAuth();
     const [pois, setPois] = useState<POI[]>([]);
@@ -23,25 +45,7 @@ export default function POIsPage() {
     const [users, setUsers] = useState<UserRoleItem[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
-    useEffect(() => {
-        Promise.all([fetchPOIs(), fetchOwners(), fetchUsers()]).finally(() => {
-            setIsLoading(false);
-        });
-    }, []);
-
-    useEffect(() => {
-        console.log('[AdminPOIs] Users loaded:', users);
-    }, [users]);
-
-    useEffect(() => {
-        console.log('[AdminPOIs] Owners loaded:', owners);
-    }, [owners]);
-
-    useEffect(() => {
-        console.log('[AdminPOIs] POIs loaded:', pois);
-    }, [pois]);
-
-    const fetchPOIs = async () => {
+    async function fetchPOIs() {
         try {
             const res = await fetch(`/api/pois?include_deleted=false&t=${Date.now()}`, {
                 cache: 'no-store',
@@ -62,9 +66,9 @@ export default function POIsPage() {
         } catch (error) {
             console.error('Error fetching POIs:', error);
         }
-    };
+    }
 
-    const fetchOwners = async () => {
+    async function fetchOwners() {
         try {
             const res = await fetch(`/api/users/owners?t=${Date.now()}`, {
                 cache: 'no-store',
@@ -85,9 +89,9 @@ export default function POIsPage() {
         } catch (error) {
             console.error('Error fetching owners:', error);
         }
-    };
+    }
 
-    const fetchUsers = async () => {
+    async function fetchUsers() {
         try {
             const res = await fetch(`/api/users?t=${Date.now()}`, {
                 cache: 'no-store',
@@ -108,7 +112,35 @@ export default function POIsPage() {
         } catch (error) {
             console.error('Error fetching users:', error);
         }
-    };
+    }
+
+    useEffect(() => {
+        let isMounted = true;
+        const loadTimer = window.setTimeout(() => {
+            Promise.all([fetchPOIs(), fetchOwners(), fetchUsers()]).finally(() => {
+                if (isMounted) {
+                    setIsLoading(false);
+                }
+            });
+        }, 0);
+
+        return () => {
+            isMounted = false;
+            window.clearTimeout(loadTimer);
+        };
+    }, []);
+
+    useEffect(() => {
+        console.log('[AdminPOIs] Users loaded:', users);
+    }, [users]);
+
+    useEffect(() => {
+        console.log('[AdminPOIs] Owners loaded:', owners);
+    }, [owners]);
+
+    useEffect(() => {
+        console.log('[AdminPOIs] POIs loaded:', pois);
+    }, [pois]);
 
     const handleDelete = async (id: string) => {
         if (!confirm('Bạn có chắc muốn xóa địa điểm này?')) return;
@@ -269,7 +301,7 @@ export default function POIsPage() {
                                 </td>
                                 <td className="px-6 py-4">
                                     {poi.image_url ? (
-                                        <img src={poi.image_url} alt="" className="w-12 h-12 rounded-lg object-cover bg-black/50" />
+                                        <Image src={poi.image_url} alt="" width={48} height={48} unoptimized className="w-12 h-12 rounded-lg object-cover bg-black/50" />
                                     ) : (
                                         <div className="w-12 h-12 rounded-lg bg-white/10 flex items-center justify-center">
                                             <span className="material-symbols-outlined text-xs">image_not_supported</span>
@@ -285,7 +317,7 @@ export default function POIsPage() {
                                         {['vi', 'en', 'ja', 'fr', 'ko', 'zh'].map(lang => (
                                             <span
                                                 key={lang}
-                                                className={`w-2 h-2 rounded-full ${(poi as any)[`audio_url_${lang}`] ? 'bg-green-500' : 'bg-red-500/20'
+                                                className={`w-2 h-2 rounded-full ${poi[getAudioFieldKey(lang)] ? 'bg-green-500' : 'bg-red-500/20'
                                                     }`}
                                                 title={lang}
                                             />

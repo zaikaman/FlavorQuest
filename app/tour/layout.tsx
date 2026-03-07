@@ -77,7 +77,13 @@ export default function TourLayout({
       return;
     }
 
-    checkLocationPermission();
+    const permissionTimer = window.setTimeout(() => {
+      void checkLocationPermission();
+    }, 0);
+
+    return () => {
+      window.clearTimeout(permissionTimer);
+    };
   }, [isLoading, user, isRoleReady, isOwner, isAdmin, hasCustomerAccess, router]);
 
   const handleAllowLocation = async () => {

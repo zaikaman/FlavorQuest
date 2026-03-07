@@ -17,6 +17,12 @@ interface OwnerOption {
     email: string;
 }
 
+type FormValue = string | number | null | undefined;
+type LocalizedNameField = 'name_en' | 'name_ja' | 'name_fr' | 'name_ko' | 'name_zh';
+type LocalizedDescriptionField = 'description_en' | 'description_ja' | 'description_fr' | 'description_ko' | 'description_zh';
+type LocalizedAudioField = 'audio_url_vi' | 'audio_url_en' | 'audio_url_ja' | 'audio_url_fr' | 'audio_url_ko' | 'audio_url_zh';
+type TranslationUpdates = Partial<Record<LocalizedNameField | LocalizedDescriptionField | LocalizedAudioField, string>>;
+
 const LANGUAGES = [
     { code: 'vi', label: 'Vietnamese (Tiếng Việt)' },
     { code: 'en', label: 'English' },
@@ -59,7 +65,7 @@ export function POIForm({ initialData, isNew = false, allowOwnerAssignment = tru
         loadOwners();
     }, [allowOwnerAssignment]);
 
-    const handleChange = (field: keyof POI, value: any) => {
+    const handleChange = (field: keyof POI, value: FormValue) => {
         setFormData(prev => ({ ...prev, [field]: value }));
     };
 
@@ -98,7 +104,7 @@ export function POIForm({ initialData, isNew = false, allowOwnerAssignment = tru
 
         setTranslating(true);
         try {
-            let updates: any = {};
+            const updates: TranslationUpdates = {};
 
             // Translate Name
             if (formData.name_vi) {
@@ -111,7 +117,7 @@ export function POIForm({ initialData, isNew = false, allowOwnerAssignment = tru
                     const translations = await res.json();
                     LANGUAGES.forEach(lang => {
                         if (lang.code !== 'vi' && translations[lang.code]) {
-                            updates[`name_${lang.code}`] = translations[lang.code];
+                            updates[`name_${lang.code}` as LocalizedNameField] = translations[lang.code];
                         }
                     });
                 }
@@ -128,7 +134,7 @@ export function POIForm({ initialData, isNew = false, allowOwnerAssignment = tru
                     const translations = await res.json();
                     LANGUAGES.forEach(lang => {
                         if (lang.code !== 'vi' && translations[lang.code]) {
-                            updates[`description_${lang.code}`] = translations[lang.code];
+                            updates[`description_${lang.code}` as LocalizedDescriptionField] = translations[lang.code];
                         }
                     });
                 }
@@ -149,7 +155,7 @@ export function POIForm({ initialData, isNew = false, allowOwnerAssignment = tru
 
         setGenAllLoading(true);
         try {
-            const updates: any = {};
+            const updates: TranslationUpdates = {};
 
             for (const lang of LANGUAGES) {
                 const text = formData[`description_${lang.code}` as keyof POI] as string;
@@ -171,7 +177,7 @@ export function POIForm({ initialData, isNew = false, allowOwnerAssignment = tru
 
                     if (res.ok) {
                         const data = await res.json();
-                        updates[`audio_url_${lang.code}`] = data.url;
+                        updates[`audio_url_${lang.code}` as LocalizedAudioField] = data.url;
                     }
                 } catch (err) {
                     console.error(`Failed to generate audio for ${lang.code}`, err);
