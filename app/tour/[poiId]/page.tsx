@@ -5,6 +5,7 @@
 
 'use client';
 
+import Image from 'next/image';
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useLanguage } from '@/lib/contexts/LanguageContext';
@@ -218,10 +219,12 @@ export default function POIDetailPage() {
       {/* Hero Image */}
       <div className="relative w-full aspect-[4/3]">
         {poi.image_url ? (
-          <img
+          <Image
             src={poi.image_url}
             alt={localized.name}
-            className="w-full h-full object-cover"
+            fill
+            unoptimized
+            className="object-cover"
           />
         ) : (
           <div className="w-full h-full bg-[#2a1e16] flex items-center justify-center">

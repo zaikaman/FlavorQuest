@@ -63,33 +63,21 @@ export function AudioPreloadIndicator({
   }, []);
 
   // Auto preload khi online và có POIs
-  useEffect(() => {
-    if (!autoPreload || pois.length === 0 || isPreloading) return;
-    if (!navigator.onLine) return;
+  const verifyCache = useCallback(async () => {
+    try {
+      // Verify audio cache
+      const audioCache = await caches.open('flavorquest-audio-v1');
+      const audioKeys = await audioCache.keys();
+      console.log(`[Verify] Audio cache có ${audioKeys.length} files`);
 
-    const shouldPreload = async () => {
-      const status = await loadPreloadStatus();
-
-      // Chỉ preload nếu:
-      // 1. Chưa có status (lần đầu)
-      // 2. Hoặc đã lâu không preload (> 24h)
-      // 3. Hoặc số POIs thay đổi
-      if (!status) return true;
-
-      const daysSinceLastPreload = (Date.now() - status.lastPreloadTime) / (1000 * 60 * 60 * 24);
-      if (daysSinceLastPreload > 1) return true;
-
-      if (status.totalPOIs !== pois.length) return true;
-
-      return false;
-    };
-
-    shouldPreload().then((should) => {
-      if (should) {
-        handlePreload();
-      }
-    });
-  }, [pois, autoPreload, isPreloading]);
+      // Verify image cache
+      const imageCache = await caches.open('flavorquest-images-v1');
+      const imageKeys = await imageCache.keys();
+      console.log(`[Verify] Image cache có ${imageKeys.length} files`);
+    } catch (err) {
+      console.error('[Verify] Lỗi khi verify cache:', err);
+    }
+  }, []);
 
   const handlePreload = useCallback(async () => {
     if (isPreloading || pois.length === 0) return;
@@ -170,24 +158,35 @@ export function AudioPreloadIndicator({
       setError(err instanceof Error ? err.message : 'Lỗi không xác định');
       setIsPreloading(false);
     }
-  }, [pois, language, currentPosition, preloadRadius, isPreloading, onComplete]);
+  }, [pois, language, currentPosition, preloadRadius, isPreloading, onComplete, verifyCache]);
 
-  // Verify cache để đảm bảo files thực sự có
-  const verifyCache = async () => {
-    try {
-      // Verify audio cache
-      const audioCache = await caches.open('flavorquest-audio-v1');
-      const audioKeys = await audioCache.keys();
-      console.log(`[Verify] Audio cache có ${audioKeys.length} files`);
+  useEffect(() => {
+    if (!autoPreload || pois.length === 0 || isPreloading) return;
+    if (!navigator.onLine) return;
 
-      // Verify image cache
-      const imageCache = await caches.open('flavorquest-images-v1');
-      const imageKeys = await imageCache.keys();
-      console.log(`[Verify] Image cache có ${imageKeys.length} files`);
-    } catch (err) {
-      console.error('[Verify] Lỗi khi verify cache:', err);
-    }
-  };
+    const shouldPreload = async () => {
+      const status = await loadPreloadStatus();
+
+      // Chỉ preload nếu:
+      // 1. Chưa có status (lần đầu)
+      // 2. Hoặc đã lâu không preload (> 24h)
+      // 3. Hoặc số POIs thay đổi
+      if (!status) return true;
+
+      const daysSinceLastPreload = (Date.now() - status.lastPreloadTime) / (1000 * 60 * 60 * 24);
+      if (daysSinceLastPreload > 1) return true;
+
+      if (status.totalPOIs !== pois.length) return true;
+
+      return false;
+    };
+
+    shouldPreload().then((should) => {
+      if (should) {
+        void handlePreload();
+      }
+    });
+  }, [pois, autoPreload, isPreloading, handlePreload]);
 
   // Nếu không hiển thị UI, return null
   if (!showUI) {

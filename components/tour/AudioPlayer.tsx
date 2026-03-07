@@ -6,6 +6,7 @@
 
 'use client';
 
+import Image from 'next/image';
 import { useCallback } from 'react';
 import type { POI } from '@/lib/types/index';
 import { useLanguage } from '@/lib/contexts/LanguageContext';
@@ -111,10 +112,12 @@ export function AudioPlayer({
           <div className="relative aspect-[4/5] w-full rounded-2xl overflow-hidden shadow-2xl border border-white/5 group">
             {/* Image */}
             {currentPOI.image_url ? (
-              <img
+              <Image
                 src={currentPOI.image_url}
                 alt={localizedPOI.name}
-                className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                fill
+                unoptimized
+                className="absolute inset-0 object-cover transition-transform duration-700 group-hover:scale-105"
               />
             ) : (
               <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-background-dark"></div>
@@ -256,9 +259,12 @@ export function AudioPlayer({
             <div className="flex items-center gap-3 bg-white/5 p-2 rounded-lg border border-white/5 hover:bg-white/10 transition-colors cursor-pointer">
               {/* Thumbnail */}
               {nextPOI.image_url ? (
-                <img
+                <Image
                   src={nextPOI.image_url}
                   alt={getLocalizedPOI(nextPOI, language).name}
+                  width={48}
+                  height={48}
+                  unoptimized
                   className="size-12 rounded bg-cover bg-center shrink-0 object-cover"
                 />
               ) : (

@@ -9,10 +9,33 @@
  * - Session tracking
  */
 
-import { createClient } from '@/lib/supabase/client';
 import type { Language, Coordinates } from '@/lib/types/index';
 import type { Json } from '@/lib/types/database.types';
 import { enqueueAnalytics, loadAnalyticsQueue, clearAnalyticsQueue } from '@/lib/services/storage';
+
+interface SyncManager {
+  register: (tag: string) => Promise<void>;
+}
+
+interface ServiceWorkerRegistrationWithSync extends ServiceWorkerRegistration {
+  sync: SyncManager;
+}
+
+type AnalyticsDbEvent = {
+  event_type: AnalyticsEventBase['event_type'];
+  poi_id?: string;
+  language?: Language;
+  metadata?: Json;
+  rounded_lat?: number;
+  rounded_lng?: number;
+  session_id?: string;
+  timestamp: string;
+  user_agent?: string;
+  listen_duration?: number;
+  completed?: boolean;
+};
+
+type AnalyticsMetadata = Record<string, Json | undefined>;
 
 export interface AnalyticsEventBase {
   event_type: 'tour_start' | 'tour_end' | 'auto_play' | 'manual_play' | 'skip' | 'settings_change';
@@ -51,7 +74,8 @@ function getSessionId(): string {
     } else {
       // Fallback for very old browsers (unlikely needed but safe)
       sessionId = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-        var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+        const r = Math.random() * 16 | 0;
+        const v = c === 'x' ? r : (r & 0x3 | 0x8);
         return v.toString(16);
       });
     }
@@ -82,10 +106,10 @@ export async function logEvent(event: AnalyticsEventBase, coordinates?: Coordina
   // Transform event to match database schema
   // Metadata is not a column, so we map specific fields to columns
   const { metadata, ...rest } = analyticsEvent;
-  const dbEvent: any = { ...rest };
+  const dbEvent: AnalyticsDbEvent = { ...rest };
 
   if (metadata && typeof metadata === 'object' && !Array.isArray(metadata)) {
-    const meta = metadata as Record<string, any>;
+    const meta = metadata as AnalyticsMetadata;
 
     // Map user_agent
     if (typeof meta.user_agent === 'string') {
@@ -111,22 +135,26 @@ export async function logEvent(event: AnalyticsEventBase, coordinates?: Coordina
   }
 
   try {
-    const supabase = createClient();
-    const { error } = await supabase
-      .from('analytics_logs')
-      .insert(dbEvent);
+    const response = await fetch('/api/analytics/batch', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ events: [dbEvent] }),
+    });
 
-    if (error) {
-      console.error('Failed to log analytics event:', JSON.stringify(error, null, 2));
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Failed to log analytics event:', errorText);
       // Queue for later if network error
-      const errorMsg = error.message || '';
+      const errorMsg = errorText || '';
       if (errorMsg.includes('fetch') || errorMsg.includes('network')) {
         const queueEvent = {
           id: crypto.randomUUID(),
           ...analyticsEvent,
           session_id: analyticsEvent.session_id || sessionId,
         };
-        await enqueueAnalytics(queueEvent as any);
+        await enqueueAnalytics(queueEvent);
       }
     }
   } catch (error) {
@@ -137,7 +165,7 @@ export async function logEvent(event: AnalyticsEventBase, coordinates?: Coordina
       ...analyticsEvent,
       session_id: analyticsEvent.session_id || sessionId,
     };
-    await enqueueAnalytics(queueEvent as any);
+    await enqueueAnalytics(queueEvent);
   }
 }
 
@@ -261,20 +289,8 @@ export async function syncQueuedEvents(): Promise<{ synced: number; failed: bool
       return { synced: queuedEvents.length, failed: false };
     }
 
-    // Fallback to direct Supabase insert
-    const supabase = createClient();
-
-    const { error } = await supabase
-      .from('analytics_logs')
-      .insert(queuedEvents);
-
-    if (!error) {
-      await clearAnalyticsQueue();
-      console.log(`Synced ${queuedEvents.length} analytics events via Supabase`);
-      return { synced: queuedEvents.length, failed: false };
-    }
-
-    console.error('Failed to sync analytics events:', error);
+    const errorText = await response.text();
+    console.error('Failed to sync analytics events:', errorText);
     return { synced: 0, failed: true };
   } catch (error) {
     console.error('Analytics sync error:', error);
@@ -300,7 +316,7 @@ export async function registerAnalyticsBackgroundSync(): Promise<boolean> {
 
   try {
     const registration = await navigator.serviceWorker.ready;
-    await (registration as any).sync.register('sync-analytics');
+    await (registration as ServiceWorkerRegistrationWithSync).sync.register('sync-analytics');
     return true;
   } catch (error) {
     console.error('Failed to register background sync:', error);

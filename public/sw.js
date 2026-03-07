@@ -408,39 +408,6 @@ async function staleWhileRevalidate(request, cacheName) {
   });
 }
 
-/**
- * Network First Strategy
- * Try network first, fallback to cache
- */
-async function networkFirst(request, cacheName) {
-  try {
-    const response = await fetch(request);
-
-    // Cache successful responses
-    if (response.ok) {
-      const cache = await caches.open(cacheName);
-      cache.put(request, response.clone());
-    }
-
-    return response;
-  } catch (error) {
-    console.error('[SW] Network fetch failed, trying cache:', error);
-
-    const cache = await caches.open(cacheName);
-    const cached = await cache.match(request);
-
-    if (cached) {
-      return cached;
-    }
-
-    // Return offline fallback
-    return new Response('Offline', {
-      status: 503,
-      statusText: 'Service Unavailable',
-    });
-  }
-}
-
 // Background Sync: Sync analytics when back online
 self.addEventListener('sync', (event) => {
   console.log('[SW] Background sync:', event.tag);
@@ -647,9 +614,6 @@ async function preloadAudioFiles(urls) {
             });
 
             if (response.ok) {
-              // Verify content type
-              const contentType = response.headers.get('content-type') || '';
-
               // Clone và cache response
               const responseToCache = response.clone();
               await cache.put(cleanUrl, responseToCache);

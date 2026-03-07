@@ -59,10 +59,11 @@ export async function POST(request: NextRequest) {
             .getPublicUrl(fileName);
 
         return NextResponse.json({ url: publicUrl, fileName });
-    } catch (error: any) {
+    } catch (error) {
+        const message = error instanceof Error ? error.message : 'Failed to generate audio';
         console.error('TTS Generation error:', error);
         return NextResponse.json(
-            { error: error.message || 'Failed to generate audio' },
+            { error: message },
             { status: 500 }
         );
     }

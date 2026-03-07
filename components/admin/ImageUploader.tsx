@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useState, useRef } from 'react';
 
 interface ImageUploaderProps {
@@ -59,7 +60,7 @@ export function ImageUploader({ currentImageUrl, onImageUploaded, folder = 'pois
             >
                 {preview ? (
                     <>
-                        <img src={preview} alt="Preview" className="w-full h-full object-cover" />
+                        <Image src={preview} alt="Preview" fill unoptimized className="object-cover" />
                         <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
                             <span className="text-white font-medium flex items-center gap-2">
                                 <span className="material-symbols-outlined">edit</span> Đổi ảnh

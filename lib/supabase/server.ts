@@ -88,12 +88,12 @@ export async function createServerClient() {
       getAll() {
         return cookieStore.getAll();
       },
-      setAll(cookiesToSet: any) {
+      setAll(cookiesToSet) {
         try {
-          cookiesToSet.forEach(({ name, value, options }: any) => {
+          cookiesToSet.forEach(({ name, value, options }) => {
             cookieStore.set(name, value, options);
           });
-        } catch (error) {
+        } catch {
           // Ignore errors from set() in Server Components
           // This can happen if cookies are set after headers are sent
         }
@@ -145,9 +145,9 @@ export async function createServerActionClient() {
       getAll() {
         return cookieStore.getAll();
       },
-      setAll(cookiesToSet: any) {
+      setAll(cookiesToSet) {
         // Server Actions can always set cookies
-        cookiesToSet.forEach(({ name, value, options }: any) => {
+        cookiesToSet.forEach(({ name, value, options }) => {
           cookieStore.set(name, value, options);
         });
       },

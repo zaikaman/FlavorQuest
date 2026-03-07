@@ -5,6 +5,7 @@
 
 'use client';
 
+import Image from 'next/image';
 import { useLanguage } from '@/lib/contexts/LanguageContext';
 import { useTranslations } from '@/lib/hooks/useTranslations';
 import { getLocalizedPOI } from '@/lib/utils/localization';
@@ -54,10 +55,12 @@ export function POIDetailCard({
         onClick={onViewDetail}
       >
         {poi.image_url ? (
-          <img
+          <Image
             src={poi.image_url}
             alt={localized.name}
-            className="absolute inset-0 w-full h-full object-cover"
+            fill
+            unoptimized
+            className="absolute inset-0 object-cover"
           />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center bg-[#3a2d25]">

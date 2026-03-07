@@ -91,7 +91,7 @@ export default function TourPage() {
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
   const [visitedPOIs, setVisitedPOIs] = useState<Set<string>>(new Set());
-  const [tourStartTime] = useState(Date.now());
+  const [tourStartTime] = useState(() => Date.now());
   const [selectedPOI, setSelectedPOI] = useState<POI | null>(null);
   const [isOfflineReady, setIsOfflineReady] = useState(false);
   const [isAutoMode, setIsAutoMode] = useState(true);
@@ -116,15 +116,21 @@ export default function TourPage() {
     });
 
     // Check offline preference from localStorage
-    const savedPreference = localStorage.getItem('flavorquest-offline-preference');
-    if (savedPreference) {
-      setShouldPreloadOffline(savedPreference === 'accepted');
-    } else {
-      // Chưa có preference, hiển thị prompt sau 2 giây
-      setTimeout(() => {
-        setShowOfflinePrompt(true);
-      }, 2000);
-    }
+    const preferenceTimer = window.setTimeout(() => {
+      const savedPreference = localStorage.getItem('flavorquest-offline-preference');
+      if (savedPreference) {
+        setShouldPreloadOffline(savedPreference === 'accepted');
+      } else {
+        // Chưa có preference, hiển thị prompt sau 2 giây
+        window.setTimeout(() => {
+          setShowOfflinePrompt(true);
+        }, 2000);
+      }
+    }, 0);
+
+    return () => {
+      window.clearTimeout(preferenceTimer);
+    };
   }, []);
 
 
@@ -134,7 +140,7 @@ export default function TourPage() {
     setToastMessage(message);
     setShowToast(true);
     setTimeout(() => setShowToast(false), 3000);
-  }, []);
+  }, [setToastMessage, setShowToast]);
 
   // Handle offline download acceptance
   const handleOfflineAccept = useCallback(() => {
@@ -142,14 +148,14 @@ export default function TourPage() {
     localStorage.setItem('flavorquest-offline-preference', 'accepted');
     setShowOfflinePrompt(false);
     showToastMessage(t('offline.downloadStarted') || 'Bắt đầu tải xuống nội dung offline...');
-  }, [showToastMessage, t]);
+  }, [setShouldPreloadOffline, setShowOfflinePrompt, showToastMessage, t]);
 
   // Handle offline download decline
   const handleOfflineDecline = useCallback(() => {
     setShouldPreloadOffline(false);
     localStorage.setItem('flavorquest-offline-preference', 'declined');
     setShowOfflinePrompt(false);
-  }, []);
+  }, [setShouldPreloadOffline, setShowOfflinePrompt]);
 
   // Calculate estimated size
   const estimatedSize = Math.round((pois.length * 2.5)); // ~2.5MB per POI (audio + image)
@@ -192,7 +198,7 @@ export default function TourPage() {
   }, [filteredPosition, pois, preloadNearbyAudio]);
 
   // Handle POI entry event
-  const handlePOIEnter = useCallback(async (event: { poi: POI; distance: number }) => {
+  const handlePOIEnter = async (event: { poi: POI; distance: number }) => {
     if (!isAutoMode) return; // Skip if manual mode
 
     const { poi } = event;
@@ -239,7 +245,7 @@ export default function TourPage() {
     });
 
     showToastMessage(t('tour.nowPlaying', { name: localizedPOI.name }));
-  }, [isAutoMode, language, enqueue, showToastMessage, t]);
+  };
 
   // Geofencing - detect POI entry
   const { nearbyPOIs } = useGeofencing(
@@ -280,7 +286,13 @@ export default function TourPage() {
   useEffect(() => {
     if (permissionState === 'denied') {
       showToastMessage(t('tour.locationDenied'));
-      setIsAutoMode(false);
+      const disableTimer = window.setTimeout(() => {
+        setIsAutoMode(false);
+      }, 0);
+
+      return () => {
+        window.clearTimeout(disableTimer);
+      };
     }
   }, [permissionState, showToastMessage, t]);
 
@@ -371,7 +383,7 @@ export default function TourPage() {
   // Handle POI selection from map
   const handleSelectPOI = useCallback((poi: POI | null) => {
     setSelectedPOI(poi);
-  }, []);
+  }, [setSelectedPOI]);
 
   // Handle play POI from map card
   const handlePlayPOI = useCallback(async (poi: POI) => {
@@ -438,7 +450,7 @@ export default function TourPage() {
     });
 
     showToastMessage(t('tour.nowPlaying', { name: localizedPOI.name }));
-  }, [audioPlayer, language, showToastMessage, accuracy, t]);
+  }, [accuracy, audioPlayer, language, setVisitedPOIs, showToastMessage, t]);
 
   // Handle view POI detail
   const handleViewPOI = useCallback((poi: POI) => {
@@ -454,7 +466,7 @@ export default function TourPage() {
     } else {
       setActiveTab(tab);
     }
-  }, []);
+  }, [setActiveTab, setShowHistory, setShowSettings]);
 
   // Toggle auto/manual mode
   const toggleAutoMode = useCallback(() => {
@@ -463,7 +475,7 @@ export default function TourPage() {
       showToastMessage(newMode ? t('tour.autoMode') : t('tour.manualMode'));
       return newMode;
     });
-  }, [showToastMessage, t]);
+  }, [setIsAutoMode, showToastMessage, t]);
 
   // Check offline readiness
   useEffect(() => {

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 interface DailyStats {
     date: string;
@@ -14,11 +14,7 @@ export default function AnalyticsPage() {
     const [period, setPeriod] = useState('7days');
     const [isLoading, setIsLoading] = useState(true);
 
-    useEffect(() => {
-        fetchAnalytics();
-    }, [period]);
-
-    const fetchAnalytics = async () => {
+    const fetchAnalytics = useCallback(async () => {
         setIsLoading(true);
         try {
             const res = await fetch(`/api/analytics/summary?period=${period}`);
@@ -31,7 +27,11 @@ export default function AnalyticsPage() {
         } finally {
             setIsLoading(false);
         }
-    };
+    }, [period]);
+
+    useEffect(() => {
+        void fetchAnalytics();
+    }, [fetchAnalytics]);
 
     const totalPlays = data.reduce((sum, day) => sum + day.total_plays, 0);
     const totalTours = data.reduce((sum, day) => sum + day.total_tours, 0);

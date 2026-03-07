@@ -44,7 +44,13 @@ const DEFAULT_OPTIONS: UsePOIManagerOptions = {
 };
 
 export function usePOIManager(options: UsePOIManagerOptions = {}) {
-  const opts = { ...DEFAULT_OPTIONS, ...options };
+  const language = options.language ?? DEFAULT_OPTIONS.language ?? 'vi';
+  const autoFetch = options.autoFetch ?? DEFAULT_OPTIONS.autoFetch ?? true;
+  const cacheFirst = options.cacheFirst ?? DEFAULT_OPTIONS.cacheFirst ?? true;
+  const autoPreloadAudio = options.autoPreloadAudio ?? DEFAULT_OPTIONS.autoPreloadAudio ?? true;
+  const preloadRadius = options.preloadRadius ?? DEFAULT_OPTIONS.preloadRadius ?? 500;
+  const onOfflineReady = options.onOfflineReady;
+  const onError = options.onError;
   
   const [pois, setPOIs] = useState<POI[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -71,7 +77,7 @@ export function usePOIManager(options: UsePOIManagerOptions = {}) {
       throw new Error(`Failed to fetch POIs: ${error.message}`);
     }
 
-    return (data || []) as POI[];
+    return (data ?? []) as unknown as POI[];
   }, []);
 
   // Load POIs with cache-first strategy
@@ -82,7 +88,7 @@ export function usePOIManager(options: UsePOIManagerOptions = {}) {
 
     try {
       // Try cache first if enabled
-      if (opts.cacheFirst) {
+      if (cacheFirst) {
         const cachedPOIs = await loadPOIs();
         if (cachedPOIs && cachedPOIs.length > 0) {
           setPOIs(cachedPOIs);
@@ -134,21 +140,21 @@ export function usePOIManager(options: UsePOIManagerOptions = {}) {
           // Notify offline mode but with data
           if (!offlineReadyTriggeredRef.current) {
             offlineReadyTriggeredRef.current = true;
-            opts.onOfflineReady?.();
+            onOfflineReady?.();
           }
         } else {
           setError(errorMessage);
-          opts.onError?.(errorMessage);
+          onError?.(errorMessage);
         }
       } catch (cacheErr) {
         console.error('Failed to load from cache:', cacheErr);
         setError(errorMessage);
-        opts.onError?.(errorMessage);
+        onError?.(errorMessage);
       }
     } finally {
       setIsLoading(false);
     }
-  }, [opts.cacheFirst, fetchFromSupabase, opts]);
+  }, [cacheFirst, fetchFromSupabase, onError, onOfflineReady]);
 
   // Refetch POIs (bypass cache)
   const refetch = useCallback(async () => {
@@ -170,15 +176,15 @@ export function usePOIManager(options: UsePOIManagerOptions = {}) {
     } catch (err) {
       const errorMessage = (err as Error).message;
       setError(errorMessage);
-      opts.onError?.(errorMessage);
+      onError?.(errorMessage);
     } finally {
       setIsLoading(false);
     }
-  }, [fetchFromSupabase, opts]);
+  }, [fetchFromSupabase, onError]);
 
   // Preload audio for nearby POIs
   const preloadNearbyAudio = useCallback(async (position: Coordinates) => {
-    if (!opts.autoPreloadAudio || pois.length === 0) return;
+    if (!autoPreloadAudio || pois.length === 0) return;
 
     try {
       setIsPreloading(true);
@@ -187,9 +193,9 @@ export function usePOIManager(options: UsePOIManagerOptions = {}) {
       const { audioPreloader } = await import('@/lib/services/audio-preloader');
       
       await audioPreloader.preload(pois, {
-        language: opts.language!,
+        language,
         currentPosition: position,
-        preloadRadius: opts.preloadRadius,
+        preloadRadius,
         onProgress: (progress) => {
           setPreloadProgress(progress.percent);
         },
@@ -200,7 +206,7 @@ export function usePOIManager(options: UsePOIManagerOptions = {}) {
           // Notify offline ready
           if (!offlineReadyTriggeredRef.current) {
             offlineReadyTriggeredRef.current = true;
-            opts.onOfflineReady?.();
+            onOfflineReady?.();
           }
         },
         onError: (error) => {
@@ -212,7 +218,7 @@ export function usePOIManager(options: UsePOIManagerOptions = {}) {
       console.error('Failed to preload audio:', error);
       setIsPreloading(false);
     }
-  }, [opts.autoPreloadAudio, opts.language, opts.preloadRadius, opts.onOfflineReady, pois]);
+  }, [autoPreloadAudio, language, onOfflineReady, pois, preloadRadius]);
 
   // Preload all audio (for manual trigger)
   const preloadAllAudio = useCallback(async () => {
@@ -224,7 +230,7 @@ export function usePOIManager(options: UsePOIManagerOptions = {}) {
       const { audioPreloader } = await import('@/lib/services/audio-preloader');
       
       await audioPreloader.preload(pois, {
-        language: opts.language!,
+        language,
         preloadAll: true,
         onProgress: (progress) => {
           setPreloadProgress(progress.percent);
@@ -235,7 +241,7 @@ export function usePOIManager(options: UsePOIManagerOptions = {}) {
           
           if (!offlineReadyTriggeredRef.current) {
             offlineReadyTriggeredRef.current = true;
-            opts.onOfflineReady?.();
+            onOfflineReady?.();
           }
         },
         onError: (error) => {
@@ -247,12 +253,12 @@ export function usePOIManager(options: UsePOIManagerOptions = {}) {
       console.error('Failed to preload all audio:', error);
       setIsPreloading(false);
     }
-  }, [pois, opts.language, opts.onOfflineReady]);
+  }, [language, onOfflineReady, pois]);
 
   // Get localized POIs
-  const getLocalizedPOIs = useCallback((lang: Language = opts.language!): LocalizedPOI[] => {
+  const getLocalizedPOIs = useCallback((lang: Language = language): LocalizedPOI[] => {
     return pois.map((poi) => getLocalizedPOI(poi, lang));
-  }, [pois, opts.language]);
+  }, [language, pois]);
 
   // Filter POIs within radius
   const filterNearby = useCallback((position: Coordinates, radiusMeters: number = 500): POI[] => {
@@ -266,11 +272,10 @@ export function usePOIManager(options: UsePOIManagerOptions = {}) {
 
   // Initialize
   useEffect(() => {
-    if (opts.autoFetch) {
-      loadPOIsWithCache();
+    if (autoFetch) {
+      void loadPOIsWithCache();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [autoFetch, loadPOIsWithCache]);
 
   // Listen for online/offline events
   useEffect(() => {
@@ -278,7 +283,7 @@ export function usePOIManager(options: UsePOIManagerOptions = {}) {
       setIsOfflineMode(false);
       // Optionally refetch when back online
       if (pois.length > 0) {
-        refetch();
+        void refetch();
       }
     };
 

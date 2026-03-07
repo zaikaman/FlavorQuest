@@ -51,6 +51,17 @@ export interface BatteryInfo {
   dischargingTime: number;
 }
 
+interface BatteryManagerLike extends EventTarget {
+  level: number;
+  charging: boolean;
+  chargingTime: number;
+  dischargingTime: number;
+}
+
+interface NavigatorWithBattery extends Navigator {
+  getBattery?: () => Promise<BatteryManagerLike>;
+}
+
 /**
  * Battery optimization mode
  */
@@ -82,8 +93,8 @@ const BATTERY_THRESHOLDS = {
  * ```
  */
 export class BatteryManager {
-  private battery: any = null;
-  private supported: boolean = false;
+  private battery: BatteryManagerLike | null = null;
+  private supported = false;
   private listeners: Array<(info: BatteryInfo) => void> = [];
 
   /**
@@ -100,8 +111,7 @@ export class BatteryManager {
     }
 
     try {
-      // @ts-ignore - Battery Status API not in TypeScript lib
-      this.battery = await navigator.getBattery();
+      this.battery = await (navigator as NavigatorWithBattery).getBattery!();
       this.supported = true;
 
       // Setup event listeners

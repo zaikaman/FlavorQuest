@@ -16,6 +16,14 @@
 
 'use client';
 
+interface StandaloneNavigator extends Navigator {
+  standalone?: boolean;
+}
+
+interface IOSWindow extends Window {
+  MSStream?: unknown;
+}
+
 /**
  * PWA Installation State
  */
@@ -233,7 +241,7 @@ export function isStandalone(): boolean {
 
   return (
     window.matchMedia('(display-mode: standalone)').matches ||
-    (window.navigator as any).standalone === true ||
+    (window.navigator as StandaloneNavigator).standalone === true ||
     document.referrer.includes('android-app://')
   );
 }
@@ -246,7 +254,7 @@ export function isIOS(): boolean {
     return false;
   }
 
-  return /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
+  return /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as IOSWindow).MSStream;
 }
 
 /**

@@ -16,6 +16,10 @@ interface DashboardStats {
   uniqueVisitors: number;
 }
 
+interface SessionRow {
+  session_id: string | null;
+}
+
 export default function AdminDashboard() {
   const router = useRouter();
   const [stats, setStats] = useState<DashboardStats>({
@@ -48,7 +52,7 @@ export default function AdminDashboard() {
       const { count: totalPlays } = await supabase
         .from('analytics_logs')
         .select('*', { count: 'exact', head: true })
-        .in('event_type', ['auto_play', 'manual_play']);
+        .or('event_type.eq.auto_play,event_type.eq.manual_play');
 
       // Count unique sessions
       const { data: sessions } = await supabase
@@ -56,7 +60,12 @@ export default function AdminDashboard() {
         .select('session_id')
         .not('session_id', 'is', null);
 
-      const uniqueVisitors = new Set(sessions?.map(s => s.session_id) || []).size;
+      const sessionRows = (Array.isArray(sessions) ? sessions : []) as SessionRow[];
+      const uniqueVisitors = new Set(
+        sessionRows
+          .map(session => session.session_id)
+          .filter((sessionId): sessionId is string => typeof sessionId === 'string' && sessionId.length > 0)
+      ).size;
 
       setStats({
         totalPOIs: totalPOIs || 0,

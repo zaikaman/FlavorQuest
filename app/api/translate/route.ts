@@ -26,10 +26,11 @@ export async function POST(request: NextRequest) {
         const translations = await translateText(text);
 
         return NextResponse.json(translations);
-    } catch (error: any) {
+    } catch (error) {
+        const message = error instanceof Error ? error.message : 'Failed to translate text';
         console.error('Translation error:', error);
         return NextResponse.json(
-            { error: error.message || 'Failed to translate text' },
+            { error: message },
             { status: 500 }
         );
     }

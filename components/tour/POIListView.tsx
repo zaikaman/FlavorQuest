@@ -5,6 +5,7 @@
 
 'use client';
 
+import Image from 'next/image';
 import { useState, useMemo } from 'react';
 import { useLanguage } from '@/lib/contexts/LanguageContext';
 import { useTranslations } from '@/lib/hooks/useTranslations';
@@ -155,10 +156,12 @@ export function POIListView({
                     onClick={() => onViewPOI(poi)}
                   >
                     {poi.image_url ? (
-                      <img
+                      <Image
                         src={poi.image_url}
                         alt={localized.name}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        fill
+                        unoptimized
+                        className="object-cover transition-transform duration-500 group-hover:scale-105"
                       />
                     ) : (
                       <div className="w-full h-full bg-[#3a2d25] flex items-center justify-center">
