@@ -141,10 +141,6 @@ export async function proxy(request: NextRequest) {
       return redirect(request, '/login', { type: 'customer' });
     }
 
-    if (profile.role === 'admin') {
-      return redirect(request, '/admin');
-    }
-
     if (profile.role === 'owner') {
       return redirect(request, '/owner');
     }
@@ -162,7 +158,7 @@ export async function proxy(request: NextRequest) {
     }
 
     if (profile.role === 'admin') {
-      return redirect(request, '/admin');
+      return redirect(request, '/tour');
     }
 
     if (profile.role === 'owner') {
