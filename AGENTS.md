@@ -1,0 +1,1 @@
+Khi update code liên quan tới giao diện chú ý là có tận 6 file locale, phải dịch tận 6 lần trong các file đó nhé.

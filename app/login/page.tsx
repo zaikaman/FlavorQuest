@@ -1,25 +1,37 @@
 /**
  * Login Page
- * Google Sign In cho Admin
+ * Đăng nhập bằng email + OTP
  */
 
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/lib/contexts/AuthContext';
 import { useTranslations } from '@/lib/hooks/useTranslations';
-import { signInWithGoogle } from '@/lib/services/auth';
-
-type AccountType = 'customer' | 'owner';
+import { requestEmailOtp, verifyEmailOtp, type AccountType } from '@/lib/services/auth';
 
 export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { user, isLoading, isOwner, isRoleReady, hasCustomerAccess } = useAuth();
+  const { user, isLoading, isOwner, isRoleReady, hasCustomerAccess, refreshUserRole } = useAuth();
   const { t } = useTranslations();
   const error = searchParams.get('error');
   const accountType = (searchParams.get('type') === 'owner' ? 'owner' : 'customer') as AccountType;
+  const [email, setEmail] = useState('');
+  const [otp, setOtp] = useState('');
+  const [lastSentEmail, setLastSentEmail] = useState('');
+  const [isOtpSent, setIsOtpSent] = useState(false);
+  const [isSendingOtp, setIsSendingOtp] = useState(false);
+  const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
+  const [cooldown, setCooldown] = useState(0);
+  const [feedback, setFeedback] = useState<{ type: 'error' | 'success'; message: string } | null>(null);
+
+  const normalizedEmail = useMemo(() => email.trim().toLowerCase(), [email]);
+  const isResendLocked = cooldown > 0 && normalizedEmail === lastSentEmail;
+  const activeFeedback = feedback ?? (error === 'auth_failed'
+    ? { type: 'error' as const, message: t('login.error') }
+    : null);
 
   useEffect(() => {
     if (!isLoading && user && isRoleReady) {
@@ -29,11 +41,68 @@ export default function LoginPage() {
     }
   }, [user, isLoading, isOwner, isRoleReady, hasCustomerAccess, accountType, router]);
 
-  const handleGoogleSignIn = async (type: AccountType) => {
-    const { error } = await signInWithGoogle(type);
-    if (error) {
-      console.error('Sign in failed:', error);
+  useEffect(() => {
+    if (cooldown <= 0) {
+      return;
     }
+
+    const timer = window.setInterval(() => {
+      setCooldown(current => (current <= 1 ? 0 : current - 1));
+    }, 1000);
+
+    return () => window.clearInterval(timer);
+  }, [cooldown]);
+
+  const handleSendOtp = async () => {
+    if (!normalizedEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
+      setFeedback({ type: 'error', message: t('login.invalidEmail') });
+      return;
+    }
+
+    setIsSendingOtp(true);
+    setFeedback(null);
+
+    const { error: requestError } = await requestEmailOtp(normalizedEmail);
+
+    setIsSendingOtp(false);
+
+    if (requestError) {
+      setFeedback({ type: 'error', message: requestError.message || t('login.sendOtpError') });
+      return;
+    }
+
+    setLastSentEmail(normalizedEmail);
+    setIsOtpSent(true);
+    setCooldown(60);
+    setFeedback({ type: 'success', message: t('login.codeSentTo', { email: normalizedEmail }) });
+  };
+
+  const handleVerifyOtp = async () => {
+    if (!normalizedEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
+      setFeedback({ type: 'error', message: t('login.invalidEmail') });
+      return;
+    }
+
+    if (!otp.trim() || otp.trim().length < 6) {
+      setFeedback({ type: 'error', message: t('login.invalidOtp') });
+      return;
+    }
+
+    setIsVerifyingOtp(true);
+    setFeedback(null);
+
+    const { error: verifyError, redirectTo } = await verifyEmailOtp(normalizedEmail, otp, accountType);
+
+    setIsVerifyingOtp(false);
+
+    if (verifyError) {
+      setFeedback({ type: 'error', message: verifyError.message || t('login.verifyOtpError') });
+      return;
+    }
+
+    await refreshUserRole();
+    router.push(redirectTo ?? (accountType === 'owner' ? '/owner' : '/tour'));
+    router.refresh();
   };
 
   if (isLoading) {
@@ -67,12 +136,20 @@ export default function LoginPage() {
           <p className="text-gray-400 font-medium">{t('login.subtitle')}</p>
         </div>
 
-        {/* Error Message */}
-        {error === 'auth_failed' && (
-          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-xl backdrop-blur-md">
-            <p className="text-red-400 text-sm text-center font-medium flex items-center justify-center gap-2">
-              <span className="material-symbols-outlined text-lg">error</span>
-              {t('login.error')}
+        {/* Feedback Message */}
+        {activeFeedback && (
+          <div className={`mb-6 rounded-xl border p-4 backdrop-blur-md ${
+            activeFeedback.type === 'error'
+              ? 'border-red-500/30 bg-red-500/10'
+              : 'border-emerald-500/30 bg-emerald-500/10'
+          }`}>
+            <p className={`flex items-center justify-center gap-2 text-center text-sm font-medium ${
+              activeFeedback.type === 'error' ? 'text-red-400' : 'text-emerald-300'
+            }`}>
+              <span className="material-symbols-outlined text-lg">
+                {activeFeedback.type === 'error' ? 'error' : 'mark_email_read'}
+              </span>
+              {activeFeedback.message}
             </p>
           </div>
         )}
@@ -86,32 +163,6 @@ export default function LoginPage() {
                 {t('login.prompt')}
               </p>
             </div>
-
-            {/* Google Sign In Button */}
-            <button
-              onClick={() => handleGoogleSignIn(accountType)}
-              className="group w-full flex items-center justify-center gap-3 bg-white text-gray-900 font-bold py-4 px-6 rounded-xl transition-all duration-200 hover:bg-gray-100 hover:shadow-[0_0_20px_rgba(255,255,255,0.3)] hover:scale-[1.01] active:scale-[0.98]"
-            >
-              <svg className="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24">
-                <path
-                  fill="currentColor"
-                  d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                />
-                <path
-                  fill="currentColor"
-                  d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                />
-                <path
-                  fill="currentColor"
-                  d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                />
-                <path
-                  fill="currentColor"
-                  d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                />
-              </svg>
-              <span>{t('login.signInWithGoogle')}</span>
-            </button>
 
             <div className="grid grid-cols-2 gap-3">
               <button
@@ -138,6 +189,67 @@ export default function LoginPage() {
               </button>
             </div>
             <p className="text-xs text-center text-gray-500">{t('login.selectedType', { type: accountType === 'owner' ? t('login.owner') : t('login.customer') })}</p>
+
+            <div className="space-y-3">
+              <label className="block text-sm font-semibold text-white" htmlFor="email">
+                {t('login.emailLabel')}
+              </label>
+              <input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                placeholder={t('login.emailPlaceholder')}
+                className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none transition-colors placeholder:text-gray-500 focus:border-primary"
+                autoComplete="email"
+              />
+              <button
+                type="button"
+                onClick={handleSendOtp}
+                disabled={isSendingOtp || isResendLocked}
+                className="w-full rounded-xl bg-primary px-6 py-3 font-bold text-white transition-all duration-200 hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {isSendingOtp
+                  ? t('login.sendingOtp')
+                  : isOtpSent
+                    ? isResendLocked
+                      ? t('login.resendIn', { seconds: cooldown })
+                      : t('login.resendOtp')
+                    : t('login.sendOtp')}
+              </button>
+              <p className="text-xs text-center text-gray-500">{t('login.changeEmailHint')}</p>
+            </div>
+
+            {isOtpSent && (
+              <div className="space-y-3 rounded-2xl border border-white/10 bg-white/5 p-4">
+                <div className="text-center text-sm text-gray-300">
+                  <p>{t('login.codeSent')}</p>
+                  <p className="mt-1 text-xs text-gray-500">{lastSentEmail}</p>
+                </div>
+                <label className="block text-sm font-semibold text-white" htmlFor="otp">
+                  {t('login.otpLabel')}
+                </label>
+                <input
+                  id="otp"
+                  type="text"
+                  inputMode="numeric"
+                  value={otp}
+                  onChange={(event) => setOtp(event.target.value.replace(/\D/g, '').slice(0, 6))}
+                  placeholder={t('login.otpPlaceholder')}
+                  className="w-full rounded-xl border border-white/10 bg-background-dark/70 px-4 py-3 text-center text-xl tracking-[0.4em] text-white outline-none transition-colors placeholder:tracking-normal placeholder:text-gray-500 focus:border-primary"
+                  autoComplete="one-time-code"
+                  maxLength={6}
+                />
+                <button
+                  type="button"
+                  onClick={handleVerifyOtp}
+                  disabled={isVerifyingOtp}
+                  className="w-full rounded-xl border border-primary/30 bg-primary/15 px-6 py-3 font-bold text-primary transition-all duration-200 hover:bg-primary/20 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {isVerifyingOtp ? t('login.verifyingOtp') : t('login.verifyOtp')}
+                </button>
+              </div>
+            )}
 
             {/* Divider */}
             <div className="relative py-2">
