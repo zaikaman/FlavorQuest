@@ -287,7 +287,7 @@ export default function PaywallPage() {
       } else if (result.payment?.status === 'PAID') {
         setStatusMessage('Thanh toán đã ghi nhận. Đang đồng bộ quyền truy cập...');
       } else if (result.payment?.status) {
-        setStatusMessage(`Trạng thái hiện tại: ${result.payment.status}. Webhook sẽ tự mở khóa, hoặc bạn có thể bấm kiểm tra thủ công.`);
+        setStatusMessage(`Trạng thái hiện tại: ${result.payment.status}. Webhook sẽ tự mở khóa, hoặc bạn có thể bấm kiểm tra thủ công. Trang thanh toán chỉ mở khi bạn chủ động bấm nút.`);
       }
     } catch (error) {
       console.error(error);
@@ -381,11 +381,6 @@ export default function PaywallPage() {
       console.error('[Paywall] init status failed:', error);
     });
   }, [hasCustomerAccess, isAdmin, isCompletingAccess, isLoading, isOwner, isRoleReady, isStatusUnauthorized, orderCodeFromQuery, refreshStatus, router, user]);
-
-  useEffect(() => {
-    if (!allowEmbedded || !scriptReady || !payment?.checkout_url) return;
-    openEmbedded(payment.checkout_url);
-  }, [allowEmbedded, scriptReady, payment?.checkout_url, openEmbedded]);
 
   useEffect(() => {
     return () => {
