@@ -32,25 +32,51 @@ export async function GET(request: NextRequest) {
       const desiredRole = accountType === 'owner' ? 'owner' : 'customer';
 
       const adminClient = createAdminClient();
-      const { data: existingProfile } = await adminClient
+      const { data: existingProfile, error: existingProfileError } = await adminClient
         .from('users')
         .select('role')
         .eq('id', user.id)
         .maybeSingle();
 
-      const role = existingProfile?.role === 'admin' ? 'admin' : desiredRole;
+      if (existingProfileError) {
+        console.error('Auth callback profile lookup error:', existingProfileError);
+        return NextResponse.redirect(`${origin}/login?error=auth_failed`);
+      }
 
-      await adminClient
-        .from('users')
-        .upsert(
-          {
-            id: user.id,
-            email: user.email,
-            role,
-            updated_at: new Date().toISOString(),
-          },
-          { onConflict: 'id' }
-        );
+      const timestamp = new Date().toISOString();
+      const isExistingAdmin = existingProfile?.role === 'admin';
+
+      const { error: upsertError } = isExistingAdmin
+        ? await adminClient
+            .from('users')
+            .upsert(
+              {
+                id: user.id,
+                email: user.email,
+                updated_at: timestamp,
+              },
+              { onConflict: 'id' }
+            )
+        : await adminClient
+            .from('users')
+            .upsert(
+              {
+                id: user.id,
+                email: user.email,
+                role: desiredRole,
+                updated_at: timestamp,
+              },
+              { onConflict: 'id' }
+            );
+
+      if (upsertError) {
+        console.error('Auth callback upsert error:', upsertError);
+        return NextResponse.redirect(`${origin}/login?error=auth_failed`);
+      }
+
+      if (isExistingAdmin) {
+        return NextResponse.redirect(`${origin}/admin`);
+      }
 
       // Chỉ redirect theo accountType người dùng đã chọn ở màn hình login.
       // Trang /admin chỉ truy cập thủ công, không auto redirect.

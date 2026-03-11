@@ -14,7 +14,7 @@ import { requestEmailOtp, verifyEmailOtp, type AccountType } from '@/lib/service
 export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { user, isLoading, isOwner, isRoleReady, hasCustomerAccess, refreshUserRole } = useAuth();
+  const { user, isLoading, isOwner, isAdmin, isRoleReady, hasCustomerAccess, refreshUserRole } = useAuth();
   const { t } = useTranslations();
   const error = searchParams.get('error');
   const accountType = (searchParams.get('type') === 'owner' ? 'owner' : 'customer') as AccountType;
@@ -35,11 +35,16 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (!isLoading && user && isRoleReady) {
+      if (isAdmin) {
+        router.push('/admin');
+        return;
+      }
+
       // Ưu tiên loại tài khoản đã chọn trên màn hình login.
       // Điều này giúp tài khoản admin vẫn có thể vào luồng chủ quán khi chọn "Chủ quán".
       router.push(accountType === 'owner' || isOwner ? '/owner' : hasCustomerAccess ? '/tour' : '/paywall');
     }
-  }, [user, isLoading, isOwner, isRoleReady, hasCustomerAccess, accountType, router]);
+  }, [user, isLoading, isOwner, isAdmin, isRoleReady, hasCustomerAccess, accountType, router]);
 
   useEffect(() => {
     if (cooldown <= 0) {
@@ -101,7 +106,7 @@ export default function LoginPage() {
     }
 
     await refreshUserRole();
-    router.push(redirectTo ?? (accountType === 'owner' ? '/owner' : '/tour'));
+    router.push(redirectTo ?? (isAdmin ? '/admin' : accountType === 'owner' ? '/owner' : '/tour'));
     router.refresh();
   };
 
