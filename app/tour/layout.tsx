@@ -17,7 +17,7 @@ export default function TourLayout({
 }) {
   const { t } = useTranslations();
   const router = useRouter();
-  const { user, isLoading, isRoleReady, isOwner, isAdmin, hasCustomerAccess } = useAuth();
+  const { user, isLoading, isRoleReady, isOwner, hasCustomerAccess } = useAuth();
 
   useEffect(() => {
     if (isLoading) return;
