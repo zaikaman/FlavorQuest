@@ -3,7 +3,7 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-type EditableRole = 'customer' | 'owner';
+type EditableRole = 'customer' | 'owner' | 'admin';
 
 const NO_STORE_HEADERS = {
   'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
@@ -48,7 +48,7 @@ export async function PATCH(request: NextRequest) {
 
     const adminClient = createAdminClient();
 
-    if (!userId || !role || !['customer', 'owner'].includes(role)) {
+    if (!userId || !role || !['customer', 'owner', 'admin'].includes(role)) {
       return NextResponse.json({ error: 'Invalid userId or role' }, { status: 400, headers: NO_STORE_HEADERS });
     }
 

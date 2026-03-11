@@ -57,12 +57,6 @@ export default function OwnerLayout({ children }: { children: React.ReactNode })
             <h1 className="font-bold text-lg">FlavorQuest Owner</h1>
             <p className="text-xs text-gray-400">Không gian quản lý chủ quán</p>
           </div>
-          <button
-            onClick={() => router.push('/tour')}
-            className="px-4 py-2 rounded-lg text-sm border border-white/10 hover:bg-white/5"
-          >
-            Về trang khách hàng
-          </button>
         </div>
       </header>
 

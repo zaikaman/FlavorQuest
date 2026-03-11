@@ -3,27 +3,41 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/lib/contexts/AuthContext';
+import { useTranslations } from '@/lib/hooks/useTranslations';
 
 export default function PaywallSuccessPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { customerAccessGrantedAt, hasCustomerAccess } = useAuth();
+  const { t, language } = useTranslations();
   const [countdown, setCountdown] = useState(8);
 
   const orderCode = searchParams.get('orderCode');
   const grantedTime = useMemo(() => {
     if (!customerAccessGrantedAt) {
-      return 'Vừa xong';
+      return t('paywall.success.justNow');
     }
 
-    return new Date(customerAccessGrantedAt).toLocaleString('vi-VN', {
+    const locale = language === 'vi'
+      ? 'vi-VN'
+      : language === 'en'
+        ? 'en-US'
+        : language === 'fr'
+          ? 'fr-FR'
+          : language === 'ja'
+            ? 'ja-JP'
+            : language === 'ko'
+              ? 'ko-KR'
+              : 'zh-CN';
+
+    return new Date(customerAccessGrantedAt).toLocaleString(locale, {
       hour: '2-digit',
       minute: '2-digit',
       day: '2-digit',
       month: '2-digit',
       year: 'numeric',
     });
-  }, [customerAccessGrantedAt]);
+  }, [customerAccessGrantedAt, language, t]);
 
   useEffect(() => {
     if (!hasCustomerAccess) {
@@ -59,26 +73,26 @@ export default function PaywallSuccessPage() {
             </div>
             <div className="inline-flex items-center gap-2 rounded-full border border-emerald-400/25 bg-emerald-400/10 px-4 py-1.5 text-sm font-semibold text-emerald-300 mb-4">
               <span className="material-symbols-outlined text-base">lock_open</span>
-              Đã mở khóa thành công
+              {t('paywall.success.badge')}
             </div>
             <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-4">
-              Chào mừng bạn đến với <span className="text-primary">FlavorQuest Premium</span>
+              {t('paywall.success.titleBefore')}{' '}<span className="text-primary">{t('paywall.success.titleHighlight')}</span>
             </h1>
             <p className="max-w-2xl mx-auto text-gray-300 leading-7 text-base md:text-lg">
-              Khoản thanh toán đã được xác nhận. Tài khoản khách hàng của bạn hiện đã được mở khóa <span className="font-bold text-white">vĩnh viễn</span>.
+              {t('paywall.success.descriptionBefore')}{' '}<span className="font-bold text-white">{t('paywall.lifetime')}</span>{'.'}
             </p>
           </div>
 
           <div className="grid gap-6 p-6 md:grid-cols-[1.15fr,0.85fr] md:p-10">
             <div className="space-y-4">
               <div className="rounded-2xl border border-white/10 bg-black/20 p-5">
-                <h2 className="text-lg font-bold mb-4">Quyền lợi đã kích hoạt</h2>
+                <h2 className="text-lg font-bold mb-4">{t('paywall.success.benefitsTitle')}</h2>
                 <div className="space-y-3 text-sm text-gray-300">
                   {[
-                    'Truy cập đầy đủ toàn bộ trải nghiệm audio tour',
-                    'Không cần thanh toán lại cho những lần đăng nhập sau',
-                    'Tiếp tục dùng được trên cùng tài khoản khách hàng',
-                    'Tự động xác nhận qua webhook payOS an toàn',
+                    t('paywall.success.benefit1'),
+                    t('paywall.success.benefit2'),
+                    t('paywall.success.benefit3'),
+                    t('paywall.success.benefit4'),
                   ].map(item => (
                     <div key={item} className="flex items-start gap-3">
                       <span className="material-symbols-outlined text-emerald-400 mt-0.5">check_circle</span>
@@ -89,9 +103,9 @@ export default function PaywallSuccessPage() {
               </div>
 
               <div className="rounded-2xl border border-primary/20 bg-primary/10 p-5">
-                <h3 className="font-bold text-white mb-2">Tiếp theo bạn có thể làm gì?</h3>
+                <h3 className="font-bold text-white mb-2">{t('paywall.success.nextTitle')}</h3>
                 <p className="text-sm text-gray-300 leading-6">
-                  Mở bản đồ tour, duyệt POI gần bạn, và bắt đầu nghe thuyết minh tự động ngay khi tiến vào khu vực Vĩnh Khánh.
+                  {t('paywall.success.nextDescription')}
                 </p>
               </div>
             </div>
@@ -99,45 +113,45 @@ export default function PaywallSuccessPage() {
             <div className="space-y-4">
               <div className="rounded-2xl border border-white/10 bg-black/20 p-5 space-y-4">
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-400">Trạng thái</span>
-                  <span className="font-bold text-emerald-400">PAID</span>
+                  <span className="text-gray-400">{t('paywall.status')}</span>
+                  <span className="font-bold text-emerald-400">{t('paywall.statuses.PAID')}</span>
                 </div>
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-400">Gói truy cập</span>
-                  <span className="font-semibold text-white">Vĩnh viễn</span>
+                  <span className="text-gray-400">{t('paywall.accessPlan')}</span>
+                  <span className="font-semibold text-white">{t('paywall.lifetime')}</span>
                 </div>
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-400">Số tiền</span>
-                  <span className="font-semibold text-white">20.000 VND</span>
+                  <span className="text-gray-400">{t('paywall.success.amountLabel')}</span>
+                  <span className="font-semibold text-white">{t('paywall.amount')}</span>
                 </div>
                 {orderCode && (
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-400">Mã đơn</span>
+                    <span className="text-gray-400">{t('paywall.orderCode')}</span>
                     <span className="font-semibold text-white">{orderCode}</span>
                   </div>
                 )}
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-400">Thời điểm kích hoạt</span>
+                  <span className="text-gray-400">{t('paywall.success.activatedAt')}</span>
                   <span className="font-semibold text-white text-right">{grantedTime}</span>
                 </div>
               </div>
 
               <div className="rounded-2xl border border-white/10 bg-white/5 p-5 text-center">
-                <p className="text-sm text-gray-400 mb-2">Tự động chuyển sau</p>
+                <p className="text-sm text-gray-400 mb-2">{t('paywall.success.redirectIn')}</p>
                 <p className="text-4xl font-extrabold text-primary mb-4">{countdown}s</p>
                 <button
                   type="button"
                   onClick={() => router.push('/tour')}
                   className="w-full rounded-2xl bg-primary px-5 py-4 font-bold text-white hover:bg-orange-600 transition-colors"
                 >
-                  Vào ứng dụng ngay
+                  {t('paywall.success.enterApp')}
                 </button>
                 <button
                   type="button"
                   onClick={() => router.push('/')}
                   className="w-full mt-3 rounded-2xl border border-white/10 px-5 py-4 font-semibold text-gray-300 hover:bg-white/5 transition-colors"
                 >
-                  Về trang chủ
+                  {t('paywall.buttons.backHome')}
                 </button>
               </div>
             </div>

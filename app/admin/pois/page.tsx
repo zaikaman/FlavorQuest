@@ -192,7 +192,7 @@ export default function POIsPage() {
         }
     };
 
-    const handleUpdateRole = async (userId: string, role: 'customer' | 'owner') => {
+    const handleUpdateRole = async (userId: string, role: 'customer' | 'owner' | 'admin') => {
         try {
             console.group('[AdminPOIs] Update role');
             console.log('userId:', userId);
@@ -356,29 +356,29 @@ export default function POIsPage() {
 
             <div className="bg-[#2c1e16] rounded-xl border border-white/5 overflow-hidden">
                 <div className="px-6 py-4 border-b border-white/10">
-                    <h2 className="text-lg font-bold text-white">Quản lý chủ quán</h2>
-                    <p className="text-sm text-gray-400">Chuyển vai trò người dùng sang Chủ quán để có thể liên kết vào POI</p>
+                    <h2 className="text-lg font-bold text-white">Quản lý vai trò người dùng</h2>
+                    <p className="text-sm text-gray-400">Gán vai trò Khách hàng, Chủ quán hoặc Admin cho từng tài khoản</p>
                 </div>
                 <div className="divide-y divide-white/5">
                     {users
-                        .filter(user => user.role !== 'admin')
                         .map(user => (
                             <div key={user.id} className="px-6 py-4 flex items-center justify-between gap-4">
                                 <div>
                                     <p className="text-white text-sm font-medium">{user.email}</p>
-                                    <p className="text-xs text-gray-500">ID: {user.id.slice(0, 8)}...</p>
+                                    <p className="text-xs text-gray-500">ID: {user.id.slice(0, 8)}... · Vai trò hiện tại: {user.role}</p>
                                 </div>
                                 <select
                                     value={user.role}
-                                    onChange={e => handleUpdateRole(user.id, e.target.value as 'customer' | 'owner')}
+                                    onChange={e => handleUpdateRole(user.id, e.target.value as 'customer' | 'owner' | 'admin')}
                                     className="bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-sm text-white"
                                 >
                                     <option value="customer">Khách hàng</option>
                                     <option value="owner">Chủ quán</option>
+                                    <option value="admin">Admin</option>
                                 </select>
                             </div>
                         ))}
-                    {users.filter(user => user.role !== 'admin').length === 0 && (
+                    {users.length === 0 && (
                         <div className="px-6 py-6 text-sm text-gray-500">Chưa có tài khoản người dùng nào.</div>
                     )}
                 </div>

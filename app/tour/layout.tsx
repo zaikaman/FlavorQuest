@@ -31,7 +31,7 @@ export default function TourLayout({
       return;
     }
 
-    if (isOwner || isAdmin) {
+    if (isOwner) {
       router.replace('/owner');
       return;
     }
@@ -40,7 +40,7 @@ export default function TourLayout({
       router.replace('/paywall');
       return;
     }
-  }, [isLoading, user, isRoleReady, isOwner, isAdmin, hasCustomerAccess, router]);
+  }, [isLoading, user, isRoleReady, isOwner, hasCustomerAccess, router]);
 
   if (isLoading || !user || !isRoleReady) {
     return (
