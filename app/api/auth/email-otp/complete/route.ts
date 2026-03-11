@@ -50,25 +50,41 @@ export async function POST(request: NextRequest) {
   }
 
   const desiredRole = accountType === 'owner' ? 'owner' : 'customer';
-  const { data: existingProfile } = await adminClient
+  const { data: existingProfile, error: existingProfileError } = await adminClient
     .from('users')
     .select('role')
     .eq('id', currentUser.id)
     .maybeSingle();
 
-  const role = existingProfile?.role === 'admin' ? 'admin' : desiredRole;
+  if (existingProfileError) {
+    return NextResponse.json({ error: existingProfileError.message }, { status: 500 });
+  }
 
-  const { error: upsertError } = await adminClient
-    .from('users')
-    .upsert(
-      {
-        id: currentUser.id,
-        email: currentUser.email,
-        role,
-        updated_at: new Date().toISOString(),
-      },
-      { onConflict: 'id' }
-    );
+  const timestamp = new Date().toISOString();
+  const isExistingAdmin = existingProfile?.role === 'admin';
+
+  const { error: upsertError } = isExistingAdmin
+    ? await adminClient
+        .from('users')
+        .upsert(
+          {
+            id: currentUser.id,
+            email: currentUser.email,
+            updated_at: timestamp,
+          },
+          { onConflict: 'id' }
+        )
+    : await adminClient
+        .from('users')
+        .upsert(
+          {
+            id: currentUser.id,
+            email: currentUser.email,
+            role: desiredRole,
+            updated_at: timestamp,
+          },
+          { onConflict: 'id' }
+        );
 
   if (upsertError) {
     return NextResponse.json({ error: upsertError.message }, { status: 500 });
@@ -80,11 +96,13 @@ export async function POST(request: NextRequest) {
     .eq('id', currentUser.id)
     .maybeSingle();
 
-  const redirectTo = desiredRole === 'owner'
-    ? '/owner'
-    : profile?.customer_access_granted
-      ? '/tour'
-      : '/paywall';
+  const redirectTo = isExistingAdmin
+    ? '/admin'
+    : desiredRole === 'owner'
+      ? '/owner'
+      : profile?.customer_access_granted
+        ? '/tour'
+        : '/paywall';
 
-  return NextResponse.json({ redirectTo, role });
+  return NextResponse.json({ redirectTo, role: isExistingAdmin ? 'admin' : desiredRole });
 }
