@@ -122,19 +122,24 @@ export async function getCurrentUser(): Promise<User | null> {
 
 /**
  * Check if current user is admin
- * Kiểm tra email có trong ADMIN_EMAILS environment variable
+ * Kiểm tra role admin từ database
  */
 export async function isAdmin(): Promise<boolean> {
-  const user = await getCurrentUser();
-  
-  if (!user?.email) {
+  const response = await fetch('/api/users/me', {
+    cache: 'no-store',
+    headers: {
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      Pragma: 'no-cache',
+    },
+  });
+
+  if (!response.ok) {
     return false;
   }
 
-  const adminEmails = process.env.NEXT_PUBLIC_ADMIN_EMAILS || process.env.ADMIN_EMAILS || '';
-  const adminList = adminEmails.split(',').map(email => email.trim().toLowerCase());
+  const result = await response.json().catch(() => null) as { role?: string } | null;
 
-  return adminList.includes(user.email.toLowerCase());
+  return result?.role === 'admin';
 }
 
 /**

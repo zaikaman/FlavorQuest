@@ -91,19 +91,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    const adminEmails = process.env.NEXT_PUBLIC_ADMIN_EMAILS || '';
-    const adminList = adminEmails.split(',').map(email => email.trim().toLowerCase());
-    if (adminList.includes(currentUser.email.toLowerCase())) {
-      console.log('Matched admin via env list');
-      setUserRole('admin');
-      setIsAdmin(true);
-      setHasCustomerAccess(true);
-      setCustomerAccessGrantedAt(null);
-      setIsRoleReady(true);
-      console.groupEnd();
-      return;
-    }
-
     try {
       const me = await fetchRoleFromApi();
       console.log('role api result:', me.role, me.customerAccessGranted);

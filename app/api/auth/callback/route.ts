@@ -29,15 +29,17 @@ export async function GET(request: NextRequest) {
     } = await supabase.auth.getUser();
 
     if (user?.id && user.email) {
-      const adminEmails = (process.env.ADMIN_EMAILS || process.env.NEXT_PUBLIC_ADMIN_EMAILS || '')
-        .split(',')
-        .map(email => email.trim().toLowerCase())
-        .filter(Boolean);
-
       const desiredRole = accountType === 'owner' ? 'owner' : 'customer';
-      const role = adminEmails.includes(user.email.toLowerCase()) ? 'admin' : desiredRole;
 
       const adminClient = createAdminClient();
+      const { data: existingProfile } = await adminClient
+        .from('users')
+        .select('role')
+        .eq('id', user.id)
+        .maybeSingle();
+
+      const role = existingProfile?.role === 'admin' ? 'admin' : desiredRole;
+
       await adminClient
         .from('users')
         .upsert(
