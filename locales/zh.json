@@ -380,6 +380,7 @@
     "cart": "购物车",
     "placeOrder": "下单",
     "pickupTime": "取餐时间",
+    "pickupTimeFuture": "请选择未来的取餐时间",
     "customerName": "顾客姓名",
     "customerPhone": "联系电话",
     "note": "备注",

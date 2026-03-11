@@ -363,6 +363,7 @@
     "cart": "Panier",
     "placeOrder": "Passer la commande",
     "pickupTime": "Heure de retrait",
+    "pickupTimeFuture": "Veuillez choisir une heure de retrait dans le futur",
     "customerName": "Nom du client",
     "customerPhone": "Téléphone",
     "note": "Note",

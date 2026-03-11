@@ -20,6 +20,22 @@ import { Spinner } from '@/components/ui/Spinner';
 import { Toast } from '@/components/ui/Toast';
 import type { Dish, POI } from '@/lib/types/index';
 
+function toLocalDateTimeInputValue(date: Date) {
+  const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+  return localDate.toISOString().slice(0, 16);
+}
+
+function getMinimumPickupTimeValue() {
+  const nextMinute = new Date(Date.now() + 60 * 1000);
+  nextMinute.setSeconds(0, 0);
+  return toLocalDateTimeInputValue(nextMinute);
+}
+
+function isFutureDateTime(value: string) {
+  const parsed = new Date(value);
+  return !Number.isNaN(parsed.getTime()) && parsed.getTime() > Date.now();
+}
+
 export default function POIDetailPage() {
   const params = useParams();
   const router = useRouter();
@@ -39,6 +55,7 @@ export default function POIDetailPage() {
   const [isOrdering, setIsOrdering] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
+  const pickupTimeMin = getMinimumPickupTimeValue();
 
   const showToastMsg = useCallback((msg: string) => {
     setToastMessage(msg);
@@ -144,6 +161,11 @@ export default function POIDetailPage() {
       return;
     }
 
+    if (pickupTime && !isFutureDateTime(pickupTime)) {
+      showToastMsg(t('menu.pickupTimeFuture'));
+      return;
+    }
+
     setIsOrdering(true);
     try {
       const res = await fetch('/api/orders', {
@@ -159,8 +181,14 @@ export default function POIDetailPage() {
         }),
       });
 
+      const payload = await res.json().catch(() => null);
+
       if (!res.ok) {
-        throw new Error('Order failed');
+        if (payload?.code === 'PICKUP_TIME_IN_PAST' || payload?.code === 'INVALID_PICKUP_TIME') {
+          throw new Error(t('menu.pickupTimeFuture'));
+        }
+
+        throw new Error(payload?.error || 'Order failed');
       }
 
       setCart({});
@@ -171,7 +199,7 @@ export default function POIDetailPage() {
       showToastMsg(t('menu.success'));
     } catch (error) {
       console.error('Place order failed:', error);
-      showToastMsg(t('errors.generic'));
+      showToastMsg(error instanceof Error ? error.message : t('errors.generic'));
     } finally {
       setIsOrdering(false);
     }
@@ -402,6 +430,7 @@ export default function POIDetailPage() {
             type="datetime-local"
             value={pickupTime}
             onChange={event => setPickupTime(event.target.value)}
+            min={pickupTimeMin}
             className="w-full rounded-lg bg-black/20 border border-white/10 px-3 py-2"
           />
           <textarea

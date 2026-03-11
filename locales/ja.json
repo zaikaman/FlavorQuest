@@ -380,6 +380,7 @@
     "cart": "カート",
     "placeOrder": "注文する",
     "pickupTime": "受け取り時間",
+    "pickupTimeFuture": "未来の受け取り時間を選択してください",
     "customerName": "お名前",
     "customerPhone": "電話番号",
     "note": "メモ",

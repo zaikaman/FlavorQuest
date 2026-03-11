@@ -363,6 +363,7 @@
     "cart": "Đơn đặt trước",
     "placeOrder": "Đặt món trước",
     "pickupTime": "Giờ nhận món",
+    "pickupTimeFuture": "Vui lòng chọn thời gian nhận món trong tương lai",
     "customerName": "Tên người nhận",
     "customerPhone": "Số điện thoại",
     "note": "Ghi chú",

@@ -120,6 +120,7 @@ CREATE TABLE public.preorder_orders (
   total_amount numeric NOT NULL DEFAULT 0 CHECK (total_amount >= 0::numeric),
   created_at timestamp with time zone NOT NULL DEFAULT now(),
   updated_at timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT preorder_orders_pickup_time_future_check CHECK (pickup_time IS NULL OR pickup_time > now()),
   CONSTRAINT preorder_orders_pkey PRIMARY KEY (id),
   CONSTRAINT preorder_orders_poi_id_fkey FOREIGN KEY (poi_id) REFERENCES public.pois(id),
   CONSTRAINT preorder_orders_customer_id_fkey FOREIGN KEY (customer_id) REFERENCES public.users(id)
