@@ -6,7 +6,6 @@
 
 'use client';
 
-import Image from 'next/image';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import type { POI, Coordinates } from '@/lib/types/index';
 import { getLocalizedPOI } from '@/lib/utils/localization';
