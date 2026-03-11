@@ -1,13 +1,26 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/contexts/AuthContext';
 
 export default function OwnerLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  const { user, isOwner, isAdmin, isLoading, isRoleReady, refreshUserRole } = useAuth();
+  const { user, isOwner, isAdmin, isLoading, isRoleReady, refreshUserRole, signOut } = useAuth();
   const refreshedUserIdRef = useRef<string | null>(null);
+  const [isSigningOut, setIsSigningOut] = useState(false);
+
+  const handleSignOut = async () => {
+    try {
+      setIsSigningOut(true);
+      await signOut();
+      router.replace('/login?type=owner');
+      router.refresh();
+    } catch (error) {
+      console.error('[OwnerLayout] signOut failed:', error);
+      setIsSigningOut(false);
+    }
+  };
 
   useEffect(() => {
     if (!user?.id) return;
@@ -57,6 +70,15 @@ export default function OwnerLayout({ children }: { children: React.ReactNode })
             <h1 className="font-bold text-lg">FlavorQuest Owner</h1>
             <p className="text-xs text-gray-400">Không gian quản lý chủ quán</p>
           </div>
+          <button
+            type="button"
+            onClick={handleSignOut}
+            disabled={isSigningOut}
+            className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            <span className="material-symbols-outlined text-lg">logout</span>
+            <span>{isSigningOut ? 'Đang đăng xuất...' : 'Đăng xuất'}</span>
+          </button>
         </div>
       </header>
 
