@@ -78,6 +78,30 @@ function shouldUseEmbeddedCheckout(returnUrl: string) {
   }
 }
 
+function isStandalonePwa() {
+  const isNavigatorStandalone = typeof navigator !== 'undefined'
+    && 'standalone' in navigator
+    && Boolean((navigator as Navigator & { standalone?: boolean }).standalone);
+
+  const isDisplayModeStandalone = typeof window !== 'undefined'
+    && typeof window.matchMedia === 'function'
+    && window.matchMedia('(display-mode: standalone)').matches;
+
+  return isNavigatorStandalone || isDisplayModeStandalone;
+}
+
+function isMobileDevice() {
+  if (typeof navigator === 'undefined') {
+    return false;
+  }
+
+  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile/i.test(navigator.userAgent);
+}
+
+function shouldForceHostedCheckout() {
+  return isMobileDevice() || isStandalonePwa();
+}
+
 export default function PaywallPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -98,6 +122,7 @@ export default function PaywallPage() {
   const [isCompletingAccess, setIsCompletingAccess] = useState(false);
   const [isStatusUnauthorized, setIsStatusUnauthorized] = useState(false);
   const [scriptReady, setScriptReady] = useState(false);
+  const [allowEmbedded, setAllowEmbedded] = useState(true);
   const checkoutInstanceRef = useRef<{ open: () => void; exit: () => void } | null>(null);
 
   const fitEmbeddedContainer = useCallback(() => {
@@ -142,7 +167,7 @@ export default function PaywallPage() {
     }
 
     setStatusMessage(
-      'Thiết bị hiện tại chưa mở được payOS embedded ổn định. Đang chuyển thẳng sang trang thanh toán payOS để bạn tiếp tục ngay.'
+      'Thiết bị hiện tại không phù hợp để chạy payOS embedded ổn định. Đang chuyển sang trang thanh toán payOS đầy đủ để tránh treo ứng dụng.'
     );
 
     window.location.assign(checkoutUrl);
@@ -176,6 +201,14 @@ export default function PaywallPage() {
       return;
     }
 
+    if (!allowEmbedded || shouldForceHostedCheckout()) {
+      fallbackToHostedCheckout(
+        normalizedCheckoutUrl,
+        'Embedded checkout bị tắt trên mobile/PWA để tránh treo giao diện.'
+      );
+      return;
+    }
+
     if (!window.PayOSCheckout) {
       setStatusMessage('Chưa tải xong tiện ích thanh toán payOS. Vui lòng thử lại sau vài giây.');
       return;
@@ -195,14 +228,14 @@ export default function PaywallPage() {
 
       checkoutInstanceRef.current = instance;
       instance.open();
-      window.setTimeout(() => {
-        fitEmbeddedContainer();
-      }, 250);
+      window.setTimeout(fitEmbeddedContainer, 150);
+      window.setTimeout(fitEmbeddedContainer, 500);
+      window.setTimeout(fitEmbeddedContainer, 1200);
     } catch (error) {
       console.error('[Paywall] open embedded checkout failed:', error);
       fallbackToHostedCheckout(normalizedCheckoutUrl, error instanceof Error ? error.message : 'Unknown error');
     }
-  }, [fallbackToHostedCheckout, fitEmbeddedContainer]);
+  }, [allowEmbedded, fallbackToHostedCheckout, fitEmbeddedContainer]);
 
   const refreshStatus = useCallback(async (orderCode?: number | null, force = true) => {
     if (isStatusUnauthorized) {
@@ -317,6 +350,10 @@ export default function PaywallPage() {
   }, [isCreating, openEmbedded, refreshUserRole, router, user?.id]);
 
   useEffect(() => {
+    setAllowEmbedded(!shouldForceHostedCheckout());
+  }, []);
+
+  useEffect(() => {
     if (isLoading) return;
 
     if (!user) {
@@ -346,9 +383,9 @@ export default function PaywallPage() {
   }, [hasCustomerAccess, isAdmin, isCompletingAccess, isLoading, isOwner, isRoleReady, isStatusUnauthorized, orderCodeFromQuery, refreshStatus, router, user]);
 
   useEffect(() => {
-    if (!scriptReady || !payment?.checkout_url) return;
+    if (!allowEmbedded || !scriptReady || !payment?.checkout_url) return;
     openEmbedded(payment.checkout_url);
-  }, [scriptReady, payment?.checkout_url, openEmbedded]);
+  }, [allowEmbedded, scriptReady, payment?.checkout_url, openEmbedded]);
 
   useEffect(() => {
     return () => {
@@ -357,21 +394,6 @@ export default function PaywallPage() {
   }, []);
 
   useEffect(() => {
-    const container = document.getElementById('payos-embedded-container');
-    if (!container) return;
-
-    fitEmbeddedContainer();
-
-    const observer = new MutationObserver(() => {
-      fitEmbeddedContainer();
-    });
-
-    observer.observe(container, {
-      childList: true,
-      subtree: true,
-      attributes: true,
-    });
-
     const resizeHandler = () => {
       fitEmbeddedContainer();
     };
@@ -379,7 +401,6 @@ export default function PaywallPage() {
     window.addEventListener('resize', resizeHandler);
 
     return () => {
-      observer.disconnect();
       window.removeEventListener('resize', resizeHandler);
     };
   }, [fitEmbeddedContainer]);
@@ -397,11 +418,13 @@ export default function PaywallPage() {
 
   return (
     <div className="min-h-screen bg-background-dark text-white px-4 py-8">
-      <Script
-        src="https://cdn.payos.vn/payos-checkout/v1/stable/payos-initialize.js"
-        strategy="afterInteractive"
-        onLoad={() => setScriptReady(true)}
-      />
+      {allowEmbedded && (
+        <Script
+          src="https://cdn.payos.vn/payos-checkout/v1/stable/payos-initialize.js"
+          strategy="afterInteractive"
+          onLoad={() => setScriptReady(true)}
+        />
+      )}
 
       <div className="max-w-5xl mx-auto grid gap-6 lg:grid-cols-[420px,1fr]">
         <div className="rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl p-6 shadow-2xl">
@@ -457,7 +480,7 @@ export default function PaywallPage() {
                 onClick={() => openEmbedded(payment.checkout_url!)}
                 className="w-full rounded-2xl border border-white/10 bg-white/5 px-5 py-4 font-semibold hover:bg-white/10 transition-colors"
               >
-                Mở lại khung thanh toán
+                {allowEmbedded ? 'Mở lại khung thanh toán' : 'Mở trang thanh toán payOS'}
               </button>
             )}
 
@@ -492,19 +515,29 @@ export default function PaywallPage() {
           <div className="mb-4 flex items-center justify-between gap-3">
             <div>
               <h2 className="text-xl font-bold">Khung thanh toán nhúng</h2>
-              <p className="text-sm text-gray-400">Thanh toán ngay trên trang, không cần rời khỏi ứng dụng.</p>
+              <p className="text-sm text-gray-400">
+                {allowEmbedded
+                  ? 'Thanh toán ngay trên trang, không cần rời khỏi ứng dụng.'
+                  : 'Mobile/PWA sẽ dùng trang thanh toán đầy đủ để tránh lag và treo thao tác.'}
+              </p>
             </div>
             <div className="rounded-full border border-white/10 px-3 py-1 text-xs text-gray-300">
-              {scriptReady ? 'payOS sẵn sàng' : 'Đang tải payOS'}
+              {allowEmbedded ? (scriptReady ? 'payOS sẵn sàng' : 'Đang tải payOS') : 'Dùng chế độ an toàn'}
             </div>
           </div>
 
-          <div
-            id="payos-embedded-container"
-            className="payos-embedded-shell min-h-[820px] rounded-2xl border border-dashed border-white/15 bg-black/20 overflow-hidden"
-          />
+          {allowEmbedded ? (
+            <div
+              id="payos-embedded-container"
+              className="payos-embedded-shell min-h-[820px] rounded-2xl border border-dashed border-white/15 bg-black/20 overflow-hidden"
+            />
+          ) : (
+            <div className="rounded-2xl border border-white/10 bg-black/20 p-5 text-sm text-gray-300 leading-6">
+              Trên mobile và PWA, payOS embedded dễ gây đơ thao tác do giới hạn của WebView/iframe. FlavorQuest sẽ tự mở trang thanh toán payOS đầy đủ để trải nghiệm ổn định hơn.
+            </div>
+          )}
 
-          {!payment?.checkout_url && (
+          {!payment?.checkout_url && allowEmbedded && (
             <div className="mt-4 rounded-2xl border border-white/10 bg-black/20 p-4 text-sm text-gray-400">
               Sau khi tạo giao dịch, giao diện thanh toán nhúng của payOS sẽ xuất hiện tại đây.
             </div>
