@@ -12,6 +12,7 @@ import type { POI, Coordinates } from '@/lib/types/index';
 import { getLocalizedPOI } from '@/lib/utils/localization';
 import { useTranslations } from '@/lib/hooks/useTranslations';
 import { useLanguage } from '@/lib/contexts/LanguageContext';
+import { POIDetailCard } from '@/components/tour/POIDetailCard';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -26,6 +27,7 @@ interface InteractiveMapProps {
   pois: POI[];
   selectedPOI: POI | null;
   onSelectPOI: (poi: POI | null) => void;
+  onViewPOI: (poi: POI) => void;
   onPlayPOI: (poi: POI) => void;
   playingPOIId?: string | null;
   isAudioPlaying?: boolean;
@@ -39,6 +41,7 @@ export function InteractiveMap({
   pois,
   selectedPOI,
   onSelectPOI,
+  onViewPOI,
   onPlayPOI,
   playingPOIId,
   isAudioPlaying = false,
@@ -179,6 +182,12 @@ export function InteractiveMap({
 
         marker.on('click', (e) => {
           L.DomEvent.stopPropagation(e);
+
+          if (selectedPOI?.id === poi.id) {
+            onViewPOI(poi);
+            return;
+          }
+
           onSelectPOI(poi);
         });
 
@@ -198,7 +207,7 @@ export function InteractiveMap({
         mapRef.current.fitBounds(bounds, { padding: [50, 50], maxZoom: 16 });
       }
     }
-  }, [pois, selectedPOI, mapLoaded, language, onSelectPOI, userLocation]);
+  }, [pois, selectedPOI, mapLoaded, language, onSelectPOI, onViewPOI, userLocation]);
 
   // Center map on user
   const handleCenterOnUser = useCallback(() => {
@@ -294,67 +303,14 @@ export function InteractiveMap({
       {/* Selected POI Card */}
       {selectedPOI && (
         <div className="absolute bottom-20 left-4 right-4 z-20 animate-slideInUp">
-          <div className="relative flex items-center gap-4 rounded-xl bg-[#2a1e16]/95 backdrop-blur-xl border border-white/5 p-3 shadow-2xl ring-1 ring-black/20">
-            {/* Close Button */}
-            <button
-              onClick={() => onSelectPOI(null)}
-              className="absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-[#493222] text-white shadow border border-white/10 hover:bg-[#5a4030] transition-colors"
-            >
-              <span className="material-symbols-outlined text-[14px]">close</span>
-            </button>
-
-            {/* POI Image */}
-            <div className="h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-gray-700 relative shadow-inner">
-              {selectedPOI.image_url ? (
-                <Image
-                  src={selectedPOI.image_url}
-                  alt={getLocalizedPOI(selectedPOI, language).name}
-                  fill
-                  unoptimized
-                  className="absolute inset-0 object-cover"
-                />
-              ) : (
-                <div className="absolute inset-0 flex items-center justify-center bg-[#3a2d25]">
-                  <span className="material-symbols-outlined text-primary text-2xl">restaurant</span>
-                </div>
-              )}
-            </div>
-
-            {/* POI Content */}
-            <div className="flex flex-1 flex-col justify-center min-w-0">
-              <div className="flex items-center gap-2">
-                <h3 className="text-white text-base font-bold leading-tight truncate">
-                  {getLocalizedPOI(selectedPOI, language).name}
-                </h3>
-                {selectedPOI.priority && selectedPOI.priority <= 3 && (
-                  <span className="flex h-5 items-center rounded bg-primary/20 px-1.5 text-[10px] font-bold text-primary uppercase">
-                    {t('units.number')} {selectedPOI.priority}
-                  </span>
-                )}
-              </div>
-              <p className="text-[#cba990] text-xs font-normal leading-relaxed truncate mt-0.5">
-                {t('poi.cuisine')} • {getDistanceToPOI(selectedPOI)}{t('units.meters')}
-              </p>
-              <div className="mt-1.5 flex items-center gap-2">
-                {selectedPOI.signature_dish && (
-                  <span className="text-[10px] text-[#cba990] truncate max-w-[150px]">
-                    {selectedPOI.signature_dish}
-                  </span>
-                )}
-              </div>
-            </div>
-
-            {/* Play Button */}
-            <button
-              onClick={() => onPlayPOI(selectedPOI)}
-              className="group flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary text-white shadow-lg transition-all active:scale-95 hover:bg-primary/90"
-              aria-label={isSelectedPOIPlaying ? t('audio.pause') : t('audio.play')}
-            >
-              <span className="material-symbols-outlined text-[28px] ml-0.5 group-hover:scale-110 transition-transform" style={{ fontVariationSettings: "'FILL' 1" }}>
-                {isSelectedPOIPlaying ? 'pause' : 'play_arrow'}
-              </span>
-            </button>
-          </div>
+          <POIDetailCard
+            poi={selectedPOI}
+            distance={getDistanceToPOI(selectedPOI)}
+            isPlaying={isSelectedPOIPlaying}
+            onPlay={() => onPlayPOI(selectedPOI)}
+            onClose={() => onSelectPOI(null)}
+            onViewDetail={() => onViewPOI(selectedPOI)}
+          />
         </div>
       )}
 

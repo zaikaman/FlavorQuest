@@ -380,6 +380,7 @@
     "cart": "장바구니",
     "placeOrder": "주문하기",
     "pickupTime": "픽업 시간",
+    "pickupTimeFuture": "현재 이후의 픽업 시간을 선택해 주세요",
     "customerName": "고객 이름",
     "customerPhone": "전화번호",
     "note": "메모",

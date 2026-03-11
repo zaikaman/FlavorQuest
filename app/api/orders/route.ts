@@ -8,6 +8,28 @@ interface OrderItemInput {
   quantity: number;
 }
 
+function validatePickupTime(pickupTime: unknown) {
+  if (!pickupTime) {
+    return { isValid: true as const, normalizedPickupTime: null };
+  }
+
+  if (typeof pickupTime !== 'string') {
+    return { isValid: false as const, code: 'INVALID_PICKUP_TIME', error: 'Invalid pickup_time' };
+  }
+
+  const pickupDate = new Date(pickupTime);
+
+  if (Number.isNaN(pickupDate.getTime())) {
+    return { isValid: false as const, code: 'INVALID_PICKUP_TIME', error: 'Invalid pickup_time' };
+  }
+
+  if (pickupDate.getTime() <= Date.now()) {
+    return { isValid: false as const, code: 'PICKUP_TIME_IN_PAST', error: 'Pickup time must be in the future' };
+  }
+
+  return { isValid: true as const, normalizedPickupTime: pickupDate.toISOString() };
+}
+
 export async function GET() {
   const supabase = await createServerClient();
   const profile = await getCurrentUserProfile(supabase);
@@ -63,9 +85,17 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const items = (body.items ?? []) as OrderItemInput[];
+    const pickupTimeValidation = validatePickupTime(body.pickup_time);
 
     if (!body.poi_id || items.length === 0) {
       return NextResponse.json({ error: 'Missing poi_id or items' }, { status: 400 });
+    }
+
+    if (!pickupTimeValidation.isValid) {
+      return NextResponse.json(
+        { error: pickupTimeValidation.error, code: pickupTimeValidation.code },
+        { status: 400 }
+      );
     }
 
     const dishIds = items.map(item => item.dish_id);
@@ -99,7 +129,7 @@ export async function POST(request: NextRequest) {
         customer_name: body.customer_name ?? null,
         customer_phone: body.customer_phone ?? null,
         note: body.note ?? null,
-        pickup_time: body.pickup_time ?? null,
+        pickup_time: pickupTimeValidation.normalizedPickupTime,
         total_amount: totalAmount,
         status: 'pending',
       })
@@ -163,7 +193,7 @@ export async function POST(request: NextRequest) {
           orderId: order.id,
           totalAmount,
           itemSummary: summary,
-          pickupTime: body.pickup_time ?? null,
+          pickupTime: pickupTimeValidation.normalizedPickupTime,
         }).catch(error => {
           console.error('Send owner order email failed:', error);
         });

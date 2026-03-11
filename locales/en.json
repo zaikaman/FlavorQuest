@@ -363,6 +363,7 @@
     "cart": "Cart",
     "placeOrder": "Place order",
     "pickupTime": "Pickup time",
+    "pickupTimeFuture": "Please choose a pickup time in the future",
     "customerName": "Customer name",
     "customerPhone": "Phone number",
     "note": "Note",
