@@ -1,4 +1,4 @@
-import { createServerClient } from '@/lib/supabase/server';
+import { createServerClient, getCurrentUserProfile } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { NextResponse } from 'next/server';
 
@@ -18,14 +18,17 @@ export async function GET() {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401, headers: NO_STORE_HEADERS });
   }
 
-  const adminEmails = (process.env.ADMIN_EMAILS || process.env.NEXT_PUBLIC_ADMIN_EMAILS || '')
-    .split(',')
-    .map(email => email.trim().toLowerCase())
-    .filter(Boolean);
+  const profile = await getCurrentUserProfile(supabase);
 
-  if (user.email && adminEmails.includes(user.email.toLowerCase())) {
+  if (profile) {
     return NextResponse.json(
-      { id: user.id, email: user.email, role: 'admin', customerAccessGranted: true, customerAccessGrantedAt: null },
+      {
+        id: profile.id,
+        email: profile.email,
+        role: profile.role,
+        customerAccessGranted: profile.customerAccessGranted,
+        customerAccessGrantedAt: profile.customerAccessGrantedAt,
+      },
       { headers: NO_STORE_HEADERS }
     );
   }

@@ -211,12 +211,6 @@ export async function isUserAdmin(client: SupabaseServerClient): Promise<boolean
     return false;
   }
 
-  // Check Env Var first (hardcoded super admins)
-  const adminEmails = process.env.ADMIN_EMAILS || process.env.NEXT_PUBLIC_ADMIN_EMAILS || '';
-  if (user.email && adminEmails.toLowerCase().includes(user.email.toLowerCase())) {
-    return true;
-  }
-
   const { data } = await client
     .from('users')
     .select('role')
@@ -231,16 +225,6 @@ export async function getUserRole(client: SupabaseServerClient): Promise<AppUser
 
   if (!user) {
     return null;
-  }
-
-  const adminEmails = process.env.ADMIN_EMAILS || process.env.NEXT_PUBLIC_ADMIN_EMAILS || '';
-  const adminList = adminEmails
-    .split(',')
-    .map(email => email.trim().toLowerCase())
-    .filter(Boolean);
-
-  if (user.email && adminList.includes(user.email.toLowerCase())) {
-    return 'admin';
   }
 
   const { data } = await client

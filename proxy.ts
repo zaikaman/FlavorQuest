@@ -71,22 +71,6 @@ async function resolveProfile(request: NextRequest) {
     };
   }
 
-  const adminEmails = (process.env.ADMIN_EMAILS || process.env.NEXT_PUBLIC_ADMIN_EMAILS || '')
-    .split(',')
-    .map(email => email.trim().toLowerCase())
-    .filter(Boolean);
-
-  if (user.email && adminEmails.includes(user.email.toLowerCase())) {
-    return {
-      response,
-      profile: {
-        userId: user.id,
-        role: 'admin',
-        customerAccessGranted: true,
-      } satisfies RouteProfile,
-    };
-  }
-
   const { data } = await supabase
     .from('users')
     .select('role, customer_access_granted')

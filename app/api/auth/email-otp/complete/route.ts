@@ -5,13 +5,6 @@ import { createServerClient } from '@/lib/supabase/server';
 
 type AccountType = 'customer' | 'owner';
 
-function getAdminEmails() {
-  return (process.env.ADMIN_EMAILS || process.env.NEXT_PUBLIC_ADMIN_EMAILS || '')
-    .split(',')
-    .map(email => email.trim().toLowerCase())
-    .filter(Boolean);
-}
-
 export async function POST(request: NextRequest) {
   let accountType: AccountType = 'customer';
 
@@ -57,7 +50,13 @@ export async function POST(request: NextRequest) {
   }
 
   const desiredRole = accountType === 'owner' ? 'owner' : 'customer';
-  const role = getAdminEmails().includes(currentUser.email.toLowerCase()) ? 'admin' : desiredRole;
+  const { data: existingProfile } = await adminClient
+    .from('users')
+    .select('role')
+    .eq('id', currentUser.id)
+    .maybeSingle();
+
+  const role = existingProfile?.role === 'admin' ? 'admin' : desiredRole;
 
   const { error: upsertError } = await adminClient
     .from('users')
