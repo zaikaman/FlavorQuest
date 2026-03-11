@@ -51,7 +51,11 @@ export async function GET() {
     );
   }
 
-  const resolvedRole = data?.role === 'owner' ? 'owner' : 'customer';
+  const resolvedRole = data?.role === 'admin'
+    ? 'admin'
+    : data?.role === 'owner'
+      ? 'owner'
+      : 'customer';
 
   return NextResponse.json(
     {
