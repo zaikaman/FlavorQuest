@@ -93,7 +93,11 @@ async function resolveProfile(request: NextRequest) {
     .eq('id', user.id)
     .maybeSingle();
 
-  const role = data?.role === 'owner' ? 'owner' : 'customer';
+  const role = data?.role === 'admin'
+    ? 'admin'
+    : data?.role === 'owner'
+      ? 'owner'
+      : 'customer';
 
   return {
     response,

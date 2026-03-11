@@ -5,7 +5,7 @@
 
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/contexts/AuthContext';
@@ -17,7 +17,8 @@ export default function AdminLayout({
 }) {
   const router = useRouter();
   const pathname = usePathname();
-  const { user, isAdmin, isLoading } = useAuth();
+  const { user, isAdmin, isLoading, isRoleReady, refreshUserRole } = useAuth();
+  const refreshedUserIdRef = useRef<string | null>(null);
 
   const navItems = [
     { href: '/admin', label: 'Dashboard' },
@@ -27,19 +28,37 @@ export default function AdminLayout({
   ];
 
   useEffect(() => {
-    if (!isLoading) {
-      if (!user) {
-        // Not logged in, redirect to login
-        router.push('/login');
-      } else if (!isAdmin) {
-        // Logged in but not admin, redirect to home
-        router.push('/');
-      }
+    if (!user?.id) return;
+    if (refreshedUserIdRef.current === user.id) return;
+
+    refreshedUserIdRef.current = user.id;
+
+    refreshUserRole().catch(error => {
+      console.error('[AdminLayout] refreshUserRole failed:', error);
+    });
+  }, [user?.id, refreshUserRole]);
+
+  useEffect(() => {
+    if (isLoading) {
+      return;
     }
-  }, [user, isAdmin, isLoading, router]);
+
+    if (!user) {
+      router.replace('/login');
+      return;
+    }
+
+    if (!isRoleReady) {
+      return;
+    }
+
+    if (!isAdmin) {
+      router.replace('/');
+    }
+  }, [user, isAdmin, isLoading, isRoleReady, router]);
 
   // Show loading state
-  if (isLoading) {
+  if (isLoading || (user && !isRoleReady)) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background-dark">
         <div className="text-center">
@@ -51,7 +70,7 @@ export default function AdminLayout({
   }
 
   // Show access denied if not admin
-  if (!user || !isAdmin) {
+  if (!user || !isRoleReady || !isAdmin) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background-dark">
         <div className="text-center p-8 bg-white/5 rounded-2xl border border-white/10 backdrop-blur-md">
