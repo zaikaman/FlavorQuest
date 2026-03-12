@@ -109,6 +109,9 @@
   "tourSelector": {
     "title": "ツアーで聞く",
     "subtitle": "ツアーを選ぶと、その行程に含まれるPOIのみ表示します",
+    "show": "開く",
+    "hide": "閉じる",
+    "collapsedHint": "開くとツアーをすばやく選択・切替できます",
     "allOption": "すべてのスポット",
     "allDescription": "公開中のPOIをすべて表示",
     "clear": "解除",

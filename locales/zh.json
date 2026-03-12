@@ -109,6 +109,9 @@
   "tourSelector": {
     "title": "按导览收听",
     "subtitle": "选择导览后，只显示该路线包含的 POI",
+    "show": "展开",
+    "hide": "收起",
+    "collapsedHint": "展开后可快速选择或切换导览",
     "allOption": "全部地点",
     "allDescription": "显示所有启用中的 POI",
     "clear": "清除",

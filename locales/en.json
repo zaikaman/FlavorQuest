@@ -92,6 +92,9 @@
   "tourSelector": {
     "title": "Listen by tour",
     "subtitle": "Choose a tour to show only the POIs in that itinerary",
+    "show": "Expand",
+    "hide": "Collapse",
+    "collapsedHint": "Expand to quickly choose or switch tours",
     "allOption": "All locations",
     "allDescription": "Show every active POI",
     "clear": "Clear",

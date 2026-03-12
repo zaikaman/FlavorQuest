@@ -92,6 +92,9 @@
   "tourSelector": {
     "title": "Écouter par circuit",
     "subtitle": "Choisissez un circuit pour n'afficher que les POI de cet itinéraire",
+    "show": "Développer",
+    "hide": "Réduire",
+    "collapsedHint": "Développez pour choisir ou changer rapidement de circuit",
     "allOption": "Tous les lieux",
     "allDescription": "Afficher tous les POI actifs",
     "clear": "Réinitialiser",
