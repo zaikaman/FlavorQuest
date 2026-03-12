@@ -85,7 +85,22 @@
     "locationDenied": "Vị trí bị từ chối. Chuyển sang chế độ thủ công.",
     "httpsRequired": "Lỗi: GPS yêu cầu HTTPS. Vui lòng dùng localhost hoặc cài đặt SSL.",
     "gpsError": "Lỗi GPS: {message}",
-    "noAudioForPOI": "Không có audio cho địa điểm này"
+    "noAudioForPOI": "Không có audio cho địa điểm này",
+    "invalidSelectedTour": "Tour đã chọn không còn khả dụng",
+    "stoppedOutsideSelectedTour": "Đã dừng audio vì POI không thuộc tour đang chọn"
+  },
+  "tourSelector": {
+    "title": "Nghe theo tour",
+    "subtitle": "Chọn một tour để chỉ hiển thị các POI thuộc hành trình đó",
+    "allOption": "Tất cả địa điểm",
+    "allDescription": "Hiển thị toàn bộ POI đang hoạt động",
+    "clear": "Bỏ chọn",
+    "loading": "Đang tải danh sách tour...",
+    "empty": "Hiện chưa có tour nào được mở.",
+    "poiCount": "{count} POI",
+    "duration": "{count} phút",
+    "selectedSummary": "Đang hiển thị {count} POI của tour đã chọn",
+    "allSummary": "Đang hiển thị {count} POI đang hoạt động"
   },
   "audio": {
     "play": "Phát",

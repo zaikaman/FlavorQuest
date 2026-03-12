@@ -14,12 +14,13 @@
 
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useGeolocation } from '@/lib/hooks/useGeolocation';
 import { useGeofencing } from '@/lib/hooks/useGeofencing';
 import { useAudioPlayer } from '@/lib/hooks/useAudioPlayer';
 import { usePOIManager } from '@/lib/hooks/usePOIManager';
+import { useTourManager } from '@/lib/hooks/useTourManager';
 import { useOfflineSync } from '@/lib/hooks/useOfflineSync';
 import { useLanguage } from '@/lib/contexts/LanguageContext';
 import { useAuth } from '@/lib/contexts/AuthContext';
@@ -28,6 +29,7 @@ import { InteractiveMap } from '@/components/tour/InteractiveMap';
 import { NarrationOverlay } from '@/components/tour/NarrationOverlay';
 import { AudioPlayer } from '@/components/tour/AudioPlayer';
 import { POIListView } from '@/components/tour/POIListView';
+import { TourSelector } from '@/components/tour/TourSelector';
 import { HistoryView } from '@/components/tour/HistoryView';
 import { BottomNav, type NavTab } from '@/components/layout/BottomNav';
 import { SettingsPanel } from '@/components/layout/SettingsPanel';
@@ -38,17 +40,20 @@ import { Toast } from '@/components/ui/Toast';
 import { NoiseFilter } from '@/lib/utils/noise-filter';
 import { SpeedCalculator } from '@/lib/utils/speed';
 import { isCooldownActive, setCooldown } from '@/lib/utils/cooldown';
-import { logAutoPlay, logSkip, logTourEnd } from '@/lib/services/analytics';
+import { logAutoPlay, logManualPlay, logSkip, logTourEnd } from '@/lib/services/analytics';
 import { saveVisit, loadSettings } from '@/lib/services/storage';
 import { getLocalizedPOI } from '@/lib/utils/localization';
+import type { Json } from '@/lib/types/database.types';
 import type { AppNotification, POI, Coordinates, UserSettings } from '@/lib/types/index';
 import { GEOFENCE_TRIGGER_RADIUS_M, MAX_WALKING_SPEED_KMH } from '@/lib/constants/index';
 
 export default function TourPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { language } = useLanguage();
   const { t } = useTranslations();
   const { user } = useAuth();
+  const selectedTourId = searchParams.get('tour');
 
   // UI State
   const [activeTab, setActiveTab] = useState<NavTab>('map');
@@ -148,6 +153,57 @@ export default function TourPage() {
     onOfflineReady: handlePOIOfflineReady,
   });
 
+  const {
+    tours,
+    isLoading: toursLoading,
+  } = useTourManager();
+
+  const selectedTour = useMemo(
+    () => tours.find(tour => tour.id === selectedTourId) ?? null,
+    [selectedTourId, tours]
+  );
+
+  const activePOIs = useMemo(() => {
+    if (!selectedTour) {
+      return pois;
+    }
+
+    const poiMap = new Map(pois.map(poi => [poi.id, poi]));
+    return selectedTour.poi_ids
+      .map(poiId => poiMap.get(poiId))
+      .filter((poi): poi is POI => Boolean(poi));
+  }, [pois, selectedTour]);
+
+  const handleSelectTour = useCallback((tourId: string | null) => {
+    const params = new URLSearchParams(searchParams.toString());
+
+    if (tourId) {
+      params.set('tour', tourId);
+    } else {
+      params.delete('tour');
+    }
+
+    const nextUrl = params.toString() ? `/tour?${params.toString()}` : '/tour';
+    router.replace(nextUrl, { scroll: false });
+  }, [router, searchParams]);
+
+  const selectedTourMetadata = useMemo<Json | undefined>(() => {
+    if (!selectedTour) {
+      return undefined;
+    }
+
+    return {
+      tour_id: selectedTour.id,
+      tour_name: selectedTour.name_vi,
+      tour_poi_count: selectedTour.poi_ids.length,
+      tour_duration_min: selectedTour.estimated_duration_min ?? null,
+    } as Json;
+  }, [selectedTour]);
+
+  useEffect(() => {
+    hasPreloadedRef.current = false;
+  }, [selectedTourId]);
+
   // Handle offline download acceptance
   const handleOfflineAccept = useCallback(() => {
     setShouldPreloadOffline(true);
@@ -164,7 +220,7 @@ export default function TourPage() {
   }, [setShouldPreloadOffline, setShowOfflinePrompt]);
 
   // Calculate estimated size
-  const estimatedSize = Math.round((pois.length * 2.5)); // ~2.5MB per POI (audio + image)
+  const estimatedSize = Math.round((activePOIs.length * 2.5)); // ~2.5MB per POI (audio + image)
 
   // Handle TTS fallback
   const handleTTSFallback = useCallback(() => {
@@ -197,11 +253,11 @@ export default function TourPage() {
 
   // Preload audio when position changes
   useEffect(() => {
-    if (filteredPosition && pois.length > 0 && !hasPreloadedRef.current) {
+    if (filteredPosition && activePOIs.length > 0 && !hasPreloadedRef.current) {
       preloadNearbyAudio(filteredPosition);
       hasPreloadedRef.current = true;
     }
-  }, [filteredPosition, pois, preloadNearbyAudio]);
+  }, [activePOIs.length, filteredPosition, preloadNearbyAudio]);
 
   // Handle POI entry event
   const handlePOIEnter = async (event: { poi: POI; distance: number }) => {
@@ -242,7 +298,12 @@ export default function TourPage() {
 
     await setCooldown(poi.id);
     setVisitedPOIs(prev => new Set([...prev, poi.id]));
-    await logAutoPlay(poi.id, language, undefined, { distance: event.distance });
+    await logAutoPlay(poi.id, language, undefined, {
+      distance: event.distance,
+      ...(selectedTourMetadata && typeof selectedTourMetadata === 'object' && !Array.isArray(selectedTourMetadata)
+        ? selectedTourMetadata as Record<string, Json>
+        : {}),
+    } as Json);
     await saveVisit({
       poi_id: poi.id,
       poi_name: localizedPOI.name,
@@ -256,13 +317,68 @@ export default function TourPage() {
   // Geofencing - detect POI entry
   const { nearbyPOIs } = useGeofencing(
     filteredPosition,
-    pois,
+    activePOIs,
     {
       radius: settings?.geofenceRadius || GEOFENCE_TRIGGER_RADIUS_M,
       enabled: isAutoMode,
       onEnter: handlePOIEnter,
     }
   );
+
+  useEffect(() => {
+    if (!selectedTourId || toursLoading || selectedTour) {
+      return;
+    }
+
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete('tour');
+    const nextUrl = params.toString() ? `/tour?${params.toString()}` : '/tour';
+    router.replace(nextUrl, { scroll: false });
+    const toastTimer = window.setTimeout(() => {
+      showToastMessage(t('tour.invalidSelectedTour'));
+    }, 0);
+
+    return () => {
+      window.clearTimeout(toastTimer);
+    };
+  }, [router, searchParams, selectedTour, selectedTourId, showToastMessage, t, toursLoading]);
+
+  useEffect(() => {
+    if (!selectedPOI) return;
+
+    const isStillVisible = activePOIs.some(poi => poi.id === selectedPOI.id);
+    if (!isStillVisible) {
+      const clearTimer = window.setTimeout(() => {
+        setSelectedPOI(null);
+      }, 0);
+
+      return () => {
+        window.clearTimeout(clearTimer);
+      };
+    }
+  }, [activePOIs, selectedPOI]);
+
+  useEffect(() => {
+    const currentPoiId = audioPlayer.currentItem?.poi.id;
+
+    if (!currentPoiId || !selectedTour) {
+      return;
+    }
+
+    if (selectedTour.poi_ids.includes(currentPoiId)) {
+      return;
+    }
+
+    void audioPlayer.stop();
+    const stopTimer = window.setTimeout(() => {
+      setShowPlayerModal(false);
+      showToastMessage(t('tour.stoppedOutsideSelectedTour'));
+    }, 0);
+
+    return () => {
+      window.clearTimeout(stopTimer);
+    };
+  }, [audioPlayer, selectedTour, showToastMessage, t]);
 
   // Apply noise filter to GPS coordinates
   useEffect(() => {
@@ -284,19 +400,22 @@ export default function TourPage() {
   useEffect(() => {
     return () => {
       const duration = Date.now() - tourStartTime;
-      logTourEnd(language, duration, visitedPOIs.size, filteredPosition || undefined);
+      logTourEnd(language, duration, visitedPOIs.size, filteredPosition || undefined, selectedTourMetadata);
     };
-  }, [language, tourStartTime, visitedPOIs, filteredPosition]);
+  }, [filteredPosition, language, selectedTourMetadata, tourStartTime, visitedPOIs]);
 
   // Handle permission denied
   useEffect(() => {
     if (permissionState === 'denied') {
-      showToastMessage(t('tour.locationDenied'));
+      const toastTimer = window.setTimeout(() => {
+        showToastMessage(t('tour.locationDenied'));
+      }, 0);
       const disableTimer = window.setTimeout(() => {
         setIsAutoMode(false);
       }, 0);
 
       return () => {
+        window.clearTimeout(toastTimer);
         window.clearTimeout(disableTimer);
       };
     }
@@ -314,7 +433,9 @@ export default function TourPage() {
       // Check for insecure origin (common issue on local network testing)
       if (typeof window !== 'undefined' && window.location.protocol === 'http:' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
         console.warn('Geolocation requires a secure context (HTTPS) or localhost.');
-        showToastMessage(t('tour.httpsRequired'));
+        window.setTimeout(() => {
+          showToastMessage(t('tour.httpsRequired'));
+        }, 0);
         return;
       }
 
@@ -322,7 +443,9 @@ export default function TourPage() {
       // 1 = PERMISSION_DENIED (handled by permissionState effect)
       // 3 = TIMEOUT (suppressed per user request as it happens during idle)
       if (errorCode !== 1 && errorCode !== 3) {
-        showToastMessage(t('tour.gpsError', { message: errorMsg }));
+        window.setTimeout(() => {
+          showToastMessage(t('tour.gpsError', { message: errorMsg }));
+        }, 0);
       } else if (errorCode === 3) {
         console.warn(`Geolocation timeout (background/idle): ${errorMsg}`);
       }
@@ -337,7 +460,8 @@ export default function TourPage() {
           audioPlayer.currentItem.poi.id,
           language,
           audioPlayer.currentTime,
-          audioPlayer.duration
+          audioPlayer.duration,
+          selectedTourMetadata,
         );
         audioPlayer.skip();
         return;
@@ -346,7 +470,7 @@ export default function TourPage() {
       const nextTime = Math.min(audioPlayer.duration || 0, audioPlayer.currentTime + 15);
       audioPlayer.seek(nextTime);
     }
-  }, [audioPlayer, language]);
+  }, [audioPlayer, language, selectedTourMetadata]);
 
   // Handle skip previous
   const handleSkipPrevious = useCallback(() => {
@@ -444,10 +568,13 @@ export default function TourPage() {
     setVisitedPOIs(prev => new Set([...prev, poi.id]));
 
     // Log analytics & save visit
-    await logAutoPlay(poi.id, language, undefined, {
+    await logManualPlay(poi.id, language, {
       distance: 0,
       accuracy: accuracy ?? undefined,
-    });
+      ...(selectedTourMetadata && typeof selectedTourMetadata === 'object' && !Array.isArray(selectedTourMetadata)
+        ? selectedTourMetadata as Record<string, Json>
+        : {}),
+    } as Json);
     await saveVisit({
       poi_id: poi.id,
       poi_name: localizedPOI.name,
@@ -456,12 +583,21 @@ export default function TourPage() {
     });
 
     showToastMessage(t('tour.nowPlaying', { name: localizedPOI.name }));
-  }, [accuracy, audioPlayer, language, setVisitedPOIs, showToastMessage, t]);
+  }, [accuracy, audioPlayer, language, selectedTourMetadata, setVisitedPOIs, showToastMessage, t]);
 
   // Handle view POI detail
   const handleViewPOI = useCallback((poi: POI) => {
-    router.push(`/tour/${poi.id}`);
-  }, [router]);
+    const params = new URLSearchParams();
+    if (selectedTourId) {
+      params.set('tour', selectedTourId);
+    }
+
+    const nextUrl = params.toString()
+      ? `/tour/${poi.id}?${params.toString()}`
+      : `/tour/${poi.id}`;
+
+    router.push(nextUrl);
+  }, [router, selectedTourId]);
 
   // Handle tab change
   const handleTabChange = useCallback((tab: NavTab) => {
@@ -605,69 +741,71 @@ export default function TourPage() {
         </div>
       </div>
       {/* Main Content Area */}
-      <div className="flex-1 relative overflow-hidden pt-16 pb-16">
-        {/* Map View */}
-        {activeTab === 'map' && (
-          <>
-            <InteractiveMap
-              userLocation={filteredPosition}
-              heading={heading}
-              accuracy={accuracy}
-              pois={pois}
-              selectedPOI={selectedPOI}
-              onSelectPOI={handleSelectPOI}
-              onViewPOI={handleViewPOI}
-              onPlayPOI={handlePlayPOI}
-              playingPOIId={audioPlayer.currentItem?.poi.id}
-              isAudioPlaying={audioPlayer.isPlaying}
-
-            />
-
-            {/* Auto/Manual Mode Toggle */}
-
-
-            {/* Offline Mode Indicator */}
-            {/* Offline Banner below header if needed, but the indicator handles it. 
-                  Removing extra centralized banner to clean up UI 
-              */}
-          </>
-        )}
-
-        {/* List View */}
-        {activeTab === 'list' && (
-          <POIListView
-            pois={pois}
-            userLocation={filteredPosition}
-            onPlayPOI={handlePlayPOI}
-            onViewPOI={handleViewPOI}
-            playingPOIId={audioPlayer.currentItem?.poi.id}
-            isOfflineReady={isOfflineReady || offlineSyncReady}
+      <div className="flex-1 overflow-hidden pt-16 pb-16">
+        <div className="flex h-full flex-col">
+          <TourSelector
+            tours={tours}
+            selectedTourId={selectedTourId}
+            onSelectTour={handleSelectTour}
+            filteredPOICount={activePOIs.length}
+            totalPOICount={pois.length}
+            isLoading={toursLoading}
           />
-        )}
 
-        {/* Loading Overlay */}
-        {poisLoading && (
-          <div className="absolute inset-0 z-40 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-            <div className="flex flex-col items-center gap-3 text-white">
-              <span className="material-symbols-outlined text-5xl animate-spin">sync</span>
-              <p className="text-lg font-medium">{t('tour.loadingPOIs')}</p>
-            </div>
-          </div>
-        )}
+          <div className="relative flex-1 overflow-hidden">
+            {/* Map View */}
+            {activeTab === 'map' && (
+              <InteractiveMap
+                userLocation={filteredPosition}
+                heading={heading}
+                accuracy={accuracy}
+                pois={activePOIs}
+                selectedPOI={selectedPOI}
+                onSelectPOI={handleSelectPOI}
+                onViewPOI={handleViewPOI}
+                onPlayPOI={handlePlayPOI}
+                playingPOIId={audioPlayer.currentItem?.poi.id}
+                isAudioPlaying={audioPlayer.isPlaying}
+              />
+            )}
 
-        {/* Narration Overlay (Mini Player) */}
-        {audioPlayer.currentItem && !showPlayerModal && (
-          <div className="absolute bottom-0 left-0 right-0 z-40 px-4 pb-20">
-            <NarrationOverlay
-              currentPOI={audioPlayer.currentItem.poi}
-              distance={nearbyPOIs.find(p => p.id === audioPlayer.currentItem?.poi.id)?.distance}
-              isPlaying={audioPlayer.isPlaying}
-              currentTime={audioPlayer.currentTime}
-              duration={audioPlayer.duration}
-              onExpand={() => setShowPlayerModal(true)}
-            />
+            {/* List View */}
+            {activeTab === 'list' && (
+              <POIListView
+                pois={activePOIs}
+                userLocation={filteredPosition}
+                onPlayPOI={handlePlayPOI}
+                onViewPOI={handleViewPOI}
+                playingPOIId={audioPlayer.currentItem?.poi.id}
+                isOfflineReady={isOfflineReady || offlineSyncReady}
+              />
+            )}
+
+            {/* Loading Overlay */}
+            {poisLoading && (
+              <div className="absolute inset-0 z-40 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+                <div className="flex flex-col items-center gap-3 text-white">
+                  <span className="material-symbols-outlined text-5xl animate-spin">sync</span>
+                  <p className="text-lg font-medium">{t('tour.loadingPOIs')}</p>
+                </div>
+              </div>
+            )}
+
+            {/* Narration Overlay (Mini Player) */}
+            {audioPlayer.currentItem && !showPlayerModal && (
+              <div className="absolute bottom-0 left-0 right-0 z-40 px-4 pb-20">
+                <NarrationOverlay
+                  currentPOI={audioPlayer.currentItem.poi}
+                  distance={nearbyPOIs.find(p => p.id === audioPlayer.currentItem?.poi.id)?.distance}
+                  isPlaying={audioPlayer.isPlaying}
+                  currentTime={audioPlayer.currentTime}
+                  duration={audioPlayer.duration}
+                  onExpand={() => setShowPlayerModal(true)}
+                />
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
 
       {/* Full Audio Player Modal */}
@@ -732,9 +870,9 @@ export default function TourPage() {
       )}
 
       {/* Audio Preload Indicator */}
-      {pois.length > 0 && shouldPreloadOffline && (
+      {activePOIs.length > 0 && shouldPreloadOffline && (
         <AudioPreloadIndicator
-          pois={pois}
+          pois={activePOIs}
           language={language}
           currentPosition={filteredPosition || undefined}
           preloadRadius={5000} // Tải hết tất cả POIs
@@ -752,7 +890,7 @@ export default function TourPage() {
         isOpen={showOfflinePrompt}
         onAccept={handleOfflineAccept}
         onDecline={handleOfflineDecline}
-        poisCount={pois.length}
+        poisCount={activePOIs.length}
         estimatedSize={estimatedSize}
       />
 

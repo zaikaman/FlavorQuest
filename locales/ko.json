@@ -102,7 +102,22 @@
     "locationDenied": "위치 권한이 거부되었습니다. 수동 모드로 전환합니다.",
     "httpsRequired": "오류: GPS에는 HTTPS가 필요합니다. localhost 또는 SSL을 사용하세요.",
     "gpsError": "GPS 오류: {message}",
-    "noAudioForPOI": "이 장소의 오디오가 없습니다"
+    "noAudioForPOI": "이 장소의 오디오가 없습니다",
+    "invalidSelectedTour": "선택한 투어를 더 이상 사용할 수 없습니다",
+    "stoppedOutsideSelectedTour": "선택한 투어에 없는 POI라서 오디오를 중지했습니다"
+  },
+  "tourSelector": {
+    "title": "투어별 듣기",
+    "subtitle": "투어를 선택하면 해당 일정에 포함된 POI만 표시됩니다",
+    "allOption": "모든 장소",
+    "allDescription": "활성화된 모든 POI 표시",
+    "clear": "해제",
+    "loading": "투어 불러오는 중...",
+    "empty": "현재 이용 가능한 투어가 없습니다.",
+    "poiCount": "POI {count}개",
+    "duration": "약 {count}분",
+    "selectedSummary": "선택한 투어의 POI {count}개 표시 중",
+    "allSummary": "활성 POI {count}개 표시 중"
   },
   "audio": {
     "play": "재생",

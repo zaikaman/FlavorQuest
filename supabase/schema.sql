@@ -13,6 +13,7 @@ CREATE TABLE public.analytics_logs (
   completed boolean,
   timestamp timestamp with time zone NOT NULL DEFAULT now(),
   user_agent text,
+  metadata jsonb,
   CONSTRAINT analytics_logs_pkey PRIMARY KEY (id),
   CONSTRAINT analytics_logs_poi_id_fkey FOREIGN KEY (poi_id) REFERENCES public.pois(id)
 );
@@ -115,15 +116,39 @@ CREATE TABLE public.preorder_orders (
   customer_name text,
   customer_phone text,
   note text,
-  pickup_time timestamp with time zone,
+  pickup_time timestamp with time zone CHECK (pickup_time IS NULL OR pickup_time > now()) NOT VALI),
   status character varying NOT NULL DEFAULT 'pending'::character varying CHECK (status::text = ANY (ARRAY['pending'::character varying, 'confirmed'::character varying, 'preparing'::character varying, 'ready'::character varying, 'cancelled'::character varying]::text[])),
   total_amount numeric NOT NULL DEFAULT 0 CHECK (total_amount >= 0::numeric),
   created_at timestamp with time zone NOT NULL DEFAULT now(),
   updated_at timestamp with time zone NOT NULL DEFAULT now(),
-  CONSTRAINT preorder_orders_pickup_time_future_check CHECK (pickup_time IS NULL OR pickup_time > now()),
   CONSTRAINT preorder_orders_pkey PRIMARY KEY (id),
   CONSTRAINT preorder_orders_poi_id_fkey FOREIGN KEY (poi_id) REFERENCES public.pois(id),
   CONSTRAINT preorder_orders_customer_id_fkey FOREIGN KEY (customer_id) REFERENCES public.users(id)
+);
+CREATE TABLE public.tours (
+  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  name_vi text NOT NULL,
+  name_en text,
+  name_ja text,
+  name_fr text,
+  name_ko text,
+  name_zh text,
+  description_vi text,
+  description_en text,
+  description_ja text,
+  description_fr text,
+  description_ko text,
+  description_zh text,
+  poi_ids ARRAY NOT NULL DEFAULT ARRAY[]::uuid[] CHECK (cardinality(poi_ids) > 0),
+  is_active boolean NOT NULL DEFAULT true,
+  created_by uuid,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  updated_at timestamp with time zone NOT NULL DEFAULT now(),
+  deleted_at timestamp with time zone,
+  cover_image_url text,
+  estimated_duration_min integer CHECK (estimated_duration_min IS NULL OR estimated_duration_min >= 1 AND estimated_duration_min <= 1440),
+  CONSTRAINT tours_pkey PRIMARY KEY (id),
+  CONSTRAINT tours_created_by_fkey FOREIGN KEY (created_by) REFERENCES public.users(id)
 );
 CREATE TABLE public.users (
   id uuid NOT NULL,

@@ -136,10 +136,89 @@ export interface Database {
           }
         ];
       };
+      tours: {
+        Row: {
+          id: string;
+          name_vi: string;
+          name_en: string | null;
+          name_ja: string | null;
+          name_fr: string | null;
+          name_ko: string | null;
+          name_zh: string | null;
+          description_vi: string | null;
+          description_en: string | null;
+          description_ja: string | null;
+          description_fr: string | null;
+          description_ko: string | null;
+          description_zh: string | null;
+          cover_image_url: string | null;
+          estimated_duration_min: number | null;
+          poi_ids: string[];
+          is_active: boolean;
+          created_by: string | null;
+          created_at: string;
+          updated_at: string;
+          deleted_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          name_vi: string;
+          name_en?: string | null;
+          name_ja?: string | null;
+          name_fr?: string | null;
+          name_ko?: string | null;
+          name_zh?: string | null;
+          description_vi?: string | null;
+          description_en?: string | null;
+          description_ja?: string | null;
+          description_fr?: string | null;
+          description_ko?: string | null;
+          description_zh?: string | null;
+          cover_image_url?: string | null;
+          estimated_duration_min?: number | null;
+          poi_ids?: string[];
+          is_active?: boolean;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+          deleted_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          name_vi?: string;
+          name_en?: string | null;
+          name_ja?: string | null;
+          name_fr?: string | null;
+          name_ko?: string | null;
+          name_zh?: string | null;
+          description_vi?: string | null;
+          description_en?: string | null;
+          description_ja?: string | null;
+          description_fr?: string | null;
+          description_ko?: string | null;
+          description_zh?: string | null;
+          cover_image_url?: string | null;
+          estimated_duration_min?: number | null;
+          poi_ids?: string[];
+          is_active?: boolean;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+          deleted_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'tours_created_by_fkey';
+            columns: ['created_by'];
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          }
+        ];
+      };
       analytics_logs: {
         Row: {
           id: string;
-          created_at: string;
+          timestamp: string;
           event_type: 'tour_start' | 'tour_end' | 'auto_play' | 'manual_play' | 'skip' | 'settings_change';
           poi_id: string | null;
           language: string | null;
@@ -151,7 +230,7 @@ export interface Database {
         };
         Insert: {
           id?: string;
-          created_at?: string;
+          timestamp?: string;
           event_type: 'tour_start' | 'tour_end' | 'auto_play' | 'manual_play' | 'skip' | 'settings_change';
           poi_id?: string | null;
           language?: string | null;
@@ -163,7 +242,7 @@ export interface Database {
         };
         Update: {
           id?: string;
-          created_at?: string;
+          timestamp?: string;
           event_type?: 'tour_start' | 'tour_end' | 'auto_play' | 'manual_play' | 'skip' | 'settings_change';
           poi_id?: string | null;
           language?: string | null;

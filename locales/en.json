@@ -85,7 +85,22 @@
     "locationDenied": "Location denied. Switching to manual mode.",
     "httpsRequired": "Error: GPS requires HTTPS. Please use localhost or install SSL.",
     "gpsError": "GPS Error: {message}",
-    "noAudioForPOI": "No audio available for this location"
+    "noAudioForPOI": "No audio available for this location",
+    "invalidSelectedTour": "The selected tour is no longer available",
+    "stoppedOutsideSelectedTour": "Audio stopped because this POI is outside the selected tour"
+  },
+  "tourSelector": {
+    "title": "Listen by tour",
+    "subtitle": "Choose a tour to show only the POIs in that itinerary",
+    "allOption": "All locations",
+    "allDescription": "Show every active POI",
+    "clear": "Clear",
+    "loading": "Loading tours...",
+    "empty": "No tour is available right now.",
+    "poiCount": "{count} POIs",
+    "duration": "{count} min",
+    "selectedSummary": "Showing {count} POIs from the selected tour",
+    "allSummary": "Showing {count} active POIs"
   },
   "audio": {
     "play": "Play",

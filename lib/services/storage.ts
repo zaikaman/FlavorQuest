@@ -6,6 +6,7 @@
  * 
  * Storage Keys:
  * - 'pois': Cached POI data từ Supabase
+ * - 'tours': Cached tour data từ Supabase
  * - 'user-settings': User preferences (language, volume, auto-mode, etc.)
  * - 'visit-history': List of visited POIs with timestamps
  * - 'cooldown-tracker': Last played timestamp per POI
@@ -16,13 +17,14 @@
  */
 
 import { get, set, del, clear, keys } from 'idb-keyval';
-import type { POI, UserSettings, VisitHistoryEntry, CooldownRecord, AnalyticsLog } from '@/lib/types/index';
+import type { POI, Tour, UserSettings, VisitHistoryEntry, CooldownRecord, AnalyticsLog } from '@/lib/types/index';
 
 /**
  * Storage Keys
  */
 export const STORAGE_KEYS = {
   POIS: 'pois',
+  TOURS: 'tours',
   USER_SETTINGS: 'user-settings',
   VISIT_HISTORY: 'visit-history',
   COOLDOWN_TRACKER: 'cooldown-tracker',
@@ -62,6 +64,23 @@ export async function loadPOIs(): Promise<POI[]> {
  */
 export async function clearPOIs(): Promise<void> {
   await del(STORAGE_KEYS.POIS);
+}
+
+// ========================================
+// Tours Storage
+// ========================================
+
+export async function saveTours(tours: Tour[]): Promise<void> {
+  await set(STORAGE_KEYS.TOURS, tours);
+}
+
+export async function loadTours(): Promise<Tour[]> {
+  const tours = await get<Tour[]>(STORAGE_KEYS.TOURS);
+  return tours ?? [];
+}
+
+export async function clearTours(): Promise<void> {
+  await del(STORAGE_KEYS.TOURS);
 }
 
 // ========================================

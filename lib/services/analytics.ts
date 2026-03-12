@@ -29,7 +29,7 @@ type AnalyticsDbEvent = {
   rounded_lat?: number;
   rounded_lng?: number;
   session_id?: string;
-  timestamp: string;
+  timestamp?: string;
   user_agent?: string;
   listen_duration?: number;
   completed?: boolean;
@@ -104,9 +104,8 @@ export async function logEvent(event: AnalyticsEventBase, coordinates?: Coordina
   }
 
   // Transform event to match database schema
-  // Metadata is not a column, so we map specific fields to columns
   const { metadata, ...rest } = analyticsEvent;
-  const dbEvent: AnalyticsDbEvent = { ...rest };
+  const dbEvent: AnalyticsDbEvent = { ...rest, metadata };
 
   if (metadata && typeof metadata === 'object' && !Array.isArray(metadata)) {
     const meta = metadata as AnalyticsMetadata;
@@ -127,11 +126,6 @@ export async function logEvent(event: AnalyticsEventBase, coordinates?: Coordina
       dbEvent.completed = meta.completion_percent > 95;
     }
 
-    // For tour_end, we might want to store duration elsewhere, 
-    // but the schema doesn't seem to have a generic duration column other than listen_duration.
-    // If it's a tour_end event, listen_duration might be used for tour duration?
-    // The comment says "Audio listen duration", so maybe not suitable for tour duration.
-    // However, to avoid errors, we just won't try to insert unknown fields.
   }
 
   try {
@@ -183,6 +177,22 @@ export async function logTourStart(language: Language, coordinates?: Coordinates
   }, coordinates);
 }
 
+export async function logTourStartWithMetadata(
+  language: Language,
+  metadata?: Json,
+  coordinates?: Coordinates,
+): Promise<void> {
+  return logEvent({
+    event_type: 'tour_start',
+    language,
+    metadata: {
+      user_agent: typeof navigator !== 'undefined' ? navigator.userAgent : '',
+      screen_size: typeof window !== 'undefined' ? `${window.screen.width}x${window.screen.height}` : '',
+      ...(metadata && typeof metadata === 'object' && !Array.isArray(metadata) ? metadata as Record<string, Json> : {}),
+    } as Json,
+  }, coordinates);
+}
+
 /**
  * Log auto play event
  */
@@ -223,7 +233,8 @@ export async function logSkip(
   poiId: string,
   language: Language,
   playedDuration: number,
-  totalDuration: number
+  totalDuration: number,
+  metadata?: Json,
 ): Promise<void> {
   return logEvent({
     event_type: 'skip',
@@ -233,6 +244,7 @@ export async function logSkip(
       played_duration: playedDuration,
       total_duration: totalDuration,
       completion_percent: Math.round((playedDuration / totalDuration) * 100),
+      ...(metadata && typeof metadata === 'object' && !Array.isArray(metadata) ? metadata as Record<string, Json> : {}),
     } as Json,
   });
 }
@@ -244,7 +256,8 @@ export async function logTourEnd(
   language: Language,
   duration: number,
   poisVisited: number,
-  coordinates?: Coordinates
+  coordinates?: Coordinates,
+  metadata?: Json,
 ): Promise<void> {
   return logEvent({
     event_type: 'tour_end',
@@ -252,6 +265,7 @@ export async function logTourEnd(
     metadata: {
       duration,
       pois_visited: poisVisited,
+      ...(metadata && typeof metadata === 'object' && !Array.isArray(metadata) ? metadata as Record<string, Json> : {}),
     } as Json,
   }, coordinates);
 }
