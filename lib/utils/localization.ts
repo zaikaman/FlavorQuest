@@ -9,7 +9,7 @@
  * - Type-safe với POI type
  */
 
-import type { POI, Language, LocalizedPOI } from '@/lib/types/index';
+import type { POI, Tour, Language, LocalizedPOI, LocalizedTour } from '@/lib/types/index';
 
 /**
  * Get localized POI name
@@ -152,4 +152,38 @@ export function getTranslationCompleteness(poi: POI): number {
   const completed = languages.filter((lang) => hasTranslation(poi, lang)).length;
 
   return Math.round((completed / languages.length) * 100);
+}
+
+export function getLocalizedTourName(tour: Tour, language: Language): string {
+  const key = `name_${language}` as keyof Tour;
+  const name = tour[key];
+
+  if (typeof name === 'string' && name.length > 0) {
+    return name;
+  }
+
+  return tour.name_vi;
+}
+
+export function getLocalizedTourDescription(tour: Tour, language: Language): string {
+  const key = `description_${language}` as keyof Tour;
+  const description = tour[key];
+
+  if (typeof description === 'string' && description.length > 0) {
+    return description;
+  }
+
+  return tour.description_vi ?? '';
+}
+
+export function getLocalizedTour(tour: Tour, language: Language): LocalizedTour {
+  return {
+    id: tour.id,
+    name: getLocalizedTourName(tour, language),
+    description: getLocalizedTourDescription(tour, language),
+    cover_image_url: tour.cover_image_url,
+    estimated_duration_min: tour.estimated_duration_min,
+    poi_ids: tour.poi_ids,
+    is_active: tour.is_active,
+  };
 }

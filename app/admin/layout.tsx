@@ -23,6 +23,7 @@ export default function AdminLayout({
   const navItems = [
     { href: '/admin', label: 'Dashboard' },
     { href: '/admin/pois', label: 'POI' },
+    { href: '/admin/tours', label: 'Tours' },
     { href: '/admin/analytics', label: 'Analytics' },
     { href: '/admin/payments', label: 'Thanh toán' },
   ];

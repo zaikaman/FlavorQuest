@@ -12,6 +12,7 @@ import { createClient } from '@/lib/supabase/client';
 interface DashboardStats {
   totalPOIs: number;
   activePOIs: number;
+  totalTours: number;
   totalPlays: number;
   uniqueVisitors: number;
 }
@@ -25,6 +26,7 @@ export default function AdminDashboard() {
   const [stats, setStats] = useState<DashboardStats>({
     totalPOIs: 0,
     activePOIs: 0,
+    totalTours: 0,
     totalPlays: 0,
     uniqueVisitors: 0,
   });
@@ -45,6 +47,11 @@ export default function AdminDashboard() {
 
       const { count: activePOIs } = await supabase
         .from('pois')
+        .select('*', { count: 'exact', head: true })
+        .is('deleted_at', null);
+
+      const { count: totalTours } = await supabase
+        .from('tours')
         .select('*', { count: 'exact', head: true })
         .is('deleted_at', null);
 
@@ -70,6 +77,7 @@ export default function AdminDashboard() {
       setStats({
         totalPOIs: totalPOIs || 0,
         activePOIs: activePOIs || 0,
+        totalTours: totalTours || 0,
         totalPlays: totalPlays || 0,
         uniqueVisitors,
       });
@@ -89,7 +97,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
         {/* Total POIs */}
         <div className="bg-[#2c1e16] rounded-xl shadow-lg border border-white/5 p-6 relative overflow-hidden group hover:border-primary/30 transition-colors">
           <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
@@ -140,6 +148,21 @@ export default function AdminDashboard() {
           <p className="text-3xl font-bold text-white relative z-10">{isLoading ? '...' : stats.totalPlays}</p>
         </div>
 
+        <div className="bg-[#2c1e16] rounded-xl shadow-lg border border-white/5 p-6 relative overflow-hidden group hover:border-primary/30 transition-colors">
+          <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+            <span className="material-symbols-outlined text-6xl text-amber-500">route</span>
+          </div>
+          <div className="flex items-center justify-between mb-4 relative z-10">
+            <div className="p-3 bg-amber-500/20 rounded-lg border border-amber-500/30">
+              <svg className="w-6 h-6 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 01.553-.894L9 2m0 18l6-2m-6 2V2m6 16l5.447 2.724A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 14V4m-6-2l6 2" />
+              </svg>
+            </div>
+          </div>
+          <p className="text-sm text-gray-400 mb-1 relative z-10">Tổng tour</p>
+          <p className="text-3xl font-bold text-white relative z-10">{isLoading ? '...' : stats.totalTours}</p>
+        </div>
+
         {/* Unique Visitors */}
         <div className="bg-[#2c1e16] rounded-xl shadow-lg border border-white/5 p-6 relative overflow-hidden group hover:border-primary/30 transition-colors">
           <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
@@ -160,7 +183,7 @@ export default function AdminDashboard() {
       {/* Quick Actions */}
       <div>
         <h3 className="text-lg font-bold text-white mb-4">Thao tác nhanh</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
           {/* Manage POIs */}
           <button
             onClick={() => router.push('/admin/pois')}
@@ -207,6 +230,21 @@ export default function AdminDashboard() {
             <div>
               <h4 className="font-semibold text-white mb-1 group-hover:text-purple-500 transition-colors">Xem Analytics</h4>
               <p className="text-sm text-gray-400">Thống kê sử dụng</p>
+            </div>
+          </button>
+
+          <button
+            onClick={() => router.push('/admin/tours')}
+            className="flex items-center gap-4 p-6 bg-[#2c1e16] rounded-xl shadow-lg border border-white/5 hover:border-amber-500/50 hover:bg-[#3bf1f0d] transition-all duration-200 text-left group"
+          >
+            <div className="p-3 bg-amber-500/10 rounded-lg group-hover:bg-amber-500/20 transition-colors">
+              <svg className="w-6 h-6 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 01.553-.894L9 2m0 18l6-2m-6 2V2m6 16l5.447 2.724A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 14V4m-6-2l6 2" />
+              </svg>
+            </div>
+            <div>
+              <h4 className="font-semibold text-white mb-1 group-hover:text-amber-400 transition-colors">Quản lý tour</h4>
+              <p className="text-sm text-gray-400">Tạo lịch trình và sắp xếp POI</p>
             </div>
           </button>
 

@@ -102,7 +102,22 @@
     "locationDenied": "位置情報が拒否されました。手動モードに切り替えます。",
     "httpsRequired": "エラー: GPSにはHTTPSが必要です。localhostまたはSSLを使用してください。",
     "gpsError": "GPSエラー: {message}",
-    "noAudioForPOI": "この場所の音声はありません"
+    "noAudioForPOI": "この場所の音声はありません",
+    "invalidSelectedTour": "選択したツアーは現在利用できません",
+    "stoppedOutsideSelectedTour": "選択中のツアーに含まれていないため音声を停止しました"
+  },
+  "tourSelector": {
+    "title": "ツアーで聞く",
+    "subtitle": "ツアーを選ぶと、その行程に含まれるPOIのみ表示します",
+    "allOption": "すべてのスポット",
+    "allDescription": "公開中のPOIをすべて表示",
+    "clear": "解除",
+    "loading": "ツアーを読み込み中...",
+    "empty": "現在利用できるツアーはありません。",
+    "poiCount": "{count}件のPOI",
+    "duration": "約{count}分",
+    "selectedSummary": "選択中のツアーから {count} 件のPOIを表示中",
+    "allSummary": "公開中のPOIを {count} 件表示中"
   },
   "audio": {
     "play": "再生",

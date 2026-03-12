@@ -1,0 +1,154 @@
+'use client';
+
+import Image from 'next/image';
+import { useMemo } from 'react';
+import { useLanguage } from '@/lib/contexts/LanguageContext';
+import { useTranslations } from '@/lib/hooks/useTranslations';
+import { getLocalizedTour } from '@/lib/utils/localization';
+import type { Tour } from '@/lib/types/index';
+
+interface TourSelectorProps {
+  tours: Tour[];
+  selectedTourId: string | null;
+  onSelectTour: (tourId: string | null) => void;
+  filteredPOICount: number;
+  totalPOICount: number;
+  isLoading?: boolean;
+}
+
+export function TourSelector({
+  tours,
+  selectedTourId,
+  onSelectTour,
+  filteredPOICount,
+  totalPOICount,
+  isLoading = false,
+}: TourSelectorProps) {
+  const { language } = useLanguage();
+  const { t } = useTranslations();
+
+  const selectedTour = useMemo(
+    () => tours.find(tour => tour.id === selectedTourId) ?? null,
+    [selectedTourId, tours]
+  );
+
+  const localizedTours = useMemo(
+    () => tours.map(tour => ({ ...tour, localized: getLocalizedTour(tour, language) })),
+    [language, tours]
+  );
+
+  return (
+    <div className="px-4 pb-3 pt-2">
+      <div className="rounded-2xl border border-white/10 bg-black/25 p-4 backdrop-blur-md shadow-lg">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <p className="text-sm font-semibold text-white">{t('tourSelector.title')}</p>
+            <p className="mt-1 text-xs text-white/60">{t('tourSelector.subtitle')}</p>
+          </div>
+          {selectedTour && (
+            <button
+              onClick={() => onSelectTour(null)}
+              className="rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary"
+            >
+              {t('tourSelector.clear')}
+            </button>
+          )}
+        </div>
+
+        <div className="mt-3 rounded-xl bg-white/5 px-3 py-2 text-xs text-white/70">
+          {selectedTour
+            ? t('tourSelector.selectedSummary', { count: String(filteredPOICount) })
+            : t('tourSelector.allSummary', { count: String(totalPOICount) })}
+        </div>
+
+        <div className="mt-3 flex gap-3 overflow-x-auto pb-1 scrollbar-hide">
+          <button
+            onClick={() => onSelectTour(null)}
+            className={`min-w-[220px] shrink-0 rounded-2xl border p-4 text-left transition-colors ${
+              !selectedTourId
+                ? 'border-primary bg-primary/15 text-white'
+                : 'border-white/10 bg-white/5 text-white/80 hover:bg-white/10'
+            }`}
+          >
+            <div className="flex items-center justify-between gap-3">
+              <p className="font-semibold">{t('tourSelector.allOption')}</p>
+              <span className="rounded-full bg-black/30 px-2 py-1 text-[11px] font-semibold text-primary">
+                {t('tourSelector.poiCount', { count: String(totalPOICount) })}
+              </span>
+            </div>
+            <p className="mt-2 text-sm text-white/60">{t('tourSelector.allDescription')}</p>
+          </button>
+
+          {localizedTours.map(tour => {
+            const isSelected = selectedTourId === tour.id;
+
+            return (
+              <button
+                key={tour.id}
+                onClick={() => onSelectTour(tour.id)}
+                className={`min-w-[260px] shrink-0 overflow-hidden rounded-2xl border text-left transition-colors ${
+                  isSelected
+                    ? 'border-primary bg-primary/15 text-white'
+                    : 'border-white/10 bg-white/5 text-white/80 hover:bg-white/10'
+                }`}
+              >
+                <div className="relative aspect-[16/9] w-full bg-[#2c1e16]">
+                  {tour.localized.cover_image_url ? (
+                    <Image
+                      src={tour.localized.cover_image_url}
+                      alt={tour.localized.name}
+                      fill
+                      unoptimized
+                      className="object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/20 to-[#2c1e16] text-primary/60">
+                      <span className="material-symbols-outlined text-5xl">route</span>
+                    </div>
+                  )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                  <div className="absolute bottom-3 left-3 right-3 flex items-end justify-between gap-3">
+                    <p className="line-clamp-2 font-semibold text-white">{tour.localized.name}</p>
+                    <span className={`shrink-0 rounded-full px-2 py-1 text-[11px] font-semibold ${isSelected ? 'bg-primary/20 text-primary' : 'bg-black/40 text-white/80'}`}>
+                      {t('tourSelector.poiCount', { count: String(tour.poi_ids.length) })}
+                    </span>
+                  </div>
+                </div>
+                <div className="p-4">
+                  <div className="flex flex-wrap items-center gap-2 text-xs text-white/60">
+                    {typeof tour.localized.estimated_duration_min === 'number' && tour.localized.estimated_duration_min > 0 && (
+                      <span className="rounded-full bg-white/5 px-2.5 py-1">
+                        {t('tourSelector.duration', { count: String(tour.localized.estimated_duration_min) })}
+                      </span>
+                    )}
+                  </div>
+                  {tour.localized.description && (
+                    <p className="mt-3 line-clamp-2 text-sm text-white/60">{tour.localized.description}</p>
+                  )}
+                </div>
+              </button>
+            );
+          })}
+        </div>
+
+        {!isLoading && tours.length === 0 && (
+          <p className="mt-3 text-sm text-white/60">{t('tourSelector.empty')}</p>
+        )}
+
+        {isLoading && tours.length === 0 && (
+          <p className="mt-3 text-sm text-white/60">{t('tourSelector.loading')}</p>
+        )}
+      </div>
+
+      <style jsx>{`
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;
+        }
+        .scrollbar-hide {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+      `}</style>
+    </div>
+  );
+}

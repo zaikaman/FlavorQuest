@@ -140,6 +140,59 @@ export interface POIPayload {
   owner_id?: string | null;
 }
 
+export interface Tour {
+  id: string;
+  name_vi: string;
+  name_en?: string | null;
+  name_ja?: string | null;
+  name_fr?: string | null;
+  name_ko?: string | null;
+  name_zh?: string | null;
+  description_vi?: string | null;
+  description_en?: string | null;
+  description_ja?: string | null;
+  description_fr?: string | null;
+  description_ko?: string | null;
+  description_zh?: string | null;
+  cover_image_url?: string | null;
+  estimated_duration_min?: number | null;
+  poi_ids: string[];
+  is_active: boolean;
+  created_by?: string | null;
+  created_at: string;
+  updated_at: string;
+  deleted_at?: string | null;
+}
+
+export interface LocalizedTour {
+  id: string;
+  name: string;
+  description: string;
+  cover_image_url?: string | null;
+  estimated_duration_min?: number | null;
+  poi_ids: string[];
+  is_active: boolean;
+}
+
+export interface TourPayload {
+  name_vi: string;
+  name_en?: string | null;
+  name_ja?: string | null;
+  name_fr?: string | null;
+  name_ko?: string | null;
+  name_zh?: string | null;
+  description_vi?: string | null;
+  description_en?: string | null;
+  description_ja?: string | null;
+  description_fr?: string | null;
+  description_ko?: string | null;
+  description_zh?: string | null;
+  cover_image_url?: string | null;
+  estimated_duration_min?: number | null;
+  poi_ids: string[];
+  is_active?: boolean;
+}
+
 export interface Dish {
   id: string;
   poi_id: string;
@@ -300,6 +353,7 @@ export interface AnalyticsLog {
   completed?: boolean;
   timestamp: string;
   user_agent?: string;
+  metadata?: import('@/lib/types/database.types').Json;
 }
 
 /**
@@ -315,6 +369,7 @@ export interface AnalyticsPayload {
   listen_duration?: number;
   completed?: boolean;
   user_agent?: string;
+  metadata?: import('@/lib/types/database.types').Json;
 }
 
 /**

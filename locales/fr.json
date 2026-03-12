@@ -85,7 +85,22 @@
     "locationDenied": "Localisation refusée. Passage en mode manuel.",
     "httpsRequired": "Erreur : le GPS nécessite HTTPS. Utilisez localhost ou installez SSL.",
     "gpsError": "Erreur GPS : {message}",
-    "noAudioForPOI": "Aucun audio disponible pour ce lieu"
+    "noAudioForPOI": "Aucun audio disponible pour ce lieu",
+    "invalidSelectedTour": "Le circuit sélectionné n'est plus disponible",
+    "stoppedOutsideSelectedTour": "L'audio a été arrêté car ce POI n'appartient pas au circuit sélectionné"
+  },
+  "tourSelector": {
+    "title": "Écouter par circuit",
+    "subtitle": "Choisissez un circuit pour n'afficher que les POI de cet itinéraire",
+    "allOption": "Tous les lieux",
+    "allDescription": "Afficher tous les POI actifs",
+    "clear": "Réinitialiser",
+    "loading": "Chargement des circuits...",
+    "empty": "Aucun circuit n'est disponible pour le moment.",
+    "poiCount": "{count} POI",
+    "duration": "{count} min",
+    "selectedSummary": "Affichage de {count} POI du circuit sélectionné",
+    "allSummary": "Affichage de {count} POI actifs"
   },
   "audio": {
     "play": "Lecture",

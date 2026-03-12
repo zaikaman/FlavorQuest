@@ -102,7 +102,22 @@
     "locationDenied": "位置权限被拒绝。切换到手动模式。",
     "httpsRequired": "错误：GPS 需要 HTTPS。请使用 localhost 或安装 SSL。",
     "gpsError": "GPS 错误：{message}",
-    "noAudioForPOI": "此位置没有音频"
+    "noAudioForPOI": "此位置没有音频",
+    "invalidSelectedTour": "所选导览已不可用",
+    "stoppedOutsideSelectedTour": "该 POI 不在当前所选导览中，音频已停止"
+  },
+  "tourSelector": {
+    "title": "按导览收听",
+    "subtitle": "选择导览后，只显示该路线包含的 POI",
+    "allOption": "全部地点",
+    "allDescription": "显示所有启用中的 POI",
+    "clear": "清除",
+    "loading": "正在加载导览...",
+    "empty": "当前没有可用导览。",
+    "poiCount": "{count} 个 POI",
+    "duration": "约 {count} 分钟",
+    "selectedSummary": "正在显示所选导览的 {count} 个 POI",
+    "allSummary": "正在显示 {count} 个启用中的 POI"
   },
   "audio": {
     "play": "播放",

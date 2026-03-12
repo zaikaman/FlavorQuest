@@ -7,17 +7,18 @@
 
 import Image from 'next/image';
 import { useState, useEffect, useCallback } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { useLanguage } from '@/lib/contexts/LanguageContext';
 import { useTranslations } from '@/lib/hooks/useTranslations';
 import { useAuth } from '@/lib/contexts/AuthContext';
 import { useAudioPlayer } from '@/lib/hooks/useAudioPlayer';
 import { usePOIManager } from '@/lib/hooks/usePOIManager';
 import { getLocalizedPOI } from '@/lib/utils/localization';
-import { logAutoPlay } from '@/lib/services/analytics';
+import { logManualPlay } from '@/lib/services/analytics';
 import { saveVisit } from '@/lib/services/storage';
 import { Spinner } from '@/components/ui/Spinner';
 import { Toast } from '@/components/ui/Toast';
+import type { Json } from '@/lib/types/database.types';
 import type { Dish, POI } from '@/lib/types/index';
 
 function toLocalDateTimeInputValue(date: Date) {
@@ -39,7 +40,9 @@ function isFutureDateTime(value: string) {
 export default function POIDetailPage() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const poiId = params.poiId as string;
+  const selectedTourId = searchParams.get('tour');
   const { language } = useLanguage();
   const { t } = useTranslations();
   const { user } = useAuth();
@@ -110,7 +113,11 @@ export default function POIDetailPage() {
     });
 
     // Log analytics
-    await logAutoPlay(poi.id, language);
+    await logManualPlay(
+      poi.id,
+      language,
+      (selectedTourId ? { tour_id: selectedTourId } : undefined) as Json | undefined,
+    );
     
     // Save visit
     await saveVisit({
