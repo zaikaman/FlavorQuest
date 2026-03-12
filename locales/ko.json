@@ -109,6 +109,9 @@
   "tourSelector": {
     "title": "투어별 듣기",
     "subtitle": "투어를 선택하면 해당 일정에 포함된 POI만 표시됩니다",
+    "show": "펼치기",
+    "hide": "접기",
+    "collapsedHint": "펼치면 투어를 빠르게 선택하거나 변경할 수 있습니다",
     "allOption": "모든 장소",
     "allDescription": "활성화된 모든 POI 표시",
     "clear": "해제",

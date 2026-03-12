@@ -92,6 +92,9 @@
   "tourSelector": {
     "title": "Nghe theo tour",
     "subtitle": "Chọn một tour để chỉ hiển thị các POI thuộc hành trình đó",
+    "show": "Mở rộng",
+    "hide": "Thu gọn",
+    "collapsedHint": "Nhấn mở rộng để chọn hoặc đổi tour nhanh",
     "allOption": "Tất cả địa điểm",
     "allDescription": "Hiển thị toàn bộ POI đang hoạt động",
     "clear": "Bỏ chọn",
