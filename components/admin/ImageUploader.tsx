@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { useState, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 interface ImageUploaderProps {
     currentImageUrl?: string | null;
@@ -13,6 +13,24 @@ export function ImageUploader({ currentImageUrl, onImageUploaded, folder = 'pois
     const [isUploading, setIsUploading] = useState(false);
     const [preview, setPreview] = useState<string | null>(currentImageUrl || null);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const objectUrlRef = useRef<string | null>(null);
+
+    useEffect(() => {
+        if (objectUrlRef.current) {
+            URL.revokeObjectURL(objectUrlRef.current);
+            objectUrlRef.current = null;
+        }
+
+        setPreview(currentImageUrl || null);
+    }, [currentImageUrl]);
+
+    useEffect(() => {
+        return () => {
+            if (objectUrlRef.current) {
+                URL.revokeObjectURL(objectUrlRef.current);
+            }
+        };
+    }, []);
 
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -20,6 +38,10 @@ export function ImageUploader({ currentImageUrl, onImageUploaded, folder = 'pois
 
         // Preview
         const objectUrl = URL.createObjectURL(file);
+        if (objectUrlRef.current) {
+            URL.revokeObjectURL(objectUrlRef.current);
+        }
+        objectUrlRef.current = objectUrl;
         setPreview(objectUrl);
 
         // Upload
