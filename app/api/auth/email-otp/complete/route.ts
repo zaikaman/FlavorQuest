@@ -96,13 +96,11 @@ export async function POST(request: NextRequest) {
     .eq('id', currentUser.id)
     .maybeSingle();
 
-  const redirectTo = isExistingAdmin
-    ? '/admin'
-    : desiredRole === 'owner'
-      ? '/owner'
-      : profile?.customer_access_granted
-        ? '/tour'
-        : '/paywall';
+  const redirectTo = desiredRole === 'owner'
+    ? '/owner'
+    : profile?.customer_access_granted
+      ? '/tour'
+      : '/paywall';
 
   return NextResponse.json({ redirectTo, role: isExistingAdmin ? 'admin' : desiredRole });
 }
