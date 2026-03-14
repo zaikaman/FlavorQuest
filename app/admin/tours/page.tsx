@@ -13,6 +13,11 @@ const TOUR_LANGUAGES = [
   { code: 'zh', label: '中文' },
 ] as const;
 
+type TourLanguageCode = typeof TOUR_LANGUAGES[number]['code'];
+type LocalizedTourNameField = `name_${Exclude<TourLanguageCode, 'vi'>}`;
+type LocalizedTourDescriptionField = `description_${Exclude<TourLanguageCode, 'vi'>}`;
+type TranslationUpdates = Partial<Record<LocalizedTourNameField | LocalizedTourDescriptionField, string>>;
+
 type TourFormState = TourPayload & {
   is_active: boolean;
 };
@@ -64,6 +69,7 @@ export default function AdminToursPage() {
   const [editingTourId, setEditingTourId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [isTranslating, setIsTranslating] = useState(false);
   const [poiSearchQuery, setPoiSearchQuery] = useState('');
 
   async function fetchTours() {
@@ -264,6 +270,70 @@ export default function AdminToursPage() {
     }
   };
 
+  const handleAutoTranslate = async () => {
+    const vietnameseName = formData.name_vi.trim();
+    const vietnameseDescription = formData.description_vi?.trim() ?? '';
+
+    if (!vietnameseName && !vietnameseDescription) {
+      alert('Vui lòng nhập tên hoặc mô tả tiếng Việt trước khi dịch.');
+      return;
+    }
+
+    setIsTranslating(true);
+
+    try {
+      const updates: TranslationUpdates = {};
+
+      if (vietnameseName) {
+        const response = await fetch('/api/translate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: vietnameseName }),
+        });
+
+        if (!response.ok) {
+          const payload = await response.json().catch(() => null);
+          throw new Error(payload?.error || 'Dịch tên tour thất bại');
+        }
+
+        const translations = (await response.json()) as Partial<Record<TourLanguageCode, string>>;
+        TOUR_LANGUAGES.forEach(language => {
+          if (language.code !== 'vi' && translations[language.code]) {
+            updates[`name_${language.code}` as LocalizedTourNameField] = translations[language.code] as string;
+          }
+        });
+      }
+
+      if (vietnameseDescription) {
+        const response = await fetch('/api/translate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: vietnameseDescription }),
+        });
+
+        if (!response.ok) {
+          const payload = await response.json().catch(() => null);
+          throw new Error(payload?.error || 'Dịch mô tả tour thất bại');
+        }
+
+        const translations = (await response.json()) as Partial<Record<TourLanguageCode, string>>;
+        TOUR_LANGUAGES.forEach(language => {
+          if (language.code !== 'vi' && translations[language.code]) {
+            updates[`description_${language.code}` as LocalizedTourDescriptionField] = translations[language.code] as string;
+          }
+        });
+      }
+
+      setFormData(prev => ({ ...prev, ...updates }));
+      alert('Dịch tự động thành công! Vui lòng kiểm tra lại nội dung.');
+    } catch (error) {
+      console.error('[AdminTours] Translate failed:', error);
+      alert(error instanceof Error ? error.message : 'Lỗi khi dịch tự động');
+    } finally {
+      setIsTranslating(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -294,6 +364,14 @@ export default function AdminToursPage() {
               <h2 className="text-lg font-bold text-white">{editingTourId ? 'Chỉnh sửa tour' : 'Tạo tour mới'}</h2>
               <p className="text-sm text-gray-400">Tên tour có thể nhập nhiều ngôn ngữ, nội dung thiếu sẽ fallback về tiếng Việt</p>
             </div>
+            <button
+              type="button"
+              onClick={handleAutoTranslate}
+              disabled={isTranslating}
+              className="ml-auto px-4 py-2 rounded-xl border border-primary/30 bg-primary/10 text-primary hover:bg-primary/20 transition-colors disabled:opacity-50"
+            >
+              {isTranslating ? 'Đang dịch...' : 'Dịch tự động (AI)'}
+            </button>
             <label className="flex items-center gap-2 text-sm text-white">
               <input
                 type="checkbox"
