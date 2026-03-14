@@ -1,275 +1,781 @@
-/**
- * Admin Dashboard
- * Overview stats và quick links
- */
-
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import type { RealtimeChannel } from '@supabase/supabase-js';
 import { createClient } from '@/lib/supabase/client';
+import { useAuth } from '@/lib/contexts/AuthContext';
+import type { POI, Tour } from '@/lib/types';
+import { USER_PRESENCE_CHANNEL } from '@/lib/realtime/presence';
 
-interface DashboardStats {
-  totalPOIs: number;
-  activePOIs: number;
-  totalTours: number;
-  totalPlays: number;
-  totalUsers: number;
+interface DashboardTourAnalytics {
+  id: string;
+  name_vi: string;
+  cover_image_url: string | null;
+  estimated_duration_min: number | null;
+  poi_count: number;
+  is_active: boolean;
+  starts: number;
+  sessions: number;
+  total_plays: number;
+  auto_plays: number;
+  manual_plays: number;
+  skips: number;
+  completed_tours: number;
+  completion_rate: number;
+  avg_duration_min: number | null;
+}
+
+interface AnalyticsSummaryResponse {
+  overview: {
+    total_tours: number;
+    total_plays: number;
+    unique_sessions: number;
+    tracked_tours: number;
+  };
+  tours: DashboardTourAnalytics[];
+}
+
+interface PaymentHistoryResponse {
+  stats: {
+    total: number;
+    paid: number;
+    pending: number;
+    cancelled: number;
+    totalRevenue: number;
+  };
+  payments: Array<{
+    user_id: string;
+    customer_access_granted: boolean;
+  }>;
+}
+
+interface DashboardSnapshot {
+  analytics: AnalyticsSummaryResponse;
+  payments: PaymentHistoryResponse;
+  pois: POI[];
+  tours: Tour[];
+  userCount: number;
+  accessGrantedCount: number;
+}
+
+function formatNumber(value: number) {
+  return new Intl.NumberFormat('vi-VN').format(value);
+}
+
+function formatCurrency(value: number) {
+  return `${new Intl.NumberFormat('vi-VN').format(value)} VND`;
+}
+
+function formatDateTime(value: string) {
+  return new Date(value).toLocaleString('vi-VN', {
+    day: '2-digit',
+    month: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}
+
+function formatRatio(value: number, total: number) {
+  if (!total) return '0%';
+  return `${Math.round((value / total) * 100)}%`;
 }
 
 export default function AdminDashboard() {
   const router = useRouter();
-  const [stats, setStats] = useState<DashboardStats>({
-    totalPOIs: 0,
-    activePOIs: 0,
-    totalTours: 0,
-    totalPlays: 0,
-    totalUsers: 0,
-  });
+  const { user } = useAuth();
+  const [snapshot, setSnapshot] = useState<DashboardSnapshot | null>(null);
+  const [onlineUsers, setOnlineUsers] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const latestRequestRef = useRef(0);
 
-  useEffect(() => {
-    loadStats();
-  }, []);
-
-  const loadStats = async () => {
-    const supabase = createClient();
+  const loadDashboard = useCallback(async () => {
+    const requestId = ++latestRequestRef.current;
+    setIsLoading(true);
 
     try {
-      // Count POIs
-      const { count: totalPOIs } = await supabase
-        .from('pois')
-        .select('*', { count: 'exact', head: true });
+      const supabase = createClient();
 
-      const { count: activePOIs } = await supabase
-        .from('pois')
-        .select('*', { count: 'exact', head: true })
-        .is('deleted_at', null);
+      const [
+        analyticsResponse,
+        paymentsResponse,
+        poisResponse,
+        toursResponse,
+        userCountResult,
+        accessGrantedResult,
+      ] = await Promise.all([
+        fetch('/api/analytics/summary?period=7days', { cache: 'no-store' }),
+        fetch('/api/payments/customer-access/history?status=ALL', { cache: 'no-store' }),
+        fetch('/api/pois?include_deleted=true', { cache: 'no-store' }),
+        fetch('/api/tours?admin_view=true', { cache: 'no-store' }),
+        supabase.from('users').select('*', { count: 'exact', head: true }),
+        supabase
+          .from('users')
+          .select('*', { count: 'exact', head: true })
+          .eq('customer_access_granted', true),
+      ]);
 
-      const { count: totalTours } = await supabase
-        .from('tours')
-        .select('*', { count: 'exact', head: true })
-        .is('deleted_at', null);
+      if (!analyticsResponse.ok) {
+        throw new Error('Không thể tải bảng phân tích tổng quan');
+      }
 
-      // Count analytics
-      const { count: totalPlays } = await supabase
-        .from('analytics_logs')
-        .select('*', { count: 'exact', head: true })
-        .or('event_type.eq.auto_play,event_type.eq.manual_play');
+      if (!paymentsResponse.ok) {
+        throw new Error('Không thể tải dữ liệu paywall');
+      }
 
-      const { count: totalUsers } = await supabase
-        .from('users')
-        .select('*', { count: 'exact', head: true });
+      if (!poisResponse.ok) {
+        throw new Error('Không thể tải danh sách POI');
+      }
 
-      setStats({
-        totalPOIs: totalPOIs || 0,
-        activePOIs: activePOIs || 0,
-        totalTours: totalTours || 0,
-        totalPlays: totalPlays || 0,
-        totalUsers: totalUsers || 0,
-      });
+      if (!toursResponse.ok) {
+        throw new Error('Không thể tải danh sách tour');
+      }
+
+      if (userCountResult.error) {
+        throw userCountResult.error;
+      }
+
+      if (accessGrantedResult.error) {
+        throw accessGrantedResult.error;
+      }
+
+      const [analytics, payments, pois, tours] = await Promise.all([
+        analyticsResponse.json() as Promise<AnalyticsSummaryResponse>,
+        paymentsResponse.json() as Promise<PaymentHistoryResponse>,
+        poisResponse.json() as Promise<POI[]>,
+        toursResponse.json() as Promise<Tour[]>,
+      ]);
+
+      if (requestId === latestRequestRef.current) {
+        setSnapshot({
+          analytics,
+          payments,
+          pois,
+          tours,
+          userCount: userCountResult.count ?? 0,
+          accessGrantedCount: accessGrantedResult.count ?? 0,
+        });
+      }
     } catch (error) {
-      console.error('Error loading stats:', error);
+      console.error('[AdminDashboard] load failed:', error);
     } finally {
-      setIsLoading(false);
+      if (requestId === latestRequestRef.current) {
+        setIsLoading(false);
+      }
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    void loadDashboard();
+  }, [loadDashboard]);
+
+  useEffect(() => {
+    const supabase = createClient();
+    const channels: RealtimeChannel[] = [];
+
+    const refreshDashboard = () => {
+      void loadDashboard();
+    };
+
+    const dataChannel = supabase.channel('admin-dashboard-realtime');
+    dataChannel
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'pois' }, refreshDashboard)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'tours' }, refreshDashboard)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'analytics_logs' },
+        refreshDashboard
+      )
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'users' }, refreshDashboard)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'customer_access_payments' },
+        refreshDashboard
+      )
+      .subscribe();
+    channels.push(dataChannel);
+
+    const presenceChannel = supabase.channel(USER_PRESENCE_CHANNEL);
+    const syncOnlineUsers = () => {
+      const state = presenceChannel.presenceState();
+      const onlineUserIds = new Set<string>();
+
+      Object.entries(state).forEach(([presenceKey, presences]) => {
+        if (Array.isArray(presences)) {
+          presences.forEach((presence) => {
+            if (
+              presence &&
+              typeof presence === 'object' &&
+              'userId' in presence &&
+              typeof presence.userId === 'string'
+            ) {
+              onlineUserIds.add(presence.userId);
+              return;
+            }
+          });
+        }
+
+        if (presenceKey) {
+          onlineUserIds.add(presenceKey);
+        }
+      });
+
+      if (user?.id) {
+        onlineUserIds.add(user.id);
+      }
+
+      setOnlineUsers(onlineUserIds.size);
+    };
+
+    presenceChannel
+      .on('presence', { event: 'sync' }, syncOnlineUsers)
+      .on('presence', { event: 'join' }, syncOnlineUsers)
+      .on('presence', { event: 'leave' }, syncOnlineUsers)
+      .subscribe();
+    channels.push(presenceChannel);
+
+    return () => {
+      channels.forEach((channel) => {
+        void channel.unsubscribe();
+      });
+    };
+  }, [loadDashboard, user?.id]);
+
+  const derived = useMemo(() => {
+    if (!snapshot) {
+      return null;
+    }
+
+    const activePois = snapshot.pois.filter((poi) => !poi.deleted_at);
+    const hiddenPois = snapshot.pois.length - activePois.length;
+    const activeTours = snapshot.tours.filter((tour) => tour.is_active);
+    const toursWithCover = snapshot.tours.filter((tour) => Boolean(tour.cover_image_url));
+    const poisWithImage = activePois.filter((poi) => Boolean(poi.image_url));
+    const poisWithAudio = activePois.filter((poi) => Boolean(poi.audio_url_vi));
+    const poisWithEnglishName = activePois.filter((poi) => Boolean(poi.name_en?.trim()));
+    const totalManualPlays = snapshot.analytics.tours.reduce(
+      (sum, tour) => sum + tour.manual_plays,
+      0
+    );
+    const totalAutoPlays = snapshot.analytics.tours.reduce((sum, tour) => sum + tour.auto_plays, 0);
+    const totalSkips = snapshot.analytics.tours.reduce((sum, tour) => sum + tour.skips, 0);
+    const manualShare = snapshot.analytics.overview.total_plays
+      ? Math.round((totalManualPlays / snapshot.analytics.overview.total_plays) * 100)
+      : 0;
+    const topTour = snapshot.analytics.tours[0] ?? null;
+    const avgPoisPerTour = snapshot.tours.length
+      ? (
+          snapshot.tours.reduce((sum, tour) => sum + tour.poi_ids.length, 0) / snapshot.tours.length
+        ).toFixed(1)
+      : '0';
+    const recentUpdates = [
+      ...activePois.map((poi) => ({
+        id: poi.id,
+        title: poi.name_vi,
+        subtitle: poi.signature_dish || 'POI mới hoặc vừa cập nhật nội dung',
+        type: 'POI',
+        route: '/admin/pois',
+        updatedAt: poi.updated_at,
+      })),
+      ...snapshot.tours.map((tour) => ({
+        id: tour.id,
+        title: tour.name_vi,
+        subtitle: `${tour.poi_ids.length} POI trong hành trình`,
+        type: 'Tour',
+        route: '/admin/tours',
+        updatedAt: tour.updated_at,
+      })),
+    ]
+      .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
+      .slice(0, 6);
+
+    const attentionItems = [
+      {
+        label: 'POI thiếu ảnh',
+        value: activePois.filter((poi) => !poi.image_url).length,
+        note: 'Ảnh giúp thẻ nội dung và trang khách hàng đỡ trống.',
+        route: '/admin/pois',
+      },
+      {
+        label: 'POI thiếu audio VI',
+        value: activePois.filter((poi) => !poi.audio_url_vi).length,
+        note: 'Nên ưu tiên lấp khoảng trống giọng đọc tiếng Việt.',
+        route: '/admin/pois',
+      },
+      {
+        label: 'Tour chưa có ảnh bìa',
+        value: snapshot.tours.filter((tour) => !tour.cover_image_url).length,
+        note: 'Tour list sẽ thuyết phục hơn khi có visual riêng.',
+        route: '/admin/tours',
+      },
+      {
+        label: 'Tour đang ẩn',
+        value: snapshot.tours.filter((tour) => !tour.is_active).length,
+        note: 'Kiểm tra lại những tour đã soạn xong nhưng chưa mở.',
+        route: '/admin/tours',
+      },
+    ].sort((a, b) => b.value - a.value);
+
+    const quickActions = [
+      {
+        label: 'Thêm POI mới',
+        description: 'Tạo địa điểm mới và gắn audio, ảnh, món đặc trưng.',
+        href: '/admin/pois/new',
+        accent: 'text-emerald-300',
+      },
+      {
+        label: 'Quản lý tour',
+        description: 'Sắp xếp hành trình, kiểm tra ảnh bìa, mở hoặc ẩn tour.',
+        href: '/admin/tours',
+        accent: 'text-amber-200',
+      },
+      {
+        label: 'Xem phân tích',
+        description: 'Đi sâu vào tỷ lệ hoàn tất, áp lực bỏ qua và hành vi nghe.',
+        href: '/admin/analytics',
+        accent: 'text-primary',
+      },
+      {
+        label: 'Kiểm tra paywall',
+        description: 'Theo dõi giao dịch, trạng thái mở khóa và doanh thu.',
+        href: '/admin/payments',
+        accent: 'text-sky-300',
+      },
+    ];
+
+    return {
+      activePois,
+      hiddenPois,
+      activeTours,
+      toursWithCover,
+      poisWithImage,
+      poisWithAudio,
+      poisWithEnglishName,
+      totalManualPlays,
+      totalAutoPlays,
+      totalSkips,
+      manualShare,
+      topTour,
+      avgPoisPerTour,
+      recentUpdates,
+      attentionItems,
+      quickActions,
+    };
+  }, [snapshot]);
+
+  if (isLoading && !snapshot) {
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <div className="border-primary h-10 w-10 animate-spin rounded-full border-b-2" />
+      </div>
+    );
+  }
+
+  if (!snapshot || !derived) {
+    return (
+      <div className="rounded-2xl border border-red-500/20 bg-red-500/10 px-6 py-8 text-sm text-red-100">
+        Không thể tải dữ liệu bảng điều hành. Hãy thử làm mới lại trang.
+      </div>
+    );
+  }
+
+  const summaryCards = [
+    {
+      label: 'POI đang hoạt động',
+      value: formatNumber(derived.activePois.length),
+      note: `${formatNumber(derived.hiddenPois)} mục đang ẩn hoặc đã gỡ`,
+      accent: 'text-sky-300',
+      border: 'border-sky-400/20',
+      glow: 'from-sky-500/15',
+    },
+    {
+      label: 'Tour đang mở',
+      value: formatNumber(derived.activeTours.length),
+      note: `${snapshot.tours.length} tour tổng, trung bình ${derived.avgPoisPerTour} POI / tour`,
+      accent: 'text-amber-200',
+      border: 'border-amber-400/20',
+      glow: 'from-amber-500/15',
+    },
+    {
+      label: 'Audio 7 ngày',
+      value: formatNumber(snapshot.analytics.overview.total_plays),
+      note: `${derived.manualShare}% là phát thủ công, ${formatNumber(derived.totalSkips)} lượt bỏ qua`,
+      accent: 'text-primary',
+      border: 'border-primary/20',
+      glow: 'from-primary/15',
+    },
+    {
+      label: 'Phiên người dùng',
+      value: formatNumber(snapshot.analytics.overview.unique_sessions),
+      note: `${formatNumber(snapshot.analytics.overview.tracked_tours)} tour có dữ liệu trong 7 ngày`,
+      accent: 'text-violet-200',
+      border: 'border-violet-400/20',
+      glow: 'from-violet-500/15',
+    },
+    {
+      label: 'Khách đã mở khóa',
+      value: formatNumber(snapshot.accessGrantedCount),
+      note: `${formatRatio(snapshot.accessGrantedCount, snapshot.userCount)} trên tổng ${formatNumber(snapshot.userCount)} tài khoản`,
+      accent: 'text-emerald-300',
+      border: 'border-emerald-400/20',
+      glow: 'from-emerald-500/15',
+    },
+    {
+      label: 'Người dùng đang online',
+      value: formatNumber(onlineUsers),
+      note: 'Số tài khoản đang hiện diện theo thời gian thực',
+      accent: 'text-lime-300',
+      border: 'border-lime-400/20',
+      glow: 'from-lime-500/15',
+    },
+    {
+      label: 'Doanh thu paywall',
+      value: formatCurrency(snapshot.payments.stats.totalRevenue),
+      note: `${formatNumber(snapshot.payments.stats.paid)} giao dịch thành công, ${formatNumber(snapshot.payments.stats.pending)} giao dịch chờ`,
+      accent: 'text-rose-200',
+      border: 'border-rose-400/20',
+      glow: 'from-rose-500/15',
+    },
+  ];
+
+  const healthMeters = [
+    {
+      label: 'POI có ảnh',
+      value: derived.poisWithImage.length,
+      total: derived.activePois.length,
+      tone: 'bg-sky-400',
+    },
+    {
+      label: 'POI có audio tiếng Việt',
+      value: derived.poisWithAudio.length,
+      total: derived.activePois.length,
+      tone: 'bg-primary',
+    },
+    {
+      label: 'POI có tên tiếng Anh',
+      value: derived.poisWithEnglishName.length,
+      total: derived.activePois.length,
+      tone: 'bg-violet-400',
+    },
+    {
+      label: 'Tour có ảnh bìa',
+      value: derived.toursWithCover.length,
+      total: snapshot.tours.length,
+      tone: 'bg-emerald-400',
+    },
+  ];
 
   return (
     <div className="space-y-8">
-      {/* Page Header */}
-      <div>
-        <h2 className="text-2xl font-bold text-white mb-2">Dashboard</h2>
-        <p className="text-gray-400">Tổng quan hệ thống FlavorQuest</p>
-      </div>
-
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
-        {/* Total POIs */}
-        <div className="bg-[#2c1e16] rounded-xl shadow-lg border border-white/5 p-6 relative overflow-hidden group hover:border-primary/30 transition-colors">
-          <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-            <span className="material-symbols-outlined text-6xl text-blue-500">location_on</span>
-          </div>
-          <div className="flex items-center justify-between mb-4 relative z-10">
-            <div className="p-3 bg-blue-500/20 rounded-lg border border-blue-500/30">
-              <svg className="w-6 h-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
-            </div>
-          </div>
-          <p className="text-sm text-gray-400 mb-1 relative z-10">Tổng POI</p>
-          <p className="text-3xl font-bold text-white relative z-10">{isLoading ? '...' : stats.totalPOIs}</p>
+      <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+        <div>
+          <p className="text-primary/80 text-xs font-semibold tracking-[0.32em] uppercase">
+            Trung tâm điều hành
+          </p>
+          <h2 className="mt-2 text-3xl font-black text-white">Bảng điều hành FlavorQuest</h2>
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-gray-400">
+            Tập trung vào nhịp vận hành 7 ngày gần nhất, chất lượng nội dung và các điểm cần xử lý
+            để phần admin không chỉ đẹp mà còn hữu ích khi ra quyết định.
+          </p>
         </div>
 
-        {/* Active POIs */}
-        <div className="bg-[#2c1e16] rounded-xl shadow-lg border border-white/5 p-6 relative overflow-hidden group hover:border-primary/30 transition-colors">
-          <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-            <span className="material-symbols-outlined text-6xl text-green-500">check_circle</span>
-          </div>
-          <div className="flex items-center justify-between mb-4 relative z-10">
-            <div className="p-3 bg-green-500/20 rounded-lg border border-green-500/30">
-              <svg className="w-6 h-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-          </div>
-          <p className="text-sm text-gray-400 mb-1 relative z-10">POI Đang hoạt động</p>
-          <p className="text-3xl font-bold text-white relative z-10">{isLoading ? '...' : stats.activePOIs}</p>
-        </div>
-
-        {/* Total Plays */}
-        <div className="bg-[#2c1e16] rounded-xl shadow-lg border border-white/5 p-6 relative overflow-hidden group hover:border-primary/30 transition-colors">
-          <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-            <span className="material-symbols-outlined text-6xl text-purple-500">play_circle</span>
-          </div>
-          <div className="flex items-center justify-between mb-4 relative z-10">
-            <div className="p-3 bg-purple-500/20 rounded-lg border border-purple-500/30">
-              <svg className="w-6 h-6 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-          </div>
-          <p className="text-sm text-gray-400 mb-1 relative z-10">Lượt phát audio</p>
-          <p className="text-3xl font-bold text-white relative z-10">{isLoading ? '...' : stats.totalPlays}</p>
-        </div>
-
-        <div className="bg-[#2c1e16] rounded-xl shadow-lg border border-white/5 p-6 relative overflow-hidden group hover:border-primary/30 transition-colors">
-          <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-            <span className="material-symbols-outlined text-6xl text-amber-500">route</span>
-          </div>
-          <div className="flex items-center justify-between mb-4 relative z-10">
-            <div className="p-3 bg-amber-500/20 rounded-lg border border-amber-500/30">
-              <svg className="w-6 h-6 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 01.553-.894L9 2m0 18l6-2m-6 2V2m6 16l5.447 2.724A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 14V4m-6-2l6 2" />
-              </svg>
-            </div>
-          </div>
-          <p className="text-sm text-gray-400 mb-1 relative z-10">Tổng tour</p>
-          <p className="text-3xl font-bold text-white relative z-10">{isLoading ? '...' : stats.totalTours}</p>
-        </div>
-
-        {/* Unique Visitors */}
-        <div className="bg-[#2c1e16] rounded-xl shadow-lg border border-white/5 p-6 relative overflow-hidden group hover:border-primary/30 transition-colors">
-          <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-            <span className="material-symbols-outlined text-6xl text-primary">group</span>
-          </div>
-          <div className="flex items-center justify-between mb-4 relative z-10">
-            <div className="p-3 bg-primary/20 rounded-lg border border-primary/30">
-              <svg className="w-6 h-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-              </svg>
-            </div>
-          </div>
-          <p className="text-sm text-gray-400 mb-1 relative z-10">Người dùng</p>
-          <p className="text-3xl font-bold text-white relative z-10">{isLoading ? '...' : stats.totalUsers}</p>
-        </div>
-      </div>
-
-      {/* Quick Actions */}
-      <div>
-        <h3 className="text-lg font-bold text-white mb-4">Thao tác nhanh</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-          {/* Manage POIs */}
+        <div className="flex flex-wrap items-center gap-3">
           <button
-            onClick={() => router.push('/admin/pois')}
-            className="flex items-center gap-4 p-6 bg-[#2c1e16] rounded-xl shadow-lg border border-white/5 hover:border-primary/50 hover:bg-[#3bf1f0d] transition-all duration-200 text-left group"
-          >
-            <div className="p-3 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors">
-              <svg className="w-6 h-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
-            </div>
-            <div>
-              <h4 className="font-semibold text-white mb-1 group-hover:text-primary transition-colors">Quản lý POI</h4>
-              <p className="text-sm text-gray-400">Thêm, sửa, xóa địa điểm</p>
-            </div>
-          </button>
-
-          {/* Create New POI */}
-          <button
-            onClick={() => router.push('/admin/pois/new')}
-            className="flex items-center gap-4 p-6 bg-[#2c1e16] rounded-xl shadow-lg border border-white/5 hover:border-green-500/50 hover:bg-[#3bf1f0d] transition-all duration-200 text-left group"
-          >
-            <div className="p-3 bg-green-500/10 rounded-lg group-hover:bg-green-500/20 transition-colors">
-              <svg className="w-6 h-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-              </svg>
-            </div>
-            <div>
-              <h4 className="font-semibold text-white mb-1 group-hover:text-green-500 transition-colors">Tạo POI mới</h4>
-              <p className="text-sm text-gray-400">Thêm địa điểm mới</p>
-            </div>
-          </button>
-
-          {/* View Analytics */}
-          <button
-            onClick={() => router.push('/admin/analytics')}
-            className="flex items-center gap-4 p-6 bg-[#2c1e16] rounded-xl shadow-lg border border-white/5 hover:border-purple-500/50 hover:bg-[#3bf1f0d] transition-all duration-200 text-left group"
-          >
-            <div className="p-3 bg-purple-500/10 rounded-lg group-hover:bg-purple-500/20 transition-colors">
-              <svg className="w-6 h-6 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-              </svg>
-            </div>
-            <div>
-              <h4 className="font-semibold text-white mb-1 group-hover:text-purple-500 transition-colors">Xem Analytics</h4>
-              <p className="text-sm text-gray-400">Thống kê sử dụng</p>
-            </div>
-          </button>
-
-          <button
-            onClick={() => router.push('/admin/tours')}
-            className="flex items-center gap-4 p-6 bg-[#2c1e16] rounded-xl shadow-lg border border-white/5 hover:border-amber-500/50 hover:bg-[#3bf1f0d] transition-all duration-200 text-left group"
-          >
-            <div className="p-3 bg-amber-500/10 rounded-lg group-hover:bg-amber-500/20 transition-colors">
-              <svg className="w-6 h-6 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 01.553-.894L9 2m0 18l6-2m-6 2V2m6 16l5.447 2.724A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 14V4m-6-2l6 2" />
-              </svg>
-            </div>
-            <div>
-              <h4 className="font-semibold text-white mb-1 group-hover:text-amber-400 transition-colors">Quản lý tour</h4>
-              <p className="text-sm text-gray-400">Tạo lịch trình và sắp xếp POI</p>
-            </div>
-          </button>
-
-          <button
-            onClick={() => router.push('/admin/payments')}
-            className="flex items-center gap-4 p-6 bg-[#2c1e16] rounded-xl shadow-lg border border-white/5 hover:border-emerald-500/50 hover:bg-[#3bf1f0d] transition-all duration-200 text-left group"
-          >
-            <div className="p-3 bg-emerald-500/10 rounded-lg group-hover:bg-emerald-500/20 transition-colors">
-              <svg className="w-6 h-6 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a5 5 0 00-10 0v2M5 9h14l1 10H4L5 9zm4 4h6" />
-              </svg>
-            </div>
-            <div>
-              <h4 className="font-semibold text-white mb-1 group-hover:text-emerald-400 transition-colors">Lịch sử thanh toán</h4>
-              <p className="text-sm text-gray-400">Theo dõi giao dịch paywall</p>
-            </div>
-          </button>
-        </div>
-      </div>
-
-      {/* Preview App Link */}
-      <div className="bg-gradient-to-r from-primary/10 to-orange-900/20 rounded-xl p-6 border border-primary/20">
-        <div className="flex items-center justify-between">
-          <div>
-            <h3 className="text-lg font-bold text-white mb-1">Preview App</h3>
-            <p className="text-sm text-gray-400">Xem giao diện người dùng</p>
-          </div>
-          <button
+            type="button"
             onClick={() => window.open('/', '_blank')}
-            className="px-6 py-3 bg-primary hover:bg-orange-600 text-white font-bold rounded-lg transition-colors flex items-center gap-2 shadow-lg shadow-primary/20"
+            className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-gray-100 transition-colors hover:bg-white/10"
           >
-            <span>Mở App</span>
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-            </svg>
+            Mở app khách hàng
+          </button>
+          <button
+            type="button"
+            onClick={() => void loadDashboard()}
+            className="bg-primary rounded-xl px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-orange-600"
+          >
+            Làm mới bảng điều hành
           </button>
         </div>
       </div>
+
+      <section className="grid gap-6 lg:grid-cols-[1.25fr_0.75fr]">
+        <div className="overflow-hidden rounded-[28px] border border-white/10 bg-[#2c1e16]">
+          <div className="from-primary/12 border-b border-white/10 bg-gradient-to-r via-transparent to-transparent px-6 py-6">
+            <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+              <div className="max-w-2xl">
+                <p className="text-primary text-sm font-semibold">Nhịp hoạt động 7 ngày</p>
+                <h3 className="mt-2 text-2xl font-black text-white">
+                  {derived.topTour
+                    ? `${derived.topTour.name_vi} đang dẫn nhịp với ${formatNumber(derived.topTour.total_plays)} lượt phát`
+                    : 'Chưa có tour nổi bật trong giai đoạn hiện tại'}
+                </h3>
+                <p className="mt-3 text-sm leading-6 text-gray-300">
+                  {derived.topTour
+                    ? `Tour này ghi nhận ${formatNumber(derived.topTour.sessions)} phiên, tỷ lệ hoàn tất ${derived.topTour.completion_rate}% và đang là điểm tựa chính cho mức sử dụng audio của toàn hệ thống.`
+                    : 'Khi dữ liệu phân tích tăng lên, khu vực này sẽ tóm tắt tour hoặc xu hướng vận hành đáng chú ý nhất.'}
+                </p>
+              </div>
+
+              <div className="grid gap-3 sm:grid-cols-3">
+                {[
+                  {
+                    label: 'Lượt bắt đầu tour',
+                    value: formatNumber(snapshot.analytics.overview.total_tours),
+                    note: 'bắt đầu hành trình',
+                    accent: 'text-primary',
+                  },
+                  {
+                    label: 'Tự động / Thủ công',
+                    value: `${formatNumber(derived.totalAutoPlays)} / ${formatNumber(derived.totalManualPlays)}`,
+                    note: 'cơ cấu phát âm thanh',
+                    accent: 'text-amber-200',
+                  },
+                  {
+                    label: 'Thanh toán paywall',
+                    value: formatNumber(snapshot.payments.stats.paid),
+                    note: 'giao dịch thành công',
+                    accent: 'text-emerald-300',
+                  },
+                ].map((item) => (
+                  <div
+                    key={item.label}
+                    className="rounded-2xl border border-white/10 bg-black/20 px-4 py-4"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="text-[11px] font-semibold tracking-[0.18em] text-gray-500 uppercase">
+                          {item.label}
+                        </p>
+                        <p className={`mt-3 text-3xl leading-none font-black ${item.accent}`}>
+                          {item.value}
+                        </p>
+                        <p className="mt-3 text-sm text-gray-400">{item.note}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="grid gap-4 px-6 py-6 md:grid-cols-3">
+            {healthMeters.map((item) => {
+              const ratio = item.total ? Math.round((item.value / item.total) * 100) : 0;
+
+              return (
+                <div
+                  key={item.label}
+                  className="rounded-2xl border border-white/10 bg-black/15 p-4"
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="text-sm font-semibold text-white">{item.label}</p>
+                    <span className="text-xs font-semibold text-gray-400">{ratio}%</span>
+                  </div>
+                  <div className="mt-3 h-2 overflow-hidden rounded-full bg-white/5">
+                    <div
+                      className={`h-full rounded-full ${item.tone}`}
+                      style={{ width: `${ratio}%` }}
+                    />
+                  </div>
+                  <p className="mt-3 text-xs text-gray-400">
+                    {formatNumber(item.value)} / {formatNumber(item.total)} mục đã hoàn thiện
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="rounded-[28px] border border-white/10 bg-[#2c1e16] p-6">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <p className="text-primary text-sm font-semibold">Cần chú ý</p>
+              <h3 className="mt-1 text-xl font-black text-white">Bảng cần chú ý</h3>
+            </div>
+            <span className="rounded-full border border-white/10 bg-black/15 px-3 py-1 text-xs font-semibold text-gray-300">
+              {formatNumber(derived.attentionItems.reduce((sum, item) => sum + item.value, 0))} việc
+            </span>
+          </div>
+
+          <div className="mt-5 space-y-3">
+            {derived.attentionItems.map((item) => (
+              <button
+                key={item.label}
+                type="button"
+                onClick={() => router.push(item.route)}
+                className="w-full rounded-2xl border border-white/10 bg-black/15 px-4 py-4 text-left transition-colors hover:bg-white/5"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-semibold text-white">{item.label}</p>
+                    <p className="mt-1 text-xs leading-5 text-gray-400">{item.note}</p>
+                  </div>
+                  <span className="bg-primary/10 text-primary min-w-10 rounded-full px-3 py-1 text-center text-sm font-bold">
+                    {formatNumber(item.value)}
+                  </span>
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        {summaryCards.map((card) => (
+          <div
+            key={card.label}
+            className={`overflow-hidden rounded-[24px] border ${card.border} bg-[#2c1e16] shadow-lg`}
+          >
+            <div
+              className={`bg-gradient-to-r ${card.glow} via-transparent to-transparent px-5 py-5`}
+            >
+              <p className="text-sm text-gray-400">{card.label}</p>
+              <p className={`mt-3 text-3xl font-black ${card.accent}`}>{card.value}</p>
+              <p className="mt-3 text-xs leading-5 text-gray-400">{card.note}</p>
+            </div>
+          </div>
+        ))}
+      </section>
+
+      <section className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+        <div className="rounded-[28px] border border-white/10 bg-[#2c1e16] p-6">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <p className="text-primary text-sm font-semibold">Hiệu suất nổi bật</p>
+              <h3 className="mt-1 text-xl font-black text-white">Tour thu hút tốt nhất</h3>
+            </div>
+            <button
+              type="button"
+              onClick={() => router.push('/admin/analytics')}
+              className="text-primary text-sm font-semibold transition-colors hover:text-orange-300"
+            >
+              Mở trang phân tích
+            </button>
+          </div>
+
+          <div className="mt-5 space-y-3">
+            {snapshot.analytics.tours.slice(0, 5).map((tour, index) => (
+              <div
+                key={tour.id}
+                className="rounded-2xl border border-white/10 bg-black/15 px-4 py-4"
+              >
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex items-start gap-4">
+                    <div className="bg-primary/10 text-primary flex h-10 w-10 items-center justify-center rounded-2xl text-sm font-black">
+                      {index + 1}
+                    </div>
+                    <div>
+                      <p className="font-semibold text-white">{tour.name_vi}</p>
+                      <p className="mt-1 text-xs text-gray-400">
+                        {formatNumber(tour.sessions)} phiên • {formatNumber(tour.total_plays)} lượt
+                        phát • {tour.poi_count} POI
+                      </p>
+                    </div>
+                  </div>
+                  <span
+                    className={`rounded-full px-3 py-1 text-xs font-bold ${
+                      tour.completion_rate >= 60
+                        ? 'bg-emerald-500/15 text-emerald-300'
+                        : tour.completion_rate >= 35
+                          ? 'bg-amber-500/15 text-amber-200'
+                          : 'bg-white/10 text-gray-300'
+                    }`}
+                  >
+                    Hoàn tất {tour.completion_rate}%
+                  </span>
+                </div>
+
+                <div className="mt-4 grid gap-3 sm:grid-cols-3">
+                  <div className="rounded-xl bg-black/20 px-3 py-3">
+                    <p className="text-[11px] tracking-[0.22em] text-gray-500 uppercase">Bắt đầu</p>
+                    <p className="mt-2 text-lg font-bold text-white">{formatNumber(tour.starts)}</p>
+                  </div>
+                  <div className="rounded-xl bg-black/20 px-3 py-3">
+                    <p className="text-[11px] tracking-[0.22em] text-gray-500 uppercase">
+                      Tự động / Thủ công
+                    </p>
+                    <p className="mt-2 text-lg font-bold text-white">
+                      {formatNumber(tour.auto_plays)} / {formatNumber(tour.manual_plays)}
+                    </p>
+                  </div>
+                  <div className="rounded-xl bg-black/20 px-3 py-3">
+                    <p className="text-[11px] tracking-[0.22em] text-gray-500 uppercase">
+                      Thời lượng TB
+                    </p>
+                    <p className="mt-2 text-lg font-bold text-white">
+                      {tour.avg_duration_min ? `${tour.avg_duration_min} phút` : 'Chưa đủ dữ liệu'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))}
+
+            {snapshot.analytics.tours.length === 0 && (
+              <div className="rounded-2xl border border-dashed border-white/10 px-4 py-10 text-center text-sm text-gray-500">
+                Chưa có dữ liệu phân tích để xếp hạng tour.
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="space-y-6">
+          <div className="rounded-[28px] border border-white/10 bg-[#2c1e16] p-6">
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <p className="text-primary text-sm font-semibold">Cập nhật gần đây</p>
+                <h3 className="mt-1 text-xl font-black text-white">Feed nội dung mới chỉnh</h3>
+              </div>
+              <span className="text-xs text-gray-400">Cập nhật gần nhất</span>
+            </div>
+
+            <div className="mt-5 space-y-3">
+              {derived.recentUpdates.map((item) => (
+                <button
+                  key={`${item.type}-${item.id}`}
+                  type="button"
+                  onClick={() => router.push(item.route)}
+                  className="w-full rounded-2xl border border-white/10 bg-black/15 px-4 py-4 text-left transition-colors hover:bg-white/5"
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="rounded-full bg-white/10 px-2 py-1 text-[11px] font-semibold text-gray-300">
+                          {item.type}
+                        </span>
+                        <p className="font-semibold text-white">{item.title}</p>
+                      </div>
+                      <p className="mt-2 text-sm text-gray-400">{item.subtitle}</p>
+                    </div>
+                    <span className="shrink-0 text-xs text-gray-500">
+                      {formatDateTime(item.updatedAt)}
+                    </span>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="rounded-[28px] border border-white/10 bg-[#2c1e16] p-6">
+            <div>
+              <p className="text-primary text-sm font-semibold">Thao tác nhanh</p>
+              <h3 className="mt-1 text-xl font-black text-white">Lối tắt cho các việc hay làm</h3>
+            </div>
+
+            <div className="mt-5 grid gap-3">
+              {derived.quickActions.map((action) => (
+                <button
+                  key={action.href}
+                  type="button"
+                  onClick={() => router.push(action.href)}
+                  className="rounded-2xl border border-white/10 bg-black/15 px-4 py-4 text-left transition-colors hover:bg-white/5"
+                >
+                  <p className={`font-semibold ${action.accent}`}>{action.label}</p>
+                  <p className="mt-2 text-sm leading-6 text-gray-400">{action.description}</p>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }
