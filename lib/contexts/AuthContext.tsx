@@ -7,7 +7,8 @@
 
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import type { AuthChangeEvent, User } from '@supabase/supabase-js';
+import type { AuthChangeEvent, RealtimeChannel, User } from '@supabase/supabase-js';
+import { USER_PRESENCE_CHANNEL, type UserPresencePayload } from '@/lib/realtime/presence';
 
 type AppUserRole = 'customer' | 'owner' | 'admin';
 const ROLE_FETCH_TIMEOUT_MS = 5000;
@@ -91,6 +92,7 @@ function clearAuthSnapshot() {
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const supabaseRef = useRef(createClient());
   const currentUserIdRef = useRef<string | null>(null);
+  const presenceChannelRef = useRef<RealtimeChannel | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [userRole, setUserRole] = useState<AppUserRole | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -135,85 +137,91 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       throw new Error(`/api/users/me -> ${response.status}: ${errorText}`);
     }
 
-    return await response.json() as MeResponse;
+    return (await response.json()) as MeResponse;
   }, [withTimeout]);
 
-  const checkUserRole = useCallback(async (currentUser: User | null) => {
-    console.group('[AuthContext] checkUserRole');
-    console.log('currentUser:', currentUser?.email ?? null, currentUser?.id ?? null);
+  const checkUserRole = useCallback(
+    async (currentUser: User | null) => {
+      console.group('[AuthContext] checkUserRole');
+      console.log('currentUser:', currentUser?.email ?? null, currentUser?.id ?? null);
 
-    if (!currentUser?.email) {
-      console.log('No current user email, reset role state');
-      resetRoleState(true);
-      console.groupEnd();
-      return;
-    }
-
-    try {
-      const me = await fetchRoleFromApi();
-      console.log('role api result:', me.role, me.customerAccessGranted);
-      setUserRole(me.role);
-      setIsAdmin(me.role === 'admin');
-      setHasCustomerAccess(me.role === 'customer' ? Boolean(me.customerAccessGranted) : true);
-      setCustomerAccessGrantedAt(me.customerAccessGrantedAt ?? null);
-      saveAuthSnapshot({
-        userId: currentUser.id,
-        role: me.role,
-        hasCustomerAccess: me.role === 'customer' ? Boolean(me.customerAccessGranted) : true,
-        customerAccessGrantedAt: me.customerAccessGrantedAt ?? null,
-        cachedAt: Date.now(),
-      });
-      setIsRoleReady(true);
-      console.log('resolved role:', me.role);
-    } catch (error) {
-      const cachedSnapshot = loadAuthSnapshot(currentUser.id);
-
-      if (cachedSnapshot) {
-        console.warn('[AuthContext] checkUserRole failed, using cached auth snapshot:', error);
-        setUserRole(cachedSnapshot.role);
-        setIsAdmin(cachedSnapshot.role === 'admin');
-        setHasCustomerAccess(cachedSnapshot.hasCustomerAccess);
-        setCustomerAccessGrantedAt(cachedSnapshot.customerAccessGrantedAt);
-      } else {
-        console.error('[AuthContext] checkUserRole failed, fallback to customer:', error);
-        setUserRole('customer');
-        setIsAdmin(false);
-        setHasCustomerAccess(false);
-        setCustomerAccessGrantedAt(null);
+      if (!currentUser?.email) {
+        console.log('No current user email, reset role state');
+        resetRoleState(true);
+        console.groupEnd();
+        return;
       }
 
-      setIsRoleReady(true);
-    } finally {
-      console.groupEnd();
-    }
-  }, [fetchRoleFromApi, resetRoleState]);
+      try {
+        const me = await fetchRoleFromApi();
+        console.log('role api result:', me.role, me.customerAccessGranted);
+        setUserRole(me.role);
+        setIsAdmin(me.role === 'admin');
+        setHasCustomerAccess(me.role === 'customer' ? Boolean(me.customerAccessGranted) : true);
+        setCustomerAccessGrantedAt(me.customerAccessGrantedAt ?? null);
+        saveAuthSnapshot({
+          userId: currentUser.id,
+          role: me.role,
+          hasCustomerAccess: me.role === 'customer' ? Boolean(me.customerAccessGranted) : true,
+          customerAccessGrantedAt: me.customerAccessGrantedAt ?? null,
+          cachedAt: Date.now(),
+        });
+        setIsRoleReady(true);
+        console.log('resolved role:', me.role);
+      } catch (error) {
+        const cachedSnapshot = loadAuthSnapshot(currentUser.id);
 
-  const syncAuthState = useCallback(async (
-    event: AuthChangeEvent,
-    nextUser: User | null,
-  ) => {
-    const previousUserId = currentUserIdRef.current;
-    const nextUserId = nextUser?.id ?? null;
-    const sameUser = previousUserId !== null && previousUserId === nextUserId;
+        if (cachedSnapshot) {
+          console.warn('[AuthContext] checkUserRole failed, using cached auth snapshot:', error);
+          setUserRole(cachedSnapshot.role);
+          setIsAdmin(cachedSnapshot.role === 'admin');
+          setHasCustomerAccess(cachedSnapshot.hasCustomerAccess);
+          setCustomerAccessGrantedAt(cachedSnapshot.customerAccessGrantedAt);
+        } else {
+          console.error('[AuthContext] checkUserRole failed, fallback to customer:', error);
+          setUserRole('customer');
+          setIsAdmin(false);
+          setHasCustomerAccess(false);
+          setCustomerAccessGrantedAt(null);
+        }
 
-    currentUserIdRef.current = nextUserId;
-    setUser(nextUser);
-    setIsLoading(false);
+        setIsRoleReady(true);
+      } finally {
+        console.groupEnd();
+      }
+    },
+    [fetchRoleFromApi, resetRoleState]
+  );
 
-    if (!nextUser) {
-      clearAuthSnapshot();
-      resetRoleState(true);
-      return;
-    }
+  const syncAuthState = useCallback(
+    async (event: AuthChangeEvent, nextUser: User | null) => {
+      const previousUserId = currentUserIdRef.current;
+      const nextUserId = nextUser?.id ?? null;
+      const sameUser = previousUserId !== null && previousUserId === nextUserId;
 
-    // Keep the current UI stable when Supabase refreshes the token for the same user.
-    if (sameUser && (event === 'TOKEN_REFRESHED' || event === 'SIGNED_IN' || event === 'USER_UPDATED')) {
-      return;
-    }
+      currentUserIdRef.current = nextUserId;
+      setUser(nextUser);
+      setIsLoading(false);
 
-    setIsRoleReady(false);
-    await checkUserRole(nextUser);
-  }, [checkUserRole, resetRoleState]);
+      if (!nextUser) {
+        clearAuthSnapshot();
+        resetRoleState(true);
+        return;
+      }
+
+      // Keep the current UI stable when Supabase refreshes the token for the same user.
+      if (
+        sameUser &&
+        (event === 'TOKEN_REFRESHED' || event === 'SIGNED_IN' || event === 'USER_UPDATED')
+      ) {
+        return;
+      }
+
+      setIsRoleReady(false);
+      await checkUserRole(nextUser);
+    },
+    [checkUserRole, resetRoleState]
+  );
 
   useEffect(() => {
     const supabase = supabaseRef.current;
@@ -248,8 +256,53 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
   }, [syncAuthState]);
 
+  useEffect(() => {
+    const supabase = supabaseRef.current;
+
+    presenceChannelRef.current?.unsubscribe();
+    presenceChannelRef.current = null;
+
+    if (!user?.id) {
+      return;
+    }
+
+    const channel = supabase.channel(USER_PRESENCE_CHANNEL, {
+      config: {
+        presence: {
+          key: user.id,
+        },
+      },
+    });
+
+    presenceChannelRef.current = channel;
+
+    channel.subscribe(async (status) => {
+      if (status !== 'SUBSCRIBED') {
+        return;
+      }
+
+      const payload: UserPresencePayload = {
+        userId: user.id,
+        email: user.email ?? null,
+        role: userRole ?? 'guest',
+        lastSeenAt: new Date().toISOString(),
+      };
+
+      await channel.track(payload);
+    });
+
+    return () => {
+      channel.unsubscribe();
+      if (presenceChannelRef.current === channel) {
+        presenceChannelRef.current = null;
+      }
+    };
+  }, [user?.email, user?.id, userRole]);
+
   const handleSignOut = async () => {
     const supabase = supabaseRef.current;
+    await presenceChannelRef.current?.unsubscribe();
+    presenceChannelRef.current = null;
     await supabase.auth.signOut();
     currentUserIdRef.current = null;
     setUser(null);
