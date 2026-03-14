@@ -7,7 +7,7 @@ export default function AdminUsersPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-white">Quản lý người dùng</h1>
-        <p className="text-gray-400">Tách riêng khu vực phân quyền tài khoản cho admin</p>
+        <p className="text-gray-400">Khu vực phân quyền tài khoản cho admin</p>
       </div>
 
       <UserRoleManager />
