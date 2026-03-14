@@ -14,11 +14,7 @@ interface DashboardStats {
   activePOIs: number;
   totalTours: number;
   totalPlays: number;
-  uniqueVisitors: number;
-}
-
-interface SessionRow {
-  session_id: string | null;
+  totalUsers: number;
 }
 
 export default function AdminDashboard() {
@@ -28,7 +24,7 @@ export default function AdminDashboard() {
     activePOIs: 0,
     totalTours: 0,
     totalPlays: 0,
-    uniqueVisitors: 0,
+    totalUsers: 0,
   });
   const [isLoading, setIsLoading] = useState(true);
 
@@ -61,25 +57,16 @@ export default function AdminDashboard() {
         .select('*', { count: 'exact', head: true })
         .or('event_type.eq.auto_play,event_type.eq.manual_play');
 
-      // Count unique sessions
-      const { data: sessions } = await supabase
-        .from('analytics_logs')
-        .select('session_id')
-        .not('session_id', 'is', null);
-
-      const sessionRows = (Array.isArray(sessions) ? sessions : []) as SessionRow[];
-      const uniqueVisitors = new Set(
-        sessionRows
-          .map(session => session.session_id)
-          .filter((sessionId): sessionId is string => typeof sessionId === 'string' && sessionId.length > 0)
-      ).size;
+      const { count: totalUsers } = await supabase
+        .from('users')
+        .select('*', { count: 'exact', head: true });
 
       setStats({
         totalPOIs: totalPOIs || 0,
         activePOIs: activePOIs || 0,
         totalTours: totalTours || 0,
         totalPlays: totalPlays || 0,
-        uniqueVisitors,
+        totalUsers: totalUsers || 0,
       });
     } catch (error) {
       console.error('Error loading stats:', error);
@@ -176,7 +163,7 @@ export default function AdminDashboard() {
             </div>
           </div>
           <p className="text-sm text-gray-400 mb-1 relative z-10">Người dùng</p>
-          <p className="text-3xl font-bold text-white relative z-10">{isLoading ? '...' : stats.uniqueVisitors}</p>
+          <p className="text-3xl font-bold text-white relative z-10">{isLoading ? '...' : stats.totalUsers}</p>
         </div>
       </div>
 
