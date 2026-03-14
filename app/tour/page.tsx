@@ -743,14 +743,16 @@ export default function TourPage() {
       {/* Main Content Area */}
       <div className="flex-1 overflow-hidden pt-16 pb-16">
         <div className="flex h-full flex-col">
-          <TourSelector
-            tours={tours}
-            selectedTourId={selectedTourId}
-            onSelectTour={handleSelectTour}
-            filteredPOICount={activePOIs.length}
-            totalPOICount={pois.length}
-            isLoading={toursLoading}
-          />
+          {activeTab !== 'list' && (
+            <TourSelector
+              tours={tours}
+              selectedTourId={selectedTourId}
+              onSelectTour={handleSelectTour}
+              filteredPOICount={activePOIs.length}
+              totalPOICount={pois.length}
+              isLoading={toursLoading}
+            />
+          )}
 
           <div className="relative flex-1 overflow-hidden">
             {/* Map View */}
