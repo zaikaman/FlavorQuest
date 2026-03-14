@@ -11,6 +11,7 @@ import type { AuthChangeEvent, User } from '@supabase/supabase-js';
 
 type AppUserRole = 'customer' | 'owner' | 'admin';
 const ROLE_FETCH_TIMEOUT_MS = 5000;
+const AUTH_SNAPSHOT_KEY = 'flavorquest-auth-snapshot';
 
 interface MeResponse {
   id: string;
@@ -18,6 +19,14 @@ interface MeResponse {
   role: AppUserRole;
   customerAccessGranted?: boolean;
   customerAccessGrantedAt?: string | null;
+}
+
+interface AuthSnapshot {
+  userId: string;
+  role: AppUserRole;
+  hasCustomerAccess: boolean;
+  customerAccessGrantedAt: string | null;
+  cachedAt: number;
 }
 
 interface AuthContextType {
@@ -35,6 +44,49 @@ interface AuthContextType {
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+function loadAuthSnapshot(userId: string | null): AuthSnapshot | null {
+  if (typeof window === 'undefined' || !userId) {
+    return null;
+  }
+
+  try {
+    const rawSnapshot = window.localStorage.getItem(AUTH_SNAPSHOT_KEY);
+    if (!rawSnapshot) {
+      return null;
+    }
+
+    const snapshot = JSON.parse(rawSnapshot) as AuthSnapshot;
+    return snapshot.userId === userId ? snapshot : null;
+  } catch (error) {
+    console.warn('[AuthContext] Failed to load auth snapshot:', error);
+    return null;
+  }
+}
+
+function saveAuthSnapshot(snapshot: AuthSnapshot) {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  try {
+    window.localStorage.setItem(AUTH_SNAPSHOT_KEY, JSON.stringify(snapshot));
+  } catch (error) {
+    console.warn('[AuthContext] Failed to save auth snapshot:', error);
+  }
+}
+
+function clearAuthSnapshot() {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  try {
+    window.localStorage.removeItem(AUTH_SNAPSHOT_KEY);
+  } catch (error) {
+    console.warn('[AuthContext] Failed to clear auth snapshot:', error);
+  }
+}
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const supabaseRef = useRef(createClient());
@@ -104,14 +156,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setIsAdmin(me.role === 'admin');
       setHasCustomerAccess(me.role === 'customer' ? Boolean(me.customerAccessGranted) : true);
       setCustomerAccessGrantedAt(me.customerAccessGrantedAt ?? null);
+      saveAuthSnapshot({
+        userId: currentUser.id,
+        role: me.role,
+        hasCustomerAccess: me.role === 'customer' ? Boolean(me.customerAccessGranted) : true,
+        customerAccessGrantedAt: me.customerAccessGrantedAt ?? null,
+        cachedAt: Date.now(),
+      });
       setIsRoleReady(true);
       console.log('resolved role:', me.role);
     } catch (error) {
-      console.error('[AuthContext] checkUserRole failed, fallback to customer:', error);
-      setUserRole('customer');
-      setIsAdmin(false);
-      setHasCustomerAccess(false);
-      setCustomerAccessGrantedAt(null);
+      const cachedSnapshot = loadAuthSnapshot(currentUser.id);
+
+      if (cachedSnapshot) {
+        console.warn('[AuthContext] checkUserRole failed, using cached auth snapshot:', error);
+        setUserRole(cachedSnapshot.role);
+        setIsAdmin(cachedSnapshot.role === 'admin');
+        setHasCustomerAccess(cachedSnapshot.hasCustomerAccess);
+        setCustomerAccessGrantedAt(cachedSnapshot.customerAccessGrantedAt);
+      } else {
+        console.error('[AuthContext] checkUserRole failed, fallback to customer:', error);
+        setUserRole('customer');
+        setIsAdmin(false);
+        setHasCustomerAccess(false);
+        setCustomerAccessGrantedAt(null);
+      }
+
       setIsRoleReady(true);
     } finally {
       console.groupEnd();
@@ -131,6 +201,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setIsLoading(false);
 
     if (!nextUser) {
+      clearAuthSnapshot();
       resetRoleState(true);
       return;
     }
@@ -182,6 +253,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await supabase.auth.signOut();
     currentUserIdRef.current = null;
     setUser(null);
+    clearAuthSnapshot();
     resetRoleState(true);
   };
 

@@ -23,7 +23,7 @@
  * - flavorquest-tiles-v1: Map tiles
  */
 
-const CACHE_VERSION = 'v1';
+const CACHE_VERSION = 'v2';
 const CACHE_NAMES = {
   static: `flavorquest-static-${CACHE_VERSION}`,
   dynamic: `flavorquest-dynamic-${CACHE_VERSION}`,
@@ -119,6 +119,18 @@ self.addEventListener('fetch', (event) => {
     console.log('[SW] Supabase request:', url.href);
   }
 
+  // Navigation requests need an HTML fallback instead of rendering raw text.
+  if (isNavigationRequest(request)) {
+    event.respondWith(handleNavigationRequest(request));
+    return;
+  }
+
+  // Next.js assets should fail silently and use the browser cache when possible.
+  if (isNextAsset(url)) {
+    event.respondWith(cacheFirst(request, CACHE_NAMES.static));
+    return;
+  }
+
   // Supabase Storage audio files: Cache first (high priority for offline)
   if (isSupabaseAudioUrl(url.href)) {
     console.log('[SW] Matched audio pattern:', url.href);
@@ -200,13 +212,63 @@ function isOSMTile(url) {
     url.pathname.includes('.tile.');
 }
 
+function isNavigationRequest(request) {
+  const accept = request.headers.get('accept') || '';
+  return request.mode === 'navigate' || accept.includes('text/html');
+}
+
+function isNextAsset(url) {
+  return url.origin === self.location.origin && url.pathname.startsWith('/_next/');
+}
+
+async function handleNavigationRequest(request) {
+  const cache = await caches.open(CACHE_NAMES.static);
+  const requestUrl = new URL(request.url);
+  const cleanPath = requestUrl.pathname || '/';
+  const cleanRequest = new Request(`${self.location.origin}${cleanPath}`, { method: 'GET' });
+
+  const cachedPage =
+    (await cache.match(request, { ignoreSearch: true })) ||
+    (await cache.match(cleanRequest, { ignoreSearch: true }));
+
+  if (cachedPage) {
+    return cachedPage;
+  }
+
+  try {
+    const response = await fetch(request);
+
+    if (response.ok && response.type === 'basic') {
+      cache.put(cleanRequest, response.clone());
+    }
+
+    return response;
+  } catch (error) {
+    console.error('[SW] Navigation fetch failed:', error);
+
+    const offlineFallbacks = [
+      cleanRequest,
+      new Request(`${self.location.origin}/tour`),
+      new Request(`${self.location.origin}/`),
+    ];
+    for (const fallbackRequest of offlineFallbacks) {
+      const fallback = await cache.match(fallbackRequest, { ignoreSearch: true });
+      if (fallback) {
+        return fallback;
+      }
+    }
+
+    return Response.error();
+  }
+}
+
 /**
  * Cache First Strategy
  * Try cache first, fallback to network
  */
 async function cacheFirst(request, cacheName) {
   const cache = await caches.open(cacheName);
-  const cached = await cache.match(request);
+  const cached = await cache.match(request, { ignoreSearch: true });
 
   if (cached) {
     return cached;
@@ -223,12 +285,7 @@ async function cacheFirst(request, cacheName) {
     return response;
   } catch (error) {
     console.error('[SW] Fetch failed:', error);
-
-    // Return offline fallback if available
-    return new Response('Offline', {
-      status: 503,
-      statusText: 'Service Unavailable',
-    });
+    return Response.error();
   }
 }
 
