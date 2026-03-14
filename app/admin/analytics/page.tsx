@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 interface DailyStats {
     date: string;
@@ -52,9 +52,12 @@ export default function AnalyticsPage() {
     const [period, setPeriod] = useState('7days');
     const [selectedTourId, setSelectedTourId] = useState('');
     const [isLoading, setIsLoading] = useState(true);
+    const latestRequestRef = useRef(0);
 
     const fetchAnalytics = useCallback(async () => {
+        const requestId = ++latestRequestRef.current;
         setIsLoading(true);
+
         try {
             const params = new URLSearchParams({ period });
             if (selectedTourId) {
@@ -62,14 +65,20 @@ export default function AnalyticsPage() {
             }
 
             const res = await fetch(`/api/analytics/summary?${params.toString()}`);
-            if (res.ok) {
-                const jsonData = await res.json() as AnalyticsSummaryResponse;
+            if (!res.ok) {
+                return;
+            }
+
+            const jsonData = await res.json() as AnalyticsSummaryResponse;
+            if (requestId === latestRequestRef.current) {
                 setData(jsonData);
             }
         } catch (error) {
             console.error('Error fetching analytics:', error);
         } finally {
-            setIsLoading(false);
+            if (requestId === latestRequestRef.current) {
+                setIsLoading(false);
+            }
         }
     }, [period, selectedTourId]);
 
@@ -87,13 +96,16 @@ export default function AnalyticsPage() {
         tracked_tours: 0,
     };
 
-    const maxPlays = Math.max(...dailyData.map(d => d.total_plays), 1);
+    const maxActivity = Math.max(
+        ...dailyData.map(day => Math.max(day.total_tours, day.total_plays, day.unique_sessions)),
+        1,
+    );
     const topTour = tourData[0] ?? null;
 
     if (isLoading) {
         return (
-            <div className="flex items-center justify-center h-64">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            <div className="flex h-64 items-center justify-center">
+                <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary" />
             </div>
         );
     }
@@ -106,14 +118,14 @@ export default function AnalyticsPage() {
             </div>
 
             <div className="flex gap-2">
-                <div className="flex gap-2 flex-wrap flex-1">
-                    {['7days', '30days', 'all'].map(p => (
+                <div className="flex flex-1 flex-wrap gap-2">
+                    {['7days', '30days', 'all'].map(item => (
                         <button
-                            key={p}
-                            onClick={() => setPeriod(p)}
-                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${period === p ? 'bg-primary text-white' : 'bg-white/5 text-gray-400 hover:bg-white/10'}`}
+                            key={item}
+                            onClick={() => setPeriod(item)}
+                            className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${period === item ? 'bg-primary text-white' : 'bg-white/5 text-gray-400 hover:bg-white/10'}`}
                         >
-                            {p === '7days' ? '7 ngày' : p === '30days' ? '30 ngày' : 'Toàn bộ'}
+                            {item === '7days' ? '7 ngày' : item === '30days' ? '30 ngày' : 'Toàn bộ'}
                         </button>
                     ))}
                 </div>
@@ -126,34 +138,35 @@ export default function AnalyticsPage() {
                     <option value="">Tất cả tour</option>
                     {availableTours.map(tour => (
                         <option key={tour.id} value={tour.id}>
-                            {tour.name_vi}{tour.is_active ? '' : ' (ẩn)'}
+                            {tour.name_vi}
+                            {tour.is_active ? '' : ' (ẩn)'}
                         </option>
                     ))}
                 </select>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
-                <div className="bg-[#2c1e16] p-6 rounded-xl border border-white/5">
-                    <h3 className="text-gray-400 text-sm mb-1">Lượt bắt đầu tour</h3>
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
+                <div className="rounded-xl border border-white/5 bg-[#2c1e16] p-6">
+                    <h3 className="mb-1 text-sm text-gray-400">Lượt bắt đầu tour</h3>
                     <p className="text-3xl font-bold text-white">{overview.total_tours}</p>
                 </div>
-                <div className="bg-[#2c1e16] p-6 rounded-xl border border-white/5">
-                    <h3 className="text-gray-400 text-sm mb-1">Lượt phát audio</h3>
+                <div className="rounded-xl border border-white/5 bg-[#2c1e16] p-6">
+                    <h3 className="mb-1 text-sm text-gray-400">Lượt phát audio</h3>
                     <p className="text-3xl font-bold text-white">{overview.total_plays}</p>
                 </div>
-                <div className="bg-[#2c1e16] p-6 rounded-xl border border-white/5">
-                    <h3 className="text-gray-400 text-sm mb-1">Phiên người dùng</h3>
+                <div className="rounded-xl border border-white/5 bg-[#2c1e16] p-6">
+                    <h3 className="mb-1 text-sm text-gray-400">Phiên người dùng</h3>
                     <p className="text-3xl font-bold text-white">{overview.unique_sessions}</p>
                 </div>
-                <div className="bg-[#2c1e16] p-6 rounded-xl border border-white/5">
-                    <h3 className="text-gray-400 text-sm mb-1">Tour có dữ liệu</h3>
+                <div className="rounded-xl border border-white/5 bg-[#2c1e16] p-6">
+                    <h3 className="mb-1 text-sm text-gray-400">Tour có dữ liệu</h3>
                     <p className="text-3xl font-bold text-white">{overview.tracked_tours}</p>
                 </div>
             </div>
 
-            {topTour && (
-                <div className="grid grid-cols-1 lg:grid-cols-[1.1fr_0.9fr] gap-6">
-                    <div className="bg-[#2c1e16] rounded-xl border border-white/5 overflow-hidden">
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+                <div className="overflow-hidden rounded-xl border border-white/5 bg-[#2c1e16]">
+                    {topTour ? (
                         <div className="relative aspect-[16/7] bg-black/20">
                             {topTour.cover_image_url ? (
                                 <Image
@@ -164,13 +177,13 @@ export default function AnalyticsPage() {
                                     className="object-cover"
                                 />
                             ) : (
-                                <div className="w-full h-full flex items-center justify-center bg-gradient-to-r from-primary/20 to-[#1a1512]">
+                                <div className="flex h-full w-full items-center justify-center bg-gradient-to-r from-primary/20 to-[#1a1512]">
                                     <span className="material-symbols-outlined text-7xl text-primary/50">route</span>
                                 </div>
                             )}
                             <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
-                            <div className="absolute left-6 right-6 bottom-6">
-                                <p className="text-sm text-primary font-semibold mb-2">Tour nổi bật theo lượt phát</p>
+                            <div className="absolute bottom-6 left-6 right-6">
+                                <p className="mb-2 text-sm font-semibold text-primary">Tour nổi bật theo lượt phát</p>
                                 <h2 className="text-2xl font-bold text-white">{topTour.name_vi}</h2>
                                 <div className="mt-3 flex flex-wrap gap-2 text-xs text-white/80">
                                     <span className="rounded-full bg-black/40 px-3 py-1">{topTour.total_plays} lượt phát</span>
@@ -181,51 +194,83 @@ export default function AnalyticsPage() {
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    ) : (
+                        <div className="flex aspect-[16/7] items-center justify-center px-6 text-center text-sm text-gray-500">
+                            Chưa có dữ liệu tour nổi bật trong giai đoạn này.
+                        </div>
+                    )}
+                </div>
 
-                    <div className="bg-[#2c1e16] p-6 rounded-xl border border-white/5">
-                        <h3 className="text-white font-bold mb-6">Hoạt động theo ngày</h3>
-
-                        <div className="flex items-end gap-2 h-56">
-                            {dailyData.map(day => (
-                                <div key={day.date} className="flex-1 flex flex-col items-center gap-2 group min-w-0">
-                                    <div
-                                        className="w-full bg-primary/20 rounded-t-sm relative group-hover:bg-primary/40 transition-colors"
-                                        style={{ height: `${(day.total_plays / maxPlays) * 100}%` }}
-                                    >
-                                        <div className="absolute -top-11 left-1/2 -translate-x-1/2 bg-black/85 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10 text-center">
-                                            {day.total_plays} plays<br />{day.total_tours} starts
-                                        </div>
-                                    </div>
-                                    <span className="text-[10px] text-gray-500 truncate w-full text-center">
-                                        {new Date(day.date).toLocaleDateString(undefined, { day: '2-digit', month: '2-digit' })}
-                                    </span>
-                                </div>
-                            ))}
-
-                            {dailyData.length === 0 && (
-                                <div className="w-full h-full flex items-center justify-center text-gray-500">
-                                    Không có dữ liệu trong giai đoạn này
-                                </div>
-                            )}
+                <div className="rounded-xl border border-white/5 bg-[#2c1e16] p-6">
+                    <div className="mb-6 flex items-center justify-between gap-4">
+                        <h3 className="font-bold text-white">Hoạt động theo ngày</h3>
+                        <div className="flex items-center gap-3 text-[11px] text-gray-400">
+                            <span className="flex items-center gap-1">
+                                <span className="h-2.5 w-2.5 rounded-full bg-primary" />
+                                Starts
+                            </span>
+                            <span className="flex items-center gap-1">
+                                <span className="h-2.5 w-2.5 rounded-full bg-orange-300" />
+                                Plays
+                            </span>
                         </div>
                     </div>
-                </div>
-            )}
 
-            <div className="bg-[#2c1e16] rounded-xl border border-white/5 overflow-hidden">
-                <div className="px-6 py-4 border-b border-white/10 flex items-center justify-between gap-4">
+                    <div className="flex h-56 items-end gap-2">
+                        {dailyData.map(day => (
+                            <div key={day.date} className="group flex min-w-0 flex-1 flex-col items-center gap-2">
+                                <div className="flex h-full w-full items-end justify-center gap-1">
+                                    <div
+                                        className="w-1/2 rounded-t-sm bg-primary/30 transition-colors group-hover:bg-primary/60"
+                                        style={{
+                                            height: `${(day.total_tours / maxActivity) * 100}%`,
+                                            minHeight: day.total_tours > 0 ? 4 : 0,
+                                        }}
+                                    />
+                                    <div
+                                        className="relative w-1/2 rounded-t-sm bg-orange-300/40 transition-colors group-hover:bg-orange-300/70"
+                                        style={{
+                                            height: `${(day.total_plays / maxActivity) * 100}%`,
+                                            minHeight: day.total_plays > 0 ? 4 : 0,
+                                        }}
+                                    >
+                                        <div className="absolute -top-14 left-1/2 z-10 -translate-x-1/2 whitespace-nowrap rounded bg-black/85 px-2 py-1 text-center text-xs text-white opacity-0 transition-opacity group-hover:opacity-100">
+                                            {day.total_tours} starts
+                                            <br />
+                                            {day.total_plays} plays
+                                            <br />
+                                            {day.unique_sessions} sessions
+                                        </div>
+                                    </div>
+                                </div>
+                                <span className="w-full truncate text-center text-[10px] text-gray-500">
+                                    {new Date(day.date).toLocaleDateString(undefined, { day: '2-digit', month: '2-digit' })}
+                                </span>
+                            </div>
+                        ))}
+
+                        {dailyData.length === 0 && (
+                            <div className="flex h-full w-full items-center justify-center text-gray-500">
+                                Không có dữ liệu trong giai đoạn này
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </div>
+
+            <div className="overflow-hidden rounded-xl border border-white/5 bg-[#2c1e16]">
+                <div className="flex items-center justify-between gap-4 border-b border-white/10 px-6 py-4">
                     <div>
-                        <h3 className="text-white font-bold">Hiệu suất theo tour</h3>
+                        <h3 className="font-bold text-white">Hiệu suất theo tour</h3>
                         <p className="text-sm text-gray-400">Đo lường số phiên, lượt phát, bỏ qua và thời lượng thực tế của từng tour</p>
                     </div>
                     <span className="text-xs text-gray-400">{tourData.length} tour</span>
                 </div>
 
-                <div className="px-6 py-5 border-b border-white/5 bg-black/10">
-                    <div className="flex items-center justify-between gap-4 mb-4">
+                <div className="border-b border-white/5 bg-black/10 px-6 py-5">
+                    <div className="mb-4 flex items-center justify-between gap-4">
                         <div>
-                            <h4 className="text-white font-semibold">Biểu đồ completion rate</h4>
+                            <h4 className="font-semibold text-white">Biểu đồ completion rate</h4>
                             <p className="text-sm text-gray-400">Tỷ lệ hoàn tất = số lần kết thúc tour / số lần bắt đầu tour</p>
                         </div>
                     </div>
@@ -234,13 +279,13 @@ export default function AnalyticsPage() {
                         {tourData.map(tour => (
                             <div key={`${tour.id}-completion`} className="space-y-2">
                                 <div className="flex items-center justify-between gap-3 text-sm">
-                                    <span className="font-medium text-white truncate">{tour.name_vi}</span>
-                                    <span className="text-primary font-semibold">{tour.completion_rate}%</span>
+                                    <span className="truncate font-medium text-white">{tour.name_vi}</span>
+                                    <span className="font-semibold text-primary">{tour.completion_rate}%</span>
                                 </div>
-                                <div className="h-3 rounded-full bg-white/5 overflow-hidden">
+                                <div className="h-3 overflow-hidden rounded-full bg-white/5">
                                     <div
                                         className="h-full rounded-full bg-gradient-to-r from-primary to-orange-400 transition-all"
-                                        style={{ width: `${Math.max(4, tour.completion_rate)}%` }}
+                                        style={{ width: `${tour.completion_rate === 0 ? 0 : Math.max(4, tour.completion_rate)}%` }}
                                     />
                                 </div>
                             </div>
@@ -268,10 +313,10 @@ export default function AnalyticsPage() {
                         </thead>
                         <tbody className="divide-y divide-white/5">
                             {tourData.map(tour => (
-                                <tr key={tour.id} className="hover:bg-white/5 transition-colors">
+                                <tr key={tour.id} className="transition-colors hover:bg-white/5">
                                     <td className="px-6 py-4">
-                                        <div className="flex items-center gap-3 min-w-[260px]">
-                                            <div className="relative h-14 w-20 rounded-lg overflow-hidden bg-black/20 shrink-0">
+                                        <div className="flex min-w-[260px] items-center gap-3">
+                                            <div className="relative h-14 w-20 shrink-0 overflow-hidden rounded-lg bg-black/20">
                                                 {tour.cover_image_url ? (
                                                     <Image
                                                         src={tour.cover_image_url}
@@ -281,28 +326,31 @@ export default function AnalyticsPage() {
                                                         className="object-cover"
                                                     />
                                                 ) : (
-                                                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/15 to-[#1a1512] text-primary/50">
+                                                    <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/15 to-[#1a1512] text-primary/50">
                                                         <span className="material-symbols-outlined">route</span>
                                                     </div>
                                                 )}
                                             </div>
                                             <div>
-                                                <div className="flex items-center gap-2 flex-wrap">
+                                                <div className="flex flex-wrap items-center gap-2">
                                                     <p className="font-semibold text-white">{tour.name_vi}</p>
                                                     <span className={`rounded-full px-2 py-1 text-[11px] font-semibold ${tour.is_active ? 'bg-emerald-500/15 text-emerald-300' : 'bg-white/10 text-gray-300'}`}>
                                                         {tour.is_active ? 'Đang mở' : 'Đang ẩn'}
                                                     </span>
                                                 </div>
-                                                <p className="text-xs text-gray-400 mt-1">{tour.poi_count} POI{typeof tour.estimated_duration_min === 'number' ? ` · ${tour.estimated_duration_min} phút` : ''}</p>
+                                                <p className="mt-1 text-xs text-gray-400">
+                                                    {tour.poi_count} POI
+                                                    {typeof tour.estimated_duration_min === 'number' ? ` - ${tour.estimated_duration_min} phút` : ''}
+                                                </p>
                                             </div>
                                         </div>
                                     </td>
-                                    <td className="px-6 py-4 text-white font-semibold">{tour.sessions}</td>
-                                    <td className="px-6 py-4 text-white font-semibold">{tour.total_plays}</td>
+                                    <td className="px-6 py-4 font-semibold text-white">{tour.sessions}</td>
+                                    <td className="px-6 py-4 font-semibold text-white">{tour.total_plays}</td>
                                     <td className="px-6 py-4 text-gray-300">{tour.auto_plays} / {tour.manual_plays}</td>
                                     <td className="px-6 py-4 text-gray-300">{tour.skips}</td>
                                     <td className="px-6 py-4 text-gray-300">{tour.completed_tours}</td>
-                                    <td className="px-6 py-4 text-primary font-semibold">{tour.completion_rate}%</td>
+                                    <td className="px-6 py-4 font-semibold text-primary">{tour.completion_rate}%</td>
                                     <td className="px-6 py-4 text-gray-300">{tour.avg_duration_min ? `${tour.avg_duration_min} phút` : '-'}</td>
                                 </tr>
                             ))}
