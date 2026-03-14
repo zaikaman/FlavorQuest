@@ -5,9 +5,9 @@
 
 'use client';
 
-import { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import type { User } from '@supabase/supabase-js';
+import type { AuthChangeEvent, User } from '@supabase/supabase-js';
 
 type AppUserRole = 'customer' | 'owner' | 'admin';
 const ROLE_FETCH_TIMEOUT_MS = 5000;
@@ -37,6 +37,8 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const supabaseRef = useRef(createClient());
+  const currentUserIdRef = useRef<string | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [userRole, setUserRole] = useState<AppUserRole | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -44,6 +46,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [customerAccessGrantedAt, setCustomerAccessGrantedAt] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isRoleReady, setIsRoleReady] = useState(false);
+
+  const resetRoleState = useCallback((roleReady: boolean) => {
+    setUserRole(null);
+    setIsAdmin(false);
+    setHasCustomerAccess(false);
+    setCustomerAccessGrantedAt(null);
+    setIsRoleReady(roleReady);
+  }, []);
 
   const withTimeout = useCallback(async <T,>(promise: Promise<T>, label: string): Promise<T> => {
     return await Promise.race([
@@ -82,11 +92,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     if (!currentUser?.email) {
       console.log('No current user email, reset role state');
-      setUserRole(null);
-      setIsAdmin(false);
-      setHasCustomerAccess(false);
-      setCustomerAccessGrantedAt(null);
-      setIsRoleReady(true);
+      resetRoleState(true);
       console.groupEnd();
       return;
     }
@@ -110,48 +116,77 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } finally {
       console.groupEnd();
     }
-  }, [fetchRoleFromApi]);
+  }, [fetchRoleFromApi, resetRoleState]);
+
+  const syncAuthState = useCallback(async (
+    event: AuthChangeEvent,
+    nextUser: User | null,
+  ) => {
+    const previousUserId = currentUserIdRef.current;
+    const nextUserId = nextUser?.id ?? null;
+    const sameUser = previousUserId !== null && previousUserId === nextUserId;
+
+    currentUserIdRef.current = nextUserId;
+    setUser(nextUser);
+    setIsLoading(false);
+
+    if (!nextUser) {
+      resetRoleState(true);
+      return;
+    }
+
+    // Keep the current UI stable when Supabase refreshes the token for the same user.
+    if (sameUser && (event === 'TOKEN_REFRESHED' || event === 'SIGNED_IN' || event === 'USER_UPDATED')) {
+      return;
+    }
+
+    setIsRoleReady(false);
+    await checkUserRole(nextUser);
+  }, [checkUserRole, resetRoleState]);
 
   useEffect(() => {
-    const supabase = createClient();
+    const supabase = supabaseRef.current;
     console.log('[AuthContext] init');
+    let isMounted = true;
 
     // Get initial session
     supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (!isMounted) {
+        return;
+      }
+
       console.log('[AuthContext] initial session:', session?.user?.email ?? null);
-      setUser(session?.user ?? null);
-      setIsRoleReady(false);
-      setIsLoading(false);
-      await checkUserRole(session?.user ?? null);
+      await syncAuthState('INITIAL_SESSION', session?.user ?? null);
     });
 
     // Listen for auth changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (!isMounted) {
+        return;
+      }
+
       console.log('[AuthContext] auth state change:', _event, session?.user?.email ?? null);
-      setUser(session?.user ?? null);
-      setIsRoleReady(false);
-      setIsLoading(false);
-      await checkUserRole(session?.user ?? null);
+      await syncAuthState(_event, session?.user ?? null);
     });
 
-    return () => subscription.unsubscribe();
-  }, [checkUserRole]);
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
+  }, [syncAuthState]);
 
   const handleSignOut = async () => {
-    const supabase = createClient();
+    const supabase = supabaseRef.current;
     await supabase.auth.signOut();
+    currentUserIdRef.current = null;
     setUser(null);
-    setUserRole(null);
-    setIsAdmin(false);
-    setHasCustomerAccess(false);
-    setCustomerAccessGrantedAt(null);
-    setIsRoleReady(true);
+    resetRoleState(true);
   };
 
   const refreshUserRole = useCallback(async () => {
-    const supabase = createClient();
+    const supabase = supabaseRef.current;
     console.log('[AuthContext] refreshUserRole');
     const {
       data: { user: currentUser },
