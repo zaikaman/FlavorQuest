@@ -6,7 +6,14 @@
   "metadata": {
     "title": "FlavorQuest - Discover Vinh Khanh Food Street",
     "description": "Automatic location-based audio tour of Vinh Khanh food street, Can Tho. Offline-first PWA with multi-language support.",
-    "keywords": ["food tour", "audio guide", "Vinh Khanh", "Can Tho", "cuisine", "PWA"]
+    "keywords": [
+      "food tour",
+      "audio guide",
+      "Vinh Khanh",
+      "Can Tho",
+      "cuisine",
+      "PWA"
+    ]
   },
   "manifest": {
     "name": "FlavorQuest - Automatic Audio Tour Experience",
@@ -342,7 +349,7 @@
     "scriptLoading": "Loading payOS",
     "safeMode": "Safe mode",
     "embeddedInfo": "After creating a payment, the embedded payOS checkout will appear here.",
-    "hostedInfo": "On mobile and PWA, payOS embedded can freeze interactions because of WebView/iframe limits. FlavorQuest will open the full payOS payment page for a more stable experience.",
+    "hostedInfo": "FlavorQuest now always uses the full hosted payOS payment page on every device for a more stable checkout flow and to avoid embedded form issues.",
     "buttons": {
       "pay": "Pay with payOS",
       "creating": "Creating payment...",
@@ -367,8 +374,9 @@
       "currentStatus": "Current status: {status}. The webhook will unlock access automatically, or you can check manually. The payment page only opens when you press a button.",
       "statusCheckFailed": "Unable to check payment status right now.",
       "creatingPayment": "Creating payOS transaction...",
-      "createdPayment": "Transaction created. Please scan the QR code or pay in the frame below.",
-      "createFailed": "Failed to create transaction."
+      "createdPayment": "Transaction created. Redirecting you to the payOS payment page...",
+      "createFailed": "Failed to create transaction.",
+      "openingHosted": "Opening the payOS payment page..."
     },
     "statuses": {
       "PENDING": "Pending",
@@ -396,7 +404,13 @@
       "redirectIn": "Auto redirect in",
       "enterApp": "Enter app now",
       "justNow": "Just now"
-    }
+    },
+    "checkoutTitle": "payOS payment page",
+    "checkoutDescriptionReady": "Your transaction is ready. Use the button below to reopen the hosted payOS payment page.",
+    "checkoutDescriptionPending": "After you create a transaction, FlavorQuest will take you straight to the hosted payOS payment page.",
+    "checkoutReady": "Ready to pay",
+    "checkoutPending": "No transaction yet",
+    "checkoutInfo": "When you press Pay with payOS, FlavorQuest opens the hosted payOS payment page directly in the current tab."
   },
   "menu": {
     "title": "Menu",

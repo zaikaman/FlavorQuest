@@ -6,7 +6,14 @@
   "metadata": {
     "title": "FlavorQuest - 探索永庆美食街",
     "description": "位于芹苴永庆美食街的自动定位语音导览。离线优先的 PWA，提供多语言支持。",
-    "keywords": ["美食之旅", "语音导览", "永庆", "芹苴", "美食", "PWA"]
+    "keywords": [
+      "美食之旅",
+      "语音导览",
+      "永庆",
+      "芹苴",
+      "美食",
+      "PWA"
+    ]
   },
   "manifest": {
     "name": "FlavorQuest - 自动语音导览体验",
@@ -359,7 +366,7 @@
     "scriptLoading": "正在加载 payOS",
     "safeMode": "安全模式",
     "embeddedInfo": "创建交易后，payOS 嵌入式支付界面会显示在这里。",
-    "hostedInfo": "在移动端和 PWA 中，由于 WebView/iframe 限制，payOS 嵌入式支付可能导致交互卡死。FlavorQuest 会打开 payOS 完整支付页以获得更稳定的体验。",
+    "hostedInfo": "FlavorQuest ????????????? payOS ????????????????????????????????",
     "buttons": {
       "pay": "使用 payOS 支付",
       "creating": "正在创建支付...",
@@ -384,8 +391,9 @@
       "currentStatus": "当前状态：{status}。webhook 会自动解锁访问权限，你也可以手动检查。支付页面只会在你主动点击按钮时打开。",
       "statusCheckFailed": "暂时无法检查支付状态。",
       "creatingPayment": "正在创建 payOS 交易...",
-      "createdPayment": "交易已创建。请扫描二维码或在下方支付框中完成支付。",
-      "createFailed": "创建交易失败。"
+      "createdPayment": "???????????? payOS ????...",
+      "createFailed": "创建交易失败。",
+      "openingHosted": "???? payOS ????..."
     },
     "statuses": {
       "PENDING": "待支付",
@@ -413,7 +421,13 @@
       "redirectIn": "自动跳转倒计时",
       "enterApp": "立即进入应用",
       "justNow": "刚刚"
-    }
+    },
+    "checkoutTitle": "payOS ????",
+    "checkoutDescriptionReady": "????????????????????? payOS ???????",
+    "checkoutDescriptionPending": "??????FlavorQuest ??????? payOS ???????",
+    "checkoutReady": "?????",
+    "checkoutPending": "??????",
+    "checkoutInfo": "??????? payOS ?????FlavorQuest ??????????? payOS ???????"
   },
   "menu": {
     "title": "菜单",

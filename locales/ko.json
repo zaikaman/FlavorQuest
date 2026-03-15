@@ -6,7 +6,14 @@
   "metadata": {
     "title": "FlavorQuest - 빈칸 음식 거리 발견",
     "description": "빈칸 음식 거리, 껀 터의 자동 위치 기반 오디오 투어. 다국어 지원이 포함된 오프라인 우선 PWA.",
-    "keywords": ["음식 투어", "오디오 가이드", "빈칸", "껀 터", "요리", "PWA"]
+    "keywords": [
+      "음식 투어",
+      "오디오 가이드",
+      "빈칸",
+      "껀 터",
+      "요리",
+      "PWA"
+    ]
   },
   "manifest": {
     "name": "FlavorQuest - 자동 오디오 투어 경험",
@@ -359,7 +366,7 @@
     "scriptLoading": "payOS 로딩 중",
     "safeMode": "안전 모드",
     "embeddedInfo": "결제를 생성하면 payOS 임베디드 결제 화면이 여기에 표시됩니다.",
-    "hostedInfo": "모바일과 PWA에서는 WebView/iframe 제한 때문에 payOS 임베디드 결제가 터치 입력을 멈추게 할 수 있습니다. FlavorQuest는 더 안정적인 경험을 위해 payOS 전체 결제 페이지를 엽니다.",
+    "hostedInfo": "FlavorQuest? ?? ?? ???? payOS? ?? hosted ?? ???? ???? ? ???? ?? ??? ???? ???? ? ??? ????.",
     "buttons": {
       "pay": "payOS로 결제",
       "creating": "결제 생성 중...",
@@ -384,8 +391,9 @@
       "currentStatus": "현재 상태: {status}. webhook이 자동으로 잠금을 해제하거나, 직접 상태를 확인할 수 있습니다. 결제 페이지는 버튼을 눌렀을 때만 열립니다.",
       "statusCheckFailed": "지금은 결제 상태를 확인할 수 없습니다.",
       "creatingPayment": "payOS 거래를 생성하는 중...",
-      "createdPayment": "거래가 생성되었습니다. QR 코드를 스캔하거나 아래 프레임에서 결제해 주세요.",
-      "createFailed": "거래 생성에 실패했습니다."
+      "createdPayment": "??? ???????. payOS ?? ???? ???? ????...",
+      "createFailed": "거래 생성에 실패했습니다.",
+      "openingHosted": "payOS ?? ???? ?? ?..."
     },
     "statuses": {
       "PENDING": "대기 중",
@@ -413,7 +421,13 @@
       "redirectIn": "자동 이동까지",
       "enterApp": "지금 앱으로 이동",
       "justNow": "방금"
-    }
+    },
+    "checkoutTitle": "payOS ?? ???",
+    "checkoutDescriptionReady": "??? ???????. ?? ???? hosted payOS ?? ???? ?? ? ? ????.",
+    "checkoutDescriptionPending": "??? ???? FlavorQuest? ?? hosted payOS ?? ???? ??????.",
+    "checkoutReady": "?? ?? ??",
+    "checkoutPending": "?? ??",
+    "checkoutInfo": "payOS? ?? ??? ??? FlavorQuest? ?? ??? hosted payOS ?? ???? ?? ???."
   },
   "menu": {
     "title": "메뉴",
