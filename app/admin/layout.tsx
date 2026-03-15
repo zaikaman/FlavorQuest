@@ -103,7 +103,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       {/* Admin Header */}
       <header className="sticky top-0 z-20 border-b border-white/10 bg-[#2c1e16]/80 backdrop-blur-md">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col gap-4 py-4 md:h-16 md:flex-row md:items-center md:justify-between md:py-0">
+          <div className="grid gap-4 py-4 xl:grid-cols-[auto_minmax(0,1fr)_auto] xl:items-center">
             {/* Logo & Title */}
             <div className="flex items-center gap-3">
               <div className="bg-primary/20 rounded-lg p-2">
@@ -127,31 +127,33 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               </div>
             </div>
 
-            <nav className="flex flex-wrap items-center gap-2">
-              {navItems.map((item) => {
-                const isActive =
-                  pathname === item.href ||
-                  (item.href !== '/admin' && pathname.startsWith(item.href));
+            <nav className="min-w-0 overflow-x-auto xl:px-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              <div className="flex min-w-max flex-nowrap items-center gap-1.5 xl:justify-center">
+                {navItems.map((item) => {
+                  const isActive =
+                    pathname === item.href ||
+                    (item.href !== '/admin' && pathname.startsWith(item.href));
 
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className={`rounded-full border px-4 py-2 text-sm font-semibold transition-colors ${
-                      isActive
-                        ? 'border-primary bg-primary/15 text-primary'
-                        : 'border-white/10 bg-white/5 text-gray-300 hover:bg-white/10'
-                    }`}
-                  >
-                    {item.label}
-                  </Link>
-                );
-              })}
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      className={`whitespace-nowrap rounded-full border px-3 py-1.5 text-[13px] font-semibold transition-colors ${
+                        isActive
+                          ? 'border-primary bg-primary/15 text-primary'
+                          : 'border-white/10 bg-white/5 text-gray-300 hover:bg-white/10'
+                      }`}
+                    >
+                      {item.label}
+                    </Link>
+                  );
+                })}
+              </div>
             </nav>
 
             {/* User Info & Sign Out */}
-            <div className="flex items-center gap-4">
-              <div className="hidden text-right sm:block">
+            <div className="flex items-center justify-between gap-3 xl:justify-end">
+              <div className="hidden text-right lg:block">
                 <p className="text-sm font-medium text-gray-200">{user.email}</p>
                 <p className="text-primary text-xs font-semibold">Quản trị viên</p>
               </div>
@@ -161,7 +163,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   await signOut();
                   router.push('/login');
                 }}
-                className="rounded-lg border border-transparent px-4 py-2 text-sm text-gray-300 transition-colors hover:border-white/10 hover:bg-white/10 hover:text-white"
+                className="rounded-lg border border-transparent px-3 py-2 text-sm text-gray-300 transition-colors hover:border-white/10 hover:bg-white/10 hover:text-white"
               >
                 Đăng xuất
               </button>

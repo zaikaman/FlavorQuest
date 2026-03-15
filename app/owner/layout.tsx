@@ -81,7 +81,7 @@ export default function OwnerLayout({ children }: { children: React.ReactNode })
 
       <header className="sticky top-0 z-20 border-b border-white/10 bg-[#2c1e16]/85 backdrop-blur-md">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col gap-4 py-4 lg:flex-row lg:items-center lg:justify-between">
+          <div className="grid gap-4 py-4 xl:grid-cols-[auto_minmax(0,1fr)_auto] xl:items-center">
             <div className="flex items-center gap-3">
               <div className="bg-primary/15 text-primary border-primary/20 flex h-12 w-12 items-center justify-center rounded-2xl border">
                 <span className="material-symbols-outlined text-[26px]">storefront</span>
@@ -97,7 +97,8 @@ export default function OwnerLayout({ children }: { children: React.ReactNode })
               </div>
             </div>
 
-            <nav className="flex flex-wrap items-center gap-2 lg:justify-end">
+            <nav className="min-w-0 overflow-x-auto xl:px-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              <div className="flex min-w-max flex-nowrap items-center gap-1.5 xl:justify-center">
               {[
                 { href: '/owner', label: 'Tổng quan' },
                 { href: '/owner/chat', label: 'Tin nhắn' },
@@ -110,7 +111,7 @@ export default function OwnerLayout({ children }: { children: React.ReactNode })
                   <Link
                     key={item.href}
                     href={item.href}
-                    className={`rounded-full border px-4 py-2 text-sm font-semibold transition-colors ${
+                    className={`whitespace-nowrap rounded-full border px-3 py-1.5 text-[13px] font-semibold transition-colors ${
                       isActive
                         ? 'border-primary bg-primary/15 text-primary'
                         : 'border-white/10 bg-white/5 text-gray-300 hover:bg-white/10'
@@ -120,10 +121,11 @@ export default function OwnerLayout({ children }: { children: React.ReactNode })
                   </Link>
                 );
               })}
+              </div>
             </nav>
 
-            <div className="flex flex-wrap items-center gap-3 lg:justify-end">
-              <div className="rounded-2xl border border-white/10 bg-black/15 px-4 py-2 text-right">
+            <div className="flex flex-wrap items-center justify-between gap-3 xl:justify-end">
+              <div className="hidden rounded-2xl border border-white/10 bg-black/15 px-4 py-2 text-right lg:block">
                 <p className="text-sm font-semibold text-gray-100">{user?.email}</p>
                 <p className="text-primary text-xs font-semibold">
                   {isAdmin ? 'Admin kiêm chủ quán' : 'Tài khoản chủ quán'}
