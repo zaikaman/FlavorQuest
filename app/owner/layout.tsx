@@ -1,6 +1,7 @@
 'use client';
 
 import { Be_Vietnam_Pro } from 'next/font/google';
+import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { RoleChatbot } from '@/components/ai/RoleChatbot';
@@ -95,6 +96,31 @@ export default function OwnerLayout({ children }: { children: React.ReactNode })
                 </p>
               </div>
             </div>
+
+            <nav className="flex flex-wrap items-center gap-2 lg:justify-end">
+              {[
+                { href: '/owner', label: 'Tổng quan' },
+                { href: '/owner/chat', label: 'Tin nhắn' },
+              ].map((item) => {
+                const isActive =
+                  pathname === item.href ||
+                  (item.href !== '/owner' && pathname.startsWith(item.href));
+
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={`rounded-full border px-4 py-2 text-sm font-semibold transition-colors ${
+                      isActive
+                        ? 'border-primary bg-primary/15 text-primary'
+                        : 'border-white/10 bg-white/5 text-gray-300 hover:bg-white/10'
+                    }`}
+                  >
+                    {item.label}
+                  </Link>
+                );
+              })}
+            </nav>
 
             <div className="flex flex-wrap items-center gap-3 lg:justify-end">
               <div className="rounded-2xl border border-white/10 bg-black/15 px-4 py-2 text-right">

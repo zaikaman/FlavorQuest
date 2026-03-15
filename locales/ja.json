@@ -436,6 +436,88 @@
       "faq": "このアプリはオフライン利用や事前注文に対応していますか？"
     }
   },
+  "support": {
+    "nav": "チャット",
+    "openPage": "サポートチャットページを開く",
+    "customer": {
+      "eyebrow": "サポートセンター",
+      "title": "店主または管理者へ直接メッセージ",
+      "subtitle": "各店舗には販売地点ごとの専用スレッドがあり、管理者はアカウントや体験全体を支援する共通チャネルです。",
+      "emptyTitle": "会話はまだありません。",
+      "emptyBody": "左側で店舗または管理者チャネルを選んで会話を開始してください。返信があるとメール通知も送信されます。"
+    },
+    "owner": {
+      "eyebrow": "運営チャット",
+      "title": "店主とサポートチームのチャット",
+      "subtitle": "顧客との会話を店舗ごとに整理し、運営対応が必要なときは管理者との専用チャネルを開けます。",
+      "emptyTitle": "会話はまだありません。",
+      "emptyBody": "顧客が店舗に連絡したり、管理者チャネルを開いたりすると、すべての会話がここに表示されます。"
+    },
+    "admin": {
+      "eyebrow": "サポートキュー",
+      "title": "顧客と店主の会話を一元対応",
+      "subtitle": "管理者は顧客と店主からのサポートスレッドを1つの受信箱で受け取り、フローティングウィジェットなしで素早く返信できます。",
+      "emptyTitle": "キューは空です。",
+      "emptyBody": "顧客または店主から新しいサポート依頼が届くと、ここに表示されます。"
+    },
+    "stats": {
+      "activeThreads": "進行中のスレッド",
+      "activeThreadsBody": "各スレッドはメイン画面に重ならない独立ページとして表示されます。",
+      "unreadThreads": "返信が必要",
+      "unreadThreadsBody": "新しいメッセージが届くと、受信者にはメール通知も送られます。"
+    },
+    "launchpad": {
+      "title": "新しいスレッドを開く",
+      "body": "適切な相手を選んでください。システムが対応する会話を新規作成または再利用します。"
+    },
+    "inbox": {
+      "title": "会話一覧",
+      "body": "未読メッセージのあるスレッドは目立つように表示され、すばやく返信できます。"
+    },
+    "threadTypes": {
+      "customerOwner": "顧客 / 店主",
+      "customerAdmin": "顧客 / 管理者",
+      "ownerAdmin": "店主 / 管理者"
+    },
+    "states": {
+      "creating": "作成中...",
+      "waitingFirstMessage": "このスレッドにはまだメッセージがありません。",
+      "noThreadSelected": "会話を選択して開始してください。",
+      "noThreadSelectedBody": "左側の一覧から、役割と業務ルールに合ったスレッドを開けます。",
+      "noMessages": "このスレッドにはまだメッセージがありません。",
+      "noMessagesBody": "最初のメッセージを送ってください。返信があると一覧が自動更新され、メール通知も送られます。"
+    },
+    "actions": {
+      "openThread": "会話を開く",
+      "startThread": "チャットを始める",
+      "refresh": "更新",
+      "sending": "送信中...",
+      "send": "送信"
+    },
+    "counterparts": {
+      "admin": "管理チーム",
+      "unknown": "受信相手",
+      "adminShort": "管理",
+      "ownerShort": "店主",
+      "customerShort": "顧客"
+    },
+    "thread": {
+      "title": "会話",
+      "poiContext": "この会話は販売地点 {name} に紐づいています。",
+      "emailHint": "新しいメッセージはアプリ内通知とメール通知の両方を生成します。",
+      "emailBadge": "メール通知あり"
+    },
+    "composer": {
+      "placeholder": "相談内容を入力してください。Enter で送信、Shift + Enter で改行します。",
+      "hint": "メッセージはリアルタイムで表示され、受信者にもメール通知が送られます。"
+    },
+    "errors": {
+      "loadThreads": "会話一覧を読み込めませんでした。",
+      "loadMessages": "この会話のメッセージを読み込めませんでした。",
+      "createThread": "新しい会話を作成できませんでした。",
+      "sendMessage": "メッセージを送信できませんでした。"
+    }
+  },
   "notifications": {
     "title": "通知",
     "markAll": "すべて既読にする",

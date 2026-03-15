@@ -204,6 +204,13 @@ export default function TourPage() {
   }, [selectedTour]);
 
   useEffect(() => {
+    if (requestedTab === 'chat') {
+      const params = new URLSearchParams(searchParams.toString());
+      const nextUrl = params.toString() ? `/tour/chat?${params.toString()}` : '/tour/chat';
+      router.replace(nextUrl, { scroll: false });
+      return;
+    }
+
     if (requestedTab === 'assistant') {
       const params = new URLSearchParams(searchParams.toString());
       const nextUrl = params.toString()
@@ -671,6 +678,10 @@ export default function TourPage() {
           ? `/tour/assistant?${params.toString()}`
           : '/tour/assistant';
         router.push(nextUrl);
+      } else if (tab === 'chat') {
+        params.set('tab', 'chat');
+        const nextUrl = params.toString() ? `/tour/chat?${params.toString()}` : '/tour/chat';
+        router.push(nextUrl);
       } else {
         params.set('tab', tab);
         const nextUrl = params.toString() ? `/tour?${params.toString()}` : '/tour';
@@ -798,6 +809,30 @@ export default function TourPage() {
 
           {/* Offline Status */}
           <div className="pointer-events-auto flex items-center gap-2">
+            {user && (
+              <button
+                onClick={() => {
+                  const params = new URLSearchParams();
+
+                  if (selectedTourId) {
+                    params.set('tour', selectedTourId);
+                  }
+
+                  if (selectedPOI?.id) {
+                    params.set('poi', selectedPOI.id);
+                  }
+
+                  params.set('tab', 'chat');
+
+                  const nextUrl = params.toString() ? `/tour/chat?${params.toString()}` : '/tour/chat';
+                  router.push(nextUrl);
+                }}
+                className="relative flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-black/40 text-white shadow-lg backdrop-blur-md transition-colors hover:bg-black/60"
+                aria-label={t('support.openPage')}
+              >
+                <span className="material-symbols-outlined text-xl">forum</span>
+              </button>
+            )}
             <button
               onClick={() => {
                 const params = new URLSearchParams();

@@ -419,6 +419,88 @@
       "faq": "Cette application prend-elle en charge le mode hors ligne et la précommande ?"
     }
   },
+  "support": {
+    "nav": "Chat",
+    "openPage": "Ouvrir la page de chat d'assistance",
+    "customer": {
+      "eyebrow": "Centre d'assistance",
+      "title": "Échangez directement avec le propriétaire ou l'admin",
+      "subtitle": "Chaque échoppe dispose de son propre fil lié au point de vente, tandis que l'admin reste le canal d'assistance général pour le compte et l'expérience FlavorQuest.",
+      "emptyTitle": "Aucune conversation pour le moment.",
+      "emptyBody": "Choisissez une échoppe ou le canal admin à gauche pour commencer. Un e-mail sera envoyé lorsqu'une réponse arrivera."
+    },
+    "owner": {
+      "eyebrow": "Messages opérationnels",
+      "title": "Chat entre les propriétaires et l'équipe support",
+      "subtitle": "Gardez les échanges clients rattachés à chaque point de vente et ouvrez un canal séparé avec l'admin dès qu'un sujet opérationnel apparaît.",
+      "emptyTitle": "Aucune conversation pour le moment.",
+      "emptyBody": "Quand un client écrit à un point de vente ou que vous ouvrez un canal admin, toutes les conversations apparaissent ici."
+    },
+    "admin": {
+      "eyebrow": "File d'assistance",
+      "title": "Coordonner les échanges avec les clients et les propriétaires",
+      "subtitle": "Les admins reçoivent les demandes des clients et des propriétaires dans une seule boîte de réception, sans widget flottant.",
+      "emptyTitle": "La file est vide.",
+      "emptyBody": "Les nouvelles demandes d'assistance des clients ou des propriétaires apparaîtront ici."
+    },
+    "stats": {
+      "activeThreads": "Fils actifs",
+      "activeThreadsBody": "Chaque fil dispose de sa propre page complète au lieu de se superposer à l'interface principale.",
+      "unreadThreads": "À traiter",
+      "unreadThreadsBody": "Quand un nouveau message arrive, le destinataire reçoit aussi une notification par e-mail."
+    },
+    "launchpad": {
+      "title": "Ouvrir un nouveau fil",
+      "body": "Choisissez le bon interlocuteur. Le système ouvrira ou réutilisera la conversation correspondante."
+    },
+    "inbox": {
+      "title": "Liste des conversations",
+      "body": "Les fils avec des messages non lus restent mis en avant pour accélérer la réponse."
+    },
+    "threadTypes": {
+      "customerOwner": "Client / Propriétaire",
+      "customerAdmin": "Client / Admin",
+      "ownerAdmin": "Propriétaire / Admin"
+    },
+    "states": {
+      "creating": "Ouverture...",
+      "waitingFirstMessage": "Aucun message dans ce fil pour le moment.",
+      "noThreadSelected": "Choisissez une conversation pour commencer.",
+      "noThreadSelectedBody": "La liste à gauche vous aide à ouvrir le bon fil selon le rôle et les règles métier.",
+      "noMessages": "Ce fil ne contient encore aucun message.",
+      "noMessagesBody": "Envoyez le premier message. Lorsqu'une réponse arrive, la liste se met à jour automatiquement et un e-mail est envoyé."
+    },
+    "actions": {
+      "openThread": "Ouvrir la conversation",
+      "startThread": "Commencer à discuter",
+      "refresh": "Actualiser",
+      "sending": "Envoi...",
+      "send": "Envoyer le message"
+    },
+    "counterparts": {
+      "admin": "Équipe admin",
+      "unknown": "Destinataire",
+      "adminShort": "Admin",
+      "ownerShort": "Propriétaire",
+      "customerShort": "Client"
+    },
+    "thread": {
+      "title": "Conversation",
+      "poiContext": "Cette conversation est liée au point de vente {name}.",
+      "emailHint": "Les nouveaux messages créent une notification dans l'application et un e-mail pour le destinataire.",
+      "emailBadge": "Notifications e-mail actives"
+    },
+    "composer": {
+      "placeholder": "Saisissez votre message. Appuyez sur Entrée pour envoyer, Maj + Entrée pour une nouvelle ligne.",
+      "hint": "Les messages apparaissent en temps réel et le destinataire reçoit aussi un e-mail."
+    },
+    "errors": {
+      "loadThreads": "Impossible de charger les conversations.",
+      "loadMessages": "Impossible de charger les messages de cette conversation.",
+      "createThread": "Impossible de créer une nouvelle conversation.",
+      "sendMessage": "Impossible d'envoyer le message."
+    }
+  },
   "notifications": {
     "title": "Notifications",
     "markAll": "Tout marquer comme lu",

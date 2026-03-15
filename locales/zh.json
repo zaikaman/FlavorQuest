@@ -436,6 +436,88 @@
       "faq": "这个应用支持离线模式和提前点餐吗？"
     }
   },
+  "support": {
+    "nav": "聊天",
+    "openPage": "打开支持聊天页面",
+    "customer": {
+      "eyebrow": "支持中心",
+      "title": "直接联系店主或管理员",
+      "subtitle": "每个店铺都会按销售点拥有独立会话，而管理员则作为 FlavorQuest 中账号与体验问题的统一支持渠道。",
+      "emptyTitle": "暂时还没有会话。",
+      "emptyBody": "请在左侧选择店铺或管理员频道开始聊天。收到回复时，系统也会发送邮件通知。"
+    },
+    "owner": {
+      "eyebrow": "运营聊天",
+      "title": "店主与支持团队的聊天页",
+      "subtitle": "把顾客沟通按销售点整理，并在需要处理运营问题时单独开启与管理员的频道。",
+      "emptyTitle": "暂时还没有会话。",
+      "emptyBody": "当顾客向门店发消息，或你开启管理员频道时，所有会话都会显示在这里。"
+    },
+    "admin": {
+      "eyebrow": "支持队列",
+      "title": "集中处理顾客与店主的消息",
+      "subtitle": "管理员会在同一个收件箱中收到顾客和店主的支持会话，无需依赖浮动小部件也能快速回复。",
+      "emptyTitle": "队列为空。",
+      "emptyBody": "当顾客或店主发来新的支持请求时，会话会显示在这里。"
+    },
+    "stats": {
+      "activeThreads": "进行中的会话",
+      "activeThreadsBody": "每个会话都是独立完整页面，不会叠在主界面上。",
+      "unreadThreads": "需要回复",
+      "unreadThreadsBody": "有新消息时，接收方也会收到邮件通知。"
+    },
+    "launchpad": {
+      "title": "打开新会话",
+      "body": "选择正确的对象，系统会创建或复用对应的聊天会话。"
+    },
+    "inbox": {
+      "title": "会话列表",
+      "body": "带有未读消息的会话会更醒目，方便你更快处理。"
+    },
+    "threadTypes": {
+      "customerOwner": "顾客 / 店主",
+      "customerAdmin": "顾客 / 管理员",
+      "ownerAdmin": "店主 / 管理员"
+    },
+    "states": {
+      "creating": "正在打开...",
+      "waitingFirstMessage": "这个会话里还没有消息。",
+      "noThreadSelected": "请选择一个会话开始。",
+      "noThreadSelectedBody": "左侧列表会按照角色和业务规则帮助你打开正确的聊天会话。",
+      "noMessages": "这个会话里还没有消息。",
+      "noMessagesBody": "先发送第一条消息。收到回复后，列表会自动更新，同时发送邮件通知。"
+    },
+    "actions": {
+      "openThread": "打开会话",
+      "startThread": "开始聊天",
+      "refresh": "刷新",
+      "sending": "发送中...",
+      "send": "发送消息"
+    },
+    "counterparts": {
+      "admin": "管理员团队",
+      "unknown": "接收方",
+      "adminShort": "管理员",
+      "ownerShort": "店主",
+      "customerShort": "顾客"
+    },
+    "thread": {
+      "title": "会话",
+      "poiContext": "该会话绑定到销售点 {name}。",
+      "emailHint": "新消息会同时生成站内通知和邮件提醒。",
+      "emailBadge": "已启用邮件通知"
+    },
+    "composer": {
+      "placeholder": "输入要沟通的内容。按 Enter 发送，Shift + Enter 换行。",
+      "hint": "消息会实时显示，接收方也会收到邮件通知。"
+    },
+    "errors": {
+      "loadThreads": "无法加载会话列表。",
+      "loadMessages": "无法加载该会话的消息。",
+      "createThread": "无法创建新会话。",
+      "sendMessage": "无法发送消息。"
+    }
+  },
   "notifications": {
     "title": "通知",
     "markAll": "全部标记为已读",
