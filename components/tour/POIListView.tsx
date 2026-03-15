@@ -12,6 +12,7 @@ import { useTranslations } from '@/lib/hooks/useTranslations';
 import { getLocalizedPOI } from '@/lib/utils/localization';
 import { calculateDistance } from '@/lib/utils/distance';
 import { CardSkeleton, Skeleton } from '@/components/ui/Loading';
+import { type POICategoryTag } from '@/lib/constants/poiCategories';
 import type { POI, Coordinates } from '@/lib/types/index';
 
 interface POIListViewProps {
@@ -25,6 +26,14 @@ interface POIListViewProps {
 }
 
 type SortOption = 'distance' | 'priority' | 'name';
+
+const NEAR_ME_RADIUS_METERS = 3000;
+
+const CATEGORY_KEYWORDS: Record<POICategoryTag, string[]> = {
+  snails: ['ốc', 'oc', 'snail', 'snails', 'shellfish', 'escargot'],
+  seafood: ['hải sản', 'hai san', 'seafood', 'fish', 'shrimp', 'prawn', 'crab', 'squid', 'octopus', 'clam', 'oyster', 'mussel'],
+  grill: ['nướng', 'nuong', 'grill', 'grilled', 'bbq', 'barbecue', 'barbeque', 'roasted'],
+};
 
 export function POIListView({
   pois,
@@ -44,6 +53,40 @@ export function POIListView({
   // Sort and filter POIs
   const sortedPOIs = useMemo(() => {
     let filtered = [...pois];
+
+    if (filterCategory === 'nearMe') {
+      filtered = userLocation
+        ? filtered.filter((poi) => {
+          const distance = calculateDistance(userLocation, { lat: poi.lat, lng: poi.lng });
+          return distance <= NEAR_ME_RADIUS_METERS;
+        })
+        : [];
+    } else if (filterCategory !== 'all') {
+      const selectedCategory = filterCategory as POICategoryTag;
+      const keywords = CATEGORY_KEYWORDS[selectedCategory] ?? [];
+
+      filtered = filtered.filter((poi) => {
+        if (poi.category_tags?.includes(selectedCategory)) {
+          return true;
+        }
+
+        const localized = getLocalizedPOI(poi, language);
+        const haystack = [
+          localized.name,
+          localized.description,
+          poi.signature_dish,
+          poi.name_vi,
+          poi.description_vi,
+          poi.name_en,
+          poi.description_en,
+        ]
+          .filter(Boolean)
+          .join(' ')
+          .toLowerCase();
+
+        return keywords.some((keyword) => haystack.includes(keyword));
+      });
+    }
 
     // Search filter
     if (searchQuery) {
@@ -76,7 +119,7 @@ export function POIListView({
     });
 
     return filtered;
-  }, [pois, searchQuery, sortBy, userLocation, language]);
+  }, [filterCategory, pois, searchQuery, sortBy, userLocation, language]);
 
   const formatDistance = (poi: POI): string => {
     if (!userLocation) return '';

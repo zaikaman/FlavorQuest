@@ -1,4 +1,5 @@
 import { createServerClient, getCurrentUserProfile, isUserAdmin } from '@/lib/supabase/server';
+import { normalizePOICategoryTags } from '@/lib/constants/poiCategories';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
@@ -28,6 +29,7 @@ const PUBLIC_POI_SELECT = `
     audio_url_zh,
     image_url,
     signature_dish,
+    category_tags,
     fun_fact,
     estimated_hours,
     owner_id,
@@ -88,6 +90,7 @@ export async function POST(request: NextRequest) {
 
     try {
         const body = await request.json();
+        body.category_tags = normalizePOICategoryTags(body.category_tags);
 
         // Validate required fields (basic validation)
         if (!body.name_vi || !body.lat || !body.lng) {

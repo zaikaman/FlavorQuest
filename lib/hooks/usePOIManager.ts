@@ -69,6 +69,7 @@ const POI_SELECT_FIELDS = `
   audio_url_zh,
   image_url,
   signature_dish,
+  category_tags,
   fun_fact,
   estimated_hours,
   owner_id,
