@@ -7,7 +7,9 @@ interface NewOrderEmailPayload {
   orderId: string;
   totalAmount: number;
   itemSummary: string;
-  pickupTime?: string | null;
+  orderType: 'pickup' | 'delivery';
+  scheduledTime?: string | null;
+  deliveryAddress?: string | null;
 }
 
 function createTransporter() {
@@ -50,12 +52,14 @@ export async function sendNewOrderEmail(payload: NewOrderEmailPayload) {
       <div style="font-family: Arial, sans-serif; line-height: 1.5; color: #1f2937;">
         <h2 style="margin-bottom: 12px;">Bạn có đơn đặt món mới</h2>
         <p>Xin chào ${payload.ownerName || 'chủ quán'},</p>
-        <p>Khách vừa đặt món trước tại <strong>${payload.poiName}</strong>.</p>
+        <p>Khách vừa tạo ${payload.orderType === 'delivery' ? 'đơn giao hàng' : 'đơn nhận tại quán'} tại <strong>${payload.poiName}</strong>.</p>
         <ul>
           <li>Mã đơn: <strong>#${payload.orderId.slice(0, 8)}</strong></li>
           <li>Tổng tiền: <strong>${payload.totalAmount.toLocaleString('vi-VN')}đ</strong></li>
           <li>Món đã đặt: ${payload.itemSummary}</li>
-          ${payload.pickupTime ? `<li>Giờ nhận món: ${new Date(payload.pickupTime).toLocaleString('vi-VN')}</li>` : ''}
+          <li>Loại đơn: ${payload.orderType === 'delivery' ? 'Giao tận nơi' : 'Nhận tại quán'}</li>
+          ${payload.scheduledTime ? `<li>Thời gian hẹn: ${new Date(payload.scheduledTime).toLocaleString('vi-VN')}</li>` : ''}
+          ${payload.deliveryAddress ? `<li>Địa chỉ giao: ${payload.deliveryAddress}</li>` : ''}
         </ul>
         <p>Vui lòng vào dashboard chủ quán để xác nhận và chuẩn bị món.</p>
       </div>

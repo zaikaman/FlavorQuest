@@ -2,7 +2,15 @@ import { createServerClient, getCurrentUserProfile } from '@/lib/supabase/server
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-const OWNER_ALLOWED_STATUS = new Set(['pending', 'confirmed', 'preparing', 'ready', 'cancelled']);
+const OWNER_ALLOWED_STATUS = new Set([
+  'pending',
+  'confirmed',
+  'preparing',
+  'ready',
+  'delivering',
+  'delivered',
+  'cancelled',
+]);
 
 export async function PATCH(
   request: NextRequest,

@@ -69,6 +69,18 @@ const orderStatusMeta: Record<
     pill: 'bg-emerald-500/15 text-emerald-200',
     icon: 'done_all',
   },
+  delivering: {
+    label: 'Đang giao',
+    tone: 'border-violet-400/20 bg-violet-500/10 text-violet-100',
+    pill: 'bg-violet-500/15 text-violet-200',
+    icon: 'delivery_dining',
+  },
+  delivered: {
+    label: 'Đã giao xong',
+    tone: 'border-lime-400/20 bg-lime-500/10 text-lime-100',
+    pill: 'bg-lime-500/15 text-lime-200',
+    icon: 'home_pin',
+  },
   cancelled: {
     label: 'Đã hủy',
     tone: 'border-white/10 bg-white/5 text-gray-200',
@@ -144,6 +156,10 @@ function formatRelativeDate(value?: string | null) {
 
   const diffDays = Math.round(diffHours / 24);
   return `${diffDays} ngày trước`;
+}
+
+function getOrderTypeLabel(order: PreorderOrder) {
+  return order.order_type === 'delivery' ? 'Giao tận nơi' : 'Nhận tại quán';
 }
 
 export default function OwnerDashboardPage() {
@@ -1137,6 +1153,9 @@ export default function OwnerDashboardPage() {
                                   <p className="mt-1 text-sm text-gray-400">
                                     {order.pois?.name_vi || 'POI'} •{' '}
                                     {formatDateTime(order.created_at)}
+                                  </p>
+                                  <p className="mt-2 text-xs font-semibold text-primary">
+                                    {getOrderTypeLabel(order)}
                                   </p>
                                 </div>
                                 <span

@@ -21,6 +21,8 @@ import { CardSkeleton, InlineSpinner, POIDetailSkeleton } from '@/components/ui/
 import type { Json } from '@/lib/types/database.types';
 import type { Dish, POI } from '@/lib/types/index';
 
+type OrderType = 'pickup' | 'delivery';
+
 function toLocalDateTimeInputValue(date: Date) {
   const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
   return localDate.toISOString().slice(0, 16);
@@ -51,9 +53,12 @@ export default function POIDetailPage() {
   const [poi, setPoi] = useState<POI | null>(null);
   const [dishes, setDishes] = useState<Dish[]>([]);
   const [cart, setCart] = useState<Record<string, number>>({});
+  const [orderType, setOrderType] = useState<OrderType>('pickup');
   const [customerName, setCustomerName] = useState('');
   const [customerPhone, setCustomerPhone] = useState('');
   const [pickupTime, setPickupTime] = useState('');
+  const [deliveryAddress, setDeliveryAddress] = useState('');
+  const [deliveryTime, setDeliveryTime] = useState('');
   const [orderNote, setOrderNote] = useState('');
   const [isOrdering, setIsOrdering] = useState(false);
   const [isLoadingDishes, setIsLoadingDishes] = useState(true);
@@ -172,9 +177,21 @@ export default function POIDetailPage() {
       return;
     }
 
-    if (pickupTime && !isFutureDateTime(pickupTime)) {
+    if (orderType === 'pickup' && pickupTime && !isFutureDateTime(pickupTime)) {
       showToastMsg(t('menu.pickupTimeFuture'));
       return;
+    }
+
+    if (orderType === 'delivery') {
+      if (!customerName.trim() || !customerPhone.trim() || !deliveryAddress.trim()) {
+        showToastMsg(t('menu.deliveryContactRequired'));
+        return;
+      }
+
+      if (deliveryTime && !isFutureDateTime(deliveryTime)) {
+        showToastMsg(t('menu.deliveryTimeFuture'));
+        return;
+      }
     }
 
     setIsOrdering(true);
@@ -184,9 +201,13 @@ export default function POIDetailPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           poi_id: poi.id,
+          order_type: orderType,
           customer_name: customerName || null,
           customer_phone: customerPhone || null,
-          pickup_time: pickupTime ? new Date(pickupTime).toISOString() : null,
+          pickup_time: orderType === 'pickup' && pickupTime ? new Date(pickupTime).toISOString() : null,
+          delivery_address: orderType === 'delivery' ? deliveryAddress || null : null,
+          delivery_time:
+            orderType === 'delivery' && deliveryTime ? new Date(deliveryTime).toISOString() : null,
           note: orderNote || null,
           items: orderItems.map(item => ({ dish_id: item.dish.id, quantity: item.quantity })),
         }),
@@ -199,15 +220,26 @@ export default function POIDetailPage() {
           throw new Error(t('menu.pickupTimeFuture'));
         }
 
+        if (payload?.code === 'DELIVERY_TIME_IN_PAST' || payload?.code === 'INVALID_DELIVERY_TIME') {
+          throw new Error(t('menu.deliveryTimeFuture'));
+        }
+
+        if (payload?.code === 'MISSING_DELIVERY_INFO') {
+          throw new Error(t('menu.deliveryContactRequired'));
+        }
+
         throw new Error(payload?.error || 'Order failed');
       }
 
       setCart({});
+      setOrderType('pickup');
       setCustomerName('');
       setCustomerPhone('');
       setPickupTime('');
+      setDeliveryAddress('');
+      setDeliveryTime('');
       setOrderNote('');
-      showToastMsg(t('menu.success'));
+      showToastMsg(orderType === 'delivery' ? t('menu.deliverySuccess') : t('menu.pickupSuccess'));
     } catch (error) {
       console.error('Place order failed:', error);
       showToastMsg(error instanceof Error ? error.message : t('errors.generic'));
@@ -425,7 +457,43 @@ export default function POIDetailPage() {
         <div className="bg-[#2a1e16] rounded-xl border border-white/10 p-4 space-y-3 mb-8">
           <h3 className="font-bold">{t('menu.cart')}</h3>
 
+          {false && (
+
           <p className="text-sm text-gray-400">Tổng tạm tính: {totalAmount.toLocaleString('vi-VN')}đ</p>
+
+          )}
+
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={() => setOrderType('pickup')}
+              className={`rounded-lg border px-3 py-3 text-sm font-semibold transition-colors ${
+                orderType === 'pickup'
+                  ? 'border-primary/40 bg-primary/15 text-primary'
+                  : 'border-white/10 bg-black/20 text-white/80'
+              }`}
+            >
+              {t('menu.pickup')}
+            </button>
+            <button
+              type="button"
+              onClick={() => setOrderType('delivery')}
+              className={`rounded-lg border px-3 py-3 text-sm font-semibold transition-colors ${
+                orderType === 'delivery'
+                  ? 'border-primary/40 bg-primary/15 text-primary'
+                  : 'border-white/10 bg-black/20 text-white/80'
+              }`}
+            >
+              {t('menu.delivery')}
+            </button>
+          </div>
+
+          <p className="text-sm text-gray-400">
+            {orderType === 'delivery' ? t('menu.deliveryDescription') : t('menu.pickupDescription')}
+          </p>
+          <p className="text-sm text-gray-400">
+            {t('menu.subtotal', { amount: totalAmount.toLocaleString('vi-VN') })}
+          </p>
 
           <input
             value={customerName}
@@ -439,13 +507,31 @@ export default function POIDetailPage() {
             placeholder={t('menu.customerPhone')}
             className="w-full rounded-lg bg-black/20 border border-white/10 px-3 py-2"
           />
-          <input
-            type="datetime-local"
-            value={pickupTime}
-            onChange={event => setPickupTime(event.target.value)}
-            min={pickupTimeMin}
-            className="w-full rounded-lg bg-black/20 border border-white/10 px-3 py-2"
-          />
+          {orderType === 'pickup' ? (
+            <input
+              type="datetime-local"
+              value={pickupTime}
+              onChange={event => setPickupTime(event.target.value)}
+              min={pickupTimeMin}
+              className="w-full rounded-lg bg-black/20 border border-white/10 px-3 py-2"
+            />
+          ) : (
+            <>
+              <textarea
+                value={deliveryAddress}
+                onChange={event => setDeliveryAddress(event.target.value)}
+                placeholder={t('menu.deliveryAddress')}
+                className="w-full rounded-lg bg-black/20 border border-white/10 px-3 py-2"
+              />
+              <input
+                type="datetime-local"
+                value={deliveryTime}
+                onChange={event => setDeliveryTime(event.target.value)}
+                min={pickupTimeMin}
+                className="w-full rounded-lg bg-black/20 border border-white/10 px-3 py-2"
+              />
+            </>
+          )}
           <textarea
             value={orderNote}
             onChange={event => setOrderNote(event.target.value)}
@@ -458,7 +544,13 @@ export default function POIDetailPage() {
             disabled={orderItems.length === 0 || isOrdering}
             className="w-full py-3 rounded-lg bg-primary text-white font-bold disabled:opacity-50"
           >
-            {isOrdering ? <InlineSpinner label={t('common.loading')} /> : t('menu.placeOrder')}
+            {isOrdering ? (
+              <InlineSpinner label={t('common.loading')} />
+            ) : orderType === 'delivery' ? (
+              t('menu.placeDeliveryOrder')
+            ) : (
+              t('menu.placePickupOrder')
+            )}
           </button>
         </div>
       </div>
