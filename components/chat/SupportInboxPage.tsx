@@ -11,6 +11,7 @@ import {
 } from 'react';
 import type { RealtimeChannel } from '@supabase/supabase-js';
 import { createClient } from '@/lib/supabase/client';
+import { Send, ArrowLeft } from 'lucide-react';
 import { useAuth } from '@/lib/contexts/AuthContext';
 import { useTranslations } from '@/lib/hooks/useTranslations';
 import type {
@@ -79,6 +80,12 @@ export function SupportInboxPage({ role, className = '' }: SupportInboxPageProps
   const [pendingDirectoryId, setPendingDirectoryId] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const mountedRef = useRef(true);
+  const [isMobileChatOpen, setIsMobileChatOpen] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages, isLoadingMessages]);
 
   const copy = useMemo(() => {
     if (role === 'owner') {
@@ -400,8 +407,7 @@ export function SupportInboxPage({ role, className = '' }: SupportInboxPageProps
       setErrorMessage(null);
 
       if (entry.existing_thread_id) {
-        setActiveThreadId(entry.existing_thread_id);
-        return;
+        setActiveThreadId(entry.existing_thread_id);        setIsMobileChatOpen(true);        return;
       }
 
       setPendingDirectoryId(entry.id);
@@ -427,8 +433,7 @@ export function SupportInboxPage({ role, className = '' }: SupportInboxPageProps
         }
 
         const data = (await response.json()) as { threadId: string };
-        setActiveThreadId(data.threadId);
-        await fetchInbox(false);
+        setActiveThreadId(data.threadId);        setIsMobileChatOpen(true);        await fetchInbox(false);
       } catch (error) {
         setErrorMessage(
           error instanceof Error
@@ -571,8 +576,8 @@ export function SupportInboxPage({ role, className = '' }: SupportInboxPageProps
         </div>
       )}
 
-      <section className="grid gap-6 xl:grid-cols-[0.92fr_1.08fr]">
-        <aside className="space-y-6">
+      <section className="flex flex-col xl:flex-row gap-6 h-[calc(100vh-14rem)] min-h-[600px] max-h-[85vh]">
+        <aside className={`space-y-6 flex-col w-full xl:w-[45%] flex-shrink-0 flex ${isMobileChatOpen ? 'hidden xl:flex' : 'flex'} h-full overflow-y-auto pr-2 custom-scrollbar`}>
           <div className="rounded-[28px] border border-white/10 bg-[#2c1e16] p-5">
               <div className="flex items-start justify-between gap-3">
                 <div>
@@ -700,7 +705,7 @@ export function SupportInboxPage({ role, className = '' }: SupportInboxPageProps
                     <button
                       key={thread.id}
                       type="button"
-                      onClick={() => setActiveThreadId(thread.id)}
+                      onClick={() => { setActiveThreadId(thread.id); setIsMobileChatOpen(true); }}
                       className={`w-full rounded-2xl border px-4 py-4 text-left transition-colors ${
                         isActive
                           ? 'border-primary/35 bg-primary/12'
@@ -744,30 +749,39 @@ export function SupportInboxPage({ role, className = '' }: SupportInboxPageProps
           </div>
         </aside>
 
-        <div className="flex min-h-[640px] flex-col overflow-hidden rounded-[30px] border border-white/10 bg-[#2c1e16]">
+        <div className={`flex-1 flex-col overflow-hidden rounded-[30px] border border-white/10 bg-[#2c1e16] ${isMobileChatOpen ? 'flex' : 'hidden xl:flex'} h-full`}>
           <div className="border-b border-white/10 bg-[linear-gradient(135deg,rgba(242,108,13,0.12),rgba(255,255,255,0))] px-5 py-5 sm:px-6">
             {activeThread ? (
               <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-                <div>
-                  <p className="text-primary text-sm font-semibold">
-                    {activeThread.subject ||
-                      activeDirectoryEntry?.title ||
-                      t('support.thread.title', undefined, 'Cuộc trò chuyện')}
-                  </p>
-                  <h2 className="mt-2 text-2xl font-black text-white">
-                    {activeThread.counterpart?.role === 'admin'
-                      ? t('support.counterparts.admin', undefined, 'Đội ngũ admin')
-                      : activeThread.counterpart?.email || t('support.counterparts.unknown', undefined, 'Người nhận')}
-                  </h2>
-                  <p className="mt-2 text-sm leading-6 text-gray-300">
-                    {activeThread.poi
-                      ? t('support.thread.poiContext', { name: activeThread.poi.name_vi }, 'Trao đổi đang gắn với điểm bán {name}.')
-                      : t(
-                          'support.thread.emailHint',
-                          undefined,
-                          'Tin nhắn mới sẽ được báo trong ứng dụng và qua email.'
-                        )}
-                  </p>
+                <div className="flex items-start gap-4">
+                  <button
+                    onClick={() => setIsMobileChatOpen(false)}
+                    className="xl:hidden mt-0 flex-shrink-0 rounded-full bg-white/5 p-2 text-gray-400 hover:bg-white/10 hover:text-white transition-colors"
+                    aria-label="Quay lại danh sách"
+                  >
+                    <ArrowLeft className="h-5 w-5" />
+                  </button>
+                  <div>
+                    <p className="text-primary text-sm font-semibold">
+                      {activeThread.subject ||
+                        activeDirectoryEntry?.title ||
+                        t('support.thread.title', undefined, 'Cuộc trò chuyện')}
+                    </p>
+                    <h2 className="mt-2 text-2xl font-black text-white">
+                      {activeThread.counterpart?.role === 'admin'
+                        ? t('support.counterparts.admin', undefined, 'Đội ngũ admin')
+                        : activeThread.counterpart?.email || t('support.counterparts.unknown', undefined, 'Người nhận')}
+                    </h2>
+                    <p className="mt-2 text-sm leading-6 text-gray-300">
+                      {activeThread.poi
+                        ? t('support.thread.poiContext', { name: activeThread.poi.name_vi }, 'Trao đổi đang gắn với điểm bán {name}.')
+                        : t(
+                            'support.thread.emailHint',
+                            undefined,
+                            'Tin nhắn mới sẽ được báo trong ứng dụng và qua email.'
+                          )}
+                    </p>
+                  </div>
                 </div>
                 <div className="flex flex-wrap gap-2">
                   <span
@@ -800,7 +814,7 @@ export function SupportInboxPage({ role, className = '' }: SupportInboxPageProps
             )}
           </div>
 
-          <div className="flex-1 overflow-y-auto bg-[linear-gradient(180deg,rgba(0,0,0,0.04),rgba(0,0,0,0.18))] px-4 py-5 sm:px-6">
+          <div className="flex-1 overflow-y-auto custom-scrollbar bg-[linear-gradient(180deg,rgba(0,0,0,0.04),rgba(0,0,0,0.18))] px-4 py-5 sm:px-6">
             {!activeThread ? null : isLoadingMessages ? (
               <div className="space-y-4">
                 {[0, 1, 2, 3].map((item) => (
@@ -836,10 +850,10 @@ export function SupportInboxPage({ role, className = '' }: SupportInboxPageProps
                       className={`flex ${isOwnMessage ? 'justify-end' : 'justify-start'}`}
                     >
                       <div
-                        className={`max-w-[85%] rounded-[24px] border px-4 py-3 sm:max-w-[72%] ${
+                        className={`max-w-[85%] px-4 py-3 sm:max-w-[72%] shadow-sm ${
                           isOwnMessage
-                            ? 'border-primary/30 bg-primary/14 text-white'
-                            : 'border-white/10 bg-black/20 text-gray-100'
+                            ? 'rounded-[20px] rounded-tr-[4px] bg-primary text-white'
+                            : 'rounded-[20px] rounded-tl-[4px] border border-white/10 bg-[#1f1611]/80 text-gray-100 backdrop-blur-md'
                         }`}
                       >
                         <div className="flex items-center gap-2">
@@ -861,43 +875,34 @@ export function SupportInboxPage({ role, className = '' }: SupportInboxPageProps
                 })}
               </div>
             )}
+            <div ref={messagesEndRef} />
           </div>
 
           <div className="border-t border-white/10 bg-black/10 px-4 py-4 sm:px-6">
-            <div className="grid gap-3">
+            <div className="flex min-h-[56px] items-end rounded-[28px] border border-white/10 bg-white/5 pr-2 focus-within:bg-white/10 focus-within:ring-1 focus-within:ring-primary/50 transition-all">
               <textarea
                 value={draft}
                 onChange={(event) => setDraft(event.target.value)}
                 onKeyDown={handleComposerKeyDown}
                 disabled={!activeThread || isSending}
-                placeholder={t(
-                  'support.composer.placeholder',
-                  undefined,
-                  'Nhập tin nhắn...'
-                )}
-                rows={4}
-                className="focus:border-primary/40 min-h-[112px] w-full resize-none rounded-[24px] border border-white/10 bg-[#17100b] px-4 py-3 text-sm leading-6 text-white outline-none placeholder:text-gray-500 disabled:cursor-not-allowed disabled:opacity-60"
+                placeholder={t('support.composer.placeholder', undefined, 'Nhập tin nhắn...')}
+                rows={1}
+                className="max-h-32 w-full resize-none border-none bg-transparent px-5 py-4 text-sm leading-relaxed text-white outline-none placeholder:text-gray-500 disabled:cursor-not-allowed disabled:opacity-60 overflow-y-auto custom-scrollbar block"
+                style={{ minHeight: '56px' }}
               />
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <p className="text-xs leading-5 text-gray-400">
-                  {t(
-                    'support.composer.hint',
-                    undefined,
-                    'Tin nhắn mới sẽ hiện ngay tại đây. Email cũng sẽ được gửi cho bên nhận.'
-                  )}
-                </p>
-                <button
-                  type="button"
-                  onClick={() => void sendMessage()}
-                  disabled={!activeThread || !draft.trim() || isSending}
-                  className="bg-primary rounded-2xl px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  {isSending
-                    ? t('support.actions.sending', undefined, 'Đang gửi...')
-                    : t('support.actions.send', undefined, 'Gửi tin nhắn')}
-                </button>
-              </div>
+              <button
+                type="button"
+                onClick={() => void sendMessage()}
+                disabled={!activeThread || !draft.trim() || isSending}
+                className="mb-2 ml-2 flex h-[40px] w-[40px] flex-shrink-0 items-center justify-center rounded-full bg-primary text-white shadow-md transition-transform hover:scale-105 active:scale-95 disabled:bg-gray-700 disabled:opacity-50 disabled:hover:scale-100"
+                aria-label="Gửi"
+              >
+                <Send className="h-4 w-4 ml-0.5" />
+              </button>
             </div>
+            <p className="mt-3 text-center text-xs text-gray-500 xl:text-left">
+              {t('support.composer.hint', undefined, 'Nhấn Enter để gửi, Shift + Enter để xuống dòng. Email cũng sẽ được gửi cho bên nhận.')}
+            </p>
           </div>
         </div>
       </section>
