@@ -114,6 +114,7 @@ export default function PaywallPage() {
     isRoleReady,
     isOwner,
     isAdmin,
+    isPendingOwner,
     hasCustomerAccess,
     refreshUserRole,
   } = useAuth();
@@ -374,8 +375,18 @@ export default function PaywallPage() {
 
     if (!isRoleReady) return;
 
-    if (isOwner || isAdmin) {
+    if (isAdmin) {
+      router.replace('/admin');
+      return;
+    }
+
+    if (isOwner) {
       router.replace('/owner');
+      return;
+    }
+
+    if (isPendingOwner) {
+      router.replace('/pending-owner');
       return;
     }
 
@@ -391,7 +402,7 @@ export default function PaywallPage() {
     refreshStatus(orderCodeFromQuery, true).catch(error => {
       console.error('[Paywall] init status failed:', error);
     });
-  }, [hasCustomerAccess, isAdmin, isCompletingAccess, isLoading, isOwner, isRoleReady, isStatusUnauthorized, orderCodeFromQuery, refreshStatus, router, user]);
+  }, [hasCustomerAccess, isAdmin, isCompletingAccess, isLoading, isOwner, isPendingOwner, isRoleReady, isStatusUnauthorized, orderCodeFromQuery, refreshStatus, router, user]);
 
   useEffect(() => {
     return () => {

@@ -10,7 +10,17 @@ import { InlineSpinner, Skeleton } from '@/components/ui/Loading';
 export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { user, isLoading, isAdmin, isOwner, isRoleReady, hasCustomerAccess, refreshUserRole } = useAuth();
+  const {
+    user,
+    isLoading,
+    isAdmin,
+    isOwner,
+    isPendingOwner,
+    isRoleReady,
+    hasCustomerAccess,
+    ownerRequestStatus,
+    refreshUserRole,
+  } = useAuth();
   const { t } = useTranslations();
   const error = searchParams.get('error');
   const accountType = (searchParams.get('type') === 'owner' ? 'owner' : 'customer') as Extract<
@@ -23,16 +33,17 @@ export default function LoginPage() {
   const [isOtpSent, setIsOtpSent] = useState(false);
   const [isSendingOtp, setIsSendingOtp] = useState(false);
   const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
+  const [isCompletingOwnerLogin, setIsCompletingOwnerLogin] = useState(false);
   const [cooldown, setCooldown] = useState(0);
-  const [feedback, setFeedback] = useState<{ type: 'error' | 'success'; message: string } | null>(null);
+  const [feedback, setFeedback] = useState<{ type: 'error' | 'success'; message: string } | null>(
+    null
+  );
 
   const normalizedEmail = useMemo(() => email.trim().toLowerCase(), [email]);
   const isResendLocked = cooldown > 0 && normalizedEmail === lastSentEmail;
   const activeFeedback =
     feedback ??
-    (error === 'auth_failed'
-      ? { type: 'error' as const, message: t('login.error') }
-      : null);
+    (error === 'auth_failed' ? { type: 'error' as const, message: t('login.error') } : null);
 
   useEffect(() => {
     if (!isLoading && user && isRoleReady) {
@@ -41,14 +52,47 @@ export default function LoginPage() {
         return;
       }
 
-      if (accountType === 'owner' || isOwner) {
+      if (isOwner) {
         router.push('/owner');
+        return;
+      }
+
+      if (isPendingOwner) {
+        router.push('/pending-owner');
+        return;
+      }
+
+      if (
+        accountType === 'owner' &&
+        (ownerRequestStatus === 'pending' || ownerRequestStatus === 'rejected')
+      ) {
+        router.push('/pending-owner');
+        return;
+      }
+
+      if (
+        accountType === 'owner' &&
+        isCompletingOwnerLogin &&
+        ownerRequestStatus === null
+      ) {
         return;
       }
 
       router.push(hasCustomerAccess ? '/tour' : '/paywall');
     }
-  }, [accountType, hasCustomerAccess, isAdmin, isLoading, isOwner, isRoleReady, router, user]);
+  }, [
+    accountType,
+    hasCustomerAccess,
+    isAdmin,
+    isCompletingOwnerLogin,
+    isLoading,
+    isOwner,
+    isPendingOwner,
+    isRoleReady,
+    ownerRequestStatus,
+    router,
+    user,
+  ]);
 
   useEffect(() => {
     if (cooldown <= 0) {
@@ -71,7 +115,9 @@ export default function LoginPage() {
     setIsSendingOtp(true);
     setFeedback(null);
 
-    const { error: requestError, errorCode } = await requestEmailOtp(normalizedEmail, { accountType });
+    const { error: requestError, errorCode } = await requestEmailOtp(normalizedEmail, {
+      accountType,
+    });
 
     setIsSendingOtp(false);
 
@@ -102,13 +148,21 @@ export default function LoginPage() {
     }
 
     setIsVerifyingOtp(true);
+    if (accountType === 'owner') {
+      setIsCompletingOwnerLogin(true);
+    }
     setFeedback(null);
 
-    const { error: verifyError, errorCode, redirectTo } = await verifyEmailOtp(normalizedEmail, otp, accountType);
+    const {
+      error: verifyError,
+      errorCode,
+      redirectTo,
+    } = await verifyEmailOtp(normalizedEmail, otp, accountType);
 
     setIsVerifyingOtp(false);
 
     if (verifyError) {
+      setIsCompletingOwnerLogin(false);
       const message =
         errorCode === 'ADMIN_PORTAL_REQUIRED'
           ? t('login.adminPortalRequired')
@@ -118,13 +172,13 @@ export default function LoginPage() {
     }
 
     await refreshUserRole();
-    router.push(redirectTo ?? (accountType === 'owner' ? '/owner' : '/tour'));
+    router.push(redirectTo ?? (accountType === 'owner' ? '/pending-owner' : '/tour'));
     router.refresh();
   };
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background-dark px-4 py-10">
+      <div className="bg-background-dark min-h-screen px-4 py-10">
         <div className="mx-auto max-w-md">
           <div className="mb-8 text-center">
             <Skeleton className="mx-auto h-20 w-20 rounded-full" />
@@ -143,7 +197,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background-dark font-display">
+    <div className="bg-background-dark font-display relative flex min-h-screen items-center justify-center overflow-hidden">
       <div className="pointer-events-none absolute inset-0 z-0 select-none">
         <div
           className="h-full w-full bg-cover bg-center object-cover opacity-40 mix-blend-overlay"
@@ -152,15 +206,19 @@ export default function LoginPage() {
               "url('https://lh3.googleusercontent.com/aida-public/AB6AXuD1td4WSx6nl5TKAIPQHvb3mXshqreYAsVVo5NGNLo4nkeSZVy-c4WPWG5TBcBOnTUczh9Q4wjij1A12mpRZrc-ME4sJthwOil3ubDdHgHAPCiXAM-77eCwcoDOIozkEpSVKWANT49fnbkrsEeUQ6qRhE7Cjs7ecrqz_iS4B9ha0zKruboEGSrVxELdqF2B3ohGZZ99cp-OG1iRCCZ4t-cqTc7bQjxoV9kFzigSrAi2XDwsssfntyMkvmsUooxLreHQfcjVYlaTnbaN')",
           }}
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-background-dark/80 via-background-dark/95 to-background-dark" />
+        <div className="from-background-dark/80 via-background-dark/95 to-background-dark absolute inset-0 bg-gradient-to-b" />
       </div>
 
       <div className="animate-scaleIn relative z-10 w-full max-w-md px-4">
         <div className="mb-8 text-center">
-          <div className="mb-4 inline-block rounded-full border border-primary/20 bg-primary/10 p-4 shadow-[0_0_15px_rgba(242,108,13,0.3)] backdrop-blur-sm">
-            <span className="material-symbols-outlined text-primary text-5xl drop-shadow-lg">restaurant</span>
+          <div className="border-primary/20 bg-primary/10 mb-4 inline-block rounded-full border p-4 shadow-[0_0_15px_rgba(242,108,13,0.3)] backdrop-blur-sm">
+            <span className="material-symbols-outlined text-primary text-5xl drop-shadow-lg">
+              restaurant
+            </span>
           </div>
-          <h1 className="mb-2 text-3xl font-extrabold tracking-tight text-white drop-shadow-md">{t('login.title')}</h1>
+          <h1 className="mb-2 text-3xl font-extrabold tracking-tight text-white drop-shadow-md">
+            {t('login.title')}
+          </h1>
           <p className="font-medium text-gray-400">{t('login.subtitle')}</p>
         </div>
 
@@ -222,6 +280,16 @@ export default function LoginPage() {
               })}
             </p>
 
+            {accountType === 'owner' && (
+              <div className="border-primary/20 bg-primary/10 rounded-2xl border px-4 py-3 text-sm leading-6 text-orange-100">
+                {t(
+                  'login.ownerApprovalNote',
+                  undefined,
+                  'Đăng nhập chủ quán cần admin xác minh trước. Sau khi gửi OTP thành công, bạn sẽ được chuyển sang trang chờ duyệt và chat trực tiếp với admin.'
+                )}
+              </div>
+            )}
+
             <div className="space-y-3">
               <label className="block text-sm font-semibold text-white" htmlFor="email">
                 {t('login.emailLabel')}
@@ -232,14 +300,14 @@ export default function LoginPage() {
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
                 placeholder={t('login.emailPlaceholder')}
-                className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none transition-colors placeholder:text-gray-500 focus:border-primary"
+                className="focus:border-primary w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white transition-colors outline-none placeholder:text-gray-500"
                 autoComplete="email"
               />
               <button
                 type="button"
                 onClick={handleSendOtp}
                 disabled={isSendingOtp || isResendLocked}
-                className="w-full rounded-xl bg-primary px-6 py-3 font-bold text-white transition-all duration-200 hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
+                className="bg-primary w-full rounded-xl px-6 py-3 font-bold text-white transition-all duration-200 hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {isSendingOtp ? (
                   <InlineSpinner label={t('login.sendingOtp')} />
@@ -272,7 +340,7 @@ export default function LoginPage() {
                   value={otp}
                   onChange={(event) => setOtp(event.target.value.replace(/\D/g, '').slice(0, 6))}
                   placeholder={t('login.otpPlaceholder')}
-                  className="w-full rounded-xl border border-white/10 bg-background-dark/70 px-4 py-3 text-center text-xl tracking-[0.4em] text-white outline-none transition-colors placeholder:tracking-normal placeholder:text-gray-500 focus:border-primary"
+                  className="bg-background-dark/70 focus:border-primary w-full rounded-xl border border-white/10 px-4 py-3 text-center text-xl tracking-[0.4em] text-white transition-colors outline-none placeholder:tracking-normal placeholder:text-gray-500"
                   autoComplete="one-time-code"
                   maxLength={6}
                 />
@@ -280,7 +348,7 @@ export default function LoginPage() {
                   type="button"
                   onClick={handleVerifyOtp}
                   disabled={isVerifyingOtp}
-                  className="w-full rounded-xl border border-primary/30 bg-primary/15 px-6 py-3 font-bold text-primary transition-all duration-200 hover:bg-primary/20 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="border-primary/30 bg-primary/15 text-primary hover:bg-primary/20 w-full rounded-xl border px-6 py-3 font-bold transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {isVerifyingOtp ? (
                     <InlineSpinner label={t('login.verifyingOtp')} color="primary" />
@@ -296,14 +364,16 @@ export default function LoginPage() {
                 <div className="w-full border-t border-white/10" />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="bg-transparent px-4 font-medium text-gray-500">{t('login.or')}</span>
+                <span className="bg-transparent px-4 font-medium text-gray-500">
+                  {t('login.or')}
+                </span>
               </div>
             </div>
 
             <button
               type="button"
               onClick={() => router.push('/')}
-              className="flex w-full items-center justify-center gap-2 rounded-xl border border-transparent px-6 py-3 font-bold text-primary transition-all duration-200 hover:border-primary/20 hover:bg-primary/10"
+              className="text-primary hover:border-primary/20 hover:bg-primary/10 flex w-full items-center justify-center gap-2 rounded-xl border border-transparent px-6 py-3 font-bold transition-all duration-200"
             >
               <span className="material-symbols-outlined text-xl">arrow_back</span>
               <span>{t('login.backToHome')}</span>

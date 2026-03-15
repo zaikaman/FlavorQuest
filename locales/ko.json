@@ -283,6 +283,7 @@
     "customer": "고객",
     "owner": "점주",
     "selectedType": "선택한 계정 유형: {type}",
+    "ownerApprovalNote": "점주 로그인은 먼저 관리자 확인이 필요합니다. OTP 인증 후에는 관리자와 바로 대화할 수 있는 승인 대기 페이지로 이동합니다.",
     "emailLabel": "로그인 이메일",
     "emailPlaceholder": "you@example.com",
     "otpLabel": "OTP 코드",
@@ -303,6 +304,36 @@
     "or": "또는",
     "backToHome": "홈으로 돌아가기",
     "error": "로그인 실패. 다시 시도하세요."
+  },
+  "pendingOwner": {
+    "eyebrow": "점주 승인 대기",
+    "titlePending": "점주 권한을 열기 전에 관리자 확인을 기다리고 있습니다",
+    "titleRejected": "점주 요청은 관리자와 추가 대화가 필요합니다",
+    "subtitlePending": "이 계정은 점주 승인 대기 상태이므로 아직 고객 영역이나 점주 영역을 사용할 수 없습니다. 아래 채팅이 진행 상황을 확인하고 추가 확인 요청에 답하는 기본 창구입니다.",
+    "subtitleRejected": "관리자가 현재 요청을 거절했습니다. 아래 채팅에서 추가 설명이나 인증 정보를 계속 보낼 수 있습니다.",
+    "statusLabel": "상태",
+    "statusPending": "승인 대기",
+    "statusRejected": "거절됨",
+    "customerAreaLabel": "탐색",
+    "customerCta": "환영 화면으로 돌아가기",
+    "customerHint": "승인 전까지 이 계정은 상태 확인과 관리자와의 대화만 할 수 있습니다.",
+    "steps": {
+      "request": {
+        "title": "요청이 접수되었습니다",
+        "body": "필요할 때 인증 정보를 추가로 보낼 수 있도록 관리자와의 채팅 스레드가 이미 열려 있습니다."
+      },
+      "review": {
+        "title": "관리자가 채팅으로 확인합니다",
+        "body": "승인 전에 추가 정보가 필요할 수 있으니 이곳의 메시지를 확인하고 빠르게 답변하세요."
+      },
+      "reviewRejected": {
+        "body": "이전 요청은 거절되었습니다. 아래 채팅에서 계속 대화하며 추가 설명을 보낼 수 있습니다."
+      },
+      "workspace": {
+        "title": "승인 후 점주 워크스페이스가 열립니다",
+        "body": "승인되면 점주 영역으로 이동합니다. 아직 매장이 배정되지 않았다면 관리자가 최소 한 개의 POI를 연결할 때까지 빈 상태가 표시됩니다."
+      }
+    }
   },
   "paywall": {
     "loading": "결제 페이지 로딩 중...",

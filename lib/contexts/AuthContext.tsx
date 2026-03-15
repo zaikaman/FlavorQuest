@@ -9,8 +9,9 @@ import { createContext, useCallback, useContext, useEffect, useRef, useState } f
 import { createClient } from '@/lib/supabase/client';
 import type { AuthChangeEvent, RealtimeChannel, User } from '@supabase/supabase-js';
 import { USER_PRESENCE_CHANNEL, type UserPresencePayload } from '@/lib/realtime/presence';
+import type { OwnerRequestStatus } from '@/lib/types';
 
-type AppUserRole = 'customer' | 'owner' | 'admin';
+type AppUserRole = 'customer' | 'pending-owner' | 'owner' | 'admin';
 const ROLE_FETCH_TIMEOUT_MS = 5000;
 const AUTH_SNAPSHOT_KEY = 'flavorquest-auth-snapshot';
 
@@ -20,6 +21,9 @@ interface MeResponse {
   role: AppUserRole;
   customerAccessGranted?: boolean;
   customerAccessGrantedAt?: string | null;
+  ownerRequestStatus?: OwnerRequestStatus | null;
+  ownerRequestedAt?: string | null;
+  ownerReviewedAt?: string | null;
 }
 
 interface AuthSnapshot {
@@ -27,6 +31,9 @@ interface AuthSnapshot {
   role: AppUserRole;
   hasCustomerAccess: boolean;
   customerAccessGrantedAt: string | null;
+  ownerRequestStatus: OwnerRequestStatus | null;
+  ownerRequestedAt: string | null;
+  ownerReviewedAt: string | null;
   cachedAt: number;
 }
 
@@ -36,8 +43,12 @@ interface AuthContextType {
   isAdmin: boolean;
   isOwner: boolean;
   isCustomer: boolean;
+  isPendingOwner: boolean;
   hasCustomerAccess: boolean;
   customerAccessGrantedAt: string | null;
+  ownerRequestStatus: OwnerRequestStatus | null;
+  ownerRequestedAt: string | null;
+  ownerReviewedAt: string | null;
   isLoading: boolean;
   isRoleReady: boolean;
   refreshUserRole: () => Promise<void>;
@@ -98,6 +109,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isAdmin, setIsAdmin] = useState(false);
   const [hasCustomerAccess, setHasCustomerAccess] = useState(false);
   const [customerAccessGrantedAt, setCustomerAccessGrantedAt] = useState<string | null>(null);
+  const [ownerRequestStatus, setOwnerRequestStatus] = useState<OwnerRequestStatus | null>(null);
+  const [ownerRequestedAt, setOwnerRequestedAt] = useState<string | null>(null);
+  const [ownerReviewedAt, setOwnerReviewedAt] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isRoleReady, setIsRoleReady] = useState(false);
 
@@ -106,6 +120,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setIsAdmin(false);
     setHasCustomerAccess(false);
     setCustomerAccessGrantedAt(null);
+    setOwnerRequestStatus(null);
+    setOwnerRequestedAt(null);
+    setOwnerReviewedAt(null);
     setIsRoleReady(roleReady);
   }, []);
 
@@ -157,13 +174,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.log('role api result:', me.role, me.customerAccessGranted);
         setUserRole(me.role);
         setIsAdmin(me.role === 'admin');
-        setHasCustomerAccess(me.role === 'customer' ? Boolean(me.customerAccessGranted) : true);
+        setHasCustomerAccess(me.role === 'customer' ? Boolean(me.customerAccessGranted) : false);
         setCustomerAccessGrantedAt(me.customerAccessGrantedAt ?? null);
+        setOwnerRequestStatus(me.ownerRequestStatus ?? null);
+        setOwnerRequestedAt(me.ownerRequestedAt ?? null);
+        setOwnerReviewedAt(me.ownerReviewedAt ?? null);
         saveAuthSnapshot({
           userId: currentUser.id,
           role: me.role,
-          hasCustomerAccess: me.role === 'customer' ? Boolean(me.customerAccessGranted) : true,
+          hasCustomerAccess: me.role === 'customer' ? Boolean(me.customerAccessGranted) : false,
           customerAccessGrantedAt: me.customerAccessGrantedAt ?? null,
+          ownerRequestStatus: me.ownerRequestStatus ?? null,
+          ownerRequestedAt: me.ownerRequestedAt ?? null,
+          ownerReviewedAt: me.ownerReviewedAt ?? null,
           cachedAt: Date.now(),
         });
         setIsRoleReady(true);
@@ -177,12 +200,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setIsAdmin(cachedSnapshot.role === 'admin');
           setHasCustomerAccess(cachedSnapshot.hasCustomerAccess);
           setCustomerAccessGrantedAt(cachedSnapshot.customerAccessGrantedAt);
+          setOwnerRequestStatus(cachedSnapshot.ownerRequestStatus);
+          setOwnerRequestedAt(cachedSnapshot.ownerRequestedAt);
+          setOwnerReviewedAt(cachedSnapshot.ownerReviewedAt);
         } else {
           console.error('[AuthContext] checkUserRole failed, fallback to customer:', error);
           setUserRole('customer');
           setIsAdmin(false);
           setHasCustomerAccess(false);
           setCustomerAccessGrantedAt(null);
+          setOwnerRequestStatus(null);
+          setOwnerRequestedAt(null);
+          setOwnerReviewedAt(null);
         }
 
         setIsRoleReady(true);
@@ -328,8 +357,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         isAdmin,
         isOwner: userRole === 'owner',
         isCustomer: userRole === 'customer',
+        isPendingOwner: userRole === 'pending-owner',
         hasCustomerAccess,
         customerAccessGrantedAt,
+        ownerRequestStatus,
+        ownerRequestedAt,
+        ownerReviewedAt,
         isLoading,
         isRoleReady,
         refreshUserRole,

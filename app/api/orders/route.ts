@@ -94,6 +94,10 @@ export async function GET() {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
+  if (profile.role === 'pending-owner') {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
+
   let query = supabase
     .from('preorder_orders')
     .select(`
@@ -139,6 +143,10 @@ export async function POST(request: NextRequest) {
 
   if (!profile) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  if (profile.role === 'pending-owner') {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
   try {

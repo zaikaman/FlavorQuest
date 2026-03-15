@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { ensureOwnerRequestForUser } from '@/lib/server/owner-requests';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { createServerClient } from '@/lib/supabase/server';
 
@@ -56,7 +57,7 @@ export async function POST(request: NextRequest) {
 
   const { data: existingProfile, error: existingProfileError } = await adminClient
     .from('users')
-    .select('role')
+    .select('role, customer_access_granted, owner_request_status')
     .eq('id', currentUser.id)
     .maybeSingle();
 
@@ -87,42 +88,84 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const desiredRole = accountType === 'owner' ? 'owner' : accountType === 'admin' ? 'admin' : 'customer';
   const timestamp = new Date().toISOString();
-  const upsertPayload =
-    accountType === 'admin'
-      ? {
-          id: currentUser.id,
-          email: currentUser.email,
-          updated_at: timestamp,
-        }
-      : {
-          id: currentUser.id,
-          email: currentUser.email,
-          role: desiredRole,
-          updated_at: timestamp,
-        };
 
-  const { error: upsertError } = await adminClient
-    .from('users')
-    .upsert(upsertPayload, { onConflict: 'id' });
+  if (existingRole === 'owner') {
+    return NextResponse.json({
+      redirectTo: '/owner',
+      role: 'owner',
+      ownerRequestStatus: existingProfile?.owner_request_status ?? null,
+    });
+  }
+
+  if (existingRole === 'pending-owner') {
+    return NextResponse.json({
+      redirectTo: '/pending-owner',
+      role: 'pending-owner',
+      ownerRequestStatus: existingProfile?.owner_request_status ?? null,
+    });
+  }
+
+  if (accountType === 'admin') {
+    const { error: upsertError } = await adminClient.from('users').upsert(
+      {
+        id: currentUser.id,
+        email: currentUser.email,
+        updated_at: timestamp,
+      },
+      { onConflict: 'id' }
+    );
+
+    if (upsertError) {
+      return NextResponse.json({ error: upsertError.message }, { status: 500 });
+    }
+
+    return NextResponse.json({ redirectTo: '/admin', role: 'admin' });
+  }
+
+  if (accountType === 'owner') {
+    try {
+      const result = await ensureOwnerRequestForUser({
+        id: currentUser.id,
+        email: currentUser.email,
+      });
+
+      return NextResponse.json(result);
+    } catch (error) {
+      return NextResponse.json(
+        {
+          error: error instanceof Error ? error.message : 'Không thể tạo yêu cầu owner lúc này.',
+        },
+        { status: 500 }
+      );
+    }
+  }
+
+  const { error: upsertError } = await adminClient.from('users').upsert(
+    {
+      id: currentUser.id,
+      email: currentUser.email,
+      role: 'customer',
+      updated_at: timestamp,
+    },
+    { onConflict: 'id' }
+  );
 
   if (upsertError) {
     return NextResponse.json({ error: upsertError.message }, { status: 500 });
   }
 
-  if (accountType === 'admin') {
-    return NextResponse.json({ redirectTo: '/admin', role: 'admin' });
-  }
-
   const { data: profile } = await adminClient
     .from('users')
-    .select('customer_access_granted')
+    .select('customer_access_granted, owner_request_status')
     .eq('id', currentUser.id)
     .maybeSingle();
 
-  const redirectTo =
-    desiredRole === 'owner' ? '/owner' : profile?.customer_access_granted ? '/tour' : '/paywall';
+  const redirectTo = profile?.customer_access_granted ? '/tour' : '/paywall';
 
-  return NextResponse.json({ redirectTo, role: desiredRole });
+  return NextResponse.json({
+    redirectTo,
+    role: 'customer',
+    ownerRequestStatus: profile?.owner_request_status ?? null,
+  });
 }

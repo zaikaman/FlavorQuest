@@ -265,6 +265,7 @@
     "customer": "Client",
     "owner": "Propriétaire",
     "selectedType": "Type de compte sélectionné : {type}",
+    "ownerApprovalNote": "La connexion propriétaire nécessite d'abord une validation admin. Après la vérification OTP, vous serez redirigé vers une page d'attente avec chat direct vers l'admin.",
     "emailLabel": "E-mail de connexion",
     "emailPlaceholder": "vous@exemple.com",
     "otpLabel": "Code OTP",
@@ -286,6 +287,36 @@
     "or": "ou",
     "backToHome": "Retour à l'accueil",
     "error": "Échec de la connexion. Veuillez réessayer."
+  },
+  "pendingOwner": {
+    "eyebrow": "Espace d'attente propriétaire",
+    "titlePending": "Votre compte attend la vérification admin avant l'accès propriétaire",
+    "titleRejected": "Votre demande propriétaire nécessite encore un échange avec l'admin",
+    "subtitlePending": "Ce compte est en attente de validation propriétaire et ne peut pas encore utiliser les espaces client ou propriétaire. Le chat ci-dessous est le canal principal pour suivre les mises à jour et répondre si l'admin demande une vérification supplémentaire.",
+    "subtitleRejected": "L'admin a refusé la demande actuelle. Vous pouvez continuer l'échange ci-dessous pour ajouter du contexte ou des éléments de vérification.",
+    "statusLabel": "Statut",
+    "statusPending": "En attente",
+    "statusRejected": "Refusé",
+    "customerAreaLabel": "Navigation",
+    "customerCta": "Retour à l'écran d'accueil",
+    "customerHint": "Tant que la validation n'est pas accordée, ce compte peut seulement suivre l'état et échanger avec l'admin.",
+    "steps": {
+      "request": {
+        "title": "La demande a été enregistrée",
+        "body": "Le système a déjà ouvert un fil de discussion avec l'admin pour vous permettre d'ajouter des informations de vérification si besoin."
+      },
+      "review": {
+        "title": "L'admin vérifiera via le chat",
+        "body": "Surveillez les messages ici afin de répondre rapidement si l'admin demande plus d'informations avant d'approuver."
+      },
+      "reviewRejected": {
+        "body": "La demande précédente a été refusée. Vous pouvez poursuivre l'échange dans le chat ci-dessous pour clarifier davantage."
+      },
+      "workspace": {
+        "title": "L'espace propriétaire s'ouvre après validation",
+        "body": "Une fois approuvé, vous accéderez à l'espace propriétaire. Si aucune échoppe n'est encore attribuée, l'écran propriétaire restera vide jusqu'à l'attribution d'au moins un POI par l'admin."
+      }
+    }
   },
   "paywall": {
     "loading": "Chargement du paywall...",

@@ -27,6 +27,9 @@ import type {
 interface SupportInboxPageProps {
   role: UserRole;
   className?: string;
+  mode?: 'default' | 'owner-request';
+  showHero?: boolean;
+  initialThreadId?: string | null;
 }
 
 interface InboxResponse {
@@ -61,9 +64,16 @@ function getRoleBadgeTone(threadType: SupportThreadType) {
   return 'border-primary/25 bg-primary/12 text-primary';
 }
 
-export function SupportInboxPage({ role, className = '' }: SupportInboxPageProps) {
+export function SupportInboxPage({
+  role,
+  className = '',
+  mode = 'default',
+  showHero = true,
+  initialThreadId = null,
+}: SupportInboxPageProps) {
   const { user } = useAuth();
   const { t, language } = useTranslations();
+  const isOwnerRequestMode = role === 'pending-owner' && mode === 'owner-request';
   const [threads, setThreads] = useState<SupportThreadSummary[]>([]);
   const [directory, setDirectory] = useState<SupportDirectoryEntry[]>([]);
   const [fallbackDirectory, setFallbackDirectory] = useState<SupportDirectoryEntry[]>([]);
@@ -82,7 +92,7 @@ export function SupportInboxPage({ role, className = '' }: SupportInboxPageProps
   const mountedRef = useRef(true);
   const [isMobileChatOpen, setIsMobileChatOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isLoadingMessages]);
@@ -175,8 +185,26 @@ export function SupportInboxPage({ role, className = '' }: SupportInboxPageProps
             }
           );
           setActiveThreadId((currentThreadId) => {
-            if (currentThreadId && (data.threads ?? []).some((thread) => thread.id === currentThreadId)) {
+            if (
+              currentThreadId &&
+              (data.threads ?? []).some((thread) => thread.id === currentThreadId)
+            ) {
               return currentThreadId;
+            }
+
+            if (
+              initialThreadId &&
+              (data.threads ?? []).some((thread) => thread.id === initialThreadId)
+            ) {
+              return initialThreadId;
+            }
+
+            if (isOwnerRequestMode) {
+              return (
+                data.threads?.find((thread) => thread.thread_type === 'customer_admin')?.id ??
+                data.threads?.[0]?.id ??
+                null
+              );
             }
 
             return data.threads?.[0]?.id ?? null;
@@ -198,7 +226,7 @@ export function SupportInboxPage({ role, className = '' }: SupportInboxPageProps
         }
       }
     },
-    [t]
+    [initialThreadId, isOwnerRequestMode, t]
   );
 
   const markRead = useCallback(async (threadId: string) => {
@@ -256,7 +284,11 @@ export function SupportInboxPage({ role, className = '' }: SupportInboxPageProps
         setErrorMessage(
           error instanceof Error
             ? error.message
-            : t('support.errors.loadMessages', undefined, 'Không thể tải tin nhắn của cuộc trò chuyện.')
+            : t(
+                'support.errors.loadMessages',
+                undefined,
+                'Không thể tải tin nhắn của cuộc trò chuyện.'
+              )
         );
       } finally {
         if (mountedRef.current) {
@@ -277,7 +309,7 @@ export function SupportInboxPage({ role, className = '' }: SupportInboxPageProps
   }, [fetchInbox]);
 
   useEffect(() => {
-    if (role !== 'customer' || isLoadingInbox || directory.length > 0) {
+    if ((role !== 'customer' && role !== 'pending-owner') || isLoadingInbox || directory.length > 0) {
       setFallbackDirectory([]);
       return;
     }
@@ -303,7 +335,9 @@ export function SupportInboxPage({ role, className = '' }: SupportInboxPageProps
         }
 
         const pois = ((await response.json()) as POI[]).filter((poi) => Boolean(poi.owner_id));
-        const customerAdminThread = threads.find((thread) => thread.thread_type === 'customer_admin');
+        const customerAdminThread = threads.find(
+          (thread) => thread.thread_type === 'customer_admin'
+        );
 
         const nextDirectory: SupportDirectoryEntry[] = pois.map((poi) => ({
           id: `fallback-poi:${poi.id}`,
@@ -316,8 +350,9 @@ export function SupportInboxPage({ role, className = '' }: SupportInboxPageProps
           },
           counterpart: null,
           existing_thread_id:
-            threads.find((thread) => thread.thread_type === 'customer_owner' && thread.poi?.id === poi.id)?.id ??
-            null,
+            threads.find(
+              (thread) => thread.thread_type === 'customer_owner' && thread.poi?.id === poi.id
+            )?.id ?? null,
         }));
 
         if (adminEmails.length > 0) {
@@ -357,6 +392,27 @@ export function SupportInboxPage({ role, className = '' }: SupportInboxPageProps
   }, [activeThreadId, loadMessages]);
 
   useEffect(() => {
+    if (!initialThreadId || !threads.some((thread) => thread.id === initialThreadId)) {
+      return;
+    }
+
+    setActiveThreadId(initialThreadId);
+    setIsMobileChatOpen(true);
+  }, [initialThreadId, threads]);
+
+  useEffect(() => {
+    if (!isOwnerRequestMode || isLoadingInbox) {
+      return;
+    }
+
+    const customerAdminThread = threads.find((thread) => thread.thread_type === 'customer_admin');
+
+    if (customerAdminThread?.id) {
+      setActiveThreadId(customerAdminThread.id);
+    }
+  }, [isLoadingInbox, isOwnerRequestMode, threads]);
+
+  useEffect(() => {
     if (!user?.id) {
       return;
     }
@@ -373,18 +429,26 @@ export function SupportInboxPage({ role, className = '' }: SupportInboxPageProps
     };
 
     channel
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'support_threads' }, refreshInbox)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'support_messages' }, (payload) => {
-        const nextThreadId =
-          (payload.new as { thread_id?: string } | undefined)?.thread_id ||
-          (payload.old as { thread_id?: string } | undefined)?.thread_id;
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'support_threads' },
+        refreshInbox
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'support_messages' },
+        (payload) => {
+          const nextThreadId =
+            (payload.new as { thread_id?: string } | undefined)?.thread_id ||
+            (payload.old as { thread_id?: string } | undefined)?.thread_id;
 
-        void fetchInbox(false);
-        if (activeThreadId && nextThreadId === activeThreadId) {
-          void loadMessages(activeThreadId, false);
-          void markRead(activeThreadId);
+          void fetchInbox(false);
+          if (activeThreadId && nextThreadId === activeThreadId) {
+            void loadMessages(activeThreadId, false);
+            void markRead(activeThreadId);
+          }
         }
-      })
+      )
       .subscribe();
 
     return () => {
@@ -392,14 +456,32 @@ export function SupportInboxPage({ role, className = '' }: SupportInboxPageProps
     };
   }, [activeThreadId, fetchInbox, loadMessages, markRead, role, user?.id]);
 
+  const displayedDirectory = useMemo(() => {
+    const baseDirectory = directory.length > 0 ? directory : fallbackDirectory;
+
+    if (!isOwnerRequestMode) {
+      return baseDirectory;
+    }
+
+    return baseDirectory.filter((entry) => entry.thread_type === 'customer_admin');
+  }, [directory, fallbackDirectory, isOwnerRequestMode]);
+
+  const displayedThreads = useMemo(() => {
+    if (!isOwnerRequestMode) {
+      return threads;
+    }
+
+    return threads.filter((thread) => thread.thread_type === 'customer_admin');
+  }, [isOwnerRequestMode, threads]);
+
   const activeThread = useMemo(
-    () => threads.find((thread) => thread.id === activeThreadId) ?? null,
-    [activeThreadId, threads]
+    () => displayedThreads.find((thread) => thread.id === activeThreadId) ?? null,
+    [activeThreadId, displayedThreads]
   );
 
   const activeDirectoryEntry = useMemo(
-    () => directory.find((entry) => entry.existing_thread_id === activeThreadId) ?? null,
-    [activeThreadId, directory]
+    () => displayedDirectory.find((entry) => entry.existing_thread_id === activeThreadId) ?? null,
+    [activeThreadId, displayedDirectory]
   );
 
   const openDirectoryEntry = useCallback(
@@ -407,7 +489,9 @@ export function SupportInboxPage({ role, className = '' }: SupportInboxPageProps
       setErrorMessage(null);
 
       if (entry.existing_thread_id) {
-        setActiveThreadId(entry.existing_thread_id);        setIsMobileChatOpen(true);        return;
+        setActiveThreadId(entry.existing_thread_id);
+        setIsMobileChatOpen(true);
+        return;
       }
 
       setPendingDirectoryId(entry.id);
@@ -433,7 +517,9 @@ export function SupportInboxPage({ role, className = '' }: SupportInboxPageProps
         }
 
         const data = (await response.json()) as { threadId: string };
-        setActiveThreadId(data.threadId);        setIsMobileChatOpen(true);        await fetchInbox(false);
+        setActiveThreadId(data.threadId);
+        setIsMobileChatOpen(true);
+        await fetchInbox(false);
       } catch (error) {
         setErrorMessage(
           error instanceof Error
@@ -497,13 +583,20 @@ export function SupportInboxPage({ role, className = '' }: SupportInboxPageProps
     [sendMessage]
   );
 
-  const unreadThreads = threads.filter((thread) => thread.unread_count > 0).length;
-  const displayedDirectory = directory.length > 0 ? directory : fallbackDirectory;
+  const unreadThreads = displayedThreads.filter((thread) => thread.unread_count > 0).length;
 
   const launchpadEmptyMessage = useMemo(() => {
-    if (role === 'customer') {
-      const ownerCount = meta.availableOwnerPoiCount || fallbackDirectory.filter((entry) => entry.thread_type === 'customer_owner').length;
-      const adminCount = meta.availableAdminCount || fallbackDirectory.filter((entry) => entry.thread_type === 'customer_admin').length;
+    if (role === 'customer' || role === 'pending-owner') {
+      if (isOwnerRequestMode) {
+        return null;
+      }
+
+      const ownerCount =
+        meta.availableOwnerPoiCount ||
+        fallbackDirectory.filter((entry) => entry.thread_type === 'customer_owner').length;
+      const adminCount =
+        meta.availableAdminCount ||
+        fallbackDirectory.filter((entry) => entry.thread_type === 'customer_admin').length;
 
       if (ownerCount === 0 && adminCount === 0) {
         return 'Hiện chưa có quán nào được gán chủ quán và cũng chưa có tài khoản admin để bạn nhắn.';
@@ -523,52 +616,62 @@ export function SupportInboxPage({ role, className = '' }: SupportInboxPageProps
     }
 
     return null;
-  }, [fallbackDirectory, meta.availableAdminCount, meta.availableOwnerPoiCount, role]);
+  }, [
+    fallbackDirectory,
+    isOwnerRequestMode,
+    meta.availableAdminCount,
+    meta.availableOwnerPoiCount,
+    role,
+  ]);
 
   return (
     <div className={`space-y-6 ${className}`}>
-      <section className="overflow-hidden rounded-[32px] border border-white/10 bg-[#2c1e16]">
-        <div className="border-b border-white/10 bg-[radial-gradient(circle_at_top_left,_rgba(242,108,13,0.22),_transparent_50%),linear-gradient(135deg,rgba(255,255,255,0.02),rgba(255,255,255,0))] px-5 py-6 sm:px-7">
-          <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-            <div className="max-w-3xl">
-              <p className="text-primary/80 text-[11px] font-semibold tracking-[0.32em] uppercase">
-                {copy.eyebrow}
-              </p>
-              <h1 className="mt-3 text-3xl font-black text-white sm:text-[2.2rem]">{copy.title}</h1>
-              <p className="mt-3 max-w-2xl text-sm leading-6 text-gray-300">{copy.subtitle}</p>
-            </div>
-
-            <div className="grid gap-3 sm:grid-cols-2">
-              <div className="rounded-2xl border border-white/10 bg-black/15 px-4 py-4">
-                <p className="text-[11px] tracking-[0.22em] text-gray-500 uppercase">
-                  {t('support.stats.activeThreads', undefined, 'Luồng đang mở')}
+      {showHero ? (
+        <section className="overflow-hidden rounded-[32px] border border-white/10 bg-[#2c1e16]">
+          <div className="border-b border-white/10 bg-[radial-gradient(circle_at_top_left,_rgba(242,108,13,0.22),_transparent_50%),linear-gradient(135deg,rgba(255,255,255,0.02),rgba(255,255,255,0))] px-5 py-6 sm:px-7">
+            <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+              <div className="max-w-3xl">
+                <p className="text-primary/80 text-[11px] font-semibold tracking-[0.32em] uppercase">
+                  {copy.eyebrow}
                 </p>
-                <p className="mt-3 text-3xl font-black text-white">{threads.length}</p>
-                <p className="mt-2 text-xs leading-5 text-gray-400">
-                  {t(
-                    'support.stats.activeThreadsBody',
-                    undefined,
-                    'Mỗi hội thoại có một trang riêng, dễ theo dõi hơn.'
-                  )}
-                </p>
+                <h1 className="mt-3 text-3xl font-black text-white sm:text-[2.2rem]">
+                  {copy.title}
+                </h1>
+                <p className="mt-3 max-w-2xl text-sm leading-6 text-gray-300">{copy.subtitle}</p>
               </div>
-              <div className="rounded-2xl border border-white/10 bg-black/15 px-4 py-4">
-                <p className="text-[11px] tracking-[0.22em] text-gray-500 uppercase">
-                  {t('support.stats.unreadThreads', undefined, 'Cần phản hồi')}
-                </p>
-                <p className="text-primary mt-3 text-3xl font-black">{unreadThreads}</p>
-                <p className="mt-2 text-xs leading-5 text-gray-400">
-                  {t(
-                    'support.stats.unreadThreadsBody',
-                    undefined,
-                    'Khi có tin nhắn mới, người nhận cũng sẽ được báo qua email.'
-                  )}
-                </p>
+
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="rounded-2xl border border-white/10 bg-black/15 px-4 py-4">
+                  <p className="text-[11px] tracking-[0.22em] text-gray-500 uppercase">
+                    {t('support.stats.activeThreads', undefined, 'Luồng đang mở')}
+                  </p>
+                  <p className="mt-3 text-3xl font-black text-white">{displayedThreads.length}</p>
+                  <p className="mt-2 text-xs leading-5 text-gray-400">
+                    {t(
+                      'support.stats.activeThreadsBody',
+                      undefined,
+                      'Mỗi hội thoại có một trang riêng, dễ theo dõi hơn.'
+                    )}
+                  </p>
+                </div>
+                <div className="rounded-2xl border border-white/10 bg-black/15 px-4 py-4">
+                  <p className="text-[11px] tracking-[0.22em] text-gray-500 uppercase">
+                    {t('support.stats.unreadThreads', undefined, 'Cần phản hồi')}
+                  </p>
+                  <p className="text-primary mt-3 text-3xl font-black">{unreadThreads}</p>
+                  <p className="mt-2 text-xs leading-5 text-gray-400">
+                    {t(
+                      'support.stats.unreadThreadsBody',
+                      undefined,
+                      'Khi có tin nhắn mới, người nhận cũng sẽ được báo qua email.'
+                    )}
+                  </p>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      ) : null}
 
       {errorMessage && (
         <div className="rounded-2xl border border-red-400/25 bg-red-500/10 px-4 py-3 text-sm text-red-100">
@@ -576,87 +679,95 @@ export function SupportInboxPage({ role, className = '' }: SupportInboxPageProps
         </div>
       )}
 
-      <section className="flex flex-col xl:flex-row gap-6 h-[calc(100vh-14rem)] min-h-[600px] max-h-[85vh]">
-        <aside className={`space-y-6 flex-col w-full xl:w-[45%] flex-shrink-0 flex ${isMobileChatOpen ? 'hidden xl:flex' : 'flex'} h-full overflow-y-auto pr-2 custom-scrollbar`}>
+      <section
+        className={`flex flex-col gap-6 xl:flex-row ${showHero ? 'h-[calc(100vh-14rem)] max-h-[85vh] min-h-[600px]' : 'min-h-[680px]'}`}
+      >
+        <aside
+          className={`flex w-full flex-shrink-0 flex-col space-y-6 xl:w-[45%] ${isMobileChatOpen ? 'hidden xl:flex' : 'flex'} custom-scrollbar h-full overflow-y-auto pr-2`}
+        >
           <div className="rounded-[28px] border border-white/10 bg-[#2c1e16] p-5">
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <p className="text-primary text-sm font-semibold">
-                    {t('support.launchpad.title', undefined, 'Mở luồng mới')}
-                  </p>
-                  <p className="mt-2 text-sm leading-6 text-gray-400">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="text-primary text-sm font-semibold">
+                  {t('support.launchpad.title', undefined, 'Mở luồng mới')}
+                </p>
+                <p className="mt-2 text-sm leading-6 text-gray-400">
                   {t(
                     'support.launchpad.body',
                     undefined,
                     'Chọn đúng người cần nhắn. Nếu đã có hội thoại trước đó, hệ thống sẽ mở lại hội thoại đó.'
                   )}
-                  </p>
-                </div>
-                <span className="rounded-full border border-white/10 bg-black/20 px-3 py-1 text-[11px] font-semibold text-gray-300">
-                  {displayedDirectory.length}
-                </span>
+                </p>
               </div>
-
-              {displayedDirectory.length === 0 ? (
-                <div className="mt-5 rounded-2xl border border-dashed border-white/10 px-4 py-8 text-center">
-                  <p className="text-sm font-semibold text-white">Chưa có ai để bắt đầu cuộc trò chuyện.</p>
-                  <p className="mt-2 text-sm leading-6 text-gray-400">
-                    {launchpadEmptyMessage || 'Khi có đối tượng phù hợp, bạn sẽ thấy danh sách xuất hiện tại đây.'}
-                  </p>
-                </div>
-              ) : (
-                <div className="mt-5 space-y-3">
-                  {displayedDirectory.map((entry) => {
-                    const isPending = pendingDirectoryId === entry.id;
-                    const isActive = entry.existing_thread_id && entry.existing_thread_id === activeThreadId;
-
-                    return (
-                      <button
-                        key={entry.id}
-                        type="button"
-                        onClick={() => void openDirectoryEntry(entry)}
-                        disabled={isPending}
-                        className={`w-full rounded-2xl border px-4 py-4 text-left transition-colors ${
-                          isActive
-                            ? 'border-primary/35 bg-primary/12'
-                            : 'border-white/10 bg-black/15 hover:bg-white/5'
-                        } disabled:cursor-not-allowed disabled:opacity-70`}
-                      >
-                        <div className="flex items-start justify-between gap-3">
-                          <div>
-                            <p className="font-semibold text-white">{entry.title}</p>
-                            <p className="mt-2 text-sm leading-6 text-gray-400">{entry.subtitle}</p>
-                          </div>
-                          <span
-                            className={`rounded-full border px-3 py-1 text-[11px] font-bold ${getRoleBadgeTone(entry.thread_type)}`}
-                          >
-                            {entry.thread_type === 'customer_owner'
-                              ? t('support.threadTypes.customerOwner', undefined, 'Khách / Chủ quán')
-                              : entry.thread_type === 'owner_admin'
-                                ? t('support.threadTypes.ownerAdmin', undefined, 'Chủ quán / Admin')
-                                : t('support.threadTypes.customerAdmin', undefined, 'Khách / Admin')}
-                          </span>
-                        </div>
-
-                        {entry.poi && (
-                          <p className="mt-3 text-xs font-semibold tracking-[0.18em] text-gray-500 uppercase">
-                            {entry.poi.name_vi}
-                          </p>
-                        )}
-
-                        <div className="mt-4 text-sm font-semibold text-primary">
-                          {isPending
-                            ? t('support.states.creating', undefined, 'Đang mở...')
-                            : entry.existing_thread_id
-                              ? t('support.actions.openThread', undefined, 'Mở cuộc trò chuyện')
-                              : t('support.actions.startThread', undefined, 'Nhắn ngay')}
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
+              <span className="rounded-full border border-white/10 bg-black/20 px-3 py-1 text-[11px] font-semibold text-gray-300">
+                {displayedDirectory.length}
+              </span>
             </div>
+
+            {displayedDirectory.length === 0 ? (
+              <div className="mt-5 rounded-2xl border border-dashed border-white/10 px-4 py-8 text-center">
+                <p className="text-sm font-semibold text-white">
+                  Chưa có ai để bắt đầu cuộc trò chuyện.
+                </p>
+                <p className="mt-2 text-sm leading-6 text-gray-400">
+                  {launchpadEmptyMessage ||
+                    'Khi có đối tượng phù hợp, bạn sẽ thấy danh sách xuất hiện tại đây.'}
+                </p>
+              </div>
+            ) : (
+              <div className="mt-5 space-y-3">
+                {displayedDirectory.map((entry) => {
+                  const isPending = pendingDirectoryId === entry.id;
+                  const isActive =
+                    entry.existing_thread_id && entry.existing_thread_id === activeThreadId;
+
+                  return (
+                    <button
+                      key={entry.id}
+                      type="button"
+                      onClick={() => void openDirectoryEntry(entry)}
+                      disabled={isPending}
+                      className={`w-full rounded-2xl border px-4 py-4 text-left transition-colors ${
+                        isActive
+                          ? 'border-primary/35 bg-primary/12'
+                          : 'border-white/10 bg-black/15 hover:bg-white/5'
+                      } disabled:cursor-not-allowed disabled:opacity-70`}
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <p className="font-semibold text-white">{entry.title}</p>
+                          <p className="mt-2 text-sm leading-6 text-gray-400">{entry.subtitle}</p>
+                        </div>
+                        <span
+                          className={`rounded-full border px-3 py-1 text-[11px] font-bold ${getRoleBadgeTone(entry.thread_type)}`}
+                        >
+                          {entry.thread_type === 'customer_owner'
+                            ? t('support.threadTypes.customerOwner', undefined, 'Khách / Chủ quán')
+                            : entry.thread_type === 'owner_admin'
+                              ? t('support.threadTypes.ownerAdmin', undefined, 'Chủ quán / Admin')
+                              : t('support.threadTypes.customerAdmin', undefined, 'Khách / Admin')}
+                        </span>
+                      </div>
+
+                      {entry.poi && (
+                        <p className="mt-3 text-xs font-semibold tracking-[0.18em] text-gray-500 uppercase">
+                          {entry.poi.name_vi}
+                        </p>
+                      )}
+
+                      <div className="text-primary mt-4 text-sm font-semibold">
+                        {isPending
+                          ? t('support.states.creating', undefined, 'Đang mở...')
+                          : entry.existing_thread_id
+                            ? t('support.actions.openThread', undefined, 'Mở cuộc trò chuyện')
+                            : t('support.actions.startThread', undefined, 'Nhắn ngay')}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
 
           <div className="rounded-[28px] border border-white/10 bg-[#2c1e16] p-5">
             <div className="flex items-start justify-between gap-3">
@@ -684,28 +795,35 @@ export function SupportInboxPage({ role, className = '' }: SupportInboxPageProps
             {isLoadingInbox ? (
               <div className="mt-5 space-y-3">
                 {[0, 1, 2].map((item) => (
-                  <div key={item} className="loading-shimmer h-24 rounded-2xl border border-white/10 bg-black/15" />
+                  <div
+                    key={item}
+                    className="loading-shimmer h-24 rounded-2xl border border-white/10 bg-black/15"
+                  />
                 ))}
               </div>
-            ) : threads.length === 0 ? (
+            ) : displayedThreads.length === 0 ? (
               <div className="mt-5 rounded-2xl border border-dashed border-white/10 px-4 py-10 text-center">
                 <p className="text-sm font-semibold text-white">{copy.emptyTitle}</p>
                 <p className="mt-2 text-sm leading-6 text-gray-400">{copy.emptyBody}</p>
               </div>
             ) : (
               <div className="mt-5 space-y-3">
-                {threads.map((thread) => {
+                {displayedThreads.map((thread) => {
                   const isActive = thread.id === activeThreadId;
                   const counterpartLabel =
                     thread.counterpart?.role === 'admin'
                       ? t('support.counterparts.admin', undefined, 'Đội ngũ admin')
-                      : thread.counterpart?.email || t('support.counterparts.unknown', undefined, 'Người nhận');
+                      : thread.counterpart?.email ||
+                        t('support.counterparts.unknown', undefined, 'Người nhận');
 
                   return (
                     <button
                       key={thread.id}
                       type="button"
-                      onClick={() => { setActiveThreadId(thread.id); setIsMobileChatOpen(true); }}
+                      onClick={() => {
+                        setActiveThreadId(thread.id);
+                        setIsMobileChatOpen(true);
+                      }}
                       className={`w-full rounded-2xl border px-4 py-4 text-left transition-colors ${
                         isActive
                           ? 'border-primary/35 bg-primary/12'
@@ -739,7 +857,11 @@ export function SupportInboxPage({ role, className = '' }: SupportInboxPageProps
 
                       <p className="mt-3 line-clamp-2 text-sm leading-6 text-gray-300">
                         {thread.last_message_preview ||
-                          t('support.states.waitingFirstMessage', undefined, 'Chưa có tin nhắn nào trong luồng này.')}
+                          t(
+                            'support.states.waitingFirstMessage',
+                            undefined,
+                            'Chưa có tin nhắn nào trong luồng này.'
+                          )}
                       </p>
                     </button>
                   );
@@ -749,14 +871,16 @@ export function SupportInboxPage({ role, className = '' }: SupportInboxPageProps
           </div>
         </aside>
 
-        <div className={`flex-1 flex-col overflow-hidden rounded-[30px] border border-white/10 bg-[#2c1e16] ${isMobileChatOpen ? 'flex' : 'hidden xl:flex'} h-full`}>
+        <div
+          className={`flex-1 flex-col overflow-hidden rounded-[30px] border border-white/10 bg-[#2c1e16] ${isMobileChatOpen ? 'flex' : 'hidden xl:flex'} h-full`}
+        >
           <div className="border-b border-white/10 bg-[linear-gradient(135deg,rgba(242,108,13,0.12),rgba(255,255,255,0))] px-5 py-5 sm:px-6">
             {activeThread ? (
               <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
                 <div className="flex items-start gap-4">
                   <button
                     onClick={() => setIsMobileChatOpen(false)}
-                    className="xl:hidden mt-0 flex-shrink-0 rounded-full bg-white/5 p-2 text-gray-400 hover:bg-white/10 hover:text-white transition-colors"
+                    className="mt-0 flex-shrink-0 rounded-full bg-white/5 p-2 text-gray-400 transition-colors hover:bg-white/10 hover:text-white xl:hidden"
                     aria-label="Quay lại danh sách"
                   >
                     <ArrowLeft className="h-5 w-5" />
@@ -770,11 +894,16 @@ export function SupportInboxPage({ role, className = '' }: SupportInboxPageProps
                     <h2 className="mt-2 text-2xl font-black text-white">
                       {activeThread.counterpart?.role === 'admin'
                         ? t('support.counterparts.admin', undefined, 'Đội ngũ admin')
-                        : activeThread.counterpart?.email || t('support.counterparts.unknown', undefined, 'Người nhận')}
+                        : activeThread.counterpart?.email ||
+                          t('support.counterparts.unknown', undefined, 'Người nhận')}
                     </h2>
                     <p className="mt-2 text-sm leading-6 text-gray-300">
                       {activeThread.poi
-                        ? t('support.thread.poiContext', { name: activeThread.poi.name_vi }, 'Trao đổi đang gắn với điểm bán {name}.')
+                        ? t(
+                            'support.thread.poiContext',
+                            { name: activeThread.poi.name_vi },
+                            'Trao đổi đang gắn với điểm bán {name}.'
+                          )
                         : t(
                             'support.thread.emailHint',
                             undefined,
@@ -801,7 +930,11 @@ export function SupportInboxPage({ role, className = '' }: SupportInboxPageProps
             ) : (
               <div className="rounded-2xl border border-dashed border-white/10 px-4 py-10 text-center">
                 <p className="text-sm font-semibold text-white">
-                  {t('support.states.noThreadSelected', undefined, 'Chọn một cuộc trò chuyện để bắt đầu.')}
+                  {t(
+                    'support.states.noThreadSelected',
+                    undefined,
+                    'Chọn một cuộc trò chuyện để bắt đầu.'
+                  )}
                 </p>
                 <p className="mt-2 text-sm leading-6 text-gray-400">
                   {t(
@@ -814,7 +947,7 @@ export function SupportInboxPage({ role, className = '' }: SupportInboxPageProps
             )}
           </div>
 
-          <div className="flex-1 overflow-y-auto custom-scrollbar bg-[linear-gradient(180deg,rgba(0,0,0,0.04),rgba(0,0,0,0.18))] px-4 py-5 sm:px-6">
+          <div className="custom-scrollbar flex-1 overflow-y-auto bg-[linear-gradient(180deg,rgba(0,0,0,0.04),rgba(0,0,0,0.18))] px-4 py-5 sm:px-6">
             {!activeThread ? null : isLoadingMessages ? (
               <div className="space-y-4">
                 {[0, 1, 2, 3].map((item) => (
@@ -831,11 +964,7 @@ export function SupportInboxPage({ role, className = '' }: SupportInboxPageProps
                     {t('support.states.noMessages', undefined, 'Luồng này chưa có tin nhắn nào.')}
                   </p>
                   <p className="mt-2 text-sm leading-6 text-gray-400">
-                    {t(
-                      'support.states.noMessagesBody',
-                      undefined,
-                      'Gửi tin đầu tiên để bắt đầu.'
-                    )}
+                    {t('support.states.noMessagesBody', undefined, 'Gửi tin đầu tiên để bắt đầu.')}
                   </p>
                 </div>
               </div>
@@ -850,9 +979,9 @@ export function SupportInboxPage({ role, className = '' }: SupportInboxPageProps
                       className={`flex ${isOwnMessage ? 'justify-end' : 'justify-start'}`}
                     >
                       <div
-                        className={`max-w-[85%] px-4 py-3 sm:max-w-[72%] shadow-sm ${
+                        className={`max-w-[85%] px-4 py-3 shadow-sm sm:max-w-[72%] ${
                           isOwnMessage
-                            ? 'rounded-[20px] rounded-tr-[4px] bg-primary text-white'
+                            ? 'bg-primary rounded-[20px] rounded-tr-[4px] text-white'
                             : 'rounded-[20px] rounded-tl-[4px] border border-white/10 bg-[#1f1611]/80 text-gray-100 backdrop-blur-md'
                         }`}
                       >
@@ -868,7 +997,9 @@ export function SupportInboxPage({ role, className = '' }: SupportInboxPageProps
                             {formatThreadTimestamp(message.created_at, language)}
                           </span>
                         </div>
-                        <p className="mt-2 whitespace-pre-wrap text-sm leading-6">{message.content}</p>
+                        <p className="mt-2 text-sm leading-6 whitespace-pre-wrap">
+                          {message.content}
+                        </p>
                       </div>
                     </div>
                   );
@@ -879,7 +1010,7 @@ export function SupportInboxPage({ role, className = '' }: SupportInboxPageProps
           </div>
 
           <div className="border-t border-white/10 bg-black/10 px-4 py-4 sm:px-6">
-            <div className="flex min-h-[56px] items-end rounded-[28px] border border-white/10 bg-white/5 pr-2 focus-within:bg-white/10 focus-within:ring-1 focus-within:ring-primary/50 transition-all">
+            <div className="focus-within:ring-primary/50 flex min-h-[56px] items-end rounded-[28px] border border-white/10 bg-white/5 pr-2 transition-all focus-within:bg-white/10 focus-within:ring-1">
               <textarea
                 value={draft}
                 onChange={(event) => setDraft(event.target.value)}
@@ -887,21 +1018,25 @@ export function SupportInboxPage({ role, className = '' }: SupportInboxPageProps
                 disabled={!activeThread || isSending}
                 placeholder={t('support.composer.placeholder', undefined, 'Nhập tin nhắn...')}
                 rows={1}
-                className="max-h-32 w-full resize-none border-none bg-transparent px-5 py-4 text-sm leading-relaxed text-white outline-none placeholder:text-gray-500 disabled:cursor-not-allowed disabled:opacity-60 overflow-y-auto custom-scrollbar block"
+                className="custom-scrollbar block max-h-32 w-full resize-none overflow-y-auto border-none bg-transparent px-5 py-4 text-sm leading-relaxed text-white outline-none placeholder:text-gray-500 disabled:cursor-not-allowed disabled:opacity-60"
                 style={{ minHeight: '56px' }}
               />
               <button
                 type="button"
                 onClick={() => void sendMessage()}
                 disabled={!activeThread || !draft.trim() || isSending}
-                className="mb-2 ml-2 flex h-[40px] w-[40px] flex-shrink-0 items-center justify-center rounded-full bg-primary text-white shadow-md transition-transform hover:scale-105 active:scale-95 disabled:bg-gray-700 disabled:opacity-50 disabled:hover:scale-100"
+                className="bg-primary mb-2 ml-2 flex h-[40px] w-[40px] flex-shrink-0 items-center justify-center rounded-full text-white shadow-md transition-transform hover:scale-105 active:scale-95 disabled:bg-gray-700 disabled:opacity-50 disabled:hover:scale-100"
                 aria-label="Gửi"
               >
-                <Send className="h-4 w-4 ml-0.5" />
+                <Send className="ml-0.5 h-4 w-4" />
               </button>
             </div>
             <p className="mt-3 text-center text-xs text-gray-500 xl:text-left">
-              {t('support.composer.hint', undefined, 'Nhấn Enter để gửi, Shift + Enter để xuống dòng. Email cũng sẽ được gửi cho bên nhận.')}
+              {t(
+                'support.composer.hint',
+                undefined,
+                'Nhấn Enter để gửi, Shift + Enter để xuống dòng. Email cũng sẽ được gửi cho bên nhận.'
+              )}
             </p>
           </div>
         </div>

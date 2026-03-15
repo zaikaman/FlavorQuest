@@ -16,7 +16,7 @@ const ownerSans = Be_Vietnam_Pro({
 export default function OwnerLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
-  const { user, isOwner, isAdmin, isLoading, isRoleReady, refreshUserRole, signOut } = useAuth();
+  const { user, isOwner, isAdmin, isPendingOwner, isLoading, isRoleReady, refreshUserRole, signOut } = useAuth();
   const refreshedUserIdRef = useRef<string | null>(null);
   const [isSigningOut, setIsSigningOut] = useState(false);
 
@@ -56,9 +56,9 @@ export default function OwnerLayout({ children }: { children: React.ReactNode })
     }
 
     if (!isOwner && !isAdmin) {
-      router.replace('/tour');
+      router.replace(isPendingOwner ? '/pending-owner' : '/tour');
     }
-  }, [isLoading, user, isOwner, isAdmin, isRoleReady, router]);
+  }, [isAdmin, isLoading, isOwner, isPendingOwner, isRoleReady, router, user]);
 
   if (isLoading) {
     return (

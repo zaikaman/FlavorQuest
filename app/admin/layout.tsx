@@ -16,7 +16,7 @@ const adminSans = Be_Vietnam_Pro({
 
 function LoadingScreen() {
   return (
-    <div className="min-h-screen bg-background-dark px-4 py-8 text-white">
+    <div className="bg-background-dark min-h-screen px-4 py-8 text-white">
       <div className="mx-auto max-w-7xl">
         <DashboardSkeleton stats={6} />
       </div>
@@ -27,13 +27,23 @@ function LoadingScreen() {
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
-  const { user, isAdmin, isOwner, isLoading, isRoleReady, hasCustomerAccess, refreshUserRole } = useAuth();
+  const {
+    user,
+    isAdmin,
+    isOwner,
+    isPendingOwner,
+    isLoading,
+    isRoleReady,
+    hasCustomerAccess,
+    refreshUserRole,
+  } = useAuth();
   const refreshedUserIdRef = useRef<string | null>(null);
   const isAdminLoginPage = pathname === '/admin/login';
 
   const navItems = [
     { href: '/admin', label: 'Tổng quan' },
     { href: '/admin/chat', label: 'Tin nhắn' },
+    { href: '/admin/owner-requests', label: 'Duyệt owner' },
     { href: '/admin/pois', label: 'POI' },
     { href: '/admin/users', label: 'Người dùng' },
     { href: '/admin/tours', label: 'Tour' },
@@ -85,8 +95,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       return;
     }
 
+    if (isPendingOwner) {
+      router.replace('/pending-owner');
+      return;
+    }
+
     router.replace(hasCustomerAccess ? '/tour' : '/paywall');
-  }, [hasCustomerAccess, isAdmin, isAdminLoginPage, isLoading, isOwner, isRoleReady, router, user]);
+  }, [hasCustomerAccess, isAdmin, isAdminLoginPage, isLoading, isOwner, isPendingOwner, isRoleReady, router, user]);
 
   if (isLoading || (user && !isRoleReady)) {
     return <LoadingScreen />;
@@ -94,7 +109,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   if (isAdminLoginPage) {
     return (
-      <div className={`${adminSans.className} min-h-screen bg-background-dark text-white`}>
+      <div className={`${adminSans.className} bg-background-dark min-h-screen text-white`}>
         <div className="pointer-events-none fixed inset-0 bg-[url('/img/noise.png')] opacity-5" />
         {children}
       </div>
@@ -106,15 +121,20 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }
 
   return (
-    <div className={`${adminSans.className} relative min-h-screen bg-background-dark`}>
+    <div className={`${adminSans.className} bg-background-dark relative min-h-screen`}>
       <div className="pointer-events-none fixed inset-0 bg-[url('/img/noise.png')] opacity-5" />
 
       <header className="sticky top-0 z-20 border-b border-white/10 bg-[#2c1e16]/80 backdrop-blur-md">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid gap-4 py-4 xl:grid-cols-[auto_minmax(0,1fr)_auto] xl:items-center">
             <div className="flex items-center gap-3">
-              <div className="rounded-lg bg-primary/20 p-2">
-                <svg className="h-6 w-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <div className="bg-primary/20 rounded-lg p-2">
+                <svg
+                  className="text-primary h-6 w-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -129,7 +149,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               </div>
             </div>
 
-            <nav className="min-w-0 overflow-x-auto xl:px-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <nav className="min-w-0 overflow-x-auto [scrollbar-width:none] xl:px-4 [&::-webkit-scrollbar]:hidden">
               <div className="flex min-w-max flex-nowrap items-center gap-1.5 xl:justify-center">
                 {navItems.map((item) => {
                   const isActive =
@@ -140,7 +160,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     <Link
                       key={item.href}
                       href={item.href}
-                      className={`whitespace-nowrap rounded-full border px-3 py-1.5 text-[13px] font-semibold transition-colors ${
+                      className={`rounded-full border px-3 py-1.5 text-[13px] font-semibold whitespace-nowrap transition-colors ${
                         isActive
                           ? 'border-primary bg-primary/15 text-primary'
                           : 'border-white/10 bg-white/5 text-gray-300 hover:bg-white/10'
@@ -156,7 +176,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <div className="flex items-center justify-between gap-3 xl:justify-end">
               <div className="hidden text-right lg:block">
                 <p className="text-sm font-medium text-gray-200">{user.email}</p>
-                <p className="text-xs font-semibold text-primary">Quản trị viên</p>
+                <p className="text-primary text-xs font-semibold">Quản trị viên</p>
               </div>
               <button
                 type="button"
@@ -175,7 +195,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </header>
 
       <main className="relative z-10 mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">{children}</main>
-      <RoleChatbot role="admin" bottomOffsetClassName="bottom-4 sm:bottom-6 lg:bottom-8" pageContext={{ pathname }} />
+      <RoleChatbot
+        role="admin"
+        bottomOffsetClassName="bottom-4 sm:bottom-6 lg:bottom-8"
+        pageContext={{ pathname }}
+      />
     </div>
   );
 }

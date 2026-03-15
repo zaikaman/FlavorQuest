@@ -283,6 +283,7 @@
     "customer": "顾客",
     "owner": "店主",
     "selectedType": "当前选择的账户类型: {type}",
+    "ownerApprovalNote": "店主登录需要先经过管理员审核。完成 OTP 验证后，你会进入一个可直接联系管理员的待审核页面。",
     "emailLabel": "登录邮箱",
     "emailPlaceholder": "you@example.com",
     "otpLabel": "OTP 验证码",
@@ -303,6 +304,36 @@
     "or": "或",
     "backToHome": "返回首页",
     "error": "登录失败。请重试。"
+  },
+  "pendingOwner": {
+    "eyebrow": "店主审核等待区",
+    "titlePending": "你的账号正在等待管理员核验后再开启店主权限",
+    "titleRejected": "你的店主申请还需要继续与管理员沟通",
+    "subtitlePending": "这个账号正处于店主审核状态，因此暂时不能使用顾客区或店主区。下面的聊天区是查看进度、补充说明和回应管理员核验问题的主要入口。",
+    "subtitleRejected": "管理员已经拒绝了当前申请。你仍然可以在下面的聊天中继续补充背景信息或核验资料。",
+    "statusLabel": "状态",
+    "statusPending": "等待审核",
+    "statusRejected": "已拒绝",
+    "customerAreaLabel": "导航",
+    "customerCta": "返回欢迎页",
+    "customerHint": "在通过审核之前，这个账号只能在这里查看状态并与管理员沟通。",
+    "steps": {
+      "request": {
+        "title": "申请已经记录",
+        "body": "系统已经为你和管理员打开聊天线程，方便在需要时继续补充核验信息。"
+      },
+      "review": {
+        "title": "管理员会通过聊天核验",
+        "body": "请留意这里的消息；如果管理员在批准前需要更多信息，你可以尽快回复。"
+      },
+      "reviewRejected": {
+        "body": "上一次申请已经被拒绝。你仍然可以在下面的聊天里继续说明更多细节。"
+      },
+      "workspace": {
+        "title": "审核通过后才会开启店主工作区",
+        "body": "通过审核后，你会进入店主区域。如果管理员还没有分配店铺，店主工作区会先显示为空，直到至少有一个 POI 被分配给你。"
+      }
+    }
   },
   "paywall": {
     "loading": "正在加载支付页面...",
