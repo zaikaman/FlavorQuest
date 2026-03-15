@@ -121,7 +121,7 @@ export default function AdminDashboard() {
       }
 
       if (!paymentsResponse.ok) {
-        throw new Error('Không thể tải dữ liệu paywall');
+        throw new Error('Không thể tải dữ liệu cổng thanh toán');
       }
 
       if (!poisResponse.ok) {
@@ -337,7 +337,7 @@ export default function AdminDashboard() {
         accent: 'text-primary',
       },
       {
-        label: 'Kiểm tra paywall',
+        label: 'Kiểm tra cổng khóa nội dung',
         description: 'Theo dõi giao dịch, trạng thái mở khóa và doanh thu.',
         href: '/admin/payments',
         accent: 'text-sky-300',
@@ -426,7 +426,7 @@ export default function AdminDashboard() {
       glow: 'from-lime-500/15',
     },
     {
-      label: 'Doanh thu paywall',
+      label: 'Doanh thu cổng thanh toán',
       value: formatCurrency(snapshot.payments.stats.totalRevenue),
       note: `${formatNumber(snapshot.payments.stats.paid)} giao dịch thành công, ${formatNumber(snapshot.payments.stats.pending)} giao dịch chờ`,
       accent: 'text-rose-200',
@@ -472,7 +472,7 @@ export default function AdminDashboard() {
           <h2 className="mt-2 text-3xl font-black text-white">Bảng điều hành FlavorQuest</h2>
           <p className="mt-2 max-w-3xl text-sm leading-6 text-gray-400">
             Tập trung vào nhịp vận hành 7 ngày gần nhất, chất lượng nội dung và các điểm cần xử lý
-            để phần admin không chỉ đẹp mà còn hữu ích khi ra quyết định.
+            để phần quản trị không chỉ đẹp mà còn hữu ích khi ra quyết định.
           </p>
         </div>
 
@@ -482,7 +482,7 @@ export default function AdminDashboard() {
             onClick={() => window.open('/', '_blank')}
             className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-gray-100 transition-colors hover:bg-white/10"
           >
-            Mở app khách hàng
+            Mở giao diện khách hàng
           </button>
           <button
             type="button"
@@ -521,7 +521,7 @@ export default function AdminDashboard() {
                     accent: 'text-primary',
                   },
                   {
-                    label: 'Thanh toán paywall',
+                    label: 'Thanh toán cổng khóa nội dung',
                     value: formatNumber(snapshot.payments.stats.paid),
                     note: 'giao dịch thành công',
                     accent: 'text-emerald-300',
@@ -713,7 +713,7 @@ export default function AdminDashboard() {
             <div className="flex items-center justify-between gap-4">
               <div>
                 <p className="text-primary text-sm font-semibold">Cập nhật gần đây</p>
-                <h3 className="mt-1 text-xl font-black text-white">Feed nội dung mới chỉnh</h3>
+                <h3 className="mt-1 text-xl font-black text-white">Luồng nội dung mới chỉnh</h3>
               </div>
               <span className="text-xs text-gray-400">Cập nhật gần nhất</span>
             </div>

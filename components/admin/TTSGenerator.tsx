@@ -51,14 +51,14 @@ export function TTSGenerator({
 
             if (!res.ok) {
                 const error = await res.json();
-                throw new Error(error.error || 'Generation failed');
+                throw new Error(error.error || 'Tạo âm thanh thất bại');
             }
 
             const data = await res.json();
             setAudioUrl(data.url);
             onAudioGenerated(data.url);
         } catch (error) {
-            const message = error instanceof Error ? error.message : 'Generation failed';
+            const message = error instanceof Error ? error.message : 'Tạo âm thanh thất bại';
             console.error('TTS Error:', error);
             toast.error(`Lỗi tạo audio: ${message}`);
         } finally {
@@ -101,7 +101,7 @@ export function TTSGenerator({
                 ) : (
                     <>
                         <span className="material-symbols-outlined text-[18px]">graphic_eq</span>
-                        {audioUrl ? 'Tạo lại Audio' : 'Tạo Audio'}
+                        {audioUrl ? 'Tạo lại âm thanh' : 'Tạo âm thanh'}
                     </>
                 )}
             </button>

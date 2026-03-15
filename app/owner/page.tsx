@@ -24,7 +24,7 @@ const ownerTabs: Array<{
   {
     id: 'menu',
     label: 'Thực đơn',
-    description: 'Quản lý món, giá bán và tốc độ cập nhật menu.',
+    description: 'Quản lý món, giá bán và tốc độ cập nhật thực đơn.',
     icon: 'restaurant_menu',
   },
   {
@@ -543,7 +543,7 @@ export default function OwnerDashboardPage() {
                   onClick={() => window.open('/tour', '_blank', 'noopener,noreferrer')}
                   className="rounded-2xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-gray-100 transition-colors hover:bg-white/10"
                 >
-                  Mở app khách hàng
+                  Mở giao diện khách hàng
                 </button>
               </div>
             </div>
@@ -565,7 +565,7 @@ export default function OwnerDashboardPage() {
                 note:
                   dishes.length > 0
                     ? `Giá trung bình ${formatCurrency(averageDishPrice)}`
-                    : 'Menu đang trống',
+                        : 'Thực đơn đang trống',
                 accent: 'text-amber-200',
               },
               {
@@ -608,7 +608,7 @@ export default function OwnerDashboardPage() {
             <div className="mt-6 rounded-2xl border border-dashed border-white/10 px-4 py-8 text-center">
               <p className="text-sm font-semibold text-white">Bạn chưa được gán điểm bán nào.</p>
               <p className="mt-2 text-sm leading-6 text-gray-400">
-                Liên hệ admin để cấp POI. Khi có điểm bán, trang này sẽ chuyển sang dạng dashboard
+                Liên hệ quản trị viên để cấp POI. Khi có điểm bán, trang này sẽ chuyển sang dạng bảng điều hành
                 vận hành đầy đủ.
               </p>
             </div>
@@ -790,7 +790,7 @@ export default function OwnerDashboardPage() {
                         label: 'Ảnh đại diện',
                         ready: Boolean(selectedPoi.image_url),
                         note: selectedPoi.image_url
-                          ? 'Đã có ảnh để hiển thị trên app khách hàng.'
+                          ? 'Đã có ảnh để hiển thị trên giao diện khách hàng.'
                           : 'Nên bổ sung ảnh để thẻ POI bớt trống.',
                       },
                       {
@@ -877,7 +877,7 @@ export default function OwnerDashboardPage() {
             <div className="rounded-[28px] border border-dashed border-white/10 bg-[#2c1e16] px-6 py-12 text-center">
               <p className="text-lg font-semibold text-white">Chưa có điểm bán để hiển thị.</p>
               <p className="mt-3 text-sm leading-6 text-gray-400">
-                Khi admin gán POI cho tài khoản này, phần tổng quan điểm bán sẽ hiện đầy đủ thông
+                Khi quản trị viên gán POI cho tài khoản này, phần tổng quan điểm bán sẽ hiện đầy đủ thông
                 tin và trạng thái nội dung.
               </p>
             </div>
@@ -914,7 +914,7 @@ export default function OwnerDashboardPage() {
                   {
                     label: 'Đơn liên quan',
                     value: String(selectedPoiOrders.length),
-                    note: 'Dùng để cân đối menu với nhu cầu thực tế',
+                    note: 'Dùng để cân đối thực đơn với nhu cầu thực tế',
                   },
                 ].map((item) => (
                   <div
@@ -990,8 +990,8 @@ export default function OwnerDashboardPage() {
 
                   <div className="mt-6 flex items-center justify-between gap-3">
                     <p className="text-xs leading-5 text-gray-400">
-                      Dùng form này cho cập nhật nhanh. Nếu sau này cần ảnh hoặc biến thể món, nên
-                      mở rộng schema riêng.
+                      Dùng biểu mẫu này cho cập nhật nhanh. Nếu sau này cần ảnh hoặc biến thể món, nên
+                      mở rộng cấu trúc dữ liệu riêng.
                     </p>
                     <button
                       type="submit"
@@ -1006,7 +1006,7 @@ export default function OwnerDashboardPage() {
                 <div className="rounded-[28px] border border-white/10 bg-[#2c1e16] p-6">
                   <div className="flex items-center justify-between gap-4">
                     <div>
-                      <p className="text-primary text-sm font-semibold">Menu hiện tại</p>
+                      <p className="text-primary text-sm font-semibold">Thực đơn hiện tại</p>
                       <h3 className="mt-1 text-xl font-black text-white">
                         Danh sách món đang niêm yết
                       </h3>
@@ -1020,7 +1020,7 @@ export default function OwnerDashboardPage() {
                     <div className="mt-6 rounded-2xl border border-dashed border-white/10 px-4 py-10 text-center">
                       <p className="text-sm font-semibold text-white">Thực đơn đang trống.</p>
                       <p className="mt-2 text-sm leading-6 text-gray-400">
-                        Thêm món đầu tiên để khách có thể đặt trước ngay từ app.
+                        Thêm món đầu tiên để khách có thể đặt trước ngay từ ứng dụng.
                       </p>
                     </div>
                   ) : (
@@ -1098,7 +1098,7 @@ export default function OwnerDashboardPage() {
                 </h3>
                 <p className="mt-2 text-sm leading-6 text-gray-400">
                   Mỗi thẻ đơn cho phép chuyển trạng thái ngay để chủ quán xử lý nhanh mà không cần
-                  rời dashboard.
+                  rời bảng điều hành.
                 </p>
               </div>
               <span className="rounded-full border border-white/10 bg-black/15 px-3 py-1 text-xs font-semibold text-gray-300">

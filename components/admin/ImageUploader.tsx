@@ -38,7 +38,7 @@ export function ImageUploader({ currentImageUrl, onImageUploaded, folder = 'pois
         const file = e.target.files?.[0];
         if (!file) return;
 
-        // Preview
+        // Xem trước
         const objectUrl = URL.createObjectURL(file);
         if (objectUrlRef.current) {
             URL.revokeObjectURL(objectUrlRef.current);
@@ -46,7 +46,7 @@ export function ImageUploader({ currentImageUrl, onImageUploaded, folder = 'pois
         objectUrlRef.current = objectUrl;
         setPreview(objectUrl);
 
-        // Upload
+        // Tải lên
         setIsUploading(true);
         const formData = new FormData();
         formData.append('file', file);
@@ -84,7 +84,7 @@ export function ImageUploader({ currentImageUrl, onImageUploaded, folder = 'pois
             >
                 {preview ? (
                     <>
-                        <Image src={preview} alt="Preview" fill unoptimized className="object-cover" />
+                        <Image src={preview} alt="Xem trước" fill unoptimized className="object-cover" />
                         <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
                             <span className="text-white font-medium flex items-center gap-2">
                                 <span className="material-symbols-outlined">edit</span> Đổi ảnh

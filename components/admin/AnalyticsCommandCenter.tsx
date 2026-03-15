@@ -595,7 +595,7 @@ export default function AnalyticsCommandCenter() {
       tone: 'bg-emerald-300',
     },
     {
-      label: 'POI có owner',
+      label: 'POI có chủ quản lý',
       value: content.owned_pois,
       total: content.active_pois,
       tone: 'bg-amber-300',
@@ -947,13 +947,13 @@ export default function AnalyticsCommandCenter() {
                   accent: 'text-white',
                 },
                 {
-                  label: 'Owner',
+                  label: 'Chủ quán',
                   value: audience.owners,
                   note: 'Nhóm phụ trách nội dung tại từng điểm',
                   accent: 'text-sky-300',
                 },
                 {
-                  label: 'Admin',
+                  label: 'Quản trị viên',
                   value: audience.admins,
                   note: 'Nhóm vận hành toàn cục',
                   accent: 'text-violet-200',
@@ -1056,7 +1056,7 @@ export default function AnalyticsCommandCenter() {
           <MiniTimeline
             items={paymentTimeline}
             title="Dòng thanh toán"
-            subtitle="So sánh đơn đã trả tiền và đơn đang chờ để biết paywall đang thu tiền tốt tới đâu."
+            subtitle="So sánh đơn đã trả tiền và đơn đang chờ để biết cổng khóa nội dung đang thu tiền tốt tới đâu."
             primaryLabel="Đơn trả tiền"
             secondaryLabel="Đơn chờ"
             primaryValue={(item) => item.paid_count}
@@ -1118,7 +1118,7 @@ export default function AnalyticsCommandCenter() {
               {[
                 { label: 'POI ẩn hoặc gỡ', value: content.hidden_pois },
                 { label: 'Tour đang ẩn', value: content.hidden_tours },
-                { label: 'POI chưa có owner', value: content.orphan_pois },
+                { label: 'POI chưa có chủ quản lý', value: content.orphan_pois },
               ].map((item) => (
                 <div key={item.label} className="rounded-2xl bg-black/20 px-4 py-4">
                   <p className="text-[11px] uppercase tracking-[0.22em] text-gray-500">{item.label}</p>

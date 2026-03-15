@@ -23,8 +23,8 @@ export default async function EditPOIPage({
     return (
         <div className="max-w-4xl mx-auto space-y-6">
             <div>
-                <h1 className="text-2xl font-bold text-white">Edit POI</h1>
-                <p className="text-gray-400">Update details for {poi.name_vi}</p>
+                <h1 className="text-2xl font-bold text-white">Chỉnh sửa POI</h1>
+                <p className="text-gray-400">Cập nhật thông tin cho {poi.name_vi}</p>
             </div>
 
             <POIForm initialData={poi} />

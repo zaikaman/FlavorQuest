@@ -192,7 +192,7 @@ export default function POIsPage() {
               <th className="px-6 py-4">Chủ quán</th>
               <th className="px-6 py-4">Hình ảnh</th>
               <th className="px-6 py-4">Tọa độ</th>
-              <th className="px-6 py-4">Trạng thái Audio</th>
+              <th className="px-6 py-4">Trạng thái âm thanh</th>
               <th className="px-6 py-4 text-right">Thao tác</th>
             </tr>
           </thead>

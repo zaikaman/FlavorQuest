@@ -349,7 +349,7 @@ export default function AdminToursPage() {
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div>
           <h1 className="text-2xl font-bold text-white">Quản lý tour</h1>
-          <p className="text-gray-400">Admin có thể tạo tour và sắp xếp thứ tự POI cho khách hàng</p>
+          <p className="text-gray-400">Quản trị viên có thể tạo tour và sắp xếp thứ tự POI cho khách hàng</p>
         </div>
         <button
           onClick={resetForm}

@@ -46,7 +46,7 @@ export function OwnerRequestManager() {
       setRequests(data ?? []);
     } catch (error) {
       console.error('[OwnerRequestManager] load failed:', error);
-      toast.error('Không thể tải danh sách owner đang chờ duyệt.');
+      toast.error('Không thể tải danh sách chủ quán đang chờ duyệt.');
     } finally {
       setIsLoading(false);
     }
@@ -72,18 +72,18 @@ export function OwnerRequestManager() {
         const result = (await response.json().catch(() => null)) as { error?: string } | null;
 
         if (!response.ok) {
-          throw new Error(result?.error || 'Không thể cập nhật yêu cầu owner.');
+          throw new Error(result?.error || 'Không thể cập nhật yêu cầu chủ quán.');
         }
 
         setRequests((current) => current.filter((item) => item.id !== payload.userId));
         toast.success(
           payload.decision === 'approve'
             ? 'Đã duyệt tài khoản chủ quán.'
-            : 'Đã từ chối yêu cầu owner.'
+            : 'Đã từ chối yêu cầu chủ quán.'
         );
       } catch (error) {
         console.error('[OwnerRequestManager] update failed:', error);
-        toast.error(error instanceof Error ? error.message : 'Không thể cập nhật yêu cầu owner.');
+        toast.error(error instanceof Error ? error.message : 'Không thể cập nhật yêu cầu chủ quán.');
       } finally {
         setActiveRequestId(null);
       }
@@ -109,12 +109,12 @@ export function OwnerRequestManager() {
         <div className="grid gap-4 border-b border-white/10 bg-[radial-gradient(circle_at_top_left,_rgba(242,108,13,0.2),_transparent_48%),linear-gradient(135deg,rgba(255,255,255,0.03),rgba(255,255,255,0))] px-6 py-6 lg:grid-cols-2">
           <div>
             <p className="text-primary/80 text-xs font-semibold tracking-[0.28em] uppercase">
-              Luồng duyệt owner
+              Luồng duyệt chủ quán
             </p>
             <h2 className="mt-2 text-2xl font-black text-white">Ưu tiên xử lý từ màn này trước</h2>
             <p className="mt-3 max-w-2xl text-sm leading-6 text-gray-400">
-              Mỗi tài khoản ở đây đều đã chủ động chọn luồng owner khi đăng nhập. Admin có thể mở
-              nhanh thread `customer_admin` để xem ngữ cảnh rồi duyệt hoặc từ chối trực tiếp.
+              Mỗi tài khoản ở đây đều đã chủ động chọn luồng chủ quán khi đăng nhập. Quản trị viên có
+              thể mở nhanh luồng trò chuyện `customer_admin` để xem ngữ cảnh rồi duyệt hoặc từ chối trực tiếp.
             </p>
           </div>
 
@@ -127,7 +127,7 @@ export function OwnerRequestManager() {
             </div>
             <div className="rounded-2xl border border-white/10 bg-black/20 px-4 py-4">
               <p className="text-[11px] font-semibold tracking-[0.2em] text-gray-500 uppercase">
-                Có thread chat
+                Có luồng trò chuyện
               </p>
               <p className="text-primary mt-3 text-3xl font-black">{summary.withThread}</p>
             </div>
@@ -137,10 +137,10 @@ export function OwnerRequestManager() {
         {requests.length === 0 ? (
           <div className="px-6 py-14 text-center">
             <p className="text-lg font-semibold text-white">
-              Không còn yêu cầu owner nào đang chờ.
+              Không còn yêu cầu chủ quán nào đang chờ.
             </p>
             <p className="mt-2 text-sm leading-6 text-gray-400">
-              Khi có khách hàng chọn luồng owner ở màn đăng nhập, yêu cầu mới sẽ xuất hiện tại đây.
+              Khi có khách hàng chọn luồng chủ quán ở màn đăng nhập, yêu cầu mới sẽ xuất hiện tại đây.
             </p>
           </div>
         ) : (
@@ -168,17 +168,17 @@ export function OwnerRequestManager() {
                   <div className="grid gap-3 sm:grid-cols-2">
                     <div className="rounded-2xl border border-white/10 bg-black/15 px-4 py-3">
                       <p className="text-[11px] font-semibold tracking-[0.2em] text-gray-500 uppercase">
-                        Thread chat
+                        Luồng trò chuyện
                       </p>
                       <p className="mt-2 text-sm text-gray-300">
                         {request.threadId
                           ? 'Đã sẵn sàng để mở nhanh.'
-                          : 'Chưa tìm thấy thread tương ứng.'}
+                          : 'Chưa tìm thấy luồng tương ứng.'}
                       </p>
                     </div>
                     <div className="rounded-2xl border border-white/10 bg-black/15 px-4 py-3">
                       <p className="text-[11px] font-semibold tracking-[0.2em] text-gray-500 uppercase">
-                        Role hiện tại
+                        Vai trò hiện tại
                       </p>
                       <p className="mt-2 text-sm font-semibold text-white">{request.role}</p>
                     </div>
@@ -190,12 +190,12 @@ export function OwnerRequestManager() {
                       onClick={() =>
                         request.threadId
                           ? router.push(`/admin/chat?threadId=${request.threadId}`)
-                          : toast.warning('Yêu cầu này chưa có thread chat để mở nhanh.')
+                            : toast.warning('Yêu cầu này chưa có luồng trò chuyện để mở nhanh.')
                       }
                       className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-gray-100 transition-colors hover:bg-white/10"
                     >
                       <MessageSquareShare className="h-4 w-4" />
-                      Mở chat
+                      Mở trò chuyện
                     </button>
 
                     <button
