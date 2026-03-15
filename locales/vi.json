@@ -6,7 +6,14 @@
   "metadata": {
     "title": "FlavorQuest - Khám Phá Ẩm Thực Vĩnh Khánh",
     "description": "Tour âm thanh tự động dẫn đường khám phá ẩm thực phố Vĩnh Khánh, Cần Thơ. Offline-first PWA với hỗ trợ đa ngôn ngữ.",
-    "keywords": ["food tour", "audio guide", "Vĩnh Khánh", "Cần Thơ", "ẩm thực", "PWA"]
+    "keywords": [
+      "food tour",
+      "audio guide",
+      "Vĩnh Khánh",
+      "Cần Thơ",
+      "ẩm thực",
+      "PWA"
+    ]
   },
   "manifest": {
     "name": "FlavorQuest - Trải Nghiệm Thuyết Minh Âm Thanh Tự Động",
@@ -342,7 +349,7 @@
     "scriptLoading": "Đang tải payOS",
     "safeMode": "Dùng chế độ an toàn",
     "embeddedInfo": "Sau khi tạo giao dịch, giao diện thanh toán nhúng của payOS sẽ xuất hiện tại đây.",
-    "hostedInfo": "Trên mobile và PWA, payOS embedded dễ gây đơ thao tác do giới hạn của WebView/iframe. FlavorQuest sẽ tự mở trang thanh toán payOS đầy đủ để trải nghiệm ổn định hơn.",
+    "hostedInfo": "FlavorQuest hi?n lu?n d?ng trang thanh to?n payOS ??y ?? tr?n m?i thi?t b? ?? thanh to?n ?n ??nh h?n v? tr?nh l?i t? bi?u m?u nh?ng.",
     "buttons": {
       "pay": "Thanh toán bằng payOS",
       "creating": "Đang tạo thanh toán...",
@@ -367,8 +374,9 @@
       "currentStatus": "Trạng thái hiện tại: {status}. Webhook sẽ tự mở khóa, hoặc bạn có thể bấm kiểm tra thủ công. Trang thanh toán chỉ mở khi bạn chủ động bấm nút.",
       "statusCheckFailed": "Không thể kiểm tra trạng thái thanh toán lúc này.",
       "creatingPayment": "Đang tạo giao dịch payOS...",
-      "createdPayment": "Đã tạo giao dịch. Vui lòng quét mã hoặc thanh toán ngay trong khung bên dưới.",
-      "createFailed": "Tạo giao dịch thất bại."
+      "createdPayment": "?? t?o giao d?ch. ?ang chuy?n b?n sang trang thanh to?n payOS...",
+      "createFailed": "Tạo giao dịch thất bại.",
+      "openingHosted": "?ang m? trang thanh to?n payOS..."
     },
     "statuses": {
       "PENDING": "Đang chờ",
@@ -396,7 +404,13 @@
       "redirectIn": "Tự động chuyển sau",
       "enterApp": "Vào ứng dụng ngay",
       "justNow": "Vừa xong"
-    }
+    },
+    "checkoutTitle": "Trang thanh to?n payOS",
+    "checkoutDescriptionReady": "Giao d?ch ?? s?n s?ng. B?m n?t b?n d??i ?? m? l?i trang thanh to?n payOS.",
+    "checkoutDescriptionPending": "Sau khi t?o giao d?ch, FlavorQuest s? chuy?n b?n th?ng sang trang thanh to?n payOS ???c l?u tr?.",
+    "checkoutReady": "S?n s?ng thanh to?n",
+    "checkoutPending": "Ch?a c? giao d?ch",
+    "checkoutInfo": "Khi b?n b?m Thanh to?n b?ng payOS, FlavorQuest s? m? tr?c ti?p trang thanh to?n payOS trong tab hi?n t?i."
   },
   "menu": {
     "title": "Menu món ăn",

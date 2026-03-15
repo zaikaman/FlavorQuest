@@ -6,7 +6,14 @@
   "metadata": {
     "title": "FlavorQuest - Découvrez la Rue Gastronomique Vinh Khanh",
     "description": "Visite audio automatique géolocalisée de la rue gastronomique Vinh Khanh, Can Tho. PWA hors ligne avec support multilingue.",
-    "keywords": ["visite gastronomique", "guide audio", "Vinh Khanh", "Can Tho", "cuisine", "PWA"]
+    "keywords": [
+      "visite gastronomique",
+      "guide audio",
+      "Vinh Khanh",
+      "Can Tho",
+      "cuisine",
+      "PWA"
+    ]
   },
   "manifest": {
     "name": "FlavorQuest - Expérience de Visite Audio Automatique",
@@ -342,7 +349,7 @@
     "scriptLoading": "Chargement de payOS",
     "safeMode": "Mode sécurisé",
     "embeddedInfo": "Après création du paiement, le formulaire payOS intégré apparaîtra ici.",
-    "hostedInfo": "Sur mobile et PWA, le paiement intégré payOS peut bloquer les interactions à cause des limites WebView/iframe. FlavorQuest ouvrira la page de paiement complète payOS pour une expérience plus stable.",
+    "hostedInfo": "FlavorQuest utilise desormais toujours la page de paiement payOS complete et hebergee sur tous les appareils afin d'offrir un parcours plus stable et d'eviter les problemes lies au formulaire integre.",
     "buttons": {
       "pay": "Payer avec payOS",
       "creating": "Création du paiement...",
@@ -367,8 +374,9 @@
       "currentStatus": "Statut actuel : {status}. Le webhook déverrouillera l'accès automatiquement, ou vous pouvez vérifier manuellement. La page de paiement ne s'ouvre que lorsque vous appuyez sur un bouton.",
       "statusCheckFailed": "Impossible de vérifier le statut du paiement pour le moment.",
       "creatingPayment": "Création de la transaction payOS...",
-      "createdPayment": "Transaction créée. Scannez le QR code ou payez dans le cadre ci-dessous.",
-      "createFailed": "Échec de la création de la transaction."
+      "createdPayment": "Transaction creee. Redirection vers la page de paiement payOS...",
+      "createFailed": "Échec de la création de la transaction.",
+      "openingHosted": "Ouverture de la page de paiement payOS..."
     },
     "statuses": {
       "PENDING": "En attente",
@@ -396,7 +404,13 @@
       "redirectIn": "Redirection automatique dans",
       "enterApp": "Entrer dans l'application",
       "justNow": "À l'instant"
-    }
+    },
+    "checkoutTitle": "Page de paiement payOS",
+    "checkoutDescriptionReady": "Votre transaction est prete. Utilisez le bouton ci-dessous pour rouvrir la page de paiement payOS hebergee.",
+    "checkoutDescriptionPending": "Apres la creation de la transaction, FlavorQuest vous redirigera directement vers la page de paiement payOS hebergee.",
+    "checkoutReady": "Pret a payer",
+    "checkoutPending": "Aucune transaction",
+    "checkoutInfo": "Lorsque vous appuyez sur Payer avec payOS, FlavorQuest ouvre directement la page de paiement payOS hebergee dans l'onglet actuel."
   },
   "menu": {
     "title": "Menu",
