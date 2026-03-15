@@ -12,6 +12,7 @@ import { useTranslations } from '@/lib/hooks/useTranslations';
 import { usePOIManager } from '@/lib/hooks/usePOIManager';
 import { loadVisitHistory } from '@/lib/services/storage';
 import { getLocalizedPOI } from '@/lib/utils/localization';
+import { FeedSkeleton } from '@/components/ui/Loading';
 import type { VisitHistoryEntry, POI } from '@/lib/types/index';
 
 interface HistoryViewProps {
@@ -131,12 +132,7 @@ export function HistoryView({ isOpen, onClose, onPlayPOI, onViewPOI }: HistoryVi
         {/* Content */}
         <div className="overflow-y-auto px-4 py-6 pb-[calc(env(safe-area-inset-bottom,20px)+40px)]">
           {isLoading ? (
-            <div className="flex flex-col items-center justify-center py-20 gap-4">
-              <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl bg-white/5 border border-white/5 backdrop-blur-md shadow-2xl">
-                <span className="material-symbols-outlined text-primary animate-spin text-3xl">sync</span>
-              </div>
-              <p className="text-sm font-medium text-white/50 animate-pulse tracking-wide">Loading...</p>
-            </div>
+            <FeedSkeleton items={4} className="py-4" />
           ) : history.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 px-4 text-center">
               <div className="relative mb-6 flex h-24 w-24 items-center justify-center rounded-[2rem] bg-gradient-to-br from-white/5 to-transparent border border-white/10 backdrop-blur-md shadow-2xl">

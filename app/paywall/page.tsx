@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/lib/contexts/AuthContext';
 import { useTranslations } from '@/lib/hooks/useTranslations';
+import { DashboardSkeleton, InlineSpinner, Skeleton } from '@/components/ui/Loading';
 
 type PaymentStatus = 'PENDING' | 'PROCESSING' | 'PAID' | 'CANCELLED' | 'EXPIRED' | 'FAILED' | 'UNDERPAID';
 
@@ -412,10 +413,9 @@ export default function PaywallPage() {
 
   if (isLoading || !isRoleReady) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background-dark text-white">
-        <div className="flex flex-col items-center gap-3">
-          <div className="h-10 w-10 rounded-full border-b-2 border-primary animate-spin" />
-          <p>{t('paywall.loading')}</p>
+      <div className="min-h-screen bg-background-dark px-4 py-8 text-white">
+        <div className="mx-auto max-w-5xl">
+          <DashboardSkeleton stats={4} />
         </div>
       </div>
     );
@@ -478,7 +478,11 @@ export default function PaywallPage() {
               disabled={isCreating}
               className="w-full rounded-2xl bg-primary text-white font-bold px-5 py-4 hover:bg-orange-600 transition-colors disabled:opacity-60"
             >
-              {isCreating ? t('paywall.buttons.creating') : payment?.checkout_url ? t('paywall.buttons.recreate') : t('paywall.buttons.pay')}
+              {isCreating
+                ? <InlineSpinner label={t('paywall.buttons.creating')} />
+                : payment?.checkout_url
+                  ? t('paywall.buttons.recreate')
+                  : t('paywall.buttons.pay')}
             </button>
 
             {payment?.checkout_url && (
@@ -497,7 +501,7 @@ export default function PaywallPage() {
               disabled={isChecking}
               className="w-full rounded-2xl border border-primary/30 bg-primary/10 px-5 py-4 font-semibold text-primary hover:bg-primary/15 transition-colors disabled:opacity-60"
             >
-              {isChecking ? t('paywall.buttons.checkingStatus') : t('paywall.buttons.checkStatus')}
+              {isChecking ? <InlineSpinner label={t('paywall.buttons.checkingStatus')} color="primary" /> : t('paywall.buttons.checkStatus')}
             </button>
 
             <button
@@ -537,7 +541,9 @@ export default function PaywallPage() {
             <div
               id="payos-embedded-container"
               className="payos-embedded-shell min-h-[820px] rounded-2xl border border-dashed border-white/15 bg-black/20 overflow-hidden"
-            />
+            >
+              {!payment?.checkout_url ? <Skeleton className="h-full min-h-[820px] w-full rounded-none" /> : null}
+            </div>
           ) : (
             <div className="rounded-2xl border border-white/10 bg-black/20 p-5 text-sm text-gray-300 leading-6">
               {t('paywall.hostedInfo')}

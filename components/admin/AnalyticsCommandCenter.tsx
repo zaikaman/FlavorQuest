@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
+import { DashboardSkeleton } from '@/components/ui/Loading';
 
 type LeaderboardSort = 'plays' | 'sessions' | 'completion' | 'skipPressure';
 
@@ -579,9 +580,7 @@ export default function AnalyticsCommandCenter() {
 
   if (isLoading && !data) {
     return (
-      <div className="flex h-64 items-center justify-center">
-        <div className="border-primary h-10 w-10 animate-spin rounded-full border-b-2" />
-      </div>
+      <DashboardSkeleton stats={6} />
     );
   }
 

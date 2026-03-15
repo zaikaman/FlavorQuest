@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/lib/contexts/AuthContext';
+import { TableSkeleton } from '@/components/ui/Loading';
 
 interface UserRoleItem {
   id: string;
@@ -74,9 +75,7 @@ export function UserRoleManager() {
 
   if (isLoading) {
     return (
-      <div className="flex h-64 items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary"></div>
-      </div>
+      <TableSkeleton columns={2} rows={8} />
     );
   }
 

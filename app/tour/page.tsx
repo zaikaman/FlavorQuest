@@ -37,6 +37,7 @@ import { OfflineIndicator } from '@/components/layout/OfflineIndicator';
 import { AudioPreloadIndicator } from '@/components/layout/AudioPreloadIndicator';
 import { OfflineDownloadPrompt } from '@/components/layout/OfflineDownloadPrompt';
 import { Toast } from '@/components/ui/Toast';
+import { TourPageSkeleton } from '@/components/ui/Loading';
 import { NoiseFilter } from '@/lib/utils/noise-filter';
 import { SpeedCalculator } from '@/lib/utils/speed';
 import { isCooldownActive, setCooldown } from '@/lib/utils/cooldown';
@@ -780,16 +781,14 @@ export default function TourPage() {
                 onViewPOI={handleViewPOI}
                 playingPOIId={audioPlayer.currentItem?.poi.id}
                 isOfflineReady={isOfflineReady || offlineSyncReady}
+                isLoading={poisLoading}
               />
             )}
 
             {/* Loading Overlay */}
-            {poisLoading && (
-              <div className="absolute inset-0 z-40 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-                <div className="flex flex-col items-center gap-3 text-white">
-                  <span className="material-symbols-outlined text-5xl animate-spin">sync</span>
-                  <p className="text-lg font-medium">{t('tour.loadingPOIs')}</p>
-                </div>
+            {poisLoading && activeTab === 'map' && activePOIs.length === 0 && (
+              <div className="absolute inset-0 z-40 overflow-hidden bg-background-dark">
+                <TourPageSkeleton />
               </div>
             )}
 

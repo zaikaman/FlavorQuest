@@ -10,6 +10,7 @@ import Link from 'next/link';
 import { Be_Vietnam_Pro } from 'next/font/google';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/contexts/AuthContext';
+import { DashboardSkeleton } from '@/components/ui/Loading';
 
 const adminSans = Be_Vietnam_Pro({
   subsets: ['latin', 'vietnamese'],
@@ -65,10 +66,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   // Show loading state
   if (isLoading || (user && !isRoleReady)) {
     return (
-      <div className="bg-background-dark flex min-h-screen items-center justify-center">
-        <div className="text-center">
-          <div className="border-primary mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-b-2"></div>
-          <p className="text-gray-400">Đang kiểm tra quyền truy cập...</p>
+      <div className="bg-background-dark min-h-screen px-4 py-8 text-white">
+        <div className="mx-auto max-w-7xl">
+          <DashboardSkeleton stats={6} />
         </div>
       </div>
     );
