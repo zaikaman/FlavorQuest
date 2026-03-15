@@ -82,22 +82,69 @@ export async function checkForUpdates(
   }
 }
 
+async function waitForWaitingServiceWorker(
+  registration: ServiceWorkerRegistration
+): Promise<ServiceWorker | null> {
+  if (registration.waiting) {
+    return registration.waiting;
+  }
+
+  if (registration.installing) {
+    return new Promise((resolve) => {
+      const installingWorker = registration.installing;
+
+      if (!installingWorker) {
+        resolve(null);
+        return;
+      }
+
+      const handleStateChange = () => {
+        if (installingWorker.state === 'installed') {
+          installingWorker.removeEventListener('statechange', handleStateChange);
+          resolve(registration.waiting ?? installingWorker);
+        }
+      };
+
+      installingWorker.addEventListener('statechange', handleStateChange);
+    });
+  }
+
+  return null;
+}
+
 /**
  * Skip waiting and activate new Service Worker immediately
  * 
  * @param registration - ServiceWorkerRegistration object
  */
-export function skipWaitingAndActivate(registration: ServiceWorkerRegistration): void {
-  registration.waiting?.postMessage({ type: 'SKIP_WAITING' });
+export async function skipWaitingAndActivate(
+  registration: ServiceWorkerRegistration
+): Promise<boolean> {
+  const waitingWorker = await waitForWaitingServiceWorker(registration);
 
-  // Reload page after activation
-  let refreshing = false;
-  navigator.serviceWorker.addEventListener('controllerchange', () => {
-    if (!refreshing) {
+  if (!waitingWorker) {
+    return false;
+  }
+
+  await new Promise<void>((resolve) => {
+    let refreshing = false;
+
+    const handleControllerChange = () => {
+      if (refreshing) {
+        return;
+      }
+
       refreshing = true;
+      navigator.serviceWorker.removeEventListener('controllerchange', handleControllerChange);
       window.location.reload();
-    }
+      resolve();
+    };
+
+    navigator.serviceWorker.addEventListener('controllerchange', handleControllerChange);
+    waitingWorker.postMessage({ type: 'SKIP_WAITING' });
   });
+
+  return true;
 }
 
 /**
