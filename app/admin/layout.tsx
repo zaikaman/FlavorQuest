@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { Be_Vietnam_Pro } from 'next/font/google';
 import { usePathname, useRouter } from 'next/navigation';
@@ -38,6 +38,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     refreshUserRole,
   } = useAuth();
   const refreshedUserIdRef = useRef<string | null>(null);
+  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
   const isAdminLoginPage = pathname === '/admin/login';
 
   const navItems = [
@@ -66,6 +67,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       console.error('[AdminLayout] refreshUserRole failed:', error);
     });
   }, [refreshUserRole, user?.id]);
+
+  useEffect(() => {
+    setIsMobileNavOpen(false);
+  }, [pathname]);
 
   useEffect(() => {
     if (isLoading) {
@@ -127,8 +132,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     return null;
   }
 
+  const handleSignOut = async () => {
+    const { signOut } = await import('@/lib/services/auth');
+    await signOut();
+    router.push('/admin/login');
+  };
+
   return (
-    <div className={`${adminSans.className} bg-background-dark relative min-h-screen flex flex-col md:flex-row`}>
+    <div
+      className={`${adminSans.className} bg-background-dark relative flex min-h-screen flex-col overflow-x-hidden md:flex-row`}
+    >
       <div
         className="pointer-events-none fixed inset-0 opacity-[0.06]"
         style={{
@@ -138,8 +151,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         }}
       />
 
-      {/* Thêm menu di động ở đây nếu cần */}
-      
       {/* Sidebar (Desktop & Tablet) */}
       <aside className="sticky top-0 z-20 h-screen w-64 flex-shrink-0 hidden flex-col border-r border-white/10 bg-[#2c1e16]/80 backdrop-blur-md lg:flex">
         <div className="flex h-full flex-col p-4 overflow-y-auto [&::-webkit-scrollbar]:hidden [scrollbar-width:none]">
@@ -197,11 +208,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </div>
             <button
               type="button"
-              onClick={async () => {
-                const { signOut } = await import('@/lib/services/auth');
-                await signOut();
-                router.push('/admin/login');
-              }}
+              onClick={() => void handleSignOut()}
               className="w-full rounded-lg border border-transparent px-3 py-2 text-center text-sm font-medium text-gray-300 transition-colors hover:border-white/10 hover:bg-white/10 hover:text-white"
             >
               Đăng xuất
@@ -214,7 +221,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <header className="sticky top-0 z-20 border-b border-white/10 bg-[#2c1e16]/80 backdrop-blur-md lg:hidden">
         <div className="px-4 py-3">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
+            <div className="min-w-0 flex items-center gap-2">
               <div className="bg-primary/20 rounded-lg p-1.5">
                 <svg
                   className="text-primary h-5 w-5"
@@ -230,45 +237,71 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   />
                 </svg>
               </div>
-              <h1 className="text-base font-bold text-white">Quản trị FlavorQuest</h1>
+              <div className="min-w-0">
+                <h1 className="truncate text-base font-bold text-white">Quản trị FlavorQuest</h1>
+                <p className="truncate text-xs text-gray-400">{user.email}</p>
+              </div>
             </div>
             <button
               type="button"
-              onClick={async () => {
-                const { signOut } = await import('@/lib/services/auth');
-                await signOut();
-                router.push('/admin/login');
-              }}
-              className="text-xs font-medium text-gray-300 transition-colors hover:text-white"
+              onClick={() => setIsMobileNavOpen((current) => !current)}
+              aria-expanded={isMobileNavOpen}
+              aria-label={isMobileNavOpen ? 'Đóng menu điều hướng' : 'Mở menu điều hướng'}
+              className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-gray-100 transition-colors hover:bg-white/10"
             >
-              Đăng xuất
+              <span className="material-symbols-outlined text-[22px]">
+                {isMobileNavOpen ? 'close' : 'menu'}
+              </span>
             </button>
           </div>
-          
-          <nav className="mt-3 min-w-0 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            <div className="flex min-w-max flex-nowrap items-center gap-2">
-              {navItems.map((item) => {
-                const isActive =
-                  pathname === item.href ||
-                  (item.href !== '/admin' && pathname.startsWith(item.href));
-
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className={`rounded-full border px-3 py-1.5 text-[12px] font-semibold whitespace-nowrap transition-colors ${
-                      isActive
-                        ? 'border-primary bg-primary/15 text-primary'
-                        : 'border-white/10 bg-white/5 text-gray-300 hover:bg-white/10'
-                    }`}
-                  >
-                    {item.label}
-                  </Link>
-                );
-              })}
-            </div>
-          </nav>
         </div>
+        {isMobileNavOpen && (
+          <>
+            <button
+              type="button"
+              aria-label="Đóng menu"
+              onClick={() => setIsMobileNavOpen(false)}
+              className="fixed inset-0 bg-black/60"
+            />
+            <div className="border-t border-white/10 bg-[#241912]/95 px-4 py-4 shadow-2xl backdrop-blur-xl">
+              <nav className="space-y-2">
+                {navItems.map((item) => {
+                  const isActive =
+                    pathname === item.href ||
+                    (item.href !== '/admin' && pathname.startsWith(item.href));
+
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      className={`flex items-center justify-between rounded-2xl border px-4 py-3 text-sm font-semibold transition-colors ${
+                        isActive
+                          ? 'border-primary/30 bg-primary/15 text-primary'
+                          : 'border-white/10 bg-white/5 text-gray-100 hover:bg-white/10'
+                      }`}
+                    >
+                      <span className="min-w-0">{item.label}</span>
+                      {isActive && (
+                        <span className="material-symbols-outlined text-lg">arrow_forward</span>
+                      )}
+                    </Link>
+                  );
+                })}
+              </nav>
+              <div className="mt-4 rounded-2xl border border-white/10 bg-black/15 p-4">
+                <p className="truncate text-sm font-semibold text-gray-100">{user.email}</p>
+                <p className="mt-1 text-xs font-semibold text-primary">Quản trị viên</p>
+                <button
+                  type="button"
+                  onClick={() => void handleSignOut()}
+                  className="mt-4 inline-flex min-h-11 w-full items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-white/10"
+                >
+                  Đăng xuất
+                </button>
+              </div>
+            </div>
+          </>
+        )}
       </header>
 
       {/* Main Content */}

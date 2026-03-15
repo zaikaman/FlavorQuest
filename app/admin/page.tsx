@@ -465,7 +465,7 @@ export default function AdminDashboard() {
   return (
     <div className="space-y-8">
       <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
-        <div>
+        <div className="min-w-0">
           <p className="text-primary/80 text-xs font-semibold tracking-[0.32em] uppercase">
             Trung tâm điều hành
           </p>
@@ -498,7 +498,7 @@ export default function AdminDashboard() {
         <div className="overflow-hidden rounded-[28px] border border-white/10 bg-[#2c1e16]">
           <div className="from-primary/12 border-b border-white/10 bg-gradient-to-r via-transparent to-transparent px-6 py-6">
             <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-              <div className="max-w-2xl">
+              <div className="min-w-0 max-w-2xl">
                 <p className="text-primary text-sm font-semibold">Nhịp hoạt động 7 ngày</p>
                 <h3 className="mt-2 text-2xl font-black text-white">
                   {derived.topTour
@@ -596,7 +596,7 @@ export default function AdminDashboard() {
                 className="w-full rounded-2xl border border-white/10 bg-black/15 px-4 py-4 text-left transition-colors hover:bg-white/5"
               >
                 <div className="flex items-start justify-between gap-3">
-                  <div>
+                  <div className="min-w-0">
                     <p className="text-sm font-semibold text-white">{item.label}</p>
                     <p className="mt-1 text-xs leading-5 text-gray-400">{item.note}</p>
                   </div>
@@ -649,13 +649,13 @@ export default function AdminDashboard() {
                 key={tour.id}
                 className="rounded-2xl border border-white/10 bg-black/15 px-4 py-4"
               >
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex items-start gap-4">
+                <div className="flex flex-wrap items-start justify-between gap-4">
+                  <div className="flex min-w-0 items-start gap-4">
                     <div className="bg-primary/10 text-primary flex h-10 w-10 items-center justify-center rounded-2xl text-sm font-black">
                       {index + 1}
                     </div>
-                    <div>
-                      <p className="font-semibold text-white">{tour.name_vi}</p>
+                    <div className="min-w-0">
+                      <p className="break-words font-semibold text-white">{tour.name_vi}</p>
                       <p className="mt-1 text-xs text-gray-400">
                         {formatNumber(tour.sessions)} phiên • {formatNumber(tour.total_plays)} lượt
                         phát • {tour.poi_count} POI
@@ -726,13 +726,13 @@ export default function AdminDashboard() {
                   onClick={() => router.push(item.route)}
                   className="w-full rounded-2xl border border-white/10 bg-black/15 px-4 py-4 text-left transition-colors hover:bg-white/5"
                 >
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <div className="flex items-center gap-2">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-2">
                         <span className="rounded-full bg-white/10 px-2 py-1 text-[11px] font-semibold text-gray-300">
                           {item.type}
                         </span>
-                        <p className="font-semibold text-white">{item.title}</p>
+                        <p className="break-words font-semibold text-white">{item.title}</p>
                       </div>
                       <p className="mt-2 text-sm text-gray-400">{item.subtitle}</p>
                     </div>

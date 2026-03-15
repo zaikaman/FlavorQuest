@@ -510,7 +510,7 @@ export default function OwnerDashboardPage() {
         <div className="overflow-hidden rounded-[30px] border border-white/10 bg-[#2c1e16]">
           <div className="from-primary/12 border-b border-white/10 bg-gradient-to-r via-transparent to-transparent px-6 py-6 lg:px-7">
             <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-              <div className="max-w-3xl">
+              <div className="min-w-0 max-w-3xl">
                 <p className="text-primary/80 text-xs font-semibold tracking-[0.32em] uppercase">
                   Không gian vận hành
                 </p>
@@ -647,9 +647,9 @@ export default function OwnerDashboardPage() {
                     }`}
                   >
                     <div className="flex items-start justify-between gap-4">
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <p className="font-semibold text-white">{poi.name_vi}</p>
+                      <div className="min-w-0">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <p className="break-words font-semibold text-white">{poi.name_vi}</p>
                           {isSelected && (
                             <span className="bg-primary/15 text-primary rounded-full px-2 py-1 text-[11px] font-bold">
                               Đang xem
@@ -832,7 +832,7 @@ export default function OwnerDashboardPage() {
                         }`}
                       >
                         <div className="flex items-start justify-between gap-4">
-                          <div>
+                          <div className="min-w-0">
                             <p className="font-semibold text-white">{item.label}</p>
                             <p className="mt-2 text-sm leading-6 text-gray-300">{item.note}</p>
                           </div>
@@ -1003,8 +1003,8 @@ export default function OwnerDashboardPage() {
                     </label>
                   </div>
 
-                  <div className="mt-6 flex items-center justify-between gap-3">
-                    <p className="text-xs leading-5 text-gray-400">
+                  <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <p className="text-xs leading-5 text-gray-400 sm:max-w-md">
                       Dùng biểu mẫu này cho cập nhật nhanh. Nếu sau này cần ảnh hoặc biến thể món, nên
                       mở rộng cấu trúc dữ liệu riêng.
                     </p>
@@ -1045,10 +1045,10 @@ export default function OwnerDashboardPage() {
                           key={dish.id}
                           className="rounded-2xl border border-white/10 bg-black/15 px-4 py-4"
                         >
-                          <div className="flex items-start justify-between gap-4">
+                          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                             <div className="min-w-0">
-                              <div className="flex items-center gap-2">
-                                <p className="font-semibold text-white">{dish.name}</p>
+                              <div className="flex flex-wrap items-center gap-2">
+                                <p className="break-words font-semibold text-white">{dish.name}</p>
                                 <span className="rounded-full bg-emerald-500/15 px-2 py-1 text-[11px] font-bold text-emerald-200">
                                   Đang bán
                                 </span>
@@ -1160,8 +1160,8 @@ export default function OwnerDashboardPage() {
                               key={order.id}
                               className="rounded-2xl border border-white/10 bg-[#241912] px-4 py-4"
                             >
-                              <div className="flex items-start justify-between gap-4">
-                                <div>
+                              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                                <div className="min-w-0">
                                   <p className="font-semibold text-white">
                                     #{order.id.slice(0, 8)}
                                   </p>
@@ -1331,10 +1331,10 @@ export default function OwnerDashboardPage() {
                         : 'border-primary/30 bg-primary/10'
                     }`}
                   >
-                    <div className="flex items-start justify-between gap-4">
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <p className="font-semibold text-white">{notification.title}</p>
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                      <div className="min-w-0">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <p className="break-words font-semibold text-white">{notification.title}</p>
                           {!notification.read_at && (
                             <span className="bg-primary/15 text-primary rounded-full px-2 py-1 text-[11px] font-bold">
                               Mới
