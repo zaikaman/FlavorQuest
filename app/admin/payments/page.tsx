@@ -34,6 +34,27 @@ interface PaymentHistoryResponse {
 
 const STATUS_OPTIONS = ['ALL', 'PAID', 'PENDING', 'PROCESSING', 'UNDERPAID', 'CANCELLED', 'EXPIRED', 'FAILED'] as const;
 
+const STATUS_LABELS: Record<(typeof STATUS_OPTIONS)[number], string> = {
+  ALL: 'Tất cả',
+  PAID: 'Đã thanh toán',
+  PENDING: 'Đang chờ',
+  PROCESSING: 'Đang xử lý',
+  UNDERPAID: 'Thiếu tiền',
+  CANCELLED: 'Đã hủy',
+  EXPIRED: 'Hết hạn',
+  FAILED: 'Thất bại',
+};
+
+const PAYMENT_STATUS_LABELS: Record<PaymentStatus, string> = {
+  PAID: 'Đã thanh toán',
+  PENDING: 'Đang chờ',
+  PROCESSING: 'Đang xử lý',
+  UNDERPAID: 'Thiếu tiền',
+  CANCELLED: 'Đã hủy',
+  EXPIRED: 'Hết hạn',
+  FAILED: 'Thất bại',
+};
+
 function formatDateTime(value: string | null) {
   if (!value) return '—';
   return new Date(value).toLocaleString('vi-VN');
@@ -108,8 +129,8 @@ export default function AdminPaymentsPage() {
     <div className="space-y-8">
       <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">Lịch sử thanh toán paywall</h1>
-          <p className="text-gray-400">Theo dõi giao dịch mở khóa khách hàng qua payOS.</p>
+          <h1 className="text-2xl font-bold text-white">Lịch sử thanh toán mở khóa</h1>
+          <p className="text-gray-400">Theo dõi giao dịch mở khóa khách hàng qua PayOS.</p>
         </div>
         <button
           type="button"
@@ -148,7 +169,7 @@ export default function AdminPaymentsPage() {
                     : 'border-white/10 bg-white/5 text-gray-300 hover:bg-white/10'
                 }`}
               >
-                {option}
+                {STATUS_LABELS[option]}
               </button>
             ))}
           </div>
@@ -156,7 +177,7 @@ export default function AdminPaymentsPage() {
           <input
             value={search}
             onChange={event => setSearch(event.target.value)}
-            placeholder="Tìm theo email, mã đơn, payment link"
+            placeholder="Tìm theo email, mã đơn, mã liên kết thanh toán"
             className="w-full lg:w-96 rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white placeholder:text-gray-500 outline-none focus:border-primary/40"
           />
         </div>
@@ -175,7 +196,7 @@ export default function AdminPaymentsPage() {
                   <th className="px-4 py-3">Kích hoạt</th>
                   <th className="px-4 py-3">Tạo lúc</th>
                   <th className="px-4 py-3">Thanh toán lúc</th>
-                  <th className="px-4 py-3">Payment Link</th>
+                  <th className="px-4 py-3">Liên kết thanh toán</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
@@ -189,7 +210,7 @@ export default function AdminPaymentsPage() {
                     <td className="px-4 py-4 font-semibold text-white">{formatCurrency(item.amount)} VND</td>
                     <td className="px-4 py-4">
                       <span className={`inline-flex rounded-full border px-3 py-1 text-xs font-bold ${getStatusBadgeClass(item.status)}`}>
-                        {item.status}
+                        {PAYMENT_STATUS_LABELS[item.status]}
                       </span>
                     </td>
                     <td className="px-4 py-4">

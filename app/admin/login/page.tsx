@@ -149,9 +149,9 @@ export default function AdminLoginPage() {
             <span className="material-symbols-outlined text-primary text-[40px]">shield_lock</span>
           </div>
           <p className="text-xs font-semibold uppercase tracking-[0.28em] text-primary/80">Cổng quản trị</p>
-          <h1 className="mt-3 text-3xl font-black text-white">Đăng nhập admin</h1>
+          <h1 className="mt-3 text-3xl font-black text-white">Đăng nhập quản trị</h1>
           <p className="mt-3 text-sm leading-6 text-gray-400">
-            Dành riêng cho tài khoản quản trị. Email không có quyền admin sẽ không thể vào khu vực này.
+            Dành riêng cho tài khoản quản trị. Email không có quyền quản trị sẽ không thể vào khu vực này.
           </p>
         </div>
 
@@ -171,7 +171,7 @@ export default function AdminLoginPage() {
           <div className="space-y-6">
             <div className="rounded-2xl border border-white/10 bg-black/15 px-4 py-4">
               <p className="text-sm leading-6 text-gray-300">
-                Nhập email quản trị để nhận mã OTP. Khu này không dùng chung với cổng khách hàng hoặc chủ quán.
+                Nhập email quản trị để nhận mã OTP. Khu vực này không dùng chung với cổng khách hàng hoặc chủ quán.
               </p>
             </div>
 
@@ -237,7 +237,7 @@ export default function AdminLoginPage() {
                   {isVerifyingOtp ? (
                     <InlineSpinner label="Đang xác thực..." color="primary" />
                   ) : (
-                    'Xác nhận và vào admin'
+                    'Xác nhận và vào khu quản trị'
                   )}
                 </button>
               </div>

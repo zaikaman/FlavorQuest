@@ -86,14 +86,14 @@ export function UserRoleManager() {
     <div className="overflow-hidden rounded-xl border border-white/5 bg-[#2c1e16]">
       <div className="border-b border-white/10 px-6 py-4">
         <h2 className="text-lg font-bold text-white">Quản lý vai trò người dùng</h2>
-        <p className="text-sm text-gray-400">Gán vai trò Khách hàng, Chủ quán hoặc Admin cho từng tài khoản</p>
+        <p className="text-sm text-gray-400">Gán vai trò Khách hàng, Chủ quán hoặc Quản trị viên cho từng tài khoản</p>
       </div>
       <div className="divide-y divide-white/5">
         {users.map(account => (
           <div key={account.id} className="flex items-center justify-between gap-4 px-6 py-4">
             <div>
               <p className="text-sm font-medium text-white">{account.email}</p>
-              <p className="text-xs text-gray-500">ID: {account.id.slice(0, 8)}... | Vai trò hiện tại: {account.role}</p>
+              <p className="text-xs text-gray-500">Mã: {account.id.slice(0, 8)}... | Vai trò hiện tại: {account.role}</p>
             </div>
             <select
               value={account.role}
@@ -102,7 +102,7 @@ export function UserRoleManager() {
             >
               <option value="customer">Khách hàng</option>
               <option value="owner">Chủ quán</option>
-              <option value="admin">Admin</option>
+              <option value="admin">Quản trị viên</option>
             </select>
           </div>
         ))}

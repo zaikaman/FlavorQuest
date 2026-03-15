@@ -26,12 +26,12 @@ type LocalizedAudioField = 'audio_url_vi' | 'audio_url_en' | 'audio_url_ja' | 'a
 type TranslationUpdates = Partial<Record<LocalizedNameField | LocalizedDescriptionField | LocalizedAudioField, string>>;
 
 const LANGUAGES = [
-    { code: 'vi', label: 'Vietnamese (Tiếng Việt)' },
-    { code: 'en', label: 'English' },
-    { code: 'ja', label: 'Japanese (日本語)' },
-    { code: 'fr', label: 'French (Français)' },
-    { code: 'ko', label: 'Korean (한국어)' },
-    { code: 'zh', label: 'Chinese (中文)' },
+    { code: 'vi', label: 'Tiếng Việt' },
+    { code: 'en', label: 'Tiếng Anh (English)' },
+    { code: 'ja', label: 'Tiếng Nhật (日本語)' },
+    { code: 'fr', label: 'Tiếng Pháp (Français)' },
+    { code: 'ko', label: 'Tiếng Hàn (한국어)' },
+    { code: 'zh', label: 'Tiếng Trung (中文)' },
 ];
 
 export function POIForm({ initialData, isNew = false, allowOwnerAssignment = true }: POIFormProps) {
@@ -103,7 +103,7 @@ export function POIForm({ initialData, isNew = false, allowOwnerAssignment = tru
                 body: JSON.stringify(formData),
             });
 
-            if (!res.ok) throw new Error('Save failed');
+            if (!res.ok) throw new Error('Lưu thất bại');
 
             toast.success('Lưu địa điểm thành công');
             router.push('/admin/pois');
@@ -200,7 +200,7 @@ export function POIForm({ initialData, isNew = false, allowOwnerAssignment = tru
                         updates[`audio_url_${lang.code}` as LocalizedAudioField] = data.url;
                     }
                 } catch (err) {
-                    console.error(`Failed to generate audio for ${lang.code}`, err);
+                    console.error(`Tạo âm thanh thất bại cho ngôn ngữ ${lang.code}`, err);
                 }
             }
 
@@ -217,7 +217,7 @@ export function POIForm({ initialData, isNew = false, allowOwnerAssignment = tru
     return (
         <form onSubmit={handleSubmit} className="space-y-8 bg-background-dark/50 p-6 rounded-xl border border-white/10">
 
-            {/* Basic Info */}
+            {/* Thông tin cơ bản */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-4">
                     <h3 className="text-lg font-bold text-white mb-4">Thông tin cơ bản</h3>
@@ -250,7 +250,7 @@ export function POIForm({ initialData, isNew = false, allowOwnerAssignment = tru
 
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-sm font-medium text-gray-400 mb-1">Vĩ độ (Latitude)</label>
+                            <label className="block text-sm font-medium text-gray-400 mb-1">Vĩ độ</label>
                             <input
                                 type="number" step="any" required
                                 value={formData.lat}
@@ -259,7 +259,7 @@ export function POIForm({ initialData, isNew = false, allowOwnerAssignment = tru
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-400 mb-1">Kinh độ (Longitude)</label>
+                            <label className="block text-sm font-medium text-gray-400 mb-1">Kinh độ</label>
                             <input
                                 type="number" step="any" required
                                 value={formData.lng}
@@ -313,7 +313,7 @@ export function POIForm({ initialData, isNew = false, allowOwnerAssignment = tru
                     </div>
                 </div>
 
-                {/* Content Localization */}
+                {/* Nội dung đa ngôn ngữ */}
                 <div className="space-y-4">
                     <div className="flex items-center justify-between mb-4">
                         <h3 className="text-lg font-bold text-white">Nội dung đa ngôn ngữ</h3>
@@ -348,12 +348,12 @@ export function POIForm({ initialData, isNew = false, allowOwnerAssignment = tru
                                 ) : (
                                     <span className="material-symbols-outlined text-[16px]">podcasts</span>
                                 )}
-                                Tạo Audio tất cả
+                                Tạo âm thanh tất cả
                             </button>
                         </div>
                     </div>
 
-                    {/* Language Tabs */}
+                    {/* Tab ngôn ngữ */}
                     <div className="flex flex-wrap gap-2 border-b border-white/10 pb-2">
                         {LANGUAGES.map(lang => (
                             <button
@@ -370,7 +370,7 @@ export function POIForm({ initialData, isNew = false, allowOwnerAssignment = tru
                         ))}
                     </div>
 
-                    {/* Localized Fields */}
+                    {/* Trường dữ liệu theo ngôn ngữ */}
                     {LANGUAGES.map(lang => (
                         <div key={lang.code} className={activeTab === lang.code ? 'block space-y-4' : 'hidden'}>
                             <div>
@@ -391,10 +391,10 @@ export function POIForm({ initialData, isNew = false, allowOwnerAssignment = tru
                                     value={formData[`description_${lang.code}` as keyof POI] as string || ''}
                                     onChange={e => handleChange(`description_${lang.code}` as keyof POI, e.target.value)}
                                     className="w-full bg-black/20 border border-white/10 rounded-lg p-2.5 text-white focus:border-primary focus:ring-1 focus:ring-primary"
-                                    placeholder={`Mô tả chi tiết để tạo audio...`}
+                                    placeholder={`Mô tả chi tiết để tạo âm thanh...`}
                                 />
 
-                                {/* TTS Generator */}
+                                {/* Trình tạo âm thanh */}
                                 <TTSGenerator
                                     text={formData[`description_${lang.code}` as keyof POI] as string || ''}
                                     languageCode={lang.code}
@@ -416,7 +416,7 @@ export function POIForm({ initialData, isNew = false, allowOwnerAssignment = tru
                     onClick={() => router.back()}
                     className="px-6 py-2.5 rounded-xl border border-white/10 text-white hover:bg-white/5 transition-colors"
                 >
-                    Hủy bỏ
+                    Hủy
                 </button>
                 <button
                     type="submit"

@@ -101,17 +101,17 @@ export function SupportInboxPage({
     if (role === 'owner') {
       return {
         eyebrow: t('support.owner.eyebrow', undefined, 'Hộp thư'),
-        title: t('support.owner.title', undefined, 'Tin nhắn từ khách và admin'),
+        title: t('support.owner.title', undefined, 'Tin nhắn từ khách và quản trị viên'),
         subtitle: t(
           'support.owner.subtitle',
           undefined,
-          'Theo dõi trao đổi với khách theo từng quán và giữ một kênh riêng để làm việc với admin.'
+          'Theo dõi trao đổi với khách theo từng quán và giữ một kênh riêng để làm việc với quản trị viên.'
         ),
         emptyTitle: t('support.owner.emptyTitle', undefined, 'Hộp thư đang trống.'),
         emptyBody: t(
           'support.owner.emptyBody',
           undefined,
-          'Khi khách nhắn hoặc bạn trao đổi với admin, hội thoại sẽ hiện ở đây.'
+          'Khi khách nhắn hoặc bạn trao đổi với quản trị viên, hội thoại sẽ hiện ở đây.'
         ),
       };
     }
@@ -135,18 +135,18 @@ export function SupportInboxPage({
     }
 
     return {
-      eyebrow: t('support.customer.eyebrow', undefined, 'Chat hỗ trợ'),
-      title: t('support.customer.title', undefined, 'Nhắn cho quán hoặc admin'),
+      eyebrow: t('support.customer.eyebrow', undefined, 'Trò chuyện hỗ trợ'),
+      title: t('support.customer.title', undefined, 'Nhắn cho quán hoặc quản trị viên'),
       subtitle: t(
         'support.customer.subtitle',
         undefined,
-        'Bạn có thể nhắn riêng cho từng quán, hoặc hỏi admin nếu cần hỗ trợ về tài khoản và trải nghiệm.'
+          'Bạn có thể nhắn riêng cho từng quán, hoặc hỏi quản trị viên nếu cần hỗ trợ về tài khoản và trải nghiệm.'
       ),
       emptyTitle: t('support.customer.emptyTitle', undefined, 'Chưa có tin nhắn nào.'),
       emptyBody: t(
         'support.customer.emptyBody',
         undefined,
-        'Chọn một quán hoặc mở chat với admin để bắt đầu.'
+        'Chọn một quán hoặc mở trò chuyện với quản trị viên để bắt đầu.'
       ),
     };
   }, [role, t]);
@@ -358,8 +358,8 @@ export function SupportInboxPage({
         if (adminEmails.length > 0) {
           nextDirectory.unshift({
             id: 'fallback-admin',
-            title: 'Nhắn admin',
-            subtitle: 'Cần hỗ trợ? Nhắn admin ở đây.',
+            title: 'Nhắn quản trị viên',
+            subtitle: 'Cần hỗ trợ? Nhắn quản trị viên ở đây.',
             thread_type: 'customer_admin',
             poi: null,
             counterpart: null,
@@ -599,7 +599,7 @@ export function SupportInboxPage({
         fallbackDirectory.filter((entry) => entry.thread_type === 'customer_admin').length;
 
       if (ownerCount === 0 && adminCount === 0) {
-        return 'Hiện chưa có quán nào được gán chủ quán và cũng chưa có tài khoản admin để bạn nhắn.';
+        return 'Hiện chưa có quán nào được gán chủ quán và cũng chưa có tài khoản quản trị viên để bạn nhắn.';
       }
 
       if (ownerCount === 0) {
@@ -607,12 +607,12 @@ export function SupportInboxPage({
       }
 
       if (adminCount === 0) {
-        return 'Hiện chưa có tài khoản admin nào sẵn sàng để hỗ trợ qua chat.';
+        return 'Hiện chưa có tài khoản quản trị viên nào sẵn sàng để hỗ trợ qua trò chuyện.';
       }
     }
 
     if (role === 'owner' && meta.availableAdminCount === 0) {
-      return 'Hiện chưa có tài khoản admin nào để bạn mở kênh hỗ trợ.';
+      return 'Hiện chưa có tài khoản quản trị viên nào để bạn mở kênh hỗ trợ.';
     }
 
     return null;
@@ -744,8 +744,8 @@ export function SupportInboxPage({
                           {entry.thread_type === 'customer_owner'
                             ? t('support.threadTypes.customerOwner', undefined, 'Khách / Chủ quán')
                             : entry.thread_type === 'owner_admin'
-                              ? t('support.threadTypes.ownerAdmin', undefined, 'Chủ quán / Admin')
-                              : t('support.threadTypes.customerAdmin', undefined, 'Khách / Admin')}
+                              ? t('support.threadTypes.ownerAdmin', undefined, 'Chủ quán / Quản trị viên')
+                              : t('support.threadTypes.customerAdmin', undefined, 'Khách / Quản trị viên')}
                         </span>
                       </div>
 
@@ -812,7 +812,7 @@ export function SupportInboxPage({
                   const isActive = thread.id === activeThreadId;
                   const counterpartLabel =
                     thread.counterpart?.role === 'admin'
-                      ? t('support.counterparts.admin', undefined, 'Đội ngũ admin')
+                      ? t('support.counterparts.admin', undefined, 'Đội ngũ quản trị')
                       : thread.counterpart?.email ||
                         t('support.counterparts.unknown', undefined, 'Người nhận');
 
@@ -893,7 +893,7 @@ export function SupportInboxPage({
                     </p>
                     <h2 className="mt-2 text-2xl font-black text-white">
                       {activeThread.counterpart?.role === 'admin'
-                        ? t('support.counterparts.admin', undefined, 'Đội ngũ admin')
+                        ? t('support.counterparts.admin', undefined, 'Đội ngũ quản trị')
                         : activeThread.counterpart?.email ||
                           t('support.counterparts.unknown', undefined, 'Người nhận')}
                     </h2>
@@ -919,8 +919,8 @@ export function SupportInboxPage({
                     {activeThread.thread_type === 'customer_owner'
                       ? t('support.threadTypes.customerOwner', undefined, 'Khách / Chủ quán')
                       : activeThread.thread_type === 'owner_admin'
-                        ? t('support.threadTypes.ownerAdmin', undefined, 'Chủ quán / Admin')
-                        : t('support.threadTypes.customerAdmin', undefined, 'Khách / Admin')}
+                        ? t('support.threadTypes.ownerAdmin', undefined, 'Chủ quán / Quản trị viên')
+                          : t('support.threadTypes.customerAdmin', undefined, 'Khách / Quản trị viên')}
                   </span>
                   <span className="rounded-full border border-white/10 bg-black/15 px-3 py-1 text-[11px] font-semibold text-gray-300">
                     {t('support.thread.emailBadge', undefined, 'Có email thông báo')}
@@ -988,7 +988,7 @@ export function SupportInboxPage({
                         <div className="flex items-center gap-2">
                           <span className="text-[11px] font-semibold tracking-[0.16em] text-white/70 uppercase">
                             {message.sender_role === 'admin'
-                              ? t('support.counterparts.adminShort', undefined, 'Admin')
+                              ? t('support.counterparts.adminShort', undefined, 'QTV')
                               : message.sender_role === 'owner'
                                 ? t('support.counterparts.ownerShort', undefined, 'Chủ quán')
                                 : t('support.counterparts.customerShort', undefined, 'Khách')}

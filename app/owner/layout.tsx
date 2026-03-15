@@ -88,7 +88,7 @@ export default function OwnerLayout({ children }: { children: React.ReactNode })
               </div>
               <div>
                 <p className="text-primary/80 text-[11px] font-semibold tracking-[0.28em] uppercase">
-                  Owner space
+                  Khu vực chủ quán
                 </p>
                 <h1 className="text-xl font-black text-white">Bảng điều hành chủ quán</h1>
                 <p className="text-sm text-gray-400">
@@ -128,7 +128,7 @@ export default function OwnerLayout({ children }: { children: React.ReactNode })
               <div className="hidden rounded-2xl border border-white/10 bg-black/15 px-4 py-2 text-right lg:block">
                 <p className="text-sm font-semibold text-gray-100">{user?.email}</p>
                 <p className="text-primary text-xs font-semibold">
-                  {isAdmin ? 'Admin kiêm chủ quán' : 'Tài khoản chủ quán'}
+                  {isAdmin ? 'Quản trị viên kiêm chủ quán' : 'Tài khoản chủ quán'}
                 </p>
               </div>
               <button

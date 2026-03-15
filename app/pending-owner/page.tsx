@@ -60,22 +60,22 @@ export default function PendingOwnerPage() {
         body: t(
           'pendingOwner.steps.request.body',
           undefined,
-          'Hệ thống đã mở luồng chat với admin để bạn bổ sung thông tin xác minh khi cần.'
+          'Hệ thống đã mở luồng trò chuyện với quản trị viên để bạn bổ sung thông tin xác minh khi cần.'
         ),
       },
       {
         icon: ShieldCheck,
-        title: t('pendingOwner.steps.review.title', undefined, 'Admin sẽ xác minh qua chat'),
+        title: t('pendingOwner.steps.review.title', undefined, 'Quản trị viên sẽ xác minh qua trò chuyện'),
         body: isRejected
           ? t(
               'pendingOwner.steps.reviewRejected.body',
               undefined,
-              'Yêu cầu trước đó đã bị từ chối. Bạn vẫn có thể tiếp tục trao đổi trong khung chat bên dưới để làm rõ thêm.'
+              'Yêu cầu trước đó đã bị từ chối. Bạn vẫn có thể tiếp tục trao đổi trong khung trò chuyện bên dưới để làm rõ thêm.'
             )
           : t(
               'pendingOwner.steps.review.body',
               undefined,
-              'Theo dõi tin nhắn ở đây để phản hồi nhanh nếu admin cần hỏi thêm trước khi duyệt.'
+              'Theo dõi tin nhắn ở đây để phản hồi nhanh nếu quản trị viên cần hỏi thêm trước khi duyệt.'
             ),
       },
       {
@@ -83,12 +83,12 @@ export default function PendingOwnerPage() {
         title: t(
           'pendingOwner.steps.workspace.title',
           undefined,
-          'Workspace owner sẽ mở sau khi duyệt'
+          'Khu vực chủ quán sẽ mở sau khi duyệt'
         ),
         body: t(
           'pendingOwner.steps.workspace.body',
           undefined,
-          'Sau khi được duyệt, bạn sẽ vào khu owner. Nếu chưa được gán quán, màn owner sẽ hiển thị trạng thái trống cho đến khi admin gán POI.'
+          'Sau khi được duyệt, bạn sẽ vào khu vực chủ quán. Nếu chưa được gán quán, màn hình chủ quán sẽ hiển thị trạng thái trống cho đến khi quản trị viên gán POI.'
         ),
       },
     ],
@@ -111,19 +111,19 @@ export default function PendingOwnerPage() {
           <div className="grid gap-6 border-b border-white/10 bg-[radial-gradient(circle_at_top_left,_rgba(242,108,13,0.24),_transparent_48%),linear-gradient(135deg,rgba(255,255,255,0.03),rgba(255,255,255,0))] px-6 py-7 lg:grid-cols-[1.2fr_0.8fr] lg:px-8">
             <div>
               <p className="text-primary/80 text-[11px] font-semibold tracking-[0.32em] uppercase">
-                {t('pendingOwner.eyebrow', undefined, 'Khu chờ duyệt owner')}
+                {t('pendingOwner.eyebrow', undefined, 'Khu chờ duyệt chủ quán')}
               </p>
               <h1 className="mt-3 max-w-3xl text-3xl font-black text-white sm:text-[2.4rem]">
                 {isRejected
                   ? t(
                       'pendingOwner.titleRejected',
                       undefined,
-                      'Yêu cầu owner của bạn cần trao đổi thêm với admin'
+                      'Yêu cầu chủ quán của bạn cần trao đổi thêm với quản trị viên'
                     )
                   : t(
                       'pendingOwner.titlePending',
                       undefined,
-                      'Tài khoản đang chờ admin xác minh để mở quyền chủ quán'
+                      'Tài khoản đang chờ quản trị viên xác minh để mở quyền chủ quán'
                     )}
               </h1>
               <p className="mt-4 max-w-2xl text-sm leading-7 text-gray-300">
@@ -136,7 +136,7 @@ export default function PendingOwnerPage() {
                   : t(
                       'pendingOwner.subtitlePending',
                       undefined,
-                      'Tài khoản này đang ở trạng thái chờ duyệt owner nên chưa thể dùng khu khách hàng hoặc owner. Luồng chat bên dưới là nơi chính để theo dõi và phản hồi nếu admin cần xác minh thêm.'
+                      'Tài khoản này đang ở trạng thái chờ duyệt chủ quán nên chưa thể dùng khu khách hàng hoặc khu vực chủ quán. Luồng trò chuyện bên dưới là nơi chính để theo dõi và phản hồi nếu quản trị viên cần xác minh thêm.'
                     )}
               </p>
             </div>
@@ -174,7 +174,7 @@ export default function PendingOwnerPage() {
                   {t(
                     'pendingOwner.customerHint',
                     undefined,
-                    'Trong lúc chưa được duyệt, tài khoản này chỉ có thể theo dõi trạng thái và trao đổi với admin.'
+                    'Trong lúc chưa được duyệt, tài khoản này chỉ có thể theo dõi trạng thái và trao đổi với quản trị viên.'
                   )}
                 </p>
               </button>
