@@ -71,12 +71,16 @@ export default function LoginPage() {
     setIsSendingOtp(true);
     setFeedback(null);
 
-    const { error: requestError } = await requestEmailOtp(normalizedEmail, { accountType });
+    const { error: requestError, errorCode } = await requestEmailOtp(normalizedEmail, { accountType });
 
     setIsSendingOtp(false);
 
     if (requestError) {
-      setFeedback({ type: 'error', message: requestError.message || t('login.sendOtpError') });
+      const message =
+        errorCode === 'ADMIN_PORTAL_REQUIRED'
+          ? t('login.adminPortalRequired')
+          : requestError.message || t('login.sendOtpError');
+      setFeedback({ type: 'error', message });
       return;
     }
 
