@@ -420,42 +420,42 @@
     }
   },
   "support": {
-    "nav": "Chat",
-    "openPage": "Mở trang chat hỗ trợ",
+    "nav": "Nhắn tin",
+    "openPage": "Mở trang nhắn tin",
     "customer": {
-      "eyebrow": "Trung tâm hỗ trợ",
-      "title": "Nhắn trực tiếp với chủ quán hoặc admin",
-      "subtitle": "Mỗi quán có một luồng riêng theo từng điểm bán, còn admin là kênh hỗ trợ chung cho tài khoản và trải nghiệm trên FlavorQuest.",
-      "emptyTitle": "Chưa có cuộc trò chuyện nào.",
-      "emptyBody": "Hãy chọn một quán hoặc kênh admin ở cột trái để bắt đầu nhắn tin. Email thông báo sẽ được gửi khi có phản hồi mới."
+      "eyebrow": "Chat hỗ trợ",
+      "title": "Nhắn cho quán hoặc admin",
+      "subtitle": "Bạn có thể nhắn riêng cho từng quán, hoặc hỏi admin nếu cần hỗ trợ về tài khoản và trải nghiệm.",
+      "emptyTitle": "Chưa có tin nhắn nào.",
+      "emptyBody": "Chọn một quán hoặc mở chat với admin để bắt đầu."
     },
     "owner": {
-      "eyebrow": "Tin nhắn vận hành",
-      "title": "Chat giữa chủ quán và hệ thống hỗ trợ",
-      "subtitle": "Tập trung trao đổi với khách theo từng điểm bán và mở một kênh riêng với admin khi cần xử lý vận hành.",
-      "emptyTitle": "Chưa có cuộc trò chuyện nào.",
-      "emptyBody": "Khi khách nhắn theo từng điểm bán hoặc bạn mở kênh với admin, toàn bộ cuộc trò chuyện sẽ xuất hiện tại đây."
+      "eyebrow": "Hộp thư",
+      "title": "Tin nhắn từ khách và admin",
+      "subtitle": "Theo dõi trao đổi với khách theo từng quán và giữ một kênh riêng để làm việc với admin.",
+      "emptyTitle": "Hộp thư đang trống.",
+      "emptyBody": "Khi khách nhắn hoặc bạn trao đổi với admin, hội thoại sẽ hiện ở đây."
     },
     "admin": {
-      "eyebrow": "Hàng đợi hỗ trợ",
-      "title": "Điều phối trao đổi với khách và chủ quán",
-      "subtitle": "Admin nhận các luồng hỗ trợ từ khách hàng và chủ quán trong cùng một inbox để phản hồi nhanh, không cần widget nổi.",
+      "eyebrow": "Tin nhắn hỗ trợ",
+      "title": "Trao đổi với khách và chủ quán",
+      "subtitle": "Tất cả yêu cầu hỗ trợ từ khách và chủ quán đều tập trung ở đây để bạn phản hồi nhanh.",
       "emptyTitle": "Hàng đợi đang trống.",
       "emptyBody": "Khi có yêu cầu hỗ trợ mới từ khách hàng hoặc chủ quán, cuộc trò chuyện sẽ xuất hiện tại đây."
     },
     "stats": {
       "activeThreads": "Luồng đang mở",
-      "activeThreadsBody": "Mỗi luồng là một trang chat đầy đủ, không chồng lên giao diện chính.",
+      "activeThreadsBody": "Mỗi hội thoại có một trang riêng, dễ theo dõi hơn.",
       "unreadThreads": "Cần phản hồi",
-      "unreadThreadsBody": "Khi có tin nhắn mới, hệ thống cũng gửi thông báo qua email cho bên nhận."
+      "unreadThreadsBody": "Khi có tin nhắn mới, người nhận cũng sẽ được báo qua email."
     },
     "launchpad": {
       "title": "Mở luồng mới",
-      "body": "Chọn đúng đối tượng cần trao đổi. Hệ thống sẽ mở hoặc tái sử dụng luồng chat tương ứng."
+      "body": "Chọn đúng người cần nhắn. Nếu đã có hội thoại trước đó, hệ thống sẽ mở lại hội thoại đó."
     },
     "inbox": {
       "title": "Danh sách cuộc trò chuyện",
-      "body": "Luồng nào có tin mới chưa đọc sẽ nổi bật để bạn phản hồi nhanh hơn."
+      "body": "Tin nhắn chưa đọc sẽ được đưa lên trước để bạn xử lý nhanh hơn."
     },
     "threadTypes": {
       "customerOwner": "Khách / Chủ quán",
@@ -466,13 +466,13 @@
       "creating": "Đang mở...",
       "waitingFirstMessage": "Chưa có tin nhắn nào trong luồng này.",
       "noThreadSelected": "Chọn một cuộc trò chuyện để bắt đầu.",
-      "noThreadSelectedBody": "Danh sách bên trái cho phép bạn mở đúng luồng chat theo vai trò và quy tắc nghiệp vụ.",
+      "noThreadSelectedBody": "Bạn cũng có thể mở nhanh một cuộc trò chuyện mới ở cột bên trái.",
       "noMessages": "Luồng này chưa có tin nhắn nào.",
-      "noMessagesBody": "Hãy gửi tin đầu tiên. Khi có phản hồi, hệ thống sẽ tự cập nhật danh sách và email thông báo."
+      "noMessagesBody": "Gửi tin đầu tiên để bắt đầu."
     },
     "actions": {
       "openThread": "Mở cuộc trò chuyện",
-      "startThread": "Bắt đầu nhắn tin",
+      "startThread": "Nhắn ngay",
       "refresh": "Làm mới",
       "sending": "Đang gửi...",
       "send": "Gửi tin nhắn"
@@ -487,12 +487,12 @@
     "thread": {
       "title": "Cuộc trò chuyện",
       "poiContext": "Trao đổi đang gắn với điểm bán {name}.",
-      "emailHint": "Tin nhắn mới sẽ tạo thông báo trong hệ thống và gửi email cho bên nhận.",
+      "emailHint": "Tin nhắn mới sẽ được báo trong ứng dụng và qua email.",
       "emailBadge": "Có email thông báo"
     },
     "composer": {
-      "placeholder": "Nhập nội dung cần trao đổi. Nhấn Enter để gửi, Shift + Enter để xuống dòng.",
-      "hint": "Tin nhắn sẽ xuất hiện theo thời gian thực và bên nhận cũng nhận được email thông báo."
+      "placeholder": "Nhập tin nhắn...",
+      "hint": "Tin nhắn mới sẽ hiện ngay tại đây. Email cũng sẽ được gửi cho bên nhận."
     },
     "errors": {
       "loadThreads": "Không thể tải danh sách cuộc trò chuyện.",

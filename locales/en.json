@@ -420,42 +420,42 @@
     }
   },
   "support": {
-    "nav": "Chat",
-    "openPage": "Open support chat page",
+    "nav": "Messages",
+    "openPage": "Open messages",
     "customer": {
-      "eyebrow": "Support hub",
-      "title": "Message the owner or admin directly",
-      "subtitle": "Each shop gets its own thread by location, while admin is the shared support channel for account and experience issues in FlavorQuest.",
-      "emptyTitle": "No conversations yet.",
-      "emptyBody": "Choose a shop or the admin channel on the left to start chatting. Email notifications will be sent when someone replies."
+      "eyebrow": "Support chat",
+      "title": "Message a shop or admin",
+      "subtitle": "You can message each shop separately, or ask admin for help with your account and overall experience.",
+      "emptyTitle": "No messages yet.",
+      "emptyBody": "Choose a shop or open the admin chat to get started."
     },
     "owner": {
-      "eyebrow": "Operations chat",
-      "title": "Chat between owners and the support team",
-      "subtitle": "Keep customer conversations tied to each location and open a separate admin channel whenever operations need attention.",
-      "emptyTitle": "No conversations yet.",
-      "emptyBody": "When a customer messages a location or you open an admin channel, every conversation will appear here."
+      "eyebrow": "Inbox",
+      "title": "Messages from customers and admin",
+      "subtitle": "Follow customer conversations by shop and keep a separate channel open with admin.",
+      "emptyTitle": "Your inbox is empty.",
+      "emptyBody": "Customer and admin conversations will appear here."
     },
     "admin": {
-      "eyebrow": "Support queue",
-      "title": "Coordinate conversations with customers and owners",
-      "subtitle": "Admins receive customer and owner support threads in one inbox, so responses stay fast without relying on floating widgets.",
+      "eyebrow": "Support messages",
+      "title": "Talk with customers and owners",
+      "subtitle": "Customer and owner support requests are collected here so you can reply quickly.",
       "emptyTitle": "The queue is empty.",
       "emptyBody": "New support requests from customers or owners will appear here."
     },
     "stats": {
       "activeThreads": "Active threads",
-      "activeThreadsBody": "Each thread lives on its own full page instead of stacking over the main interface.",
+      "activeThreadsBody": "Each conversation has its own page, so it is easier to follow.",
       "unreadThreads": "Needs reply",
-      "unreadThreadsBody": "Whenever a new message arrives, the recipient also gets an email notification."
+      "unreadThreadsBody": "When a new message arrives, the recipient also gets an email."
     },
     "launchpad": {
       "title": "Open a new thread",
-      "body": "Choose the right counterpart. The system will open or reuse the matching conversation."
+      "body": "Choose who you want to message. If a conversation already exists, we will reopen it."
     },
     "inbox": {
       "title": "Conversation list",
-      "body": "Threads with unread messages stay highlighted so you can reply faster."
+      "body": "Unread messages stay near the top so you can handle them quickly."
     },
     "threadTypes": {
       "customerOwner": "Customer / Owner",
@@ -466,13 +466,13 @@
       "creating": "Opening...",
       "waitingFirstMessage": "There are no messages in this thread yet.",
       "noThreadSelected": "Choose a conversation to begin.",
-      "noThreadSelectedBody": "The list on the left helps you open the correct thread for each role and business rule.",
+      "noThreadSelectedBody": "You can also start a new conversation from the left column.",
       "noMessages": "This thread does not have any messages yet.",
-      "noMessagesBody": "Send the first message. When someone replies, the list updates automatically and an email notification is sent."
+      "noMessagesBody": "Send the first message to get started."
     },
     "actions": {
       "openThread": "Open conversation",
-      "startThread": "Start chatting",
+      "startThread": "Message now",
       "refresh": "Refresh",
       "sending": "Sending...",
       "send": "Send message"
@@ -487,12 +487,12 @@
     "thread": {
       "title": "Conversation",
       "poiContext": "This conversation is tied to location {name}.",
-      "emailHint": "New messages create in-app notifications and email alerts for the recipient.",
+      "emailHint": "New messages show up here and also trigger an email notification.",
       "emailBadge": "Email notifications enabled"
     },
     "composer": {
-      "placeholder": "Type what you need to discuss. Press Enter to send, Shift + Enter for a new line.",
-      "hint": "Messages appear in real time and the recipient also receives an email notification."
+      "placeholder": "Type a message...",
+      "hint": "Replies appear here right away, and the recipient also gets an email."
     },
     "errors": {
       "loadThreads": "Unable to load conversations.",

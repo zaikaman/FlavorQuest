@@ -420,42 +420,42 @@
     }
   },
   "support": {
-    "nav": "Chat",
-    "openPage": "Ouvrir la page de chat d'assistance",
+    "nav": "Messages",
+    "openPage": "Ouvrir la messagerie",
     "customer": {
-      "eyebrow": "Centre d'assistance",
-      "title": "Échangez directement avec le propriétaire ou l'admin",
-      "subtitle": "Chaque échoppe dispose de son propre fil lié au point de vente, tandis que l'admin reste le canal d'assistance général pour le compte et l'expérience FlavorQuest.",
-      "emptyTitle": "Aucune conversation pour le moment.",
-      "emptyBody": "Choisissez une échoppe ou le canal admin à gauche pour commencer. Un e-mail sera envoyé lorsqu'une réponse arrivera."
+      "eyebrow": "Messagerie d'aide",
+      "title": "Écrire à une échoppe ou à l'admin",
+      "subtitle": "Vous pouvez écrire à chaque échoppe séparément, ou contacter l'admin pour l'aide liée au compte et à l'expérience.",
+      "emptyTitle": "Aucun message pour le moment.",
+      "emptyBody": "Choisissez une échoppe ou ouvrez le chat admin pour commencer."
     },
     "owner": {
-      "eyebrow": "Messages opérationnels",
-      "title": "Chat entre les propriétaires et l'équipe support",
-      "subtitle": "Gardez les échanges clients rattachés à chaque point de vente et ouvrez un canal séparé avec l'admin dès qu'un sujet opérationnel apparaît.",
-      "emptyTitle": "Aucune conversation pour le moment.",
-      "emptyBody": "Quand un client écrit à un point de vente ou que vous ouvrez un canal admin, toutes les conversations apparaissent ici."
+      "eyebrow": "Boîte de réception",
+      "title": "Messages des clients et de l'admin",
+      "subtitle": "Suivez les échanges client par échoppe et gardez un canal séparé avec l'admin.",
+      "emptyTitle": "Votre boîte est vide.",
+      "emptyBody": "Les conversations avec les clients et l'admin apparaîtront ici."
     },
     "admin": {
-      "eyebrow": "File d'assistance",
-      "title": "Coordonner les échanges avec les clients et les propriétaires",
-      "subtitle": "Les admins reçoivent les demandes des clients et des propriétaires dans une seule boîte de réception, sans widget flottant.",
+      "eyebrow": "Messages d'assistance",
+      "title": "Échanger avec les clients et les propriétaires",
+      "subtitle": "Les demandes d'aide des clients et des propriétaires arrivent ici pour permettre une réponse rapide.",
       "emptyTitle": "La file est vide.",
       "emptyBody": "Les nouvelles demandes d'assistance des clients ou des propriétaires apparaîtront ici."
     },
     "stats": {
       "activeThreads": "Fils actifs",
-      "activeThreadsBody": "Chaque fil dispose de sa propre page complète au lieu de se superposer à l'interface principale.",
+      "activeThreadsBody": "Chaque conversation a sa propre page, plus simple à suivre.",
       "unreadThreads": "À traiter",
-      "unreadThreadsBody": "Quand un nouveau message arrive, le destinataire reçoit aussi une notification par e-mail."
+      "unreadThreadsBody": "Quand un nouveau message arrive, le destinataire reçoit aussi un e-mail."
     },
     "launchpad": {
       "title": "Ouvrir un nouveau fil",
-      "body": "Choisissez le bon interlocuteur. Le système ouvrira ou réutilisera la conversation correspondante."
+      "body": "Choisissez la bonne personne. Si une conversation existe déjà, nous la rouvrirons."
     },
     "inbox": {
       "title": "Liste des conversations",
-      "body": "Les fils avec des messages non lus restent mis en avant pour accélérer la réponse."
+      "body": "Les messages non lus remontent en haut pour être traités plus vite."
     },
     "threadTypes": {
       "customerOwner": "Client / Propriétaire",
@@ -466,13 +466,13 @@
       "creating": "Ouverture...",
       "waitingFirstMessage": "Aucun message dans ce fil pour le moment.",
       "noThreadSelected": "Choisissez une conversation pour commencer.",
-      "noThreadSelectedBody": "La liste à gauche vous aide à ouvrir le bon fil selon le rôle et les règles métier.",
+      "noThreadSelectedBody": "Vous pouvez aussi lancer une nouvelle conversation depuis la colonne de gauche.",
       "noMessages": "Ce fil ne contient encore aucun message.",
-      "noMessagesBody": "Envoyez le premier message. Lorsqu'une réponse arrive, la liste se met à jour automatiquement et un e-mail est envoyé."
+      "noMessagesBody": "Envoyez le premier message pour commencer."
     },
     "actions": {
       "openThread": "Ouvrir la conversation",
-      "startThread": "Commencer à discuter",
+      "startThread": "Écrire maintenant",
       "refresh": "Actualiser",
       "sending": "Envoi...",
       "send": "Envoyer le message"
@@ -487,12 +487,12 @@
     "thread": {
       "title": "Conversation",
       "poiContext": "Cette conversation est liée au point de vente {name}.",
-      "emailHint": "Les nouveaux messages créent une notification dans l'application et un e-mail pour le destinataire.",
+      "emailHint": "Les nouveaux messages apparaissent ici et déclenchent aussi un e-mail.",
       "emailBadge": "Notifications e-mail actives"
     },
     "composer": {
-      "placeholder": "Saisissez votre message. Appuyez sur Entrée pour envoyer, Maj + Entrée pour une nouvelle ligne.",
-      "hint": "Les messages apparaissent en temps réel et le destinataire reçoit aussi un e-mail."
+      "placeholder": "Écrivez un message...",
+      "hint": "Les réponses apparaissent ici immédiatement et le destinataire reçoit aussi un e-mail."
     },
     "errors": {
       "loadThreads": "Impossible de charger les conversations.",

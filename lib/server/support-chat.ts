@@ -87,7 +87,7 @@ function buildThreadSubject(threadType: SupportThreadType, poiName?: string | nu
   }
 
   if (threadType === 'owner_admin') {
-    return 'Điều phối với admin';
+    return 'Nhắn admin';
   }
 
   return 'Hỗ trợ FlavorQuest';
@@ -362,8 +362,8 @@ export async function listSupportThreads(profile: CurrentUserProfile): Promise<L
     const adminThread = threadByCompositeKey.get(`customer_admin:${profile.id}`);
     directory.unshift({
       id: 'support:customer_admin',
-      title: 'Hỗ trợ FlavorQuest',
-      subtitle: 'Trao đổi với admin khi cần hỗ trợ tài khoản hoặc trải nghiệm',
+      title: 'Nhắn admin',
+      subtitle: 'Cần hỗ trợ? Nhắn admin ở đây.',
       thread_type: 'customer_admin',
       poi: null,
       counterpart: makeAdminParticipant(primaryAdminEmail),
@@ -375,8 +375,8 @@ export async function listSupportThreads(profile: CurrentUserProfile): Promise<L
     const adminThread = threadByCompositeKey.get(`owner_admin:${profile.id}`);
     directory.push({
       id: 'support:owner_admin',
-      title: 'Điều phối với admin',
-      subtitle: 'Báo sự cố vận hành, phân quyền hoặc nội dung',
+      title: 'Nhắn admin',
+      subtitle: 'Cần hỗ trợ vận hành hoặc tài khoản? Nhắn admin ở đây.',
       thread_type: 'owner_admin',
       poi: null,
       counterpart: makeAdminParticipant(primaryAdminEmail),
