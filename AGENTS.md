@@ -1,2 +1,3 @@
 - Khi update code liên quan tới giao diện chú ý là có tận 6 file locale, phải dịch tận 6 lần trong các file đó nhé, và chỉ cần update khi sửa giao diện khách hàng thôi, owner và admin không cần.
 - Khi viết tiếng việt phải luôn luôn viết dấu.
+- Trước khi kết thúc task, luôn luôn chạy npm run build để confirm mọi thứ chạy ổn.

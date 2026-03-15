@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import { useEffect, useRef, useState } from 'react';
+import { useToast } from '@/components/ui/ToastProvider';
 
 interface ImageUploaderProps {
     currentImageUrl?: string | null;
@@ -14,6 +15,7 @@ export function ImageUploader({ currentImageUrl, onImageUploaded, folder = 'pois
     const [preview, setPreview] = useState<string | null>(currentImageUrl || null);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const objectUrlRef = useRef<string | null>(null);
+    const toast = useToast();
 
     useEffect(() => {
         if (objectUrlRef.current) {
@@ -67,7 +69,7 @@ export function ImageUploader({ currentImageUrl, onImageUploaded, folder = 'pois
             onImageUploaded(data.url);
         } catch (error) {
             console.error('Error uploading image:', error);
-            alert('Lỗi khi tải ảnh');
+            toast.error('Lỗi khi tải ảnh');
         } finally {
             setIsUploading(false);
         }

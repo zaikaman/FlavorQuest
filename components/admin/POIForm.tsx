@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ImageUploader } from './ImageUploader';
 import { TTSGenerator } from './TTSGenerator';
+import { useToast } from '@/components/ui/ToastProvider';
 import { POI_CATEGORY_OPTIONS, type POICategoryTag } from '@/lib/constants/poiCategories';
 import type { POI } from '@/lib/types/index';
 
@@ -35,6 +36,7 @@ const LANGUAGES = [
 
 export function POIForm({ initialData, isNew = false, allowOwnerAssignment = true }: POIFormProps) {
     const router = useRouter();
+    const toast = useToast();
     const [loading, setLoading] = useState(false);
     const [owners, setOwners] = useState<OwnerOption[]>([]);
     const [formData, setFormData] = useState<Partial<POI>>(initialData || {
@@ -103,12 +105,12 @@ export function POIForm({ initialData, isNew = false, allowOwnerAssignment = tru
 
             if (!res.ok) throw new Error('Save failed');
 
-            alert('Lưu địa điểm thành công!');
+            toast.success('Lưu địa điểm thành công');
             router.push('/admin/pois');
             router.refresh();
         } catch (error) {
             console.error('Error saving POI:', error);
-            alert('Lỗi khi lưu địa điểm');
+            toast.error('Lỗi khi lưu địa điểm');
         } finally {
             setLoading(false);
         }
@@ -116,7 +118,7 @@ export function POIForm({ initialData, isNew = false, allowOwnerAssignment = tru
 
     const handleAutoTranslate = async () => {
         if (!formData.name_vi && !formData.description_vi) {
-            alert('Vui lòng nhập tên hoặc mô tả tiếng Việt trước khi dịch.');
+            toast.warning('Vui lòng nhập tên hoặc mô tả tiếng Việt trước khi dịch.');
             return;
         }
 
@@ -159,10 +161,10 @@ export function POIForm({ initialData, isNew = false, allowOwnerAssignment = tru
             }
 
             setFormData(prev => ({ ...prev, ...updates }));
-            alert('Dịch tự động thành công! Vui lòng kiểm tra lại nội dung.');
+            toast.success('Dịch tự động thành công. Vui lòng kiểm tra lại nội dung.');
         } catch (error) {
             console.error('Translate error:', error);
-            alert('Lỗi khi dịch tự động');
+            toast.error('Lỗi khi dịch tự động');
         } finally {
             setTranslating(false);
         }
@@ -203,10 +205,10 @@ export function POIForm({ initialData, isNew = false, allowOwnerAssignment = tru
             }
 
             setFormData(prev => ({ ...prev, ...updates }));
-            alert('Đã hoàn tất tạo audio cho các ngôn ngữ!');
+            toast.success('Đã hoàn tất tạo audio cho các ngôn ngữ');
         } catch (error) {
             console.error('Generate all audio error:', error);
-            alert('Có lỗi xảy ra khi tạo audio hàng loạt.');
+            toast.error('Có lỗi xảy ra khi tạo audio hàng loạt');
         } finally {
             setGenAllLoading(false);
         }

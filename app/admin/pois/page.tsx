@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { TableSkeleton } from '@/components/ui/Loading';
+import { useToast } from '@/components/ui/ToastProvider';
 import type { POI } from '@/lib/types/index';
 
 interface OwnerOption {
@@ -39,6 +40,7 @@ function getAudioFieldKey(lang: string): AudioFieldKey {
 }
 
 export default function POIsPage() {
+  const toast = useToast();
   const [pois, setPois] = useState<POI[]>([]);
   const [owners, setOwners] = useState<OwnerOption[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -112,13 +114,14 @@ export default function POIsPage() {
       });
 
       if (res.ok) {
-        alert('Đã xóa địa điểm!');
+        toast.success('Đã xóa địa điểm');
         fetchPOIs();
       } else {
-        alert('Xóa thất bại');
+        toast.error('Xóa thất bại');
       }
     } catch (error) {
       console.error('Error deleting POI:', error);
+      toast.error('Có lỗi khi xóa địa điểm');
     }
   };
 
@@ -133,16 +136,17 @@ export default function POIsPage() {
       const responseText = await res.text();
 
       if (!res.ok) {
-        alert(`Gán chủ quán thất bại: ${responseText}`);
+        toast.error(`Gán chủ quán thất bại: ${responseText}`);
         return;
       }
 
       const updatedPoi = JSON.parse(responseText) as POI;
       setPois(prev => prev.map(poi => (poi.id === poiId ? { ...poi, owner_id: updatedPoi.owner_id ?? null } : poi)));
       await fetchPOIs();
+      toast.success(ownerId ? 'Đã gán chủ quán cho địa điểm' : 'Đã gỡ chủ quán khỏi địa điểm');
     } catch (error) {
       console.error('Assign owner failed:', error);
-      alert('Có lỗi khi gán chủ quán');
+      toast.error('Có lỗi khi gán chủ quán');
     }
   };
 

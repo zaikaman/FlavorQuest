@@ -4,7 +4,7 @@ import './globals.css';
 import { LanguageProvider } from '@/lib/contexts/LanguageContext';
 import { AppProvider } from '@/lib/contexts/AppContext';
 import { AuthProvider } from '@/lib/contexts/AuthContext';
-import { ToastContainer } from '@/components/ui/Toast';
+import { ToastProvider } from '@/components/ui/ToastProvider';
 import ServiceWorkerRegistration from '@/components/ServiceWorkerRegistration';
 import vi from '@/locales/vi.json';
 
@@ -93,10 +93,11 @@ export default function RootLayout({
       >
         <AuthProvider>
           <LanguageProvider>
-            <AppProvider>
-              {children}
-              <ToastContainer position="top-right" />
-            </AppProvider>
+            <ToastProvider>
+              <AppProvider>
+                {children}
+              </AppProvider>
+            </ToastProvider>
           </LanguageProvider>
         </AuthProvider>
         <ServiceWorkerRegistration />

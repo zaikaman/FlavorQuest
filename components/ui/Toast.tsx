@@ -40,20 +40,24 @@ export function Toast({
   duration = 5000,
   onClose,
 }: ToastProps) {
-  const [isVisible, setIsVisible] = useState(true);
+  const [isRendered, setIsRendered] = useState(true);
+  const [isLeaving, setIsLeaving] = useState(false);
 
   useEffect(() => {
     if (duration > 0) {
       const timer = setTimeout(() => {
-        setIsVisible(false);
-        setTimeout(() => onClose?.(), 300); // Wait for fade out animation
+        setIsLeaving(true);
+        setTimeout(() => {
+          setIsRendered(false);
+          onClose?.();
+        }, 220);
       }, duration);
 
       return () => clearTimeout(timer);
     }
   }, [duration, onClose]);
 
-  if (!isVisible) return null;
+  if (!isRendered) return null;
 
   const typeStyles = {
     success: {
@@ -113,10 +117,10 @@ export function Toast({
 
   return (
     <div
-      className={`flex items-start gap-3 p-4 mb-3 border-l-4 rounded-lg shadow-lg ${style.bg} ${style.border} animate-slideInRight`}
+      className={`pointer-events-auto mb-3 flex items-start gap-3 overflow-hidden rounded-2xl border p-4 shadow-[0_18px_40px_-20px_rgba(12,10,9,0.65)] backdrop-blur-xl transition-all duration-200 ease-out ${style.bg} ${style.border} ${isLeaving ? 'translate-y-2 opacity-0' : 'translate-y-0 opacity-100'}`}
       role="alert"
     >
-      <div className={`flex-shrink-0 ${style.icon}`}>{icons[type]}</div>
+      <div className={`mt-0.5 flex-shrink-0 ${style.icon}`}>{icons[type]}</div>
       
       <div className="flex-1 min-w-0">
         {title && (
@@ -127,8 +131,11 @@ export function Toast({
 
       <button
         onClick={() => {
-          setIsVisible(false);
-          setTimeout(() => onClose?.(), 300);
+          setIsLeaving(true);
+          setTimeout(() => {
+            setIsRendered(false);
+            onClose?.();
+          }, 220);
         }}
         className={`flex-shrink-0 p-1 transition-colors rounded ${style.icon} hover:bg-black/5 dark:hover:bg-white/5`}
         aria-label="Close"
@@ -151,12 +158,12 @@ export interface ToastContainerProps {
 
 export function ToastContainer({ position = 'top-right', children }: ToastContainerProps) {
   const positionClasses = {
-    'top-right': 'top-4 right-4',
-    'top-left': 'top-4 left-4',
-    'top-center': 'top-4 left-1/2 -translate-x-1/2',
-    'bottom-right': 'bottom-4 right-4',
-    'bottom-left': 'bottom-4 left-4',
-    'bottom-center': 'bottom-4 left-1/2 -translate-x-1/2',
+    'top-right': 'top-4 right-4 sm:top-6 sm:right-6',
+    'top-left': 'top-4 left-4 sm:top-6 sm:left-6',
+    'top-center': 'top-4 left-1/2 -translate-x-1/2 sm:top-6',
+    'bottom-right': 'bottom-4 right-4 sm:bottom-6 sm:right-6',
+    'bottom-left': 'bottom-4 left-4 sm:bottom-6 sm:left-6',
+    'bottom-center': 'bottom-4 left-1/2 -translate-x-1/2 sm:bottom-6',
   };
 
   // If no children, render empty container for future toasts
@@ -164,7 +171,7 @@ export function ToastContainer({ position = 'top-right', children }: ToastContai
     return (
       <div
         id="toast-container"
-        className={`fixed z-50 w-full max-w-md ${positionClasses[position]}`}
+        className={`pointer-events-none fixed z-[120] w-[calc(100vw-2rem)] max-w-sm ${positionClasses[position]}`}
         aria-live="polite"
         aria-atomic="true"
       />
@@ -173,7 +180,7 @@ export function ToastContainer({ position = 'top-right', children }: ToastContai
 
   return (
     <div
-      className={`fixed z-50 w-full max-w-md ${positionClasses[position]}`}
+      className={`pointer-events-none fixed z-[120] w-[calc(100vw-2rem)] max-w-sm ${positionClasses[position]}`}
       aria-live="polite"
       aria-atomic="true"
     >
