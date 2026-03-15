@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
-import { DashboardSkeleton, InlineSpinner } from '@/components/ui/Loading';
+import { InlineSpinner } from '@/components/ui/Loading';
 import type { AppNotification, Dish, POI, PreorderOrder } from '@/lib/types';
 
 type OwnerTab = 'pois' | 'menu' | 'orders' | 'notifications';
@@ -169,7 +169,8 @@ export default function OwnerDashboardPage() {
   const [dishes, setDishes] = useState<Dish[]>([]);
   const [orders, setOrders] = useState<PreorderOrder[]>([]);
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const [hasLoadedInitialData, setHasLoadedInitialData] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [newDish, setNewDish] = useState({ name: '', description: '', price: '' });
@@ -236,8 +237,10 @@ export default function OwnerDashboardPage() {
     }));
   }, [selectedPoiId, selectedPoiOrders, visibleOrders]);
 
-  const loadInitialData = async () => {
-    setIsLoading(true);
+  const loadInitialData = async ({ showLoading = true }: { showLoading?: boolean } = {}) => {
+    if (showLoading) {
+      setIsLoading(true);
+    }
     setLoadError(null);
 
     try {
@@ -290,7 +293,11 @@ export default function OwnerDashboardPage() {
       console.error('[OwnerPage] load failed:', error);
       setLoadError('Không thể tải dữ liệu chủ quán. Vui lòng thử lại sau.');
     } finally {
-      setIsLoading(false);
+      setHasLoadedInitialData(true);
+
+      if (showLoading) {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -310,7 +317,7 @@ export default function OwnerDashboardPage() {
   };
 
   useEffect(() => {
-    void loadInitialData();
+    void loadInitialData({ showLoading: false });
   }, []);
 
   useEffect(() => {
@@ -434,10 +441,6 @@ export default function OwnerDashboardPage() {
     }
   };
 
-  if (isLoading) {
-    return <DashboardSkeleton stats={4} />;
-  }
-
   const overviewCards = [
     {
       label: 'POI đang quản lý',
@@ -485,6 +488,12 @@ export default function OwnerDashboardPage() {
 
   return (
     <div className="space-y-8">
+      {!hasLoadedInitialData && (
+        <div className="rounded-2xl border border-white/10 bg-white/5 px-5 py-4 text-sm text-gray-200">
+          <InlineSpinner label="Đang tải dữ liệu chủ quán..." />
+        </div>
+      )}
+
       {loadError && (
         <div className="rounded-2xl border border-amber-400/30 bg-amber-500/10 px-5 py-4 text-sm text-amber-100">
           {loadError}
@@ -514,6 +523,11 @@ export default function OwnerDashboardPage() {
                 </p>
 
                 <div className="mt-5 flex flex-wrap gap-2">
+                  {isLoading && (
+                    <span className="rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
+                      Đang cập nhật dữ liệu...
+                    </span>
+                  )}
                   <span className="rounded-full border border-white/10 bg-black/15 px-3 py-1 text-xs font-semibold text-gray-200">
                     {pois.length} điểm bán đang quản lý
                   </span>
@@ -534,7 +548,8 @@ export default function OwnerDashboardPage() {
                 <button
                   type="button"
                   onClick={() => void loadInitialData()}
-                  className="bg-primary rounded-2xl px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-orange-600"
+                  disabled={isLoading}
+                  className="bg-primary rounded-2xl px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   Làm mới dữ liệu
                 </button>

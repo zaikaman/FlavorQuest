@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { RoleChatbot } from '@/components/ai/RoleChatbot';
+import { DashboardSkeleton } from '@/components/ui/Loading';
 import { useAuth } from '@/lib/contexts/AuthContext';
 
 const ownerSans = Be_Vietnam_Pro({
@@ -13,10 +14,29 @@ const ownerSans = Be_Vietnam_Pro({
   display: 'swap',
 });
 
+function OwnerLoadingShell() {
+  return (
+    <div className={`${ownerSans.className} bg-background-dark min-h-screen text-white`}>
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <DashboardSkeleton stats={4} />
+      </div>
+    </div>
+  );
+}
+
 export default function OwnerLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
-  const { user, isOwner, isAdmin, isPendingOwner, isLoading, isRoleReady, refreshUserRole, signOut } = useAuth();
+  const {
+    user,
+    isOwner,
+    isAdmin,
+    isPendingOwner,
+    isLoading,
+    isRoleReady,
+    refreshUserRole,
+    signOut,
+  } = useAuth();
   const refreshedUserIdRef = useRef<string | null>(null);
   const [isSigningOut, setIsSigningOut] = useState(false);
 
@@ -60,24 +80,24 @@ export default function OwnerLayout({ children }: { children: React.ReactNode })
     }
   }, [isAdmin, isLoading, isOwner, isPendingOwner, isRoleReady, router, user]);
 
-  if (isLoading) {
-    return (
-      <div className="bg-background-dark flex min-h-screen items-center justify-center">
-        <div className="text-center">
-          <div className="border-primary mx-auto h-12 w-12 animate-spin rounded-full border-b-2" />
-          <p className="mt-4 text-sm text-gray-400">Đang kiểm tra quyền truy cập...</p>
-        </div>
-      </div>
-    );
+  if (isLoading || (user && !isRoleReady)) {
+    return <OwnerLoadingShell />;
   }
 
-  if (isLoading || (user && !isRoleReady) || (user && isRoleReady && !isOwner && !isAdmin)) {
+  if (!user || (!isOwner && !isAdmin)) {
     return null;
   }
 
   return (
     <div className={`${ownerSans.className} bg-background-dark relative min-h-screen text-white`}>
-      <div className="pointer-events-none fixed inset-0 bg-[url('/img/noise.png')] opacity-5" />
+      <div
+        className="pointer-events-none fixed inset-0 opacity-[0.06]"
+        style={{
+          backgroundImage:
+            'radial-gradient(rgba(255, 255, 255, 0.18) 0.8px, transparent 0.8px)',
+          backgroundSize: '18px 18px',
+        }}
+      />
 
       <header className="sticky top-0 z-20 border-b border-white/10 bg-[#2c1e16]/85 backdrop-blur-md">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -99,34 +119,34 @@ export default function OwnerLayout({ children }: { children: React.ReactNode })
 
             <nav className="min-w-0 overflow-x-auto xl:px-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               <div className="flex min-w-max flex-nowrap items-center gap-1.5 xl:justify-center">
-              {[
-                { href: '/owner', label: 'Tổng quan' },
-                { href: '/owner/chat', label: 'Tin nhắn' },
-              ].map((item) => {
-                const isActive =
-                  pathname === item.href ||
-                  (item.href !== '/owner' && pathname.startsWith(item.href));
+                {[
+                  { href: '/owner', label: 'Tổng quan' },
+                  { href: '/owner/chat', label: 'Tin nhắn' },
+                ].map((item) => {
+                  const isActive =
+                    pathname === item.href ||
+                    (item.href !== '/owner' && pathname.startsWith(item.href));
 
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className={`whitespace-nowrap rounded-full border px-3 py-1.5 text-[13px] font-semibold transition-colors ${
-                      isActive
-                        ? 'border-primary bg-primary/15 text-primary'
-                        : 'border-white/10 bg-white/5 text-gray-300 hover:bg-white/10'
-                    }`}
-                  >
-                    {item.label}
-                  </Link>
-                );
-              })}
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      className={`whitespace-nowrap rounded-full border px-3 py-1.5 text-[13px] font-semibold transition-colors ${
+                        isActive
+                          ? 'border-primary bg-primary/15 text-primary'
+                          : 'border-white/10 bg-white/5 text-gray-300 hover:bg-white/10'
+                      }`}
+                    >
+                      {item.label}
+                    </Link>
+                  );
+                })}
               </div>
             </nav>
 
             <div className="flex flex-wrap items-center justify-between gap-3 xl:justify-end">
               <div className="hidden rounded-2xl border border-white/10 bg-black/15 px-4 py-2 text-right lg:block">
-                <p className="text-sm font-semibold text-gray-100">{user?.email}</p>
+                <p className="text-sm font-semibold text-gray-100">{user.email}</p>
                 <p className="text-primary text-xs font-semibold">
                   {isAdmin ? 'Quản trị viên kiêm chủ quán' : 'Tài khoản chủ quán'}
                 </p>
@@ -146,7 +166,11 @@ export default function OwnerLayout({ children }: { children: React.ReactNode })
       </header>
 
       <main className="relative z-10 mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">{children}</main>
-      <RoleChatbot role="owner" bottomOffsetClassName="bottom-4 sm:bottom-6 lg:bottom-8" pageContext={{ pathname }} />
+      <RoleChatbot
+        role="owner"
+        bottomOffsetClassName="bottom-4 sm:bottom-6 lg:bottom-8"
+        pageContext={{ pathname }}
+      />
     </div>
   );
 }
