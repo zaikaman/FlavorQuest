@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next';
-import { Geist, Geist_Mono } from 'next/font/google';
+import { Be_Vietnam_Pro, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import { LanguageProvider } from '@/lib/contexts/LanguageContext';
 import { AppProvider } from '@/lib/contexts/AppContext';
@@ -8,9 +8,10 @@ import { ToastProvider } from '@/components/ui/ToastProvider';
 import ServiceWorkerRegistration from '@/components/ServiceWorkerRegistration';
 import vi from '@/locales/vi.json';
 
-const geistSans = Geist({
-  variable: '--font-geist-sans',
-  subsets: ['latin'],
+const appSans = Be_Vietnam_Pro({
+  variable: '--font-app-sans',
+  subsets: ['latin', 'vietnamese'],
+  weight: ['400', '500', '600', '700', '800', '900'],
   display: 'swap',
 });
 
@@ -88,7 +89,7 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${appSans.variable} ${geistMono.variable} antialiased`}
         suppressHydrationWarning
       >
         <AuthProvider>
