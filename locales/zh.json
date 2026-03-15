@@ -47,6 +47,7 @@
     "invalidOtp": "请输入 6 位 OTP 验证码。",
     "sendOtpError": "无法发送 OTP，请重试。",
     "verifyOtpError": "OTP 验证失败，请重试。",
+    "adminPortalRequired": "管理员账户必须通过专用管理入口登录。",
     "changeEmailHint": "如有需要，你可以修改邮箱后重新发送验证码。",
     "back": "返回",
     "next": "下一步",

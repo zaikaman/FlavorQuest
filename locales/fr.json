@@ -281,6 +281,7 @@
     "invalidOtp": "Veuillez saisir le code OTP à 6 chiffres.",
     "sendOtpError": "Impossible d'envoyer le code OTP. Veuillez réessayer.",
     "verifyOtpError": "La vérification OTP a échoué. Veuillez réessayer.",
+    "adminPortalRequired": "Les comptes administrateur doivent se connecter via le portail admin dédié.",
     "changeEmailHint": "Vous pouvez modifier votre e-mail puis renvoyer le code si besoin.",
     "or": "ou",
     "backToHome": "Retour à l'accueil",

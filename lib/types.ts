@@ -299,6 +299,11 @@ export interface SupportDirectoryEntry {
   existing_thread_id?: string | null;
 }
 
+export interface SupportLaunchpadMeta {
+  availableOwnerPoiCount: number;
+  availableAdminCount: number;
+}
+
 export interface SupportMessage {
   id: string;
   thread_id: string;

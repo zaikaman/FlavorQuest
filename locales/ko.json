@@ -47,6 +47,7 @@
     "invalidOtp": "6자리 OTP 코드를 입력해 주세요.",
     "sendOtpError": "OTP를 보낼 수 없습니다. 다시 시도해 주세요.",
     "verifyOtpError": "OTP 확인에 실패했습니다. 다시 시도해 주세요.",
+    "adminPortalRequired": "관리자 계정은 전용 관리자 포털에서 로그인해야 합니다.",
     "changeEmailHint": "필요하면 이메일을 수정하고 코드를 다시 보낼 수 있습니다.",
     "back": "뒤로",
     "next": "다음",

@@ -1,8 +1,3 @@
-/**
- * Login Page
- * Đăng nhập bằng email + OTP
- */
-
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
@@ -15,10 +10,13 @@ import { InlineSpinner, Skeleton } from '@/components/ui/Loading';
 export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { user, isLoading, isOwner, isRoleReady, hasCustomerAccess, refreshUserRole } = useAuth();
+  const { user, isLoading, isAdmin, isOwner, isRoleReady, hasCustomerAccess, refreshUserRole } = useAuth();
   const { t } = useTranslations();
   const error = searchParams.get('error');
-  const accountType = (searchParams.get('type') === 'owner' ? 'owner' : 'customer') as AccountType;
+  const accountType = (searchParams.get('type') === 'owner' ? 'owner' : 'customer') as Extract<
+    AccountType,
+    'customer' | 'owner'
+  >;
   const [email, setEmail] = useState('');
   const [otp, setOtp] = useState('');
   const [lastSentEmail, setLastSentEmail] = useState('');
@@ -30,27 +28,27 @@ export default function LoginPage() {
 
   const normalizedEmail = useMemo(() => email.trim().toLowerCase(), [email]);
   const isResendLocked = cooldown > 0 && normalizedEmail === lastSentEmail;
-  const activeFeedback = feedback ?? (error === 'auth_failed'
-    ? { type: 'error' as const, message: t('login.error') }
-    : null);
+  const activeFeedback =
+    feedback ??
+    (error === 'auth_failed'
+      ? { type: 'error' as const, message: t('login.error') }
+      : null);
 
   useEffect(() => {
     if (!isLoading && user && isRoleReady) {
-      // Ưu tiên loại tài khoản đã chọn trên màn hình login.
-      // Điều này giúp tài khoản admin có thể vào đúng luồng khi chọn "Khách hàng" hoặc "Chủ quán".
-      if (accountType === 'owner') {
-        router.push('/owner');
+      if (isAdmin) {
+        router.push('/admin');
         return;
       }
 
-      if (isOwner) {
+      if (accountType === 'owner' || isOwner) {
         router.push('/owner');
         return;
       }
 
       router.push(hasCustomerAccess ? '/tour' : '/paywall');
     }
-  }, [user, isLoading, isOwner, isRoleReady, hasCustomerAccess, accountType, router]);
+  }, [accountType, hasCustomerAccess, isAdmin, isLoading, isOwner, isRoleReady, router, user]);
 
   useEffect(() => {
     if (cooldown <= 0) {
@@ -58,7 +56,7 @@ export default function LoginPage() {
     }
 
     const timer = window.setInterval(() => {
-      setCooldown(current => (current <= 1 ? 0 : current - 1));
+      setCooldown((current) => (current <= 1 ? 0 : current - 1));
     }, 1000);
 
     return () => window.clearInterval(timer);
@@ -73,7 +71,7 @@ export default function LoginPage() {
     setIsSendingOtp(true);
     setFeedback(null);
 
-    const { error: requestError } = await requestEmailOtp(normalizedEmail);
+    const { error: requestError } = await requestEmailOtp(normalizedEmail, { accountType });
 
     setIsSendingOtp(false);
 
@@ -102,12 +100,16 @@ export default function LoginPage() {
     setIsVerifyingOtp(true);
     setFeedback(null);
 
-    const { error: verifyError, redirectTo } = await verifyEmailOtp(normalizedEmail, otp, accountType);
+    const { error: verifyError, errorCode, redirectTo } = await verifyEmailOtp(normalizedEmail, otp, accountType);
 
     setIsVerifyingOtp(false);
 
     if (verifyError) {
-      setFeedback({ type: 'error', message: verifyError.message || t('login.verifyOtpError') });
+      const message =
+        errorCode === 'ADMIN_PORTAL_REQUIRED'
+          ? t('login.adminPortalRequired')
+          : verifyError.message || t('login.verifyOtpError');
+      setFeedback({ type: 'error', message });
       return;
     }
 
@@ -137,38 +139,40 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center bg-background-dark overflow-hidden font-display">
-      {/* Background Image with Overlay */}
-      <div className="absolute inset-0 z-0 select-none pointer-events-none">
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background-dark font-display">
+      <div className="pointer-events-none absolute inset-0 z-0 select-none">
         <div
-          className="w-full h-full bg-cover bg-center object-cover opacity-40 mix-blend-overlay"
+          className="h-full w-full bg-cover bg-center object-cover opacity-40 mix-blend-overlay"
           style={{
-            backgroundImage: `url('https://lh3.googleusercontent.com/aida-public/AB6AXuD1td4WSx6nl5TKAIPQHvb3mXshqreYAsVVo5NGNLo4nkeSZVy-c4WPWG5TBcBOnTUczh9Q4wjij1A12mpRZrc-ME4sJthwOil3ubDdHgHAPCiXAM-77eCwcoDOIozkEpSVKWANT49fnbkrsEeUQ6qRhE7Cjs7ecrqz_iS4B9ha0zKruboEGSrVxELdqF2B3ohGZZ99cp-OG1iRCCZ4t-cqTc7bQjxoV9kFzigSrAi2XDwsssfntyMkvmsUooxLreHQfcjVYlaTnbaN')`,
+            backgroundImage:
+              "url('https://lh3.googleusercontent.com/aida-public/AB6AXuD1td4WSx6nl5TKAIPQHvb3mXshqreYAsVVo5NGNLo4nkeSZVy-c4WPWG5TBcBOnTUczh9Q4wjij1A12mpRZrc-ME4sJthwOil3ubDdHgHAPCiXAM-77eCwcoDOIozkEpSVKWANT49fnbkrsEeUQ6qRhE7Cjs7ecrqz_iS4B9ha0zKruboEGSrVxELdqF2B3ohGZZ99cp-OG1iRCCZ4t-cqTc7bQjxoV9kFzigSrAi2XDwsssfntyMkvmsUooxLreHQfcjVYlaTnbaN')",
           }}
-        ></div>
-        <div className="absolute inset-0 bg-gradient-to-b from-background-dark/80 via-background-dark/95 to-background-dark"></div>
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-background-dark/80 via-background-dark/95 to-background-dark" />
       </div>
 
-      <div className="relative z-10 max-w-md w-full px-4 animate-scaleIn">
-        {/* Logo & Header */}
-        <div className="text-center mb-8">
-          <div className="inline-block p-4 bg-primary/10 rounded-full shadow-[0_0_15px_rgba(242,108,13,0.3)] mb-4 border border-primary/20 backdrop-blur-sm">
+      <div className="animate-scaleIn relative z-10 w-full max-w-md px-4">
+        <div className="mb-8 text-center">
+          <div className="mb-4 inline-block rounded-full border border-primary/20 bg-primary/10 p-4 shadow-[0_0_15px_rgba(242,108,13,0.3)] backdrop-blur-sm">
             <span className="material-symbols-outlined text-primary text-5xl drop-shadow-lg">restaurant</span>
           </div>
-          <h1 className="text-3xl font-extrabold text-white mb-2 tracking-tight drop-shadow-md">{t('login.title')}</h1>
-          <p className="text-gray-400 font-medium">{t('login.subtitle')}</p>
+          <h1 className="mb-2 text-3xl font-extrabold tracking-tight text-white drop-shadow-md">{t('login.title')}</h1>
+          <p className="font-medium text-gray-400">{t('login.subtitle')}</p>
         </div>
 
-        {/* Feedback Message */}
         {activeFeedback && (
-          <div className={`mb-6 rounded-xl border p-4 backdrop-blur-md ${
-            activeFeedback.type === 'error'
-              ? 'border-red-500/30 bg-red-500/10'
-              : 'border-emerald-500/30 bg-emerald-500/10'
-          }`}>
-            <p className={`flex items-center justify-center gap-2 text-center text-sm font-medium ${
-              activeFeedback.type === 'error' ? 'text-red-400' : 'text-emerald-300'
-            }`}>
+          <div
+            className={`mb-6 rounded-xl border p-4 backdrop-blur-md ${
+              activeFeedback.type === 'error'
+                ? 'border-red-500/30 bg-red-500/10'
+                : 'border-emerald-500/30 bg-emerald-500/10'
+            }`}
+          >
+            <p
+              className={`flex items-center justify-center gap-2 text-center text-sm font-medium ${
+                activeFeedback.type === 'error' ? 'text-red-400' : 'text-emerald-300'
+              }`}
+            >
               <span className="material-symbols-outlined text-lg">
                 {activeFeedback.type === 'error' ? 'error' : 'mark_email_read'}
               </span>
@@ -177,14 +181,10 @@ export default function LoginPage() {
           </div>
         )}
 
-        {/* Sign In Card */}
-        <div className="bg-white/5 rounded-2xl shadow-2xl p-8 backdrop-blur-xl border border-white/10 ring-1 ring-black/5">
+        <div className="rounded-2xl border border-white/10 bg-white/5 p-8 shadow-2xl ring-1 ring-black/5 backdrop-blur-xl">
           <div className="space-y-6">
-            {/* Info */}
             <div className="text-center">
-              <p className="text-sm text-gray-300">
-                {t('login.prompt')}
-              </p>
+              <p className="text-sm text-gray-300">{t('login.prompt')}</p>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
@@ -211,7 +211,12 @@ export default function LoginPage() {
                 {t('login.owner')}
               </button>
             </div>
-            <p className="text-xs text-center text-gray-500">{t('login.selectedType', { type: accountType === 'owner' ? t('login.owner') : t('login.customer') })}</p>
+
+            <p className="text-center text-xs text-gray-500">
+              {t('login.selectedType', {
+                type: accountType === 'owner' ? t('login.owner') : t('login.customer'),
+              })}
+            </p>
 
             <div className="space-y-3">
               <label className="block text-sm font-semibold text-white" htmlFor="email">
@@ -232,15 +237,19 @@ export default function LoginPage() {
                 disabled={isSendingOtp || isResendLocked}
                 className="w-full rounded-xl bg-primary px-6 py-3 font-bold text-white transition-all duration-200 hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {isSendingOtp
-                  ? <InlineSpinner label={t('login.sendingOtp')} />
-                  : isOtpSent
-                    ? isResendLocked
-                      ? t('login.resendIn', { seconds: cooldown })
-                      : t('login.resendOtp')
-                    : t('login.sendOtp')}
+                {isSendingOtp ? (
+                  <InlineSpinner label={t('login.sendingOtp')} />
+                ) : isOtpSent ? (
+                  isResendLocked ? (
+                    t('login.resendIn', { seconds: cooldown })
+                  ) : (
+                    t('login.resendOtp')
+                  )
+                ) : (
+                  t('login.sendOtp')
+                )}
               </button>
-              <p className="text-xs text-center text-gray-500">{t('login.changeEmailHint')}</p>
+              <p className="text-center text-xs text-gray-500">{t('login.changeEmailHint')}</p>
             </div>
 
             {isOtpSent && (
@@ -269,25 +278,28 @@ export default function LoginPage() {
                   disabled={isVerifyingOtp}
                   className="w-full rounded-xl border border-primary/30 bg-primary/15 px-6 py-3 font-bold text-primary transition-all duration-200 hover:bg-primary/20 disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  {isVerifyingOtp ? <InlineSpinner label={t('login.verifyingOtp')} color="primary" /> : t('login.verifyOtp')}
+                  {isVerifyingOtp ? (
+                    <InlineSpinner label={t('login.verifyingOtp')} color="primary" />
+                  ) : (
+                    t('login.verifyOtp')
+                  )}
                 </button>
               </div>
             )}
 
-            {/* Divider */}
             <div className="relative py-2">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-white/10"></div>
+                <div className="w-full border-t border-white/10" />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-4 bg-transparent text-gray-500 font-medium">{t('login.or')}</span>
+                <span className="bg-transparent px-4 font-medium text-gray-500">{t('login.or')}</span>
               </div>
             </div>
 
-            {/* Back to Home */}
             <button
+              type="button"
               onClick={() => router.push('/')}
-              className="w-full flex items-center justify-center gap-2 text-primary font-bold py-3 px-6 rounded-xl hover:bg-primary/10 transition-all duration-200 border border-transparent hover:border-primary/20"
+              className="flex w-full items-center justify-center gap-2 rounded-xl border border-transparent px-6 py-3 font-bold text-primary transition-all duration-200 hover:border-primary/20 hover:bg-primary/10"
             >
               <span className="material-symbols-outlined text-xl">arrow_back</span>
               <span>{t('login.backToHome')}</span>
