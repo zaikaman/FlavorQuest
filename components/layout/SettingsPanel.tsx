@@ -12,6 +12,7 @@ import { useAuth } from '@/lib/contexts/AuthContext';
 import { useTranslations } from '@/lib/hooks/useTranslations';
 import { loadSettings, saveSettings } from '@/lib/services/storage';
 import { FeedSkeleton, InlineSpinner, Skeleton } from '@/components/ui/Loading';
+import { useToast } from '@/components/ui/ToastProvider';
 import type { UserSettings, Language } from '@/lib/types/index';
 import { GEOFENCE_RADIUS_METERS } from '@/lib/constants/index';
 
@@ -35,6 +36,7 @@ export function SettingsPanel({ isOpen, onClose, onSettingsChange }: SettingsPan
   const { language, setLanguage, availableLanguages } = useLanguage();
   const { user, signOut } = useAuth();
   const { t } = useTranslations();
+  const toast = useToast();
   const [settings, setSettings] = useState<UserSettings>({
     language: 'vi',
     volume: 0.8,
@@ -95,7 +97,7 @@ export function SettingsPanel({ isOpen, onClose, onSettingsChange }: SettingsPan
       router.refresh();
     } catch (error) {
       console.error('Sign out failed:', error);
-      window.alert(t('settings.signOutFailed', undefined, 'Đăng xuất thất bại. Vui lòng thử lại.'));
+      toast.error(t('settings.signOutFailed', undefined, 'Đăng xuất thất bại. Vui lòng thử lại.'));
     } finally {
       setIsSigningOut(false);
     }

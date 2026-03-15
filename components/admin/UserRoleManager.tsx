@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/lib/contexts/AuthContext';
 import { TableSkeleton } from '@/components/ui/Loading';
+import { useToast } from '@/components/ui/ToastProvider';
 
 interface UserRoleItem {
   id: string;
@@ -12,6 +13,7 @@ interface UserRoleItem {
 
 export function UserRoleManager() {
   const { user, refreshUserRole } = useAuth();
+  const toast = useToast();
   const [users, setUsers] = useState<UserRoleItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -55,7 +57,7 @@ export function UserRoleManager() {
       const responseText = await res.text();
 
       if (!res.ok) {
-        alert(`Cập nhật vai trò thất bại: ${responseText}`);
+        toast.error(`Cập nhật vai trò thất bại: ${responseText}`);
         return;
       }
 
@@ -67,9 +69,10 @@ export function UserRoleManager() {
       }
 
       await fetchUsers();
+      toast.success('Đã cập nhật vai trò người dùng');
     } catch (error) {
       console.error('Update role failed:', error);
-      alert('Có lỗi khi cập nhật vai trò');
+      toast.error('Có lỗi khi cập nhật vai trò');
     }
   };
 

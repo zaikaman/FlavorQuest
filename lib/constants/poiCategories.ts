@@ -13,11 +13,11 @@ export function normalizePOICategoryTags(input: unknown): POICategoryTag[] {
     return [];
   }
 
-  const allowed = new Set<string>(POI_CATEGORY_TAGS);
+  const allowed = new Set<POICategoryTag>(POI_CATEGORY_TAGS);
   const normalized = input
     .filter((value): value is string => typeof value === 'string')
     .map((value) => value.trim())
-    .filter((value) => allowed.has(value));
+    .filter((value): value is POICategoryTag => allowed.has(value as POICategoryTag));
 
   return Array.from(new Set(normalized));
 }

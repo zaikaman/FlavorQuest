@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useToast } from '@/components/ui/ToastProvider';
 
 interface TTSGeneratorProps {
     text: string;
@@ -21,6 +22,7 @@ export function TTSGenerator({
 }: TTSGeneratorProps) {
     const [isGenerating, setIsGenerating] = useState(false);
     const [audioUrl, setAudioUrl] = useState<string | null>(currentAudioUrl || null);
+    const toast = useToast();
 
     useEffect(() => {
         setAudioUrl(currentAudioUrl || null);
@@ -28,7 +30,7 @@ export function TTSGenerator({
 
     const handleGenerate = async () => {
         if (!text) {
-            alert('Vui lòng nhập nội dung trước');
+            toast.warning('Vui lòng nhập nội dung trước');
             return;
         }
 
@@ -58,7 +60,7 @@ export function TTSGenerator({
         } catch (error) {
             const message = error instanceof Error ? error.message : 'Generation failed';
             console.error('TTS Error:', error);
-            alert(`Error: ${message}`);
+            toast.error(`Lỗi tạo audio: ${message}`);
         } finally {
             setIsGenerating(false);
         }

@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { ImageUploader } from '@/components/admin/ImageUploader';
 import { DashboardSkeleton } from '@/components/ui/Loading';
+import { useToast } from '@/components/ui/ToastProvider';
 import type { POI, Tour, TourPayload } from '@/lib/types/index';
 
 const TOUR_LANGUAGES = [
@@ -64,6 +65,7 @@ function tourToFormState(tour: Tour): TourFormState {
 }
 
 export default function AdminToursPage() {
+  const toast = useToast();
   const [tours, setTours] = useState<Tour[]>([]);
   const [pois, setPois] = useState<POI[]>([]);
   const [formData, setFormData] = useState<TourFormState>(EMPTY_FORM);
@@ -203,10 +205,10 @@ export default function AdminToursPage() {
       if (editingTourId === tourId) {
         resetForm();
       }
-      alert('Đã xóa tour');
+      toast.success('Đã xóa tour');
     } catch (error) {
       console.error('[AdminTours] Delete failed:', error);
-      alert(error instanceof Error ? error.message : 'Xóa tour thất bại');
+      toast.error(error instanceof Error ? error.message : 'Xóa tour thất bại');
     }
   };
 
@@ -224,9 +226,10 @@ export default function AdminToursPage() {
       }
 
       await fetchTours();
+      toast.success(tour.is_active ? 'Đã ẩn tour' : 'Đã mở tour');
     } catch (error) {
       console.error('[AdminTours] Toggle active failed:', error);
-      alert(error instanceof Error ? error.message : 'Cập nhật trạng thái thất bại');
+      toast.error(error instanceof Error ? error.message : 'Cập nhật trạng thái thất bại');
     }
   };
 
@@ -234,12 +237,12 @@ export default function AdminToursPage() {
     event.preventDefault();
 
     if (!formData.name_vi.trim()) {
-      alert('Vui lòng nhập tên tour tiếng Việt');
+      toast.warning('Vui lòng nhập tên tour tiếng Việt');
       return;
     }
 
     if (formData.poi_ids.length === 0) {
-      alert('Vui lòng chọn ít nhất 1 POI cho tour');
+      toast.warning('Vui lòng chọn ít nhất 1 POI cho tour');
       return;
     }
 
@@ -262,10 +265,10 @@ export default function AdminToursPage() {
 
       await fetchTours();
       resetForm();
-      alert(editingTourId ? 'Đã cập nhật tour' : 'Đã tạo tour');
+      toast.success(editingTourId ? 'Đã cập nhật tour' : 'Đã tạo tour');
     } catch (error) {
       console.error('[AdminTours] Save failed:', error);
-      alert(error instanceof Error ? error.message : 'Lưu tour thất bại');
+      toast.error(error instanceof Error ? error.message : 'Lưu tour thất bại');
     } finally {
       setIsSaving(false);
     }
@@ -276,7 +279,7 @@ export default function AdminToursPage() {
     const vietnameseDescription = formData.description_vi?.trim() ?? '';
 
     if (!vietnameseName && !vietnameseDescription) {
-      alert('Vui lòng nhập tên hoặc mô tả tiếng Việt trước khi dịch.');
+      toast.warning('Vui lòng nhập tên hoặc mô tả tiếng Việt trước khi dịch.');
       return;
     }
 
@@ -326,10 +329,10 @@ export default function AdminToursPage() {
       }
 
       setFormData(prev => ({ ...prev, ...updates }));
-      alert('Dịch tự động thành công! Vui lòng kiểm tra lại nội dung.');
+      toast.success('Dịch tự động thành công. Vui lòng kiểm tra lại nội dung.');
     } catch (error) {
       console.error('[AdminTours] Translate failed:', error);
-      alert(error instanceof Error ? error.message : 'Lỗi khi dịch tự động');
+      toast.error(error instanceof Error ? error.message : 'Lỗi khi dịch tự động');
     } finally {
       setIsTranslating(false);
     }

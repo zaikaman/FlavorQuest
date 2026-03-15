@@ -201,15 +201,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: itemsError.message }, { status: 500 });
     }
 
-    const customerNotificationPromise = supabase.from('notifications').insert({
-      user_id: profile.id,
-      order_id: order.id,
-      title: 'Đặt món thành công',
-      message: `Đơn #${order.id.slice(0, 8)} đã được gửi tới quán.`,
-      type: 'order_update',
-    });
-
-    const notificationTasks: Promise<unknown>[] = [customerNotificationPromise];
+    const notificationTasks: PromiseLike<unknown>[] = [
+      supabase.from('notifications').insert({
+        user_id: profile.id,
+        order_id: order.id,
+        title: 'Đặt món thành công',
+        message: `Đơn #${order.id.slice(0, 8)} đã được gửi tới quán.`,
+        type: 'order_update',
+      }),
+    ];
 
     if (poi.owner_id) {
       notificationTasks.push(
@@ -229,17 +229,19 @@ export async function POST(request: NextRequest) {
         })
         .join(', ');
 
-      supabase
-        .from('users')
-        .select('email')
-        .eq('id', poi.owner_id)
-        .single()
-        .then(({ data: owner }) => {
+      void (async () => {
+        try {
+          const { data: owner } = await supabase
+            .from('users')
+            .select('email')
+            .eq('id', poi.owner_id)
+            .single();
+
           if (!owner?.email) {
             return;
           }
 
-          return sendNewOrderEmail({
+          await sendNewOrderEmail({
             to: owner.email,
             poiName: poi.name_vi,
             orderId: order.id,
@@ -247,10 +249,10 @@ export async function POST(request: NextRequest) {
             itemSummary: summary,
             pickupTime: pickupTimeValidation.normalizedPickupTime,
           });
-        })
-        .catch(error => {
+        } catch (error) {
           console.error('Send owner order email failed:', error);
-        });
+        }
+      })();
     }
 
     await Promise.all(notificationTasks);
