@@ -6,14 +6,7 @@
   "metadata": {
     "title": "FlavorQuest - 探索永庆美食街",
     "description": "位于芹苴永庆美食街的自动定位语音导览。离线优先的 PWA，提供多语言支持。",
-    "keywords": [
-      "美食之旅",
-      "语音导览",
-      "永庆",
-      "芹苴",
-      "美食",
-      "PWA"
-    ]
+    "keywords": ["美食之旅", "语音导览", "永庆", "芹苴", "美食", "PWA"]
   },
   "manifest": {
     "name": "FlavorQuest - 自动语音导览体验",
@@ -403,6 +396,33 @@
     "customerPhone": "联系电话",
     "note": "备注",
     "success": "下单成功！"
+  },
+  "chatbot": {
+    "badge": "智能向导",
+    "title": "FlavorQuest 助手",
+    "subtitle": "在旅途中获取菜品推荐、停靠建议和快速帮助。",
+    "welcome": "我可以推荐菜品、建议先去哪里，并回答 FlavorQuest 中常见的问题。",
+    "inputPlaceholder": "可以询问先吃什么、先去哪里，或如何使用这个应用...",
+    "open": "打开助手",
+    "close": "关闭助手",
+    "openPage": "打开助手页面",
+    "nav": "助手",
+    "pageTitle": "旅程助手",
+    "pageSubtitle": "这是一个独立空间，你可以询问菜品推荐、路线建议和应用用法，而不会遮住地图或 POI 列表。",
+    "backToTour": "返回 tour",
+    "pageInfoTitle": "这里可以问什么？",
+    "pageInfoBody": "助手会根据 FlavorQuest 当前的数据，为你推荐菜品、停靠点、合适路线，并回答探索过程中常见的问题。",
+    "thinking": "正在思考...",
+    "error": "目前无法连接助手，请稍后再试。",
+    "footer": "建议基于 FlavorQuest 当前可用的数据。",
+    "newChat": "新聊天",
+    "historyEmpty": "你还没有任何对话记录。",
+    "loadingHistory": "正在加载对话历史...",
+    "suggestions": {
+      "food": "今天我应该先试哪些菜？",
+      "route": "如果我是第一次来，应该先从哪个路线或停靠点开始？",
+      "faq": "这个应用支持离线模式和提前点餐吗？"
+    }
   },
   "notifications": {
     "title": "通知",

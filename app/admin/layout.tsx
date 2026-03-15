@@ -9,6 +9,7 @@ import { useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { Be_Vietnam_Pro } from 'next/font/google';
 import { usePathname, useRouter } from 'next/navigation';
+import { RoleChatbot } from '@/components/ai/RoleChatbot';
 import { useAuth } from '@/lib/contexts/AuthContext';
 import { DashboardSkeleton } from '@/components/ui/Loading';
 
@@ -170,6 +171,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
       {/* Admin Content */}
       <main className="relative z-10 mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">{children}</main>
+      <RoleChatbot role="admin" bottomOffsetClassName="bottom-4 sm:bottom-6 lg:bottom-8" pageContext={{ pathname }} />
     </div>
   );
 }

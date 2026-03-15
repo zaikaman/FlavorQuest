@@ -6,14 +6,7 @@
   "metadata": {
     "title": "FlavorQuest - Discover Vinh Khanh Food Street",
     "description": "Automatic location-based audio tour of Vinh Khanh food street, Can Tho. Offline-first PWA with multi-language support.",
-    "keywords": [
-      "food tour",
-      "audio guide",
-      "Vinh Khanh",
-      "Can Tho",
-      "cuisine",
-      "PWA"
-    ]
+    "keywords": ["food tour", "audio guide", "Vinh Khanh", "Can Tho", "cuisine", "PWA"]
   },
   "manifest": {
     "name": "FlavorQuest - Automatic Audio Tour Experience",
@@ -386,6 +379,33 @@
     "customerPhone": "Phone number",
     "note": "Note",
     "success": "Order placed successfully!"
+  },
+  "chatbot": {
+    "badge": "Smart guide",
+    "title": "FlavorQuest Assistant",
+    "subtitle": "Get dish ideas, stop suggestions, and quick help during your trip.",
+    "welcome": "I can suggest dishes, recommend stops, and answer common FlavorQuest questions right here.",
+    "inputPlaceholder": "Ask what to try, where to stop first, or how to use the app...",
+    "open": "Open assistant",
+    "close": "Close assistant",
+    "openPage": "Open assistant page",
+    "nav": "Assistant",
+    "pageTitle": "Trip assistant",
+    "pageSubtitle": "A dedicated space for food suggestions, route ideas, and app help without covering the map or POI list.",
+    "backToTour": "Back to tour",
+    "pageInfoTitle": "What can you ask here?",
+    "pageInfoBody": "The assistant uses the current FlavorQuest data to recommend dishes, stops, suitable routes, and answer common questions while you explore.",
+    "thinking": "Thinking...",
+    "error": "The assistant is unavailable right now. Please try again later.",
+    "footer": "Suggestions are based on the current FlavorQuest data.",
+    "newChat": "New chat",
+    "historyEmpty": "You do not have any conversations yet.",
+    "loadingHistory": "Loading conversation history...",
+    "suggestions": {
+      "food": "What dishes should I try first today?",
+      "route": "If this is my first visit, which tour or stop should I start with?",
+      "faq": "Does this app support offline mode and pre-ordering?"
+    }
   },
   "notifications": {
     "title": "Notifications",

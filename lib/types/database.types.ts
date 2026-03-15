@@ -494,6 +494,74 @@ export interface Database {
           }
         ];
       };
+      chat_conversations: {
+        Row: {
+          id: string;
+          user_id: string;
+          workspace_role: 'customer' | 'owner' | 'admin';
+          title: string;
+          last_message_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          workspace_role: 'customer' | 'owner' | 'admin';
+          title?: string;
+          last_message_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          workspace_role?: 'customer' | 'owner' | 'admin';
+          title?: string;
+          last_message_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'chat_conversations_user_id_fkey';
+            columns: ['user_id'];
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          }
+        ];
+      };
+      chat_messages: {
+        Row: {
+          id: string;
+          conversation_id: string;
+          role: 'user' | 'assistant';
+          content: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          conversation_id: string;
+          role: 'user' | 'assistant';
+          content: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          conversation_id?: string;
+          role?: 'user' | 'assistant';
+          content?: string;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'chat_messages_conversation_id_fkey';
+            columns: ['conversation_id'];
+            referencedRelation: 'chat_conversations';
+            referencedColumns: ['id'];
+          }
+        ];
+      };
       customer_access_payments: {
         Row: {
           id: string;

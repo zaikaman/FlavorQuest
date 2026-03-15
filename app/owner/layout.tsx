@@ -2,7 +2,8 @@
 
 import { Be_Vietnam_Pro } from 'next/font/google';
 import { useEffect, useRef, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+import { RoleChatbot } from '@/components/ai/RoleChatbot';
 import { useAuth } from '@/lib/contexts/AuthContext';
 
 const ownerSans = Be_Vietnam_Pro({
@@ -13,6 +14,7 @@ const ownerSans = Be_Vietnam_Pro({
 
 export default function OwnerLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
+  const pathname = usePathname();
   const { user, isOwner, isAdmin, isLoading, isRoleReady, refreshUserRole, signOut } = useAuth();
   const refreshedUserIdRef = useRef<string | null>(null);
   const [isSigningOut, setIsSigningOut] = useState(false);
@@ -116,6 +118,7 @@ export default function OwnerLayout({ children }: { children: React.ReactNode })
       </header>
 
       <main className="relative z-10 mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">{children}</main>
+      <RoleChatbot role="owner" bottomOffsetClassName="bottom-4 sm:bottom-6 lg:bottom-8" pageContext={{ pathname }} />
     </div>
   );
 }

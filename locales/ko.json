@@ -6,14 +6,7 @@
   "metadata": {
     "title": "FlavorQuest - 빈칸 음식 거리 발견",
     "description": "빈칸 음식 거리, 껀 터의 자동 위치 기반 오디오 투어. 다국어 지원이 포함된 오프라인 우선 PWA.",
-    "keywords": [
-      "음식 투어",
-      "오디오 가이드",
-      "빈칸",
-      "껀 터",
-      "요리",
-      "PWA"
-    ]
+    "keywords": ["음식 투어", "오디오 가이드", "빈칸", "껀 터", "요리", "PWA"]
   },
   "manifest": {
     "name": "FlavorQuest - 자동 오디오 투어 경험",
@@ -403,6 +396,33 @@
     "customerPhone": "전화번호",
     "note": "메모",
     "success": "주문이 완료되었습니다!"
+  },
+  "chatbot": {
+    "badge": "스마트 가이드",
+    "title": "FlavorQuest 도우미",
+    "subtitle": "여행 중에 음식 추천, 들를 곳 제안, 빠른 사용 안내를 받을 수 있습니다.",
+    "welcome": "추천 메뉴를 제안하고, 들를 곳을 안내하며, FlavorQuest의 자주 묻는 질문에 답할 수 있습니다.",
+    "inputPlaceholder": "무엇을 먼저 먹을지, 어디부터 들를지, 앱 사용법 등을 물어보세요...",
+    "open": "도우미 열기",
+    "close": "도우미 닫기",
+    "openPage": "도우미 페이지 열기",
+    "nav": "도우미",
+    "pageTitle": "여행 도우미",
+    "pageSubtitle": "지도나 POI 목록을 가리지 않고 음식 추천, 동선 제안, 앱 사용 도움을 받을 수 있는 전용 공간입니다.",
+    "backToTour": "투어로 돌아가기",
+    "pageInfoTitle": "여기서 무엇을 물어볼 수 있나요?",
+    "pageInfoBody": "도우미는 현재 FlavorQuest 데이터를 바탕으로 음식, 들를 곳, 적합한 동선 추천과 탐색 중 자주 묻는 질문에 답합니다.",
+    "thinking": "생각하는 중...",
+    "error": "지금은 도우미에 연결할 수 없습니다. 잠시 후 다시 시도해 주세요.",
+    "footer": "추천은 현재 FlavorQuest 데이터에 기반합니다.",
+    "newChat": "새 채팅",
+    "historyEmpty": "아직 대화 기록이 없습니다.",
+    "loadingHistory": "대화 기록을 불러오는 중...",
+    "suggestions": {
+      "food": "오늘은 어떤 메뉴부터 먹어보면 좋을까?",
+      "route": "처음 방문했다면 어떤 투어나 들를 곳부터 시작하는 게 좋을까?",
+      "faq": "이 앱은 오프라인 사용과 사전 주문을 지원하나요?"
+    }
   },
   "notifications": {
     "title": "알림",

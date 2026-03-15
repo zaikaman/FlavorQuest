@@ -17,6 +17,26 @@ CREATE TABLE public.analytics_logs (
   CONSTRAINT analytics_logs_pkey PRIMARY KEY (id),
   CONSTRAINT analytics_logs_poi_id_fkey FOREIGN KEY (poi_id) REFERENCES public.pois(id)
 );
+CREATE TABLE public.chat_conversations (
+  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  user_id uuid NOT NULL,
+  workspace_role character varying NOT NULL CHECK (workspace_role::text = ANY (ARRAY['customer'::character varying, 'owner'::character varying, 'admin'::character varying]::text[])),
+  title text NOT NULL DEFAULT 'Cuộc trò chuyện mới'::text,
+  last_message_at timestamp with time zone,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  updated_at timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT chat_conversations_pkey PRIMARY KEY (id),
+  CONSTRAINT chat_conversations_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id)
+);
+CREATE TABLE public.chat_messages (
+  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  conversation_id uuid NOT NULL,
+  role character varying NOT NULL CHECK (role::text = ANY (ARRAY['user'::character varying, 'assistant'::character varying]::text[])),
+  content text NOT NULL,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT chat_messages_pkey PRIMARY KEY (id),
+  CONSTRAINT chat_messages_conversation_id_fkey FOREIGN KEY (conversation_id) REFERENCES public.chat_conversations(id)
+);
 CREATE TABLE public.customer_access_payments (
   id uuid NOT NULL DEFAULT uuid_generate_v4(),
   user_id uuid NOT NULL,
@@ -89,13 +109,13 @@ CREATE TABLE public.pois (
   audio_url_zh text,
   image_url text,
   signature_dish text,
-  category_tags text[] DEFAULT ARRAY[]::text[],
   fun_fact text,
   estimated_hours text,
   created_at timestamp with time zone NOT NULL DEFAULT now(),
   updated_at timestamp with time zone NOT NULL DEFAULT now(),
   deleted_at timestamp with time zone,
   owner_id uuid,
+  category_tags ARRAY NOT NULL DEFAULT ARRAY[]::text[] CHECK (category_tags <@ ARRAY['snails'::text, 'seafood'::text, 'grill'::text]),
   CONSTRAINT pois_pkey PRIMARY KEY (id),
   CONSTRAINT pois_owner_id_fkey FOREIGN KEY (owner_id) REFERENCES public.users(id)
 );

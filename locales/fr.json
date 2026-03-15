@@ -6,14 +6,7 @@
   "metadata": {
     "title": "FlavorQuest - Découvrez la Rue Gastronomique Vinh Khanh",
     "description": "Visite audio automatique géolocalisée de la rue gastronomique Vinh Khanh, Can Tho. PWA hors ligne avec support multilingue.",
-    "keywords": [
-      "visite gastronomique",
-      "guide audio",
-      "Vinh Khanh",
-      "Can Tho",
-      "cuisine",
-      "PWA"
-    ]
+    "keywords": ["visite gastronomique", "guide audio", "Vinh Khanh", "Can Tho", "cuisine", "PWA"]
   },
   "manifest": {
     "name": "FlavorQuest - Expérience de Visite Audio Automatique",
@@ -386,6 +379,33 @@
     "customerPhone": "Téléphone",
     "note": "Note",
     "success": "Commande passée avec succès !"
+  },
+  "chatbot": {
+    "badge": "Guide intelligent",
+    "title": "Assistant FlavorQuest",
+    "subtitle": "Obtenez des idées de plats, des suggestions d'étapes et une aide rapide pendant votre visite.",
+    "welcome": "Je peux recommander des plats, suggérer des étapes et répondre aux questions fréquentes dans FlavorQuest.",
+    "inputPlaceholder": "Demandez quoi essayer, où vous arrêter d'abord ou comment utiliser l'application...",
+    "open": "Ouvrir l'assistant",
+    "close": "Fermer l'assistant",
+    "openPage": "Ouvrir la page assistant",
+    "nav": "Assistant",
+    "pageTitle": "Assistant de visite",
+    "pageSubtitle": "Un espace dédié pour demander des idées de plats, des suggestions d'itinéraire et de l'aide sans masquer la carte ni la liste des POI.",
+    "backToTour": "Retour au tour",
+    "pageInfoTitle": "Que pouvez-vous demander ici ?",
+    "pageInfoBody": "L'assistant s'appuie sur les données actuelles de FlavorQuest pour recommander des plats, des étapes, des parcours adaptés et répondre aux questions fréquentes pendant votre découverte.",
+    "thinking": "Réflexion en cours...",
+    "error": "L'assistant est indisponible pour le moment. Veuillez réessayer plus tard.",
+    "footer": "Les suggestions sont basées sur les données actuellement disponibles dans FlavorQuest.",
+    "newChat": "Nouveau chat",
+    "historyEmpty": "Vous n'avez encore aucune conversation.",
+    "loadingHistory": "Chargement de l'historique des conversations...",
+    "suggestions": {
+      "food": "Quels plats devrais-je goûter en premier aujourd'hui ?",
+      "route": "Si c'est ma première visite, par quel tour ou quelle étape devrais-je commencer ?",
+      "faq": "Cette application prend-elle en charge le mode hors ligne et la précommande ?"
+    }
   },
   "notifications": {
     "title": "Notifications",
