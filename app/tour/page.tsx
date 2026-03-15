@@ -2,7 +2,7 @@
  * Main Tour Page
  * Phase 5 - Manual mode, settings, history, bottom nav integration
  * Phase 6 - Multi-language support
- * 
+ *
  * Features:
  * - Auto/Manual mode toggle (T104-T105)
  * - Bottom navigation (T102-T103)
@@ -55,9 +55,10 @@ export default function TourPage() {
   const { t } = useTranslations();
   const { user } = useAuth();
   const selectedTourId = searchParams.get('tour');
+  const requestedTab = searchParams.get('tab');
 
   // UI State
-  const [activeTab, setActiveTab] = useState<NavTab>('map');
+  const [activeTab, setActiveTab] = useState<NavTab>(requestedTab === 'list' ? 'list' : 'map');
   const [showPlayerModal, setShowPlayerModal] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
@@ -85,8 +86,7 @@ export default function TourPage() {
 
   // Load settings on mount
   useEffect(() => {
-    loadSettings().then(s => {
-
+    loadSettings().then((s) => {
       setSettings(s);
       setIsAutoMode(s.autoPlayEnabled);
     });
@@ -109,20 +109,24 @@ export default function TourPage() {
     };
   }, []);
 
-
-
   // Toast helper
-  const showToastMessage = useCallback((message: string) => {
-    setToastMessage(message);
-    setShowToast(true);
-    setTimeout(() => setShowToast(false), 3000);
-  }, [setToastMessage, setShowToast]);
+  const showToastMessage = useCallback(
+    (message: string) => {
+      setToastMessage(message);
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 3000);
+    },
+    [setToastMessage, setShowToast]
+  );
 
-  const handleOfflineSyncSuccess = useCallback((count: number) => {
-    if (count > 0) {
-      showToastMessage(t('tour.syncedEvents', { count: String(count) }));
-    }
-  }, [showToastMessage, t]);
+  const handleOfflineSyncSuccess = useCallback(
+    (count: number) => {
+      if (count > 0) {
+        showToastMessage(t('tour.syncedEvents', { count: String(count) }));
+      }
+    },
+    [showToastMessage, t]
+  );
 
   const handleOfflineReady = useCallback(() => {
     showToastMessage(t('tour.offlineReady'));
@@ -134,9 +138,7 @@ export default function TourPage() {
   }, [showToastMessage, t]);
 
   // Offline Sync
-  const {
-    isOfflineReady: offlineSyncReady,
-  } = useOfflineSync({
+  const { isOfflineReady: offlineSyncReady } = useOfflineSync({
     autoSync: true,
     onSyncSuccess: handleOfflineSyncSuccess,
     onOfflineReady: handleOfflineReady,
@@ -154,13 +156,10 @@ export default function TourPage() {
     onOfflineReady: handlePOIOfflineReady,
   });
 
-  const {
-    tours,
-    isLoading: toursLoading,
-  } = useTourManager();
+  const { tours, isLoading: toursLoading } = useTourManager();
 
   const selectedTour = useMemo(
-    () => tours.find(tour => tour.id === selectedTourId) ?? null,
+    () => tours.find((tour) => tour.id === selectedTourId) ?? null,
     [selectedTourId, tours]
   );
 
@@ -169,24 +168,27 @@ export default function TourPage() {
       return pois;
     }
 
-    const poiMap = new Map(pois.map(poi => [poi.id, poi]));
+    const poiMap = new Map(pois.map((poi) => [poi.id, poi]));
     return selectedTour.poi_ids
-      .map(poiId => poiMap.get(poiId))
+      .map((poiId) => poiMap.get(poiId))
       .filter((poi): poi is POI => Boolean(poi));
   }, [pois, selectedTour]);
 
-  const handleSelectTour = useCallback((tourId: string | null) => {
-    const params = new URLSearchParams(searchParams.toString());
+  const handleSelectTour = useCallback(
+    (tourId: string | null) => {
+      const params = new URLSearchParams(searchParams.toString());
 
-    if (tourId) {
-      params.set('tour', tourId);
-    } else {
-      params.delete('tour');
-    }
+      if (tourId) {
+        params.set('tour', tourId);
+      } else {
+        params.delete('tour');
+      }
 
-    const nextUrl = params.toString() ? `/tour?${params.toString()}` : '/tour';
-    router.replace(nextUrl, { scroll: false });
-  }, [router, searchParams]);
+      const nextUrl = params.toString() ? `/tour?${params.toString()}` : '/tour';
+      router.replace(nextUrl, { scroll: false });
+    },
+    [router, searchParams]
+  );
 
   const selectedTourMetadata = useMemo<Json | undefined>(() => {
     if (!selectedTour) {
@@ -200,6 +202,36 @@ export default function TourPage() {
       tour_duration_min: selectedTour.estimated_duration_min ?? null,
     } as Json;
   }, [selectedTour]);
+
+  useEffect(() => {
+    if (requestedTab === 'assistant') {
+      const params = new URLSearchParams(searchParams.toString());
+      const nextUrl = params.toString()
+        ? `/tour/assistant?${params.toString()}`
+        : '/tour/assistant';
+      router.replace(nextUrl, { scroll: false });
+      return;
+    }
+
+    if (requestedTab === 'list') {
+      setActiveTab('list');
+      return;
+    }
+
+    if (requestedTab === 'history') {
+      setActiveTab('map');
+      setShowHistory(true);
+      return;
+    }
+
+    if (requestedTab === 'settings') {
+      setActiveTab('map');
+      setShowSettings(true);
+      return;
+    }
+
+    setActiveTab('map');
+  }, [requestedTab, router, searchParams]);
 
   useEffect(() => {
     hasPreloadedRef.current = false;
@@ -221,7 +253,7 @@ export default function TourPage() {
   }, [setShouldPreloadOffline, setShowOfflinePrompt]);
 
   // Calculate estimated size
-  const estimatedSize = Math.round((activePOIs.length * 2.5)); // ~2.5MB per POI (audio + image)
+  const estimatedSize = Math.round(activePOIs.length * 2.5); // ~2.5MB per POI (audio + image)
 
   // Handle TTS fallback
   const handleTTSFallback = useCallback(() => {
@@ -298,11 +330,13 @@ export default function TourPage() {
     });
 
     await setCooldown(poi.id);
-    setVisitedPOIs(prev => new Set([...prev, poi.id]));
+    setVisitedPOIs((prev) => new Set([...prev, poi.id]));
     await logAutoPlay(poi.id, language, undefined, {
       distance: event.distance,
-      ...(selectedTourMetadata && typeof selectedTourMetadata === 'object' && !Array.isArray(selectedTourMetadata)
-        ? selectedTourMetadata as Record<string, Json>
+      ...(selectedTourMetadata &&
+      typeof selectedTourMetadata === 'object' &&
+      !Array.isArray(selectedTourMetadata)
+        ? (selectedTourMetadata as Record<string, Json>)
         : {}),
     } as Json);
     await saveVisit({
@@ -316,15 +350,11 @@ export default function TourPage() {
   };
 
   // Geofencing - detect POI entry
-  const { nearbyPOIs } = useGeofencing(
-    filteredPosition,
-    activePOIs,
-    {
-      radius: settings?.geofenceRadius || GEOFENCE_TRIGGER_RADIUS_M,
-      enabled: isAutoMode,
-      onEnter: handlePOIEnter,
-    }
-  );
+  const { nearbyPOIs } = useGeofencing(filteredPosition, activePOIs, {
+    radius: settings?.geofenceRadius || GEOFENCE_TRIGGER_RADIUS_M,
+    enabled: isAutoMode,
+    onEnter: handlePOIEnter,
+  });
 
   useEffect(() => {
     if (!selectedTourId || toursLoading || selectedTour) {
@@ -347,7 +377,7 @@ export default function TourPage() {
   useEffect(() => {
     if (!selectedPOI) return;
 
-    const isStillVisible = activePOIs.some(poi => poi.id === selectedPOI.id);
+    const isStillVisible = activePOIs.some((poi) => poi.id === selectedPOI.id);
     if (!isStillVisible) {
       const clearTimer = window.setTimeout(() => {
         setSelectedPOI(null);
@@ -401,7 +431,13 @@ export default function TourPage() {
   useEffect(() => {
     return () => {
       const duration = Date.now() - tourStartTime;
-      logTourEnd(language, duration, visitedPOIs.size, filteredPosition || undefined, selectedTourMetadata);
+      logTourEnd(
+        language,
+        duration,
+        visitedPOIs.size,
+        filteredPosition || undefined,
+        selectedTourMetadata
+      );
     };
   }, [filteredPosition, language, selectedTourMetadata, tourStartTime, visitedPOIs]);
 
@@ -432,7 +468,12 @@ export default function TourPage() {
       console.error(`Geolocation error [Code ${errorCode}]: ${errorMsg}`);
 
       // Check for insecure origin (common issue on local network testing)
-      if (typeof window !== 'undefined' && window.location.protocol === 'http:' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+      if (
+        typeof window !== 'undefined' &&
+        window.location.protocol === 'http:' &&
+        window.location.hostname !== 'localhost' &&
+        window.location.hostname !== '127.0.0.1'
+      ) {
         console.warn('Geolocation requires a secure context (HTTPS) or localhost.');
         window.setTimeout(() => {
           showToastMessage(t('tour.httpsRequired'));
@@ -462,7 +503,7 @@ export default function TourPage() {
           language,
           audioPlayer.currentTime,
           audioPlayer.duration,
-          selectedTourMetadata,
+          selectedTourMetadata
         );
         audioPlayer.skip();
         return;
@@ -489,7 +530,7 @@ export default function TourPage() {
   // Cycle playback rate: 0.75x -> 1.0x -> 1.25x -> 1.5x
   const handleCyclePlaybackRate = useCallback(() => {
     const rates = [0.75, 1, 1.25, 1.5];
-    const currentIndex = rates.findIndex(rate => rate === audioPlayer.playbackRate);
+    const currentIndex = rates.findIndex((rate) => rate === audioPlayer.playbackRate);
     const nextRate = rates[(currentIndex + 1) % rates.length] as number;
     audioPlayer.setPlaybackRate(nextRate);
     showToastMessage(`Tốc độ phát: ${nextRate}x`);
@@ -512,108 +553,137 @@ export default function TourPage() {
   }, [audioPlayer, showToastMessage]);
 
   // Handle POI selection from map
-  const handleSelectPOI = useCallback((poi: POI | null) => {
-    setSelectedPOI(poi);
-  }, [setSelectedPOI]);
+  const handleSelectPOI = useCallback(
+    (poi: POI | null) => {
+      setSelectedPOI(poi);
+    },
+    [setSelectedPOI]
+  );
 
   // Handle play POI from map card
-  const handlePlayPOI = useCallback(async (poi: POI) => {
-    const localizedPOI = getLocalizedPOI(poi, language);
-    const audioUrl = localizedPOI.audio_url;
+  const handlePlayPOI = useCallback(
+    async (poi: POI) => {
+      const localizedPOI = getLocalizedPOI(poi, language);
+      const audioUrl = localizedPOI.audio_url;
 
-    // Nếu bấm lại đúng POI đang phát: toggle pause/resume
-    if (audioPlayer.currentItem?.poi.id === poi.id) {
-      // Nếu đã đổi ngôn ngữ, phát lại source theo ngôn ngữ mới thay vì resume source cũ
-      if (audioPlayer.currentItem.language !== language) {
-        if (!audioUrl) {
-          showToastMessage(t('tour.noAudioForPOI'));
+      // Nếu bấm lại đúng POI đang phát: toggle pause/resume
+      if (audioPlayer.currentItem?.poi.id === poi.id) {
+        // Nếu đã đổi ngôn ngữ, phát lại source theo ngôn ngữ mới thay vì resume source cũ
+        if (audioPlayer.currentItem.language !== language) {
+          if (!audioUrl) {
+            showToastMessage(t('tour.noAudioForPOI'));
+            return;
+          }
+
+          await audioPlayer.playNow({
+            poi,
+            audioUrl,
+            title: localizedPOI.name,
+            description: localizedPOI.description,
+            language,
+          });
+
+          showToastMessage(t('tour.nowPlaying', { name: localizedPOI.name }));
           return;
         }
 
-        await audioPlayer.playNow({
-          poi,
-          audioUrl,
-          title: localizedPOI.name,
-          description: localizedPOI.description,
-          language,
-        });
-
-        showToastMessage(t('tour.nowPlaying', { name: localizedPOI.name }));
+        if (audioPlayer.isPlaying) {
+          audioPlayer.pause();
+        } else {
+          await audioPlayer.play();
+        }
         return;
       }
 
-      if (audioPlayer.isPlaying) {
-        audioPlayer.pause();
-      } else {
-        await audioPlayer.play();
+      if (!audioUrl) {
+        showToastMessage(t('tour.noAudioForPOI'));
+        return;
       }
-      return;
-    }
 
+      await audioPlayer.playNow({
+        poi,
+        audioUrl,
+        title: localizedPOI.name,
+        description: localizedPOI.description, // For TTS fallback
+        language, // For TTS fallback
+      });
 
+      // Track visited
+      setVisitedPOIs((prev) => new Set([...prev, poi.id]));
 
-    if (!audioUrl) {
-      showToastMessage(t('tour.noAudioForPOI'));
-      return;
-    }
+      // Log analytics & save visit
+      await logManualPlay(poi.id, language, {
+        distance: 0,
+        accuracy: accuracy ?? undefined,
+        ...(selectedTourMetadata &&
+        typeof selectedTourMetadata === 'object' &&
+        !Array.isArray(selectedTourMetadata)
+          ? (selectedTourMetadata as Record<string, Json>)
+          : {}),
+      } as Json);
+      await saveVisit({
+        poi_id: poi.id,
+        poi_name: localizedPOI.name,
+        visited_at: new Date().toISOString(),
+        listened: true,
+      });
 
-    await audioPlayer.playNow({
-      poi,
-      audioUrl,
-      title: localizedPOI.name,
-      description: localizedPOI.description, // For TTS fallback
-      language, // For TTS fallback
-    });
-
-    // Track visited
-    setVisitedPOIs(prev => new Set([...prev, poi.id]));
-
-    // Log analytics & save visit
-    await logManualPlay(poi.id, language, {
-      distance: 0,
-      accuracy: accuracy ?? undefined,
-      ...(selectedTourMetadata && typeof selectedTourMetadata === 'object' && !Array.isArray(selectedTourMetadata)
-        ? selectedTourMetadata as Record<string, Json>
-        : {}),
-    } as Json);
-    await saveVisit({
-      poi_id: poi.id,
-      poi_name: localizedPOI.name,
-      visited_at: new Date().toISOString(),
-      listened: true,
-    });
-
-    showToastMessage(t('tour.nowPlaying', { name: localizedPOI.name }));
-  }, [accuracy, audioPlayer, language, selectedTourMetadata, setVisitedPOIs, showToastMessage, t]);
+      showToastMessage(t('tour.nowPlaying', { name: localizedPOI.name }));
+    },
+    [accuracy, audioPlayer, language, selectedTourMetadata, setVisitedPOIs, showToastMessage, t]
+  );
 
   // Handle view POI detail
-  const handleViewPOI = useCallback((poi: POI) => {
-    const params = new URLSearchParams();
-    if (selectedTourId) {
-      params.set('tour', selectedTourId);
-    }
+  const handleViewPOI = useCallback(
+    (poi: POI) => {
+      const params = new URLSearchParams();
+      if (selectedTourId) {
+        params.set('tour', selectedTourId);
+      }
 
-    const nextUrl = params.toString()
-      ? `/tour/${poi.id}?${params.toString()}`
-      : `/tour/${poi.id}`;
+      const nextUrl = params.toString()
+        ? `/tour/${poi.id}?${params.toString()}`
+        : `/tour/${poi.id}`;
 
-    router.push(nextUrl);
-  }, [router, selectedTourId]);
+      router.push(nextUrl);
+    },
+    [router, selectedTourId]
+  );
 
   // Handle tab change
-  const handleTabChange = useCallback((tab: NavTab) => {
-    if (tab === 'settings') {
-      setShowSettings(true);
-    } else if (tab === 'history') {
-      setShowHistory(true);
-    } else {
-      setActiveTab(tab);
-    }
-  }, [setActiveTab, setShowHistory, setShowSettings]);
+  const handleTabChange = useCallback(
+    (tab: NavTab) => {
+      const params = new URLSearchParams(searchParams.toString());
+
+      if (tab === 'settings') {
+        params.set('tab', 'settings');
+        const nextUrl = params.toString() ? `/tour?${params.toString()}` : '/tour';
+        router.replace(nextUrl, { scroll: false });
+        setShowSettings(true);
+      } else if (tab === 'history') {
+        params.set('tab', 'history');
+        const nextUrl = params.toString() ? `/tour?${params.toString()}` : '/tour';
+        router.replace(nextUrl, { scroll: false });
+        setShowHistory(true);
+      } else if (tab === 'assistant') {
+        params.set('tab', 'assistant');
+        const nextUrl = params.toString()
+          ? `/tour/assistant?${params.toString()}`
+          : '/tour/assistant';
+        router.push(nextUrl);
+      } else {
+        params.set('tab', tab);
+        const nextUrl = params.toString() ? `/tour?${params.toString()}` : '/tour';
+        router.replace(nextUrl, { scroll: false });
+        setActiveTab(tab);
+      }
+    },
+    [router, searchParams, setActiveTab, setShowHistory, setShowSettings]
+  );
 
   // Toggle auto/manual mode
   const toggleAutoMode = useCallback(() => {
-    setIsAutoMode(prev => {
+    setIsAutoMode((prev) => {
       const newMode = !prev;
       showToastMessage(newMode ? t('tour.autoMode') : t('tour.manualMode'));
       return newMode;
@@ -632,7 +702,7 @@ export default function TourPage() {
   }, []);
 
   // Get next POI
-  const nextPOI = nearbyPOIs.find(p => p.id !== audioPlayer.currentItem?.poi.id);
+  const nextPOI = nearbyPOIs.find((p) => p.id !== audioPlayer.currentItem?.poi.id);
 
   useEffect(() => {
     if (!user) return;
@@ -654,50 +724,51 @@ export default function TourPage() {
   useEffect(() => {
     if (!showNotifications || notifications.length === 0) return;
 
-    const hasUnread = notifications.some(item => !item.read_at);
+    const hasUnread = notifications.some((item) => !item.read_at);
     if (!hasUnread) return;
 
     fetch('/api/notifications', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ markAll: true }),
-    }).then(() => {
-      setNotifications(prev => prev.map(item => ({ ...item, read_at: item.read_at ?? new Date().toISOString() })));
-    }).catch(error => {
-      console.error('Mark notifications read failed:', error);
-    });
+    })
+      .then(() => {
+        setNotifications((prev) =>
+          prev.map((item) => ({ ...item, read_at: item.read_at ?? new Date().toISOString() }))
+        );
+      })
+      .catch((error) => {
+        console.error('Mark notifications read failed:', error);
+      });
   }, [showNotifications, notifications]);
 
-  const unreadCount = notifications.filter(item => !item.read_at).length;
-
-
+  const unreadCount = notifications.filter((item) => !item.read_at).length;
 
   return (
-    <div className="relative flex flex-col h-screen w-full overflow-hidden bg-background-dark">      {/* Header */}
+    <div className="bg-background-dark relative flex h-screen w-full flex-col overflow-hidden">
+      {' '}
+      {/* Header */}
       {/* Header Controls */}
-      <div className="absolute top-0 left-0 right-0 z-50 pointer-events-none p-4">
+      <div className="pointer-events-none absolute top-0 right-0 left-0 z-50 p-4">
         <div className="relative flex items-start justify-between">
           {/* Back Button */}
           <button
             onClick={() => router.push('/')}
-            className="flex items-center justify-center w-10 h-10 rounded-full bg-black/40 backdrop-blur-md border border-white/10 text-white shadow-lg pointer-events-auto hover:bg-black/60 transition-colors -mt-1"
+            className="pointer-events-auto -mt-1 flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-black/40 text-white shadow-lg backdrop-blur-md transition-colors hover:bg-black/60"
             aria-label={t('common.back')}
           >
             <span className="material-symbols-outlined text-xl">arrow_back</span>
           </button>
 
           {/* Auto/Manual Mode Toggle */}
-          <div className="pointer-events-auto -mt-2 absolute left-1/2 -translate-x-1/2">
+          <div className="pointer-events-auto absolute left-1/2 -mt-2 -translate-x-1/2">
             <button
               onClick={toggleAutoMode}
-              className={`
-                 relative flex items-center gap-2 px-4 py-2 rounded-full 
-                 backdrop-blur-md border shadow-lg transition-all duration-300
-                 ${isAutoMode
+              className={`relative flex items-center gap-2 rounded-full border px-4 py-2 shadow-lg backdrop-blur-md transition-all duration-300 ${
+                isAutoMode
                   ? 'bg-primary/90 border-primary shadow-[0_4px_20px_rgba(242,108,13,0.4)]'
-                  : 'bg-black/40 border-white/10 hover:bg-black/60'
-                }
-               `}
+                  : 'border-white/10 bg-black/40 hover:bg-black/60'
+              } `}
             >
               <span
                 className={`material-symbols-outlined text-lg transition-transform ${isAutoMode ? 'scale-110' : ''}`}
@@ -706,38 +777,70 @@ export default function TourPage() {
                 {isAutoMode ? 'sensors' : 'touch_app'}
               </span>
               <div className="flex flex-col items-start leading-none">
-                <span className={`text-xs font-bold uppercase tracking-wider ${isAutoMode ? 'text-white' : 'text-white/80'}`}>
+                <span
+                  className={`text-xs font-bold tracking-wider uppercase ${isAutoMode ? 'text-white' : 'text-white/80'}`}
+                >
                   {isAutoMode ? t('tour.auto') : t('tour.manual')}
                 </span>
                 {isAutoMode && (
-                  <span className="text-[10px] text-white/80 font-medium mt-0.5">{t('tour.searchingPOIs')}</span>
+                  <span className="mt-0.5 text-[10px] font-medium text-white/80">
+                    {t('tour.searchingPOIs')}
+                  </span>
                 )}
               </div>
 
               {/* Active Pulse */}
               {isAutoMode && (
-                <span className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-black animate-pulse"></span>
+                <span className="absolute -top-1 -right-1 h-3 w-3 animate-pulse rounded-full border-2 border-black bg-green-500"></span>
               )}
             </button>
           </div>
 
           {/* Offline Status */}
           <div className="pointer-events-auto flex items-center gap-2">
+            <button
+              onClick={() => {
+                const params = new URLSearchParams();
+
+                if (selectedTourId) {
+                  params.set('tour', selectedTourId);
+                }
+
+                if (selectedPOI?.id) {
+                  params.set('poi', selectedPOI.id);
+                }
+
+                params.set('tab', activeTab);
+
+                const nextUrl = params.toString()
+                  ? `/tour/assistant?${params.toString()}`
+                  : '/tour/assistant';
+
+                router.push(nextUrl);
+              }}
+              className="relative flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-black/40 text-white shadow-lg backdrop-blur-md transition-colors hover:bg-black/60"
+              aria-label={t('chatbot.openPage')}
+            >
+              <span className="material-symbols-outlined text-xl">psychology_alt</span>
+            </button>
             {user && (
               <button
                 onClick={() => setShowNotifications(true)}
-                className="relative flex items-center justify-center w-10 h-10 rounded-full bg-black/40 backdrop-blur-md border border-white/10 text-white shadow-lg"
+                className="relative flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-black/40 text-white shadow-lg backdrop-blur-md"
                 aria-label={t('notifications.title')}
               >
                 <span className="material-symbols-outlined text-xl">notifications</span>
                 {unreadCount > 0 && (
-                  <span className="absolute -top-1 -right-1 min-w-5 h-5 px-1 rounded-full bg-primary text-[10px] font-bold flex items-center justify-center">
+                  <span className="bg-primary absolute -top-1 -right-1 flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[10px] font-bold">
                     {unreadCount > 9 ? '9+' : unreadCount}
                   </span>
                 )}
               </button>
             )}
-            <OfflineIndicator compact className="shadow-lg border border-white/10 backdrop-blur-md !bg-black/40" />
+            <OfflineIndicator
+              compact
+              className="border border-white/10 !bg-black/40 shadow-lg backdrop-blur-md"
+            />
           </div>
         </div>
       </div>
@@ -787,17 +890,19 @@ export default function TourPage() {
 
             {/* Loading Overlay */}
             {poisLoading && activeTab === 'map' && activePOIs.length === 0 && (
-              <div className="absolute inset-0 z-40 overflow-hidden bg-background-dark">
+              <div className="bg-background-dark absolute inset-0 z-40 overflow-hidden">
                 <TourPageSkeleton />
               </div>
             )}
 
             {/* Narration Overlay (Mini Player) */}
             {audioPlayer.currentItem && !showPlayerModal && (
-              <div className="absolute bottom-0 left-0 right-0 z-40 px-4 pb-20">
+              <div className="absolute right-0 bottom-0 left-0 z-40 px-4 pb-20">
                 <NarrationOverlay
                   currentPOI={audioPlayer.currentItem.poi}
-                  distance={nearbyPOIs.find(p => p.id === audioPlayer.currentItem?.poi.id)?.distance}
+                  distance={
+                    nearbyPOIs.find((p) => p.id === audioPlayer.currentItem?.poi.id)?.distance
+                  }
                   isPlaying={audioPlayer.isPlaying}
                   currentTime={audioPlayer.currentTime}
                   duration={audioPlayer.duration}
@@ -808,10 +913,9 @@ export default function TourPage() {
           </div>
         </div>
       </div>
-
       {/* Full Audio Player Modal */}
       {showPlayerModal && audioPlayer.currentItem && (
-        <div className="fixed inset-0 z-50 bg-background-dark">
+        <div className="bg-background-dark fixed inset-0 z-50">
           <AudioPlayer
             currentPOI={audioPlayer.currentItem.poi}
             isPlaying={audioPlayer.isPlaying}
@@ -835,7 +939,6 @@ export default function TourPage() {
           />
         </div>
       )}
-
       {/* Settings Panel */}
       <SettingsPanel
         isOpen={showSettings}
@@ -846,30 +949,37 @@ export default function TourPage() {
         }}
         onClose={() => {
           setShowSettings(false);
+          const params = new URLSearchParams(searchParams.toString());
+          params.set('tab', activeTab);
+          const nextUrl = params.toString() ? `/tour?${params.toString()}` : '/tour';
+          router.replace(nextUrl, { scroll: false });
           // Reload settings
-          loadSettings().then(s => {
+          loadSettings().then((s) => {
             setSettings(s);
             setIsAutoMode(s.autoPlayEnabled);
             audioPlayer.setVolume(s.volume);
           });
         }}
       />
-
       {/* History View */}
       <HistoryView
         isOpen={showHistory}
-        onClose={() => setShowHistory(false)}
+        onClose={() => {
+          setShowHistory(false);
+          const params = new URLSearchParams(searchParams.toString());
+          params.set('tab', activeTab);
+          const nextUrl = params.toString() ? `/tour?${params.toString()}` : '/tour';
+          router.replace(nextUrl, { scroll: false });
+        }}
         onPlayPOI={handlePlayPOI}
         onViewPOI={handleViewPOI}
       />
-
       {/* Toast Notifications */}
       {showToast && (
-        <div className="fixed top-20 left-4 right-4 z-[60]">
+        <div className="fixed top-20 right-4 left-4 z-[60]">
           <Toast message={toastMessage} type="info" onClose={() => setShowToast(false)} />
         </div>
       )}
-
       {/* Audio Preload Indicator */}
       {activePOIs.length > 0 && shouldPreloadOffline && (
         <AudioPreloadIndicator
@@ -885,7 +995,6 @@ export default function TourPage() {
           }}
         />
       )}
-
       {/* Offline Download Prompt */}
       <OfflineDownloadPrompt
         isOpen={showOfflinePrompt}
@@ -894,20 +1003,21 @@ export default function TourPage() {
         poisCount={activePOIs.length}
         estimatedSize={estimatedSize}
       />
-
       {/* Bottom Navigation */}
       <BottomNav
         activeTab={activeTab}
         onTabChange={handleTabChange}
-        className="fixed bottom-0 left-0 right-0 z-50"
+        className="fixed right-0 bottom-0 left-0 z-50"
       />
-
       {showNotifications && (
-        <div className="fixed inset-0 z-[70] bg-black/70 backdrop-blur-sm p-4">
-          <div className="max-w-md mx-auto mt-16 rounded-2xl border border-white/10 bg-[#2a1e16] p-4 max-h-[70vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-4">
+        <div className="fixed inset-0 z-[70] bg-black/70 p-4 backdrop-blur-sm">
+          <div className="mx-auto mt-16 max-h-[70vh] max-w-md overflow-y-auto rounded-2xl border border-white/10 bg-[#2a1e16] p-4">
+            <div className="mb-4 flex items-center justify-between">
               <h3 className="font-bold text-white">{t('notifications.title')}</h3>
-              <button onClick={() => setShowNotifications(false)} className="text-gray-400 hover:text-white">
+              <button
+                onClick={() => setShowNotifications(false)}
+                className="text-gray-400 hover:text-white"
+              >
                 <span className="material-symbols-outlined">close</span>
               </button>
             </div>
@@ -917,13 +1027,13 @@ export default function TourPage() {
             )}
 
             <div className="space-y-2">
-              {notifications.map(notification => (
+              {notifications.map((notification) => (
                 <div
                   key={notification.id}
                   className={`rounded-lg border p-3 ${notification.read_at ? 'border-white/10' : 'border-primary/40 bg-primary/5'}`}
                 >
                   <p className="text-sm font-semibold">{notification.title}</p>
-                  <p className="text-xs text-gray-300 mt-1">{notification.message}</p>
+                  <p className="mt-1 text-xs text-gray-300">{notification.message}</p>
                 </div>
               ))}
             </div>

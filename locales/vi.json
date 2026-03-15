@@ -6,14 +6,7 @@
   "metadata": {
     "title": "FlavorQuest - Khám Phá Ẩm Thực Vĩnh Khánh",
     "description": "Tour âm thanh tự động dẫn đường khám phá ẩm thực phố Vĩnh Khánh, Cần Thơ. Offline-first PWA với hỗ trợ đa ngôn ngữ.",
-    "keywords": [
-      "food tour",
-      "audio guide",
-      "Vĩnh Khánh",
-      "Cần Thơ",
-      "ẩm thực",
-      "PWA"
-    ]
+    "keywords": ["food tour", "audio guide", "Vĩnh Khánh", "Cần Thơ", "ẩm thực", "PWA"]
   },
   "manifest": {
     "name": "FlavorQuest - Trải Nghiệm Thuyết Minh Âm Thanh Tự Động",
@@ -386,6 +379,33 @@
     "customerPhone": "Số điện thoại",
     "note": "Ghi chú",
     "success": "Đặt món thành công"
+  },
+  "chatbot": {
+    "badge": "Trợ lý thông minh",
+    "title": "Trợ lý FlavorQuest",
+    "subtitle": "Gợi ý món ăn, điểm dừng và giải đáp nhanh cho chuyến đi của bạn.",
+    "welcome": "Tôi có thể gợi ý món nên thử, điểm nào nên ghé trước và trả lời các câu hỏi thường gặp ngay trong FlavorQuest.",
+    "inputPlaceholder": "Hỏi món gì đáng thử, nên ghé đâu trước, hoặc cách dùng ứng dụng...",
+    "open": "Mở trợ lý",
+    "close": "Đóng trợ lý",
+    "openPage": "Mở trang trợ lý",
+    "nav": "Trợ lý",
+    "pageTitle": "Trợ lý chuyến đi",
+    "pageSubtitle": "Một không gian riêng để hỏi nhanh về món ăn, tour phù hợp và cách dùng FlavorQuest mà không che mất bản đồ hay danh sách POI.",
+    "backToTour": "Quay lại tour",
+    "pageInfoTitle": "Bạn có thể hỏi gì ở đây?",
+    "pageInfoBody": "Trợ lý sẽ dựa trên dữ liệu hiện có trong FlavorQuest để gợi ý món ăn, điểm dừng, lộ trình phù hợp và giải đáp những câu hỏi thường gặp trong lúc bạn khám phá.",
+    "thinking": "Đang suy nghĩ...",
+    "error": "Chưa thể kết nối trợ lý. Vui lòng thử lại sau.",
+    "footer": "Gợi ý dựa trên dữ liệu hiện có trong FlavorQuest.",
+    "newChat": "Đoạn chat mới",
+    "historyEmpty": "Bạn chưa có cuộc trò chuyện nào.",
+    "loadingHistory": "Đang tải lịch sử trò chuyện...",
+    "suggestions": {
+      "food": "Hôm nay tôi nên thử những món nào trước?",
+      "route": "Nếu mới đi lần đầu thì tôi nên bắt đầu từ tour nào hoặc ghé đâu trước?",
+      "faq": "Ứng dụng này có dùng ngoại tuyến và đặt món trước được không?"
+    }
   },
   "notifications": {
     "title": "Thông báo",
