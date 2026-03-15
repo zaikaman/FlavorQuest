@@ -95,6 +95,7 @@ export function RoleChatbot({
 }: RoleChatbotProps) {
   const { t } = useTranslations();
   const isPageMode = mode === 'page';
+  const isCompactFloatingTrigger = role === 'owner' || role === 'admin';
   const [isOpen, setIsOpen] = useState(isPageMode);
   const [input, setInput] = useState('');
   const [isSending, setIsSending] = useState(false);
@@ -617,19 +618,23 @@ export function RoleChatbot({
       <button
         type="button"
         onClick={() => setIsOpen((current) => !current)}
-        className={`pointer-events-auto group flex items-center gap-3 rounded-full border border-white/30 bg-gradient-to-br ${theme.button} px-4 py-3 text-white shadow-[0_20px_50px_rgba(22,18,15,0.4)] transition-all hover:scale-[1.02] active:scale-95`}
+        className={`pointer-events-auto group flex items-center rounded-full border border-white/30 bg-gradient-to-br ${theme.button} text-white shadow-[0_20px_50px_rgba(22,18,15,0.4)] transition-all hover:scale-[1.02] active:scale-95 ${
+          isCompactFloatingTrigger ? 'p-3' : 'gap-3 px-4 py-3'
+        }`}
         aria-expanded={isOpen}
         aria-label={isOpen ? copy.closeLabel : copy.openLabel}
       >
         <span className="flex h-11 w-11 items-center justify-center rounded-full bg-white/18 backdrop-blur-sm">
           <span className="material-symbols-outlined text-[22px]">psychology_alt</span>
         </span>
-        <span className="hidden pr-1 text-left sm:block">
-          <span className="block text-[11px] font-semibold tracking-[0.2em] text-white/78 uppercase">
-            {copy.badge}
+        {!isCompactFloatingTrigger && (
+          <span className="hidden pr-1 text-left sm:block">
+            <span className="block text-[11px] font-semibold tracking-[0.2em] text-white/78 uppercase">
+              {copy.badge}
+            </span>
+            <span className="block text-sm font-bold">{copy.title}</span>
           </span>
-          <span className="block text-sm font-bold">{copy.title}</span>
-        </span>
+        )}
       </button>
     </div>
   );
