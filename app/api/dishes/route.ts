@@ -2,6 +2,18 @@ import { createServerClient, getCurrentUserProfile } from '@/lib/supabase/server
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
+const DISH_SELECT_FIELDS = `
+  id,
+  poi_id,
+  name,
+  description,
+  price,
+  is_available,
+  image_url,
+  created_at,
+  updated_at
+`.replace(/\s+/g, ' ').trim();
+
 export async function GET(request: NextRequest) {
   const supabase = await createServerClient();
   const poiId = request.nextUrl.searchParams.get('poi_id');
@@ -12,7 +24,7 @@ export async function GET(request: NextRequest) {
 
   const { data, error } = await supabase
     .from('dishes')
-    .select('*')
+    .select(DISH_SELECT_FIELDS)
     .eq('poi_id', poiId)
     .is('deleted_at', null)
     .order('created_at', { ascending: true });
@@ -66,7 +78,7 @@ export async function POST(request: NextRequest) {
     const { data, error } = await supabase
       .from('dishes')
       .insert(payload)
-      .select('*')
+      .select(DISH_SELECT_FIELDS)
       .single();
 
     if (error) {

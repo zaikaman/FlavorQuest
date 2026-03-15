@@ -15,6 +15,11 @@ const DEFAULT_OPTIONS: UseTourManagerOptions = {
   cacheFirst: true,
 };
 
+const TOUR_MEMORY_CACHE_TTL_MS = 60_000;
+
+let toursMemoryCache: { data: Tour[]; cachedAt: number } | null = null;
+let toursInFlightPromise: Promise<Tour[]> | null = null;
+
 export function useTourManager(options: UseTourManagerOptions = {}) {
   const autoFetch = options.autoFetch ?? DEFAULT_OPTIONS.autoFetch ?? true;
   const cacheFirst = options.cacheFirst ?? DEFAULT_OPTIONS.cacheFirst ?? true;
@@ -26,22 +31,41 @@ export function useTourManager(options: UseTourManagerOptions = {}) {
   const [isOfflineMode, setIsOfflineMode] = useState(false);
   const [lastFetchTime, setLastFetchTime] = useState<number | null>(null);
 
-  const fetchFromApi = useCallback(async (): Promise<Tour[]> => {
-    const response = await fetch(`/api/tours?t=${Date.now()}`, {
-      cache: 'no-store',
-      headers: {
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
-        Pragma: 'no-cache',
-      },
-    });
+  const updateMemoryCache = useCallback((nextTours: Tour[]) => {
+    toursMemoryCache = {
+      data: nextTours,
+      cachedAt: Date.now(),
+    };
+  }, []);
 
-    if (!response.ok) {
-      const payload = await response.json().catch(() => null);
-      throw new Error(payload?.error || 'Không thể tải danh sách tour');
+  const fetchFromApi = useCallback(async (): Promise<Tour[]> => {
+    if (toursMemoryCache && Date.now() - toursMemoryCache.cachedAt < TOUR_MEMORY_CACHE_TTL_MS) {
+      return toursMemoryCache.data;
     }
 
-    return (await response.json()) as Tour[];
-  }, []);
+    if (toursInFlightPromise) {
+      return toursInFlightPromise;
+    }
+
+    toursInFlightPromise = (async () => {
+      const response = await fetch('/api/tours');
+
+      if (!response.ok) {
+        const payload = await response.json().catch(() => null);
+        throw new Error(payload?.error || 'Không thể tải danh sách tour');
+      }
+
+      const nextData = (await response.json()) as Tour[];
+      updateMemoryCache(nextData);
+      return nextData;
+    })();
+
+    try {
+      return await toursInFlightPromise;
+    } finally {
+      toursInFlightPromise = null;
+    }
+  }, [updateMemoryCache]);
 
   const loadToursWithCache = useCallback(async () => {
     setIsLoading(true);
@@ -61,6 +85,7 @@ export function useTourManager(options: UseTourManagerOptions = {}) {
                 await saveTours(freshTours);
                 setTours(freshTours);
                 setLastFetchTime(Date.now());
+                updateMemoryCache(freshTours);
               })
               .catch(fetchError => {
                 console.warn('[useTourManager] Background fetch failed:', fetchError);
@@ -77,6 +102,7 @@ export function useTourManager(options: UseTourManagerOptions = {}) {
       await saveTours(fetchedTours);
       setTours(fetchedTours);
       setLastFetchTime(Date.now());
+      updateMemoryCache(fetchedTours);
     } catch (fetchError) {
       const message = fetchError instanceof Error ? fetchError.message : 'Không thể tải danh sách tour';
 
@@ -98,7 +124,7 @@ export function useTourManager(options: UseTourManagerOptions = {}) {
     } finally {
       setIsLoading(false);
     }
-  }, [cacheFirst, fetchFromApi, onError]);
+  }, [cacheFirst, fetchFromApi, onError, updateMemoryCache]);
 
   const refetch = useCallback(async () => {
     if (!navigator.onLine) {
@@ -115,6 +141,7 @@ export function useTourManager(options: UseTourManagerOptions = {}) {
       setTours(fetchedTours);
       setLastFetchTime(Date.now());
       setIsOfflineMode(false);
+      updateMemoryCache(fetchedTours);
     } catch (fetchError) {
       const message = fetchError instanceof Error ? fetchError.message : 'Không thể tải danh sách tour';
       setError(message);
@@ -122,7 +149,7 @@ export function useTourManager(options: UseTourManagerOptions = {}) {
     } finally {
       setIsLoading(false);
     }
-  }, [fetchFromApi, onError]);
+  }, [fetchFromApi, onError, updateMemoryCache]);
 
   useEffect(() => {
     if (autoFetch) {

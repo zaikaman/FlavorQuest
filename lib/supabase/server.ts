@@ -23,6 +23,12 @@ export interface CurrentUserProfile {
   customerAccessGrantedAt: string | null;
 }
 
+interface UserProfileRow {
+  role: string | null;
+  customer_access_granted: boolean | null;
+  customer_access_granted_at: string | null;
+}
+
 /**
  * Lấy Supabase environment variables
  * Throw error nếu thiếu để catch lỗi sớm
@@ -192,6 +198,36 @@ export async function getCurrentUser(client: SupabaseServerClient) {
   return user;
 }
 
+function normalizeUserRole(role: string | null | undefined): AppUserRole {
+  if (role === 'admin' || role === 'owner') {
+    return role;
+  }
+
+  return 'customer';
+}
+
+async function getCurrentAuthProfile(
+  client: SupabaseServerClient
+): Promise<{ id: string; email: string | null; profile: UserProfileRow | null } | null> {
+  const { data: { user } } = await client.auth.getUser();
+
+  if (!user) {
+    return null;
+  }
+
+  const { data } = await client
+    .from('users')
+    .select('role, customer_access_granted, customer_access_granted_at')
+    .eq('id', user.id)
+    .maybeSingle<UserProfileRow>();
+
+  return {
+    id: user.id,
+    email: user.email ?? null,
+    profile: data ?? null,
+  };
+}
+
 /**
  * Helper: Check if current user is admin (server-side)
  * 
@@ -205,65 +241,32 @@ export async function getCurrentUser(client: SupabaseServerClient) {
  * ```
  */
 export async function isUserAdmin(client: SupabaseServerClient): Promise<boolean> {
-  const { data: { user } } = await client.auth.getUser();
-
-  if (!user) {
-    return false;
-  }
-
-  const { data } = await client
-    .from('users')
-    .select('role')
-    .eq('id', user.id)
-    .single();
-
-  return data?.role === 'admin';
+  const authProfile = await getCurrentAuthProfile(client);
+  return normalizeUserRole(authProfile?.profile?.role) === 'admin';
 }
 
 export async function getUserRole(client: SupabaseServerClient): Promise<AppUserRole | null> {
-  const { data: { user } } = await client.auth.getUser();
-
-  if (!user) {
+  const authProfile = await getCurrentAuthProfile(client);
+  if (!authProfile) {
     return null;
   }
 
-  const { data } = await client
-    .from('users')
-    .select('role')
-    .eq('id', user.id)
-    .single();
-
-  if (!data?.role) {
-    return 'customer';
-  }
-
-  if (data.role === 'user') {
-    return 'customer';
-  }
-
-  return data.role as AppUserRole;
+  return normalizeUserRole(authProfile.profile?.role);
 }
 
 export async function getCurrentUserProfile(client: SupabaseServerClient): Promise<CurrentUserProfile | null> {
-  const { data: { user } } = await client.auth.getUser();
-
-  if (!user) {
+  const authProfile = await getCurrentAuthProfile(client);
+  if (!authProfile) {
     return null;
   }
 
-  const role = await getUserRole(client);
-
-  const { data } = await client
-    .from('users')
-    .select('customer_access_granted, customer_access_granted_at')
-    .eq('id', user.id)
-    .single();
+  const role = normalizeUserRole(authProfile.profile?.role);
 
   return {
-    id: user.id,
-    email: user.email ?? null,
-    role: role ?? 'customer',
-    customerAccessGranted: role === 'customer' ? data?.customer_access_granted ?? false : true,
-    customerAccessGrantedAt: data?.customer_access_granted_at ?? null,
+    id: authProfile.id,
+    email: authProfile.email,
+    role,
+    customerAccessGranted: role === 'customer' ? authProfile.profile?.customer_access_granted ?? false : true,
+    customerAccessGrantedAt: authProfile.profile?.customer_access_granted_at ?? null,
   };
 }

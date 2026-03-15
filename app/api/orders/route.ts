@@ -8,6 +8,11 @@ interface OrderItemInput {
   quantity: number;
 }
 
+interface SanitizedOrderItem {
+  dish_id: string;
+  quantity: number;
+}
+
 function validatePickupTime(pickupTime: unknown) {
   if (!pickupTime) {
     return { isValid: true as const, normalizedPickupTime: null };
@@ -30,6 +35,30 @@ function validatePickupTime(pickupTime: unknown) {
   return { isValid: true as const, normalizedPickupTime: pickupDate.toISOString() };
 }
 
+function sanitizeOrderItems(items: OrderItemInput[]): SanitizedOrderItem[] {
+  const itemMap = new Map<string, number>();
+
+  for (const item of items) {
+    if (typeof item?.dish_id !== 'string') {
+      continue;
+    }
+
+    const dishId = item.dish_id.trim();
+    const quantity = Number(item.quantity);
+
+    if (!dishId || !Number.isInteger(quantity) || quantity <= 0) {
+      continue;
+    }
+
+    itemMap.set(dishId, (itemMap.get(dishId) ?? 0) + quantity);
+  }
+
+  return Array.from(itemMap.entries()).map(([dish_id, quantity]) => ({
+    dish_id,
+    quantity,
+  }));
+}
+
 export async function GET() {
   const supabase = await createServerClient();
   const profile = await getCurrentUserProfile(supabase);
@@ -41,8 +70,18 @@ export async function GET() {
   let query = supabase
     .from('preorder_orders')
     .select(`
-      *,
-      pois(id, name_vi, owner_id),
+      id,
+      poi_id,
+      customer_id,
+      customer_name,
+      customer_phone,
+      note,
+      pickup_time,
+      status,
+      total_amount,
+      created_at,
+      updated_at,
+      pois!inner(id, name_vi, owner_id),
       preorder_order_items(id, dish_id, quantity, unit_price, dishes(name))
     `)
     .order('created_at', { ascending: false });
@@ -52,17 +91,7 @@ export async function GET() {
   }
 
   if (profile.role === 'owner') {
-    const { data: ownedPois } = await supabase
-      .from('pois')
-      .select('id')
-      .eq('owner_id', profile.id);
-
-    const ownedPoiIds = (ownedPois ?? []).map(item => item.id);
-    if (ownedPoiIds.length === 0) {
-      return NextResponse.json([]);
-    }
-
-    query = query.in('poi_id', ownedPoiIds);
+    query = query.eq('pois.owner_id', profile.id);
   }
 
   const { data, error } = await query;
@@ -84,7 +113,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const items = (body.items ?? []) as OrderItemInput[];
+    const items = sanitizeOrderItems((body.items ?? []) as OrderItemInput[]);
     const pickupTimeValidation = validatePickupTime(body.pickup_time);
 
     if (!body.poi_id || items.length === 0) {
@@ -99,25 +128,39 @@ export async function POST(request: NextRequest) {
     }
 
     const dishIds = items.map(item => item.dish_id);
-    const { data: dishes, error: dishesError } = await supabase
-      .from('dishes')
-      .select('id, poi_id, name, price, is_available')
-      .in('id', dishIds)
-      .is('deleted_at', null);
+    const [{ data: dishes, error: dishesError }, { data: poi, error: poiError }] = await Promise.all([
+      supabase
+        .from('dishes')
+        .select('id, poi_id, name, price, is_available')
+        .in('id', dishIds)
+        .is('deleted_at', null),
+      supabase
+        .from('pois')
+        .select('id, name_vi, owner_id')
+        .eq('id', body.poi_id)
+        .single(),
+    ]);
+
+    if (poiError || !poi) {
+      return NextResponse.json({ error: 'POI not found' }, { status: 404 });
+    }
 
     if (dishesError) {
       return NextResponse.json({ error: dishesError.message }, { status: 500 });
     }
 
-    const validDishes = (dishes ?? []).filter(d => d.poi_id === body.poi_id && d.is_available);
+    const validDishes = (dishes ?? []).filter(dish => dish.poi_id === body.poi_id && dish.is_available);
     if (validDishes.length !== items.length) {
       return NextResponse.json({ error: 'Một số món không hợp lệ hoặc đã hết' }, { status: 400 });
     }
 
-    const dishMap = new Map(validDishes.map(d => [d.id, d]));
+    const dishMap = new Map(validDishes.map(dish => [dish.id, dish]));
     const totalAmount = items.reduce((sum, item) => {
       const dish = dishMap.get(item.dish_id);
-      if (!dish) return sum;
+      if (!dish) {
+        return sum;
+      }
+
       return sum + Number(dish.price) * item.quantity;
     }, 0);
 
@@ -133,7 +176,7 @@ export async function POST(request: NextRequest) {
         total_amount: totalAmount,
         status: 'pending',
       })
-      .select('*')
+      .select('id, poi_id, customer_id, customer_name, customer_phone, note, pickup_time, total_amount, status, created_at, updated_at')
       .single();
 
     if (orderError || !order) {
@@ -158,55 +201,59 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: itemsError.message }, { status: 500 });
     }
 
-    const { data: poi } = await supabase
-      .from('pois')
-      .select('id, name_vi, owner_id')
-      .eq('id', body.poi_id)
-      .single();
-
-    if (poi?.owner_id) {
-      await supabase.from('notifications').insert({
-        user_id: poi.owner_id,
-        order_id: order.id,
-        title: 'Bạn có đơn đặt món mới',
-        message: `POI ${poi.name_vi} vừa nhận đơn #${order.id.slice(0, 8)}`,
-        type: 'order_created',
-      });
-
-      const { data: owner } = await supabase
-        .from('users')
-        .select('email')
-        .eq('id', poi.owner_id)
-        .single();
-
-      if (owner?.email) {
-        const summary = orderItems
-          .map(item => {
-            const dish = dishMap.get(item.dish_id);
-            return `${dish?.name ?? 'Món'} x${item.quantity}`;
-          })
-          .join(', ');
-
-        sendNewOrderEmail({
-          to: owner.email,
-          poiName: poi.name_vi,
-          orderId: order.id,
-          totalAmount,
-          itemSummary: summary,
-          pickupTime: pickupTimeValidation.normalizedPickupTime,
-        }).catch(error => {
-          console.error('Send owner order email failed:', error);
-        });
-      }
-    }
-
-    await supabase.from('notifications').insert({
+    const customerNotificationPromise = supabase.from('notifications').insert({
       user_id: profile.id,
       order_id: order.id,
       title: 'Đặt món thành công',
       message: `Đơn #${order.id.slice(0, 8)} đã được gửi tới quán.`,
       type: 'order_update',
     });
+
+    const notificationTasks: Promise<unknown>[] = [customerNotificationPromise];
+
+    if (poi.owner_id) {
+      notificationTasks.push(
+        supabase.from('notifications').insert({
+          user_id: poi.owner_id,
+          order_id: order.id,
+          title: 'Bạn có đơn đặt món mới',
+          message: `POI ${poi.name_vi} vừa nhận đơn #${order.id.slice(0, 8)}`,
+          type: 'order_created',
+        })
+      );
+
+      const summary = orderItems
+        .map(item => {
+          const dish = dishMap.get(item.dish_id);
+          return `${dish?.name ?? 'Món'} x${item.quantity}`;
+        })
+        .join(', ');
+
+      supabase
+        .from('users')
+        .select('email')
+        .eq('id', poi.owner_id)
+        .single()
+        .then(({ data: owner }) => {
+          if (!owner?.email) {
+            return;
+          }
+
+          return sendNewOrderEmail({
+            to: owner.email,
+            poiName: poi.name_vi,
+            orderId: order.id,
+            totalAmount,
+            itemSummary: summary,
+            pickupTime: pickupTimeValidation.normalizedPickupTime,
+          });
+        })
+        .catch(error => {
+          console.error('Send owner order email failed:', error);
+        });
+    }
+
+    await Promise.all(notificationTasks);
 
     return NextResponse.json(order, { status: 201 });
   } catch {
