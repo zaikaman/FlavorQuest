@@ -12,17 +12,13 @@ type AnalyticsEventType =
   | 'settings_change';
 
 interface AnalyticsLogRow {
-  id: string;
   event_type: AnalyticsEventType;
   session_id: string | null;
   poi_id: string | null;
   timestamp: string;
   language: string | null;
-  listen_duration: number | null;
   completed: boolean | null;
   metadata: Record<string, unknown> | null;
-  rounded_lat: number | null;
-  rounded_lng: number | null;
 }
 
 interface TourRow {
@@ -55,7 +51,6 @@ interface PoiRow {
 
 interface UserRow {
   id: string;
-  email: string;
   role: string | null;
   created_at: string;
   customer_access_granted: boolean;
@@ -64,7 +59,6 @@ interface UserRow {
 
 interface PaymentRow {
   id: string;
-  user_id: string;
   amount: number;
   status: 'PENDING' | 'PROCESSING' | 'PAID' | 'CANCELLED' | 'EXPIRED' | 'FAILED' | 'UNDERPAID';
   paid_at: string | null;
@@ -120,6 +114,7 @@ interface SessionAccumulator {
 const ANALYTICS_PAGE_SIZE = 1000;
 const DEFAULT_PERIOD = '30days';
 const PERIOD_WITH_FILLED_DATES = new Set(['7days', '30days']);
+const ANALYTICS_SUMMARY_CACHE_TTL_MS = 30_000;
 const LANGUAGE_LABELS: Record<string, string> = {
   vi: 'Tiếng Việt',
   en: 'English',
@@ -128,6 +123,8 @@ const LANGUAGE_LABELS: Record<string, string> = {
   ko: '한국어',
   zh: '中文',
 };
+
+const analyticsSummaryCache = new Map<string, { payload: unknown; cachedAt: number }>();
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === 'object' && !Array.isArray(value);
@@ -173,6 +170,10 @@ function getDurationFromMetadata(metadata: Record<string, unknown> | null) {
 
 function getDateKey(value: string) {
   return value.slice(0, 10);
+}
+
+function getAnalyticsCacheKey(period: string, selectedTourId: string | null) {
+  return `${period}:${selectedTourId ?? 'all'}`;
 }
 
 function incrementDateMap<T>(map: Map<string, T>, key: string, createValue: () => T) {
@@ -221,9 +222,7 @@ async function fetchAnalyticsLogsInRange(
     const to = from + ANALYTICS_PAGE_SIZE - 1;
     const { data, error } = await adminClient
       .from('analytics_logs')
-      .select(
-        'id, event_type, session_id, poi_id, timestamp, language, listen_duration, completed, metadata, rounded_lat, rounded_lng'
-      )
+      .select('event_type, session_id, poi_id, timestamp, language, completed, metadata')
       .gte('timestamp', startIso)
       .lte('timestamp', endIso)
       .order('timestamp', { ascending: true })
@@ -259,6 +258,13 @@ export async function GET(request: NextRequest) {
     const requestedPeriod = searchParams.get('period') || DEFAULT_PERIOD;
     const selectedTourId = searchParams.get('tour_id');
     const { period, startDate, now } = getPeriodWindow(requestedPeriod);
+    const cacheKey = getAnalyticsCacheKey(period, selectedTourId);
+    const cachedSummary = analyticsSummaryCache.get(cacheKey);
+
+    if (cachedSummary && Date.now() - cachedSummary.cachedAt < ANALYTICS_SUMMARY_CACHE_TTL_MS) {
+      return NextResponse.json(cachedSummary.payload);
+    }
+
     const adminClient = createAdminClient();
 
     const [toursResult, poisResult, usersResult, paymentsResult, analyticsLogs] = await Promise.all([
@@ -275,12 +281,10 @@ export async function GET(request: NextRequest) {
         .order('priority', { ascending: false }),
       adminClient
         .from('users')
-        .select(
-          'id, email, role, created_at, customer_access_granted, customer_access_granted_at'
-        ),
+        .select('id, role, created_at, customer_access_granted, customer_access_granted_at'),
       adminClient
         .from('customer_access_payments')
-        .select('id, user_id, amount, status, paid_at, created_at')
+        .select('id, amount, status, paid_at, created_at')
         .order('created_at', { ascending: false }),
       fetchAnalyticsLogsInRange(adminClient, startDate.toISOString(), now.toISOString()),
     ]);
@@ -324,6 +328,7 @@ export async function GET(request: NextRequest) {
     const sessionMap = new Map<string, SessionAccumulator>();
     const poiToTourIds = new Map<string, string[]>();
     const poiStatsMap = new Map<string, PoiStatsAccumulator>();
+    const selectedSessionIds = new Set<string>();
 
     const tourStatsMap = new Map<string, TourStatsAccumulator>(
       tourRows.map((tour) => [
@@ -417,6 +422,10 @@ export async function GET(request: NextRequest) {
       }
 
       if (matchesSelectedTour) {
+        if (log.session_id) {
+          selectedSessionIds.add(log.session_id);
+        }
+
         const dailyItem = incrementDateMap(dailyMap, dayKey, () => ({
           date: dayKey,
           total_tours: 0,
@@ -650,22 +659,7 @@ export async function GET(request: NextRequest) {
         ? toursSummary.reduce((sum, item) => sum + item.starts, 0)
         : dailyEntries.reduce((sum, item) => sum + item.total_tours, 0),
       total_plays: dailyEntries.reduce((sum, item) => sum + item.total_plays, 0),
-      unique_sessions: new Set(
-        analyticsLogs
-          .filter((log) => {
-            if (!selectedTourId) return true;
-            const metadata = isRecord(log.metadata) ? log.metadata : null;
-            const metadataTourId = getTourIdFromMetadata(metadata);
-            if (metadataTourId) {
-              return metadataTourId === selectedTourId;
-            }
-            if (!log.poi_id) return false;
-            const inferredTourIds = poiToTourIds.get(log.poi_id) ?? [];
-            return inferredTourIds.includes(selectedTourId);
-          })
-          .map((log) => log.session_id)
-          .filter((sessionId): sessionId is string => Boolean(sessionId))
-      ).size,
+      unique_sessions: selectedSessionIds.size,
       tracked_tours: toursSummary.filter((item) => item.sessions > 0).length,
     };
 
@@ -995,7 +989,7 @@ export async function GET(request: NextRequest) {
       avg_session_duration_min: avgSessionDurationMin,
     };
 
-    return NextResponse.json({
+    const payload = {
       overview,
       daily: dailyEntries,
       tours: toursSummary,
@@ -1020,7 +1014,14 @@ export async function GET(request: NextRequest) {
         leaders: topPois.slice(0, 6),
         opportunities: poiOpportunities,
       },
+    };
+
+    analyticsSummaryCache.set(cacheKey, {
+      payload,
+      cachedAt: Date.now(),
     });
+
+    return NextResponse.json(payload);
   } catch (error) {
     console.error('[analytics/summary] failed:', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });

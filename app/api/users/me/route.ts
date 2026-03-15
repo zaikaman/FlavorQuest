@@ -1,5 +1,4 @@
 import { createServerClient, getCurrentUserProfile } from '@/lib/supabase/server';
-import { createAdminClient } from '@/lib/supabase/admin';
 import { NextResponse } from 'next/server';
 
 const NO_STORE_HEADERS = {
@@ -10,63 +9,19 @@ const NO_STORE_HEADERS = {
 
 export async function GET() {
   const supabase = await createServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const profile = await getCurrentUserProfile(supabase);
 
-  if (!user) {
+  if (!profile) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401, headers: NO_STORE_HEADERS });
   }
 
-  const profile = await getCurrentUserProfile(supabase);
-
-  if (profile) {
-    return NextResponse.json(
-      {
-        id: profile.id,
-        email: profile.email,
-        role: profile.role,
-        customerAccessGranted: profile.customerAccessGranted,
-        customerAccessGrantedAt: profile.customerAccessGrantedAt,
-      },
-      { headers: NO_STORE_HEADERS }
-    );
-  }
-
-  const adminClient = createAdminClient();
-  const { data, error } = await adminClient
-    .from('users')
-    .select('role, customer_access_granted, customer_access_granted_at')
-    .eq('id', user.id)
-    .single();
-
-  if (error) {
-    return NextResponse.json(
-      {
-        id: user.id,
-        email: user.email,
-        role: 'customer',
-        customerAccessGranted: false,
-        customerAccessGrantedAt: null,
-        warning: error.message,
-      },
-      { headers: NO_STORE_HEADERS }
-    );
-  }
-
-  const resolvedRole = data?.role === 'admin'
-    ? 'admin'
-    : data?.role === 'owner'
-      ? 'owner'
-      : 'customer';
-
   return NextResponse.json(
     {
-      id: user.id,
-      email: user.email,
-      role: resolvedRole,
-      customerAccessGranted: resolvedRole === 'customer' ? data?.customer_access_granted ?? false : true,
-      customerAccessGrantedAt: data?.customer_access_granted_at ?? null,
+      id: profile.id,
+      email: profile.email,
+      role: profile.role,
+      customerAccessGranted: profile.customerAccessGranted,
+      customerAccessGrantedAt: profile.customerAccessGrantedAt,
     },
     { headers: NO_STORE_HEADERS }
   );

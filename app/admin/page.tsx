@@ -105,7 +105,7 @@ export default function AdminDashboard() {
         userCountResult,
         accessGrantedResult,
       ] = await Promise.all([
-        fetch('/api/analytics/summary?period=7days', { cache: 'no-store' }),
+        fetch('/api/analytics/summary?period=7days'),
         fetch('/api/payments/customer-access/history?status=ALL', { cache: 'no-store' }),
         fetch('/api/pois?include_deleted=true', { cache: 'no-store' }),
         fetch('/api/tours?admin_view=true', { cache: 'no-store' }),

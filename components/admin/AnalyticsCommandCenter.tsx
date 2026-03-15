@@ -321,15 +321,23 @@ export default function AnalyticsCommandCenter() {
   const [leaderboardSort, setLeaderboardSort] = useState<LeaderboardSort>('plays');
   const [isLoading, setIsLoading] = useState(true);
   const latestRequestRef = useRef(0);
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const refreshTimerRef = useRef<number | null>(null);
 
   const fetchAnalytics = useCallback(async () => {
     const requestId = ++latestRequestRef.current;
+    abortControllerRef.current?.abort();
+    const abortController = new AbortController();
+    abortControllerRef.current = abortController;
     setIsLoading(true);
 
     try {
       const params = new URLSearchParams({ period });
+      if (selectedTourId) {
+        params.set('tour_id', selectedTourId);
+      }
       const response = await fetch(`/api/analytics/summary?${params.toString()}`, {
-        cache: 'no-store',
+        signal: abortController.signal,
       });
 
       if (!response.ok) {
@@ -337,20 +345,27 @@ export default function AnalyticsCommandCenter() {
       }
 
       const jsonData = (await response.json()) as AnalyticsSummaryResponse;
-      if (requestId === latestRequestRef.current) {
+      if (requestId === latestRequestRef.current && !abortController.signal.aborted) {
         setData(jsonData);
       }
     } catch (error) {
+      if (abortController.signal.aborted) {
+        return;
+      }
+
       console.error('[AnalyticsCommandCenter] fetch failed:', error);
     } finally {
-      if (requestId === latestRequestRef.current) {
+      if (requestId === latestRequestRef.current && !abortController.signal.aborted) {
         setIsLoading(false);
       }
     }
-  }, [period]);
+  }, [period, selectedTourId]);
 
   useEffect(() => {
     void fetchAnalytics();
+    return () => {
+      abortControllerRef.current?.abort();
+    };
   }, [fetchAnalytics]);
 
   useEffect(() => {
@@ -358,7 +373,13 @@ export default function AnalyticsCommandCenter() {
     const channel = supabase.channel('admin-analytics-command-center');
 
     const refreshAnalytics = () => {
-      void fetchAnalytics();
+      if (refreshTimerRef.current) {
+        window.clearTimeout(refreshTimerRef.current);
+      }
+
+      refreshTimerRef.current = window.setTimeout(() => {
+        void fetchAnalytics();
+      }, 400);
     };
 
     channel
@@ -374,6 +395,9 @@ export default function AnalyticsCommandCenter() {
       .subscribe();
 
     return () => {
+      if (refreshTimerRef.current) {
+        window.clearTimeout(refreshTimerRef.current);
+      }
       void channel.unsubscribe();
     };
   }, [fetchAnalytics]);

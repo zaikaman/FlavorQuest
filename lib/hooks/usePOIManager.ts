@@ -43,6 +43,44 @@ const DEFAULT_OPTIONS: UsePOIManagerOptions = {
   preloadRadius: 500,
 };
 
+const POI_SELECT_FIELDS = `
+  id,
+  lat,
+  lng,
+  radius,
+  priority,
+  name_vi,
+  name_en,
+  name_ja,
+  name_fr,
+  name_ko,
+  name_zh,
+  description_vi,
+  description_en,
+  description_ja,
+  description_fr,
+  description_ko,
+  description_zh,
+  audio_url_vi,
+  audio_url_en,
+  audio_url_ja,
+  audio_url_fr,
+  audio_url_ko,
+  audio_url_zh,
+  image_url,
+  signature_dish,
+  fun_fact,
+  estimated_hours,
+  owner_id,
+  created_at,
+  updated_at,
+  deleted_at
+`.replace(/\s+/g, ' ').trim();
+const POI_MEMORY_CACHE_TTL_MS = 60_000;
+
+let poiMemoryCache: { data: POI[]; cachedAt: number } | null = null;
+let poiInFlightPromise: Promise<POI[]> | null = null;
+
 export function usePOIManager(options: UsePOIManagerOptions = {}) {
   const language = options.language ?? DEFAULT_OPTIONS.language ?? 'vi';
   const autoFetch = options.autoFetch ?? DEFAULT_OPTIONS.autoFetch ?? true;
@@ -65,19 +103,41 @@ export function usePOIManager(options: UsePOIManagerOptions = {}) {
 
   // Fetch POIs from Supabase
   const fetchFromSupabase = useCallback(async (): Promise<POI[]> => {
-    const supabase = createClient();
-    
-    const { data, error } = await supabase
-      .from('pois')
-      .select('*')
-      .is('deleted_at', null)
-      .order('priority', { ascending: false });
-
-    if (error) {
-      throw new Error(`Failed to fetch POIs: ${error.message}`);
+    if (poiMemoryCache && Date.now() - poiMemoryCache.cachedAt < POI_MEMORY_CACHE_TTL_MS) {
+      return poiMemoryCache.data;
     }
 
-    return (data ?? []) as unknown as POI[];
+    if (poiInFlightPromise) {
+      return poiInFlightPromise;
+    }
+
+    const supabase = createClient();
+
+    poiInFlightPromise = (async () => {
+      const { data, error } = await supabase
+        .from('pois')
+        .select(POI_SELECT_FIELDS)
+        .is('deleted_at', null)
+        .order('priority', { ascending: false });
+
+      if (error) {
+        throw new Error(`Failed to fetch POIs: ${error.message}`);
+      }
+
+      const nextData = (data ?? []) as unknown as POI[];
+      poiMemoryCache = {
+        data: nextData,
+        cachedAt: Date.now(),
+      };
+
+      return nextData;
+    })();
+
+    try {
+      return await poiInFlightPromise;
+    } finally {
+      poiInFlightPromise = null;
+    }
   }, []);
 
   // Load POIs with cache-first strategy
@@ -123,6 +183,10 @@ export function usePOIManager(options: UsePOIManagerOptions = {}) {
       await saveLastSync(Date.now());
       setPOIs(fetchedPOIs);
       setLastFetchTime(Date.now());
+      poiMemoryCache = {
+        data: fetchedPOIs,
+        cachedAt: Date.now(),
+      };
     } catch (err) {
       const errorMessage = (err as Error).message;
       
@@ -173,6 +237,10 @@ export function usePOIManager(options: UsePOIManagerOptions = {}) {
       setPOIs(fetchedPOIs);
       setLastFetchTime(Date.now());
       setIsOfflineMode(false);
+      poiMemoryCache = {
+        data: fetchedPOIs,
+        cachedAt: Date.now(),
+      };
     } catch (err) {
       const errorMessage = (err as Error).message;
       setError(errorMessage);

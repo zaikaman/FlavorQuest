@@ -2,6 +2,39 @@ import { createServerClient, getCurrentUserProfile, isUserAdmin } from '@/lib/su
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
+const PUBLIC_POI_SELECT = `
+    id,
+    lat,
+    lng,
+    radius,
+    priority,
+    name_vi,
+    name_en,
+    name_ja,
+    name_fr,
+    name_ko,
+    name_zh,
+    description_vi,
+    description_en,
+    description_ja,
+    description_fr,
+    description_ko,
+    description_zh,
+    audio_url_vi,
+    audio_url_en,
+    audio_url_ja,
+    audio_url_fr,
+    audio_url_ko,
+    audio_url_zh,
+    image_url,
+    signature_dish,
+    fun_fact,
+    estimated_hours,
+    owner_id,
+    created_at,
+    updated_at
+`.replace(/\s+/g, ' ').trim();
+
 /**
  * GET /api/pois
  * Fetch all POIs (public)
@@ -18,9 +51,10 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const selectFields = ownerOnly || includeDeleted ? '*' : PUBLIC_POI_SELECT;
     let query = supabase
         .from('pois')
-        .select('*')
+        .select(selectFields)
         .order('priority', { ascending: false });
 
     if (ownerOnly) {
