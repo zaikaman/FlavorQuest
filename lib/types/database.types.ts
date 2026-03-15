@@ -358,11 +358,21 @@ export interface Database {
           id: string;
           poi_id: string;
           customer_id: string;
+          order_type: 'pickup' | 'delivery';
           customer_name: string | null;
           customer_phone: string | null;
           note: string | null;
+          delivery_address: string | null;
+          delivery_time: string | null;
           pickup_time: string | null;
-          status: 'pending' | 'confirmed' | 'preparing' | 'ready' | 'cancelled';
+          status:
+            | 'pending'
+            | 'confirmed'
+            | 'preparing'
+            | 'ready'
+            | 'delivering'
+            | 'delivered'
+            | 'cancelled';
           total_amount: number;
           created_at: string;
           updated_at: string;
@@ -371,11 +381,21 @@ export interface Database {
           id?: string;
           poi_id: string;
           customer_id: string;
+          order_type?: 'pickup' | 'delivery';
           customer_name?: string | null;
           customer_phone?: string | null;
           note?: string | null;
+          delivery_address?: string | null;
+          delivery_time?: string | null;
           pickup_time?: string | null;
-          status?: 'pending' | 'confirmed' | 'preparing' | 'ready' | 'cancelled';
+          status?:
+            | 'pending'
+            | 'confirmed'
+            | 'preparing'
+            | 'ready'
+            | 'delivering'
+            | 'delivered'
+            | 'cancelled';
           total_amount?: number;
           created_at?: string;
           updated_at?: string;
@@ -384,11 +404,21 @@ export interface Database {
           id?: string;
           poi_id?: string;
           customer_id?: string;
+          order_type?: 'pickup' | 'delivery';
           customer_name?: string | null;
           customer_phone?: string | null;
           note?: string | null;
+          delivery_address?: string | null;
+          delivery_time?: string | null;
           pickup_time?: string | null;
-          status?: 'pending' | 'confirmed' | 'preparing' | 'ready' | 'cancelled';
+          status?:
+            | 'pending'
+            | 'confirmed'
+            | 'preparing'
+            | 'ready'
+            | 'delivering'
+            | 'delivered'
+            | 'cancelled';
           total_amount?: number;
           created_at?: string;
           updated_at?: string;

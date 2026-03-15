@@ -13,26 +13,40 @@ interface SanitizedOrderItem {
   quantity: number;
 }
 
-function validatePickupTime(pickupTime: unknown) {
-  if (!pickupTime) {
-    return { isValid: true as const, normalizedPickupTime: null };
+type OrderType = 'pickup' | 'delivery';
+
+function validateScheduledTime(value: unknown, fieldName: 'pickup_time' | 'delivery_time') {
+  if (!value) {
+    return { isValid: true as const, normalizedTime: null };
   }
 
-  if (typeof pickupTime !== 'string') {
-    return { isValid: false as const, code: 'INVALID_PICKUP_TIME', error: 'Invalid pickup_time' };
+  if (typeof value !== 'string') {
+    return {
+      isValid: false as const,
+      code: fieldName === 'pickup_time' ? 'INVALID_PICKUP_TIME' : 'INVALID_DELIVERY_TIME',
+      error: `Invalid ${fieldName}`,
+    };
   }
 
-  const pickupDate = new Date(pickupTime);
+  const parsed = new Date(value);
 
-  if (Number.isNaN(pickupDate.getTime())) {
-    return { isValid: false as const, code: 'INVALID_PICKUP_TIME', error: 'Invalid pickup_time' };
+  if (Number.isNaN(parsed.getTime())) {
+    return {
+      isValid: false as const,
+      code: fieldName === 'pickup_time' ? 'INVALID_PICKUP_TIME' : 'INVALID_DELIVERY_TIME',
+      error: `Invalid ${fieldName}`,
+    };
   }
 
-  if (pickupDate.getTime() <= Date.now()) {
-    return { isValid: false as const, code: 'PICKUP_TIME_IN_PAST', error: 'Pickup time must be in the future' };
+  if (parsed.getTime() <= Date.now()) {
+    return {
+      isValid: false as const,
+      code: fieldName === 'pickup_time' ? 'PICKUP_TIME_IN_PAST' : 'DELIVERY_TIME_IN_PAST',
+      error: `${fieldName} must be in the future`,
+    };
   }
 
-  return { isValid: true as const, normalizedPickupTime: pickupDate.toISOString() };
+  return { isValid: true as const, normalizedTime: parsed.toISOString() };
 }
 
 function sanitizeOrderItems(items: OrderItemInput[]): SanitizedOrderItem[] {
@@ -59,6 +73,19 @@ function sanitizeOrderItems(items: OrderItemInput[]): SanitizedOrderItem[] {
   }));
 }
 
+function normalizeTextField(value: unknown) {
+  if (typeof value !== 'string') {
+    return null;
+  }
+
+  const normalized = value.trim();
+  return normalized.length > 0 ? normalized : null;
+}
+
+function normalizeOrderType(value: unknown): OrderType {
+  return value === 'delivery' ? 'delivery' : 'pickup';
+}
+
 export async function GET() {
   const supabase = await createServerClient();
   const profile = await getCurrentUserProfile(supabase);
@@ -73,9 +100,12 @@ export async function GET() {
       id,
       poi_id,
       customer_id,
+      order_type,
       customer_name,
       customer_phone,
       note,
+      delivery_address,
+      delivery_time,
       pickup_time,
       status,
       total_amount,
@@ -114,15 +144,35 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const items = sanitizeOrderItems((body.items ?? []) as OrderItemInput[]);
-    const pickupTimeValidation = validatePickupTime(body.pickup_time);
+    const orderType = normalizeOrderType(body.order_type);
+    const pickupTimeValidation = validateScheduledTime(body.pickup_time, 'pickup_time');
+    const deliveryTimeValidation = validateScheduledTime(body.delivery_time, 'delivery_time');
+    const customerName = normalizeTextField(body.customer_name);
+    const customerPhone = normalizeTextField(body.customer_phone);
+    const note = normalizeTextField(body.note);
+    const deliveryAddress = normalizeTextField(body.delivery_address);
 
     if (!body.poi_id || items.length === 0) {
       return NextResponse.json({ error: 'Missing poi_id or items' }, { status: 400 });
     }
 
-    if (!pickupTimeValidation.isValid) {
+    if (orderType === 'pickup' && !pickupTimeValidation.isValid) {
       return NextResponse.json(
         { error: pickupTimeValidation.error, code: pickupTimeValidation.code },
+        { status: 400 }
+      );
+    }
+
+    if (orderType === 'delivery' && !deliveryTimeValidation.isValid) {
+      return NextResponse.json(
+        { error: deliveryTimeValidation.error, code: deliveryTimeValidation.code },
+        { status: 400 }
+      );
+    }
+
+    if (orderType === 'delivery' && (!customerName || !customerPhone || !deliveryAddress)) {
+      return NextResponse.json(
+        { error: 'Missing delivery contact info', code: 'MISSING_DELIVERY_INFO' },
         { status: 400 }
       );
     }
@@ -169,14 +219,19 @@ export async function POST(request: NextRequest) {
       .insert({
         poi_id: body.poi_id,
         customer_id: profile.id,
-        customer_name: body.customer_name ?? null,
-        customer_phone: body.customer_phone ?? null,
-        note: body.note ?? null,
-        pickup_time: pickupTimeValidation.normalizedPickupTime,
+        order_type: orderType,
+        customer_name: customerName,
+        customer_phone: customerPhone,
+        note,
+        delivery_address: orderType === 'delivery' ? deliveryAddress : null,
+        delivery_time: orderType === 'delivery' ? deliveryTimeValidation.normalizedTime : null,
+        pickup_time: orderType === 'pickup' ? pickupTimeValidation.normalizedTime : null,
         total_amount: totalAmount,
         status: 'pending',
       })
-      .select('id, poi_id, customer_id, customer_name, customer_phone, note, pickup_time, total_amount, status, created_at, updated_at')
+      .select(
+        'id, poi_id, customer_id, order_type, customer_name, customer_phone, note, delivery_address, delivery_time, pickup_time, total_amount, status, created_at, updated_at'
+      )
       .single();
 
     if (orderError || !order) {
@@ -193,9 +248,7 @@ export async function POST(request: NextRequest) {
       };
     });
 
-    const { error: itemsError } = await supabase
-      .from('preorder_order_items')
-      .insert(orderItems);
+    const { error: itemsError } = await supabase.from('preorder_order_items').insert(orderItems);
 
     if (itemsError) {
       return NextResponse.json({ error: itemsError.message }, { status: 500 });
@@ -205,8 +258,11 @@ export async function POST(request: NextRequest) {
       supabase.from('notifications').insert({
         user_id: profile.id,
         order_id: order.id,
-        title: 'Đặt món thành công',
-        message: `Đơn #${order.id.slice(0, 8)} đã được gửi tới quán.`,
+        title: orderType === 'delivery' ? 'Đặt giao hàng thành công' : 'Đặt món thành công',
+        message:
+          orderType === 'delivery'
+            ? `Đơn giao hàng #${order.id.slice(0, 8)} đã được gửi tới quán.`
+            : `Đơn #${order.id.slice(0, 8)} đã được gửi tới quán.`,
         type: 'order_update',
       }),
     ];
@@ -216,8 +272,11 @@ export async function POST(request: NextRequest) {
         supabase.from('notifications').insert({
           user_id: poi.owner_id,
           order_id: order.id,
-          title: 'Bạn có đơn đặt món mới',
-          message: `POI ${poi.name_vi} vừa nhận đơn #${order.id.slice(0, 8)}`,
+          title: orderType === 'delivery' ? 'Bạn có đơn giao hàng mới' : 'Bạn có đơn đặt món mới',
+          message:
+            orderType === 'delivery'
+              ? `POI ${poi.name_vi} vừa nhận đơn giao #${order.id.slice(0, 8)}`
+              : `POI ${poi.name_vi} vừa nhận đơn #${order.id.slice(0, 8)}`,
           type: 'order_created',
         })
       );
@@ -247,7 +306,12 @@ export async function POST(request: NextRequest) {
             orderId: order.id,
             totalAmount,
             itemSummary: summary,
-            pickupTime: pickupTimeValidation.normalizedPickupTime,
+            orderType,
+            scheduledTime:
+              orderType === 'delivery'
+                ? deliveryTimeValidation.normalizedTime
+                : pickupTimeValidation.normalizedTime,
+            deliveryAddress,
           });
         } catch (error) {
           console.error('Send owner order email failed:', error);
