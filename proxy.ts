@@ -96,10 +96,15 @@ async function resolveProfile(request: NextRequest) {
 export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const { response, profile } = await resolveProfile(request);
+  const isAdminLoginPage = pathname === '/admin/login';
 
   if (pathname.startsWith('/admin')) {
     if (!profile.userId) {
-      return redirect(request, '/login');
+      if (isAdminLoginPage) {
+        return response;
+      }
+
+      return redirect(request, '/admin/login');
     }
 
     if (profile.role !== 'admin') {
@@ -107,6 +112,10 @@ export async function proxy(request: NextRequest) {
         return redirect(request, '/owner');
       }
       return redirect(request, profile.customerAccessGranted ? '/tour' : '/paywall');
+    }
+
+    if (isAdminLoginPage) {
+      return redirect(request, '/admin');
     }
 
     return response;

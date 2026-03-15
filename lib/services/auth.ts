@@ -11,19 +11,59 @@ interface RequestEmailOtpOptions {
   accountType?: AccountType;
 }
 
+interface RequestEmailOtpResult {
+  error: Error | null;
+  errorCode: string | null;
+}
+
 interface VerifyEmailOtpResult {
   error: Error | null;
   errorCode: string | null;
   redirectTo: string | null;
 }
 
+async function prepareEmailOtp(email: string, accountType: AccountType) {
+  const response = await fetch('/api/auth/email-otp/prepare', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      email,
+      accountType,
+    }),
+  });
+
+  const result = (await response.json().catch(() => null)) as {
+    error?: string;
+    errorCode?: string;
+  } | null;
+
+  if (!response.ok) {
+    return {
+      error: new Error(result?.error || 'Khong the chuan bi dang nhap OTP.'),
+      errorCode: result?.errorCode ?? null,
+    };
+  }
+
+  return {
+    error: null,
+    errorCode: null,
+  };
+}
+
 export async function requestEmailOtp(
   email: string,
   options: RequestEmailOtpOptions = {}
-): Promise<{ error: Error | null }> {
+): Promise<RequestEmailOtpResult> {
   const supabase = createClient();
   const normalizedEmail = email.trim().toLowerCase();
   const accountType = options.accountType ?? 'customer';
+  const prepared = await prepareEmailOtp(normalizedEmail, accountType);
+
+  if (prepared.error) {
+    return prepared;
+  }
 
   const { error } = await supabase.auth.signInWithOtp({
     email: normalizedEmail,
@@ -34,10 +74,10 @@ export async function requestEmailOtp(
 
   if (error) {
     console.error('Email OTP request error:', error);
-    return { error };
+    return { error, errorCode: null };
   }
 
-  return { error: null };
+  return { error: null, errorCode: null };
 }
 
 export async function verifyEmailOtp(

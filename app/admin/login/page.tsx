@@ -58,14 +58,17 @@ export default function AdminLoginPage() {
     setIsSendingOtp(true);
     setFeedback(null);
 
-    const { error } = await requestEmailOtp(normalizedEmail, { accountType: 'admin' });
+    const { error, errorCode } = await requestEmailOtp(normalizedEmail, { accountType: 'admin' });
 
     setIsSendingOtp(false);
 
     if (error) {
       setFeedback({
         type: 'error',
-        message: error.message || 'Không thể gửi mã OTP cho cổng quản trị lúc này.',
+        message:
+          errorCode === 'ADMIN_ONLY_PORTAL'
+            ? 'Email này không có quyền quản trị.'
+            : error.message || 'Không thể gửi mã OTP cho cổng quản trị lúc này.',
       });
       return;
     }
