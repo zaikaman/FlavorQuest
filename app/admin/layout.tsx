@@ -110,7 +110,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   if (isAdminLoginPage) {
     return (
       <div className={`${adminSans.className} bg-background-dark min-h-screen text-white`}>
-        <div className="pointer-events-none fixed inset-0 bg-[url('/img/noise.png')] opacity-5" />
+        <div
+          className="pointer-events-none fixed inset-0 opacity-[0.06]"
+          style={{
+            backgroundImage:
+              'radial-gradient(rgba(255, 255, 255, 0.18) 0.8px, transparent 0.8px)',
+            backgroundSize: '18px 18px',
+          }}
+        />
         {children}
       </div>
     );
@@ -122,7 +129,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   return (
     <div className={`${adminSans.className} bg-background-dark relative min-h-screen flex flex-col md:flex-row`}>
-      <div className="pointer-events-none fixed inset-0 bg-[url('/img/noise.png')] opacity-5" />
+      <div
+        className="pointer-events-none fixed inset-0 opacity-[0.06]"
+        style={{
+          backgroundImage:
+            'radial-gradient(rgba(255, 255, 255, 0.18) 0.8px, transparent 0.8px)',
+          backgroundSize: '18px 18px',
+        }}
+      />
 
       {/* Thêm menu di động ở đây nếu cần */}
       

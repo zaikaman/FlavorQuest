@@ -1,9 +1,3 @@
-import { DashboardSkeleton } from '@/components/ui/Loading';
-
 export default function OwnerLoading() {
-  return (
-    <div className="min-h-screen bg-background-dark px-4 py-8 text-white">
-      <DashboardSkeleton stats={4} />
-    </div>
-  );
+  return null;
 }
