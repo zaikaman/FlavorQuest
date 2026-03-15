@@ -38,7 +38,7 @@ export async function GET(request: Request) {
   }
 
   if (profile.role !== 'customer') {
-    return NextResponse.json({ hasAccess: true, payment: null });
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
   const url = new URL(request.url);

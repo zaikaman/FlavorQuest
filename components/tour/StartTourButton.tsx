@@ -28,8 +28,53 @@ export function StartTourButton({ onStart, className = '', disabled = false, isA
   const router = useRouter();
   const { language } = useLanguage();
   const { t } = useTranslations();
-  const { isOwner, user, userRole, hasCustomerAccess, isLoading: authLoading } = useAuth();
+  const { isOwner, isPendingOwner, user, userRole, hasCustomerAccess, isLoading: authLoading } =
+    useAuth();
   const [isLoading, setIsLoading] = useState(false);
+
+  const resolveAuthenticatedDestination = async () => {
+    try {
+      const response = await fetch('/api/users/me', {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          Pragma: 'no-cache',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`/api/users/me -> ${response.status}`);
+      }
+
+      const profile = (await response.json()) as {
+        role?: 'customer' | 'pending-owner' | 'owner' | 'admin';
+        customerAccessGranted?: boolean;
+      };
+
+      if (profile.role === 'admin') {
+        return '/admin';
+      }
+
+      if (profile.role === 'owner') {
+        return '/owner';
+      }
+
+      if (profile.role === 'pending-owner') {
+        return '/pending-owner';
+      }
+
+      return profile.customerAccessGranted ? '/tour' : '/paywall';
+    } catch (error) {
+      console.warn('[StartTourButton] fallback to local auth snapshot:', error);
+      return isOwner
+        ? '/owner'
+        : isPendingOwner
+          ? '/pending-owner'
+          : hasCustomerAccess
+            ? '/tour'
+            : '/paywall';
+    }
+  };
 
   const handleStart = async () => {
     if (disabled || isLoading) return;
@@ -63,7 +108,7 @@ export function StartTourButton({ onStart, className = '', disabled = false, isA
 
       // Navigate based on auth state
       if (isAuthenticated) {
-        const destination = isOwner ? '/owner' : hasCustomerAccess ? '/tour' : '/paywall';
+        const destination = await resolveAuthenticatedDestination();
         console.log('[StartTourButton] push:', destination);
         router.push(destination);
       } else {

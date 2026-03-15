@@ -265,6 +265,7 @@
     "customer": "Customer",
     "owner": "Owner",
     "selectedType": "Selected account type: {type}",
+    "ownerApprovalNote": "Owner sign-in needs admin approval first. After OTP verification, you will be taken to a review page with direct chat to admin.",
     "emailLabel": "Login email",
     "emailPlaceholder": "you@example.com",
     "otpLabel": "OTP code",
@@ -286,6 +287,36 @@
     "or": "or",
     "backToHome": "Back to Home",
     "error": "Sign in failed. Please try again."
+  },
+  "pendingOwner": {
+    "eyebrow": "Owner approval desk",
+    "titlePending": "Your account is waiting for admin verification before owner access opens",
+    "titleRejected": "Your owner request needs more discussion with admin",
+    "subtitlePending": "This account is in the owner-review state, so it cannot use the customer or owner areas yet. The chat below is the main place to track updates and reply if admin needs more verification.",
+    "subtitleRejected": "Admin rejected the current request. You can still continue the conversation below to provide more context or verification details.",
+    "statusLabel": "Status",
+    "statusPending": "Pending approval",
+    "statusRejected": "Rejected",
+    "customerAreaLabel": "Navigation",
+    "customerCta": "Back to welcome screen",
+    "customerHint": "Until approval happens, this account can only track status here and talk with admin.",
+    "steps": {
+      "request": {
+        "title": "Your request has been recorded",
+        "body": "The system already opened a chat thread with admin so you can provide more verification details if needed."
+      },
+      "review": {
+        "title": "Admin will verify through chat",
+        "body": "Keep an eye on the messages here so you can reply quickly if admin asks for more details before approving."
+      },
+      "reviewRejected": {
+        "body": "The previous request was rejected. You can keep talking in the chat below to clarify more details."
+      },
+      "workspace": {
+        "title": "The owner workspace opens after approval",
+        "body": "Once approved, you will enter the owner area. If no shop has been assigned yet, the owner workspace will stay empty until admin assigns at least one POI."
+      }
+    }
   },
   "paywall": {
     "loading": "Loading paywall...",

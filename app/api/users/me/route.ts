@@ -22,6 +22,9 @@ export async function GET() {
       role: profile.role,
       customerAccessGranted: profile.customerAccessGranted,
       customerAccessGrantedAt: profile.customerAccessGrantedAt,
+      ownerRequestStatus: profile.ownerRequestStatus,
+      ownerRequestedAt: profile.ownerRequestedAt,
+      ownerReviewedAt: profile.ownerReviewedAt,
     },
     { headers: NO_STORE_HEADERS }
   );

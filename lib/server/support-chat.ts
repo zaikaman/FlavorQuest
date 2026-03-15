@@ -63,6 +63,18 @@ interface CreateSupportThreadInput {
   poiId?: string;
 }
 
+function isCustomerLikeRole(role: CurrentUserProfile['role']) {
+  return role === 'customer' || role === 'pending-owner';
+}
+
+function toMessageSenderRole(role: CurrentUserProfile['role']): UserRole {
+  return role === 'pending-owner' ? 'customer' : role;
+}
+
+function toEmailRecipientRole(role: UserRole): 'customer' | 'owner' | 'admin' {
+  return role === 'pending-owner' ? 'customer' : role;
+}
+
 function isThreadAccessible(profile: CurrentUserProfile, thread: ThreadRow) {
   if (profile.role === 'admin') {
     return thread.thread_type === 'customer_admin' || thread.thread_type === 'owner_admin';
@@ -70,6 +82,10 @@ function isThreadAccessible(profile: CurrentUserProfile, thread: ThreadRow) {
 
   if (profile.role === 'owner') {
     return thread.owner_id === profile.id;
+  }
+
+  if (profile.role === 'pending-owner') {
+    return thread.thread_type === 'customer_admin' && thread.customer_id === profile.id;
   }
 
   return thread.customer_id === profile.id;
@@ -97,7 +113,7 @@ function buildThreadSubject(threadType: SupportThreadType, poiName?: string | nu
 
 function buildNotificationTitle(senderRole: UserRole, threadType: SupportThreadType, poiName?: string | null) {
   if (threadType === 'customer_owner') {
-    return senderRole === 'customer'
+    return senderRole === 'customer' || senderRole === 'pending-owner'
       ? `Khách vừa nhắn về ${poiName || 'quán của bạn'}`
       : `Chủ quán vừa phản hồi về ${poiName || 'điểm bán'}`;
   }
@@ -227,7 +243,7 @@ function getCounterpartForThread(
     return makeAdminParticipant(primaryAdminEmail);
   }
 
-  if (profile.role === 'customer') {
+  if (isCustomerLikeRole(profile.role)) {
     return thread.owner_id ? (usersById.get(thread.owner_id) ?? null) : null;
   }
 
@@ -246,6 +262,8 @@ export async function listSupportThreads(profile: CurrentUserProfile): Promise<L
 
   if (profile.role === 'customer') {
     query = query.eq('customer_id', profile.id);
+  } else if (profile.role === 'pending-owner') {
+    query = query.eq('thread_type', 'customer_admin').eq('customer_id', profile.id);
   } else if (profile.role === 'owner') {
     query = query.eq('owner_id', profile.id);
   } else {
@@ -380,6 +398,19 @@ export async function listSupportThreads(profile: CurrentUserProfile): Promise<L
     }
   }
 
+  if (profile.role === 'pending-owner' && adminUsers.length > 0) {
+    const adminThread = threadByCompositeKey.get(`customer_admin:${profile.id}`);
+    directory.push({
+      id: 'support:customer_admin',
+      title: 'Nhắn admin',
+      subtitle: 'Trao đổi về yêu cầu mở quyền owner tại đây.',
+      thread_type: 'customer_admin',
+      poi: null,
+      counterpart: makeAdminParticipant(primaryAdminEmail),
+      existing_thread_id: adminThread?.id ?? null,
+    });
+  }
+
   if (profile.role === 'owner' && adminUsers.length > 0) {
     const adminThread = threadByCompositeKey.get(`owner_admin:${profile.id}`);
     directory.push({
@@ -504,7 +535,7 @@ export async function createSupportThread(profile: CurrentUserProfile, input: Cr
   }
 
   if (input.threadType === 'customer_admin') {
-    if (profile.role !== 'customer') {
+    if (!isCustomerLikeRole(profile.role)) {
       throw new Error('INVALID_THREAD_TYPE');
     }
 
@@ -663,13 +694,13 @@ export async function sendSupportMessage(profile: CurrentUserProfile, threadId: 
 
   const { data: insertedMessage, error: messageError } = await adminClient
     .from('support_messages')
-    .insert({
-      thread_id: threadId,
-      sender_id: profile.id,
-      sender_role: profile.role,
-      content,
-      created_at: now,
-    })
+      .insert({
+        thread_id: threadId,
+        sender_id: profile.id,
+        sender_role: toMessageSenderRole(profile.role),
+        content,
+        created_at: now,
+      })
     .select('id, thread_id, sender_id, sender_role, content, created_at')
     .single();
 
@@ -727,7 +758,7 @@ export async function sendSupportMessage(profile: CurrentUserProfile, threadId: 
         .map((recipient) =>
           sendSupportChatEmail({
             to: recipient.email,
-            recipientRole: recipient.role,
+            recipientRole: toEmailRecipientRole(recipient.role),
             senderEmail: sender?.email ?? profile.email,
             threadLabel: buildEmailThreadLabel(thread, poi?.name_vi),
             messagePreview: preview,

@@ -265,6 +265,7 @@
     "customer": "Khách hàng",
     "owner": "Chủ quán",
     "selectedType": "Loại tài khoản đang chọn: {type}",
+    "ownerApprovalNote": "Đăng nhập chủ quán cần admin xác minh trước. Sau khi xác thực OTP, bạn sẽ được đưa tới trang chờ duyệt và chat trực tiếp với admin.",
     "emailLabel": "Email đăng nhập",
     "emailPlaceholder": "ban@vidu.com",
     "otpLabel": "Mã OTP",
@@ -286,6 +287,36 @@
     "or": "hoặc",
     "backToHome": "Quay lại trang chủ",
     "error": "Đăng nhập thất bại. Vui lòng thử lại."
+  },
+  "pendingOwner": {
+    "eyebrow": "Khu chờ duyệt owner",
+    "titlePending": "Tài khoản đang chờ admin xác minh để mở quyền chủ quán",
+    "titleRejected": "Yêu cầu owner của bạn cần trao đổi thêm với admin",
+    "subtitlePending": "Tài khoản này đang ở trạng thái chờ duyệt owner nên chưa thể dùng khu khách hàng hoặc owner. Luồng chat bên dưới là nơi chính để theo dõi và phản hồi nếu admin cần xác minh thêm.",
+    "subtitleRejected": "Admin đã từ chối yêu cầu hiện tại. Bạn vẫn có thể tiếp tục trao đổi trong luồng chat bên dưới để bổ sung bối cảnh hoặc thông tin xác minh.",
+    "statusLabel": "Trạng thái",
+    "statusPending": "Đang chờ duyệt",
+    "statusRejected": "Đã từ chối",
+    "customerAreaLabel": "Điều hướng",
+    "customerCta": "Quay về màn hình chào",
+    "customerHint": "Trong lúc chưa được duyệt, tài khoản này chỉ có thể theo dõi trạng thái và trao đổi với admin.",
+    "steps": {
+      "request": {
+        "title": "Yêu cầu đã được ghi nhận",
+        "body": "Hệ thống đã mở luồng chat với admin để bạn bổ sung thông tin xác minh khi cần."
+      },
+      "review": {
+        "title": "Admin sẽ xác minh qua chat",
+        "body": "Theo dõi tin nhắn ở đây để phản hồi nhanh nếu admin cần hỏi thêm trước khi duyệt."
+      },
+      "reviewRejected": {
+        "body": "Yêu cầu trước đó đã bị từ chối. Bạn vẫn có thể tiếp tục trao đổi trong khung chat bên dưới để làm rõ thêm."
+      },
+      "workspace": {
+        "title": "Workspace owner sẽ mở sau khi duyệt",
+        "body": "Sau khi được duyệt, bạn sẽ vào khu owner. Nếu chưa được gán quán, màn owner sẽ hiển thị trạng thái trống cho đến khi admin gán POI."
+      }
+    }
   },
   "paywall": {
     "loading": "Đang tải paywall...",

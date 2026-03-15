@@ -1,7 +1,10 @@
 'use client';
 
+import { useSearchParams } from 'next/navigation';
 import { SupportInboxPage } from '@/components/chat/SupportInboxPage';
 
 export default function AdminChatPage() {
-  return <SupportInboxPage role="admin" />;
+  const searchParams = useSearchParams();
+
+  return <SupportInboxPage role="admin" initialThreadId={searchParams.get('threadId')} />;
 }

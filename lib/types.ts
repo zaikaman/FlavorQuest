@@ -265,6 +265,8 @@ export interface AppNotification {
 
 export type SupportThreadType = 'customer_owner' | 'customer_admin' | 'owner_admin';
 
+export type OwnerRequestStatus = 'pending' | 'approved' | 'rejected';
+
 export interface SupportParticipantSummary {
   id: string;
   email: string;
@@ -311,6 +313,21 @@ export interface SupportMessage {
   sender_role: UserRole;
   content: string;
   created_at: string;
+}
+
+export interface OwnerRequestAdminListItem {
+  id: string;
+  email: string;
+  role: UserRole;
+  ownerRequestStatus: OwnerRequestStatus;
+  ownerRequestedAt: string | null;
+  ownerReviewedAt: string | null;
+  threadId: string | null;
+}
+
+export interface ReviewOwnerRequestPayload {
+  userId: string;
+  decision: 'approve' | 'reject';
 }
 
 // ============================================
@@ -459,7 +476,7 @@ export interface AnalyticsSummary {
 /**
  * User role
  */
-export type UserRole = 'customer' | 'owner' | 'admin';
+export type UserRole = 'customer' | 'pending-owner' | 'owner' | 'admin';
 
 /**
  * User entity

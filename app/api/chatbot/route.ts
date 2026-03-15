@@ -57,8 +57,12 @@ function normalizeLanguage(language: Language | undefined): Language {
 
 function normalizeWorkspaceRole(
   requestedRole: string | null | undefined,
-  userRole: 'customer' | 'owner' | 'admin'
+  userRole: 'customer' | 'pending-owner' | 'owner' | 'admin'
 ): WorkspaceRole {
+  if (userRole === 'pending-owner') {
+    throw new Error('Forbidden workspace role');
+  }
+
   if (requestedRole === 'owner') {
     if (userRole === 'owner' || userRole === 'admin') {
       return 'owner';
@@ -194,6 +198,13 @@ export async function GET(request: NextRequest) {
     );
   }
 
+  if (profile.role === 'pending-owner') {
+    return NextResponse.json(
+      { error: 'Pending owner accounts cannot access chatbot workspace' },
+      { status: 403, headers: NO_STORE_HEADERS }
+    );
+  }
+
   if (profile.role === 'customer' && !profile.customerAccessGranted) {
     return NextResponse.json(
       { error: 'Customer access is not active' },
@@ -235,6 +246,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       { error: 'Unauthorized' },
       { status: 401, headers: NO_STORE_HEADERS }
+    );
+  }
+
+  if (profile.role === 'pending-owner') {
+    return NextResponse.json(
+      { error: 'Pending owner accounts cannot access chatbot workspace' },
+      { status: 403, headers: NO_STORE_HEADERS }
     );
   }
 

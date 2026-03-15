@@ -215,13 +215,18 @@ CREATE TABLE public.tours (
 CREATE TABLE public.users (
   id uuid NOT NULL,
   email text NOT NULL UNIQUE,
-  role character varying NOT NULL DEFAULT 'customer'::character varying CHECK (role::text = ANY (ARRAY['customer'::character varying, 'owner'::character varying, 'admin'::character varying]::text[])),
+  role character varying NOT NULL DEFAULT 'customer'::character varying CHECK (role::text = ANY (ARRAY['customer'::character varying, 'pending-owner'::character varying, 'owner'::character varying, 'admin'::character varying]::text[])),
   created_at timestamp with time zone NOT NULL DEFAULT now(),
   updated_at timestamp with time zone NOT NULL DEFAULT now(),
   customer_access_granted boolean NOT NULL DEFAULT false,
   customer_access_granted_at timestamp with time zone,
   customer_access_payment_order_code bigint,
   customer_access_payment_link_id text,
+  owner_request_status character varying CHECK (owner_request_status::text = ANY (ARRAY['pending'::character varying, 'approved'::character varying, 'rejected'::character varying]::text[])),
+  owner_requested_at timestamp with time zone,
+  owner_reviewed_at timestamp with time zone,
+  owner_reviewed_by uuid,
   CONSTRAINT users_pkey PRIMARY KEY (id),
-  CONSTRAINT users_id_fkey FOREIGN KEY (id) REFERENCES auth.users(id)
+  CONSTRAINT users_id_fkey FOREIGN KEY (id) REFERENCES auth.users(id),
+  CONSTRAINT users_owner_reviewed_by_fkey FOREIGN KEY (owner_reviewed_by) REFERENCES public.users(id)
 );

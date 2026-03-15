@@ -1,12 +1,14 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
-type RouteRole = 'customer' | 'owner' | 'admin';
+type RouteRole = 'customer' | 'pending-owner' | 'owner' | 'admin';
+type OwnerRequestStatus = 'pending' | 'approved' | 'rejected';
 
 interface RouteProfile {
   userId: string | null;
   role: RouteRole | null;
   customerAccessGranted: boolean;
+  ownerRequestStatus: OwnerRequestStatus | null;
 }
 
 function redirect(request: NextRequest, pathname: string, params?: Record<string, string>) {
@@ -28,7 +30,15 @@ async function resolveProfile(request: NextRequest) {
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
   if (!url || !anonKey) {
-    return { response: NextResponse.next(), profile: { userId: null, role: null, customerAccessGranted: false } as RouteProfile };
+    return {
+      response: NextResponse.next(),
+      profile: {
+        userId: null,
+        role: null,
+        customerAccessGranted: false,
+        ownerRequestStatus: null,
+      } as RouteProfile,
+    };
   }
 
   let response = NextResponse.next({
@@ -67,28 +77,40 @@ async function resolveProfile(request: NextRequest) {
         userId: null,
         role: null,
         customerAccessGranted: false,
+        ownerRequestStatus: null,
       } satisfies RouteProfile,
     };
   }
 
   const { data } = await supabase
     .from('users')
-    .select('role, customer_access_granted')
+    .select('role, customer_access_granted, owner_request_status')
     .eq('id', user.id)
     .maybeSingle();
 
-  const role = data?.role === 'admin'
-    ? 'admin'
-    : data?.role === 'owner'
-      ? 'owner'
-      : 'customer';
+  const role =
+    data?.role === 'admin'
+      ? 'admin'
+      : data?.role === 'owner'
+        ? 'owner'
+        : data?.role === 'pending-owner'
+          ? 'pending-owner'
+          : 'customer';
+
+  const ownerRequestStatus =
+    data?.owner_request_status === 'pending' ||
+    data?.owner_request_status === 'approved' ||
+    data?.owner_request_status === 'rejected'
+      ? data.owner_request_status
+      : null;
 
   return {
     response,
     profile: {
       userId: user.id,
       role,
-      customerAccessGranted: role === 'customer' ? data?.customer_access_granted ?? false : true,
+      customerAccessGranted: role === 'customer' ? (data?.customer_access_granted ?? false) : false,
+      ownerRequestStatus,
     } satisfies RouteProfile,
   };
 }
@@ -111,6 +133,9 @@ export async function proxy(request: NextRequest) {
       if (profile.role === 'owner') {
         return redirect(request, '/owner');
       }
+      if (profile.role === 'pending-owner') {
+        return redirect(request, '/pending-owner');
+      }
       return redirect(request, profile.customerAccessGranted ? '/tour' : '/paywall');
     }
 
@@ -127,10 +152,34 @@ export async function proxy(request: NextRequest) {
     }
 
     if (profile.role !== 'owner' && profile.role !== 'admin') {
+      if (profile.role === 'pending-owner') {
+        return redirect(request, '/pending-owner');
+      }
+
       return redirect(request, profile.customerAccessGranted ? '/tour' : '/paywall');
     }
 
     return response;
+  }
+
+  if (pathname.startsWith('/pending-owner')) {
+    if (!profile.userId) {
+      return redirect(request, '/login', { type: 'owner' });
+    }
+
+    if (profile.role === 'admin') {
+      return redirect(request, '/admin');
+    }
+
+    if (profile.role === 'owner') {
+      return redirect(request, '/owner');
+    }
+
+    if (profile.role === 'pending-owner') {
+      return response;
+    }
+
+    return redirect(request, '/tour');
   }
 
   if (pathname.startsWith('/tour')) {
@@ -140,6 +189,10 @@ export async function proxy(request: NextRequest) {
 
     if (profile.role === 'owner') {
       return redirect(request, '/owner');
+    }
+
+    if (profile.role === 'pending-owner') {
+      return redirect(request, '/pending-owner');
     }
 
     if (!profile.customerAccessGranted) {
@@ -155,11 +208,15 @@ export async function proxy(request: NextRequest) {
     }
 
     if (profile.role === 'admin') {
-      return redirect(request, '/tour');
+      return redirect(request, '/admin');
     }
 
     if (profile.role === 'owner') {
       return redirect(request, '/owner');
+    }
+
+    if (profile.role === 'pending-owner') {
+      return redirect(request, '/pending-owner');
     }
 
     const isSuccessPage = pathname.startsWith('/paywall/success');
@@ -182,5 +239,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/tour/:path*', '/paywall/:path*', '/owner/:path*', '/admin/:path*'],
+  matcher: ['/tour/:path*', '/paywall/:path*', '/owner/:path*', '/admin/:path*', '/pending-owner'],
 };
