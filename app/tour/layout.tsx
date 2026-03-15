@@ -17,7 +17,7 @@ export default function TourLayout({
 }) {
   const { t } = useTranslations();
   const router = useRouter();
-  const { user, isLoading, isRoleReady, isOwner, hasCustomerAccess } = useAuth();
+  const { user, isLoading, isRoleReady, isAdmin, isOwner, hasCustomerAccess } = useAuth();
 
   useEffect(() => {
     if (isLoading) return;
@@ -36,13 +36,18 @@ export default function TourLayout({
       return;
     }
 
+    if (isAdmin) {
+      router.replace('/admin');
+      return;
+    }
+
     if (!hasCustomerAccess) {
       router.replace('/paywall');
       return;
     }
-  }, [isLoading, user, isRoleReady, isOwner, hasCustomerAccess, router]);
+  }, [isAdmin, isLoading, user, isRoleReady, isOwner, hasCustomerAccess, router]);
 
-  if (isLoading || !user || !isRoleReady) {
+  if (isLoading || !user || !isRoleReady || isOwner || isAdmin || !hasCustomerAccess) {
     return (
       <div className="flex items-center justify-center h-screen bg-background-dark">
         <div className="flex flex-col items-center gap-4">

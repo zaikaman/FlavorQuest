@@ -1,8 +1,3 @@
-/**
- * Admin Layout
- * Auth check middleware - chỉ admin mới truy cập được
- */
-
 'use client';
 
 import { useEffect, useRef } from 'react';
@@ -19,11 +14,22 @@ const adminSans = Be_Vietnam_Pro({
   display: 'swap',
 });
 
+function LoadingScreen() {
+  return (
+    <div className="min-h-screen bg-background-dark px-4 py-8 text-white">
+      <div className="mx-auto max-w-7xl">
+        <DashboardSkeleton stats={6} />
+      </div>
+    </div>
+  );
+}
+
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
-  const { user, isAdmin, isLoading, isRoleReady, refreshUserRole } = useAuth();
+  const { user, isAdmin, isOwner, isLoading, isRoleReady, hasCustomerAccess, refreshUserRole } = useAuth();
   const refreshedUserIdRef = useRef<string | null>(null);
+  const isAdminLoginPage = pathname === '/admin/login';
 
   const navItems = [
     { href: '/admin', label: 'Tổng quan' },
@@ -36,15 +42,20 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   ];
 
   useEffect(() => {
-    if (!user?.id) return;
-    if (refreshedUserIdRef.current === user.id) return;
+    if (!user?.id) {
+      return;
+    }
+
+    if (refreshedUserIdRef.current === user.id) {
+      return;
+    }
 
     refreshedUserIdRef.current = user.id;
 
     refreshUserRole().catch((error) => {
       console.error('[AdminLayout] refreshUserRole failed:', error);
     });
-  }, [user?.id, refreshUserRole]);
+  }, [refreshUserRole, user?.id]);
 
   useEffect(() => {
     if (isLoading) {
@@ -52,7 +63,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     }
 
     if (!user) {
-      router.replace('/login');
+      if (!isAdminLoginPage) {
+        router.replace('/admin/login');
+      }
       return;
     }
 
@@ -60,59 +73,48 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       return;
     }
 
-    if (!isAdmin) {
-      router.replace('/');
+    if (isAdmin) {
+      if (isAdminLoginPage) {
+        router.replace('/admin');
+      }
+      return;
     }
-  }, [user, isAdmin, isLoading, isRoleReady, router]);
 
-  // Show loading state
+    if (isOwner) {
+      router.replace('/owner');
+      return;
+    }
+
+    router.replace(hasCustomerAccess ? '/tour' : '/paywall');
+  }, [hasCustomerAccess, isAdmin, isAdminLoginPage, isLoading, isOwner, isRoleReady, router, user]);
+
   if (isLoading || (user && !isRoleReady)) {
+    return <LoadingScreen />;
+  }
+
+  if (isAdminLoginPage) {
     return (
-      <div className="bg-background-dark min-h-screen px-4 py-8 text-white">
-        <div className="mx-auto max-w-7xl">
-          <DashboardSkeleton stats={6} />
-        </div>
+      <div className={`${adminSans.className} min-h-screen bg-background-dark text-white`}>
+        <div className="pointer-events-none fixed inset-0 bg-[url('/img/noise.png')] opacity-5" />
+        {children}
       </div>
     );
   }
 
-  // Show access denied if not admin
-  if (!user || !isRoleReady || !isAdmin) {
-    return (
-      <div className="bg-background-dark flex min-h-screen items-center justify-center">
-        <div className="rounded-2xl border border-white/10 bg-white/5 p-8 text-center backdrop-blur-md">
-          <div className="mb-4 text-6xl">🚫</div>
-          <h1 className="mb-2 text-2xl font-bold text-white">Truy cập bị từ chối</h1>
-          <p className="mb-6 text-gray-400">Bạn không có quyền truy cập trang quản trị.</p>
-          <button
-            onClick={() => router.push('/')}
-            className="bg-primary rounded-lg px-6 py-2 font-medium text-white transition-colors hover:bg-orange-600"
-          >
-            Quay lại trang chủ
-          </button>
-        </div>
-      </div>
-    );
+  if (!user || !isAdmin) {
+    return null;
   }
 
-  // Render admin content
   return (
-    <div className={`${adminSans.className} bg-background-dark relative min-h-screen`}>
-      <div className="pointer-events-none fixed inset-0 bg-[url('/img/noise.png')] opacity-5"></div>
+    <div className={`${adminSans.className} relative min-h-screen bg-background-dark`}>
+      <div className="pointer-events-none fixed inset-0 bg-[url('/img/noise.png')] opacity-5" />
 
-      {/* Admin Header */}
       <header className="sticky top-0 z-20 border-b border-white/10 bg-[#2c1e16]/80 backdrop-blur-md">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid gap-4 py-4 xl:grid-cols-[auto_minmax(0,1fr)_auto] xl:items-center">
-            {/* Logo & Title */}
             <div className="flex items-center gap-3">
-              <div className="bg-primary/20 rounded-lg p-2">
-                <svg
-                  className="text-primary h-6 w-6"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
+              <div className="rounded-lg bg-primary/20 p-2">
+                <svg className="h-6 w-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -151,17 +153,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               </div>
             </nav>
 
-            {/* User Info & Sign Out */}
             <div className="flex items-center justify-between gap-3 xl:justify-end">
               <div className="hidden text-right lg:block">
                 <p className="text-sm font-medium text-gray-200">{user.email}</p>
-                <p className="text-primary text-xs font-semibold">Quản trị viên</p>
+                <p className="text-xs font-semibold text-primary">Quản trị viên</p>
               </div>
               <button
+                type="button"
                 onClick={async () => {
                   const { signOut } = await import('@/lib/services/auth');
                   await signOut();
-                  router.push('/login');
+                  router.push('/admin/login');
                 }}
                 className="rounded-lg border border-transparent px-3 py-2 text-sm text-gray-300 transition-colors hover:border-white/10 hover:bg-white/10 hover:text-white"
               >
@@ -172,7 +174,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </div>
       </header>
 
-      {/* Admin Content */}
       <main className="relative z-10 mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">{children}</main>
       <RoleChatbot role="admin" bottomOffsetClassName="bottom-4 sm:bottom-6 lg:bottom-8" pageContext={{ pathname }} />
     </div>

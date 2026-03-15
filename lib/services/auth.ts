@@ -1,25 +1,34 @@
 /**
- * Authentication Service
- * Email OTP integration với Supabase Auth
+ * Authentication helpers for OTP sign-in flows.
  */
 
 import { createClient } from '@/lib/supabase/client';
 import type { User } from '@supabase/supabase-js';
 
-export type AccountType = 'customer' | 'owner';
+export type AccountType = 'customer' | 'owner' | 'admin';
 
-/**
- * Gửi mã OTP đăng nhập qua email
- */
-export async function requestEmailOtp(email: string): Promise<{ error: Error | null }> {
+interface RequestEmailOtpOptions {
+  accountType?: AccountType;
+}
+
+interface VerifyEmailOtpResult {
+  error: Error | null;
+  errorCode: string | null;
+  redirectTo: string | null;
+}
+
+export async function requestEmailOtp(
+  email: string,
+  options: RequestEmailOtpOptions = {}
+): Promise<{ error: Error | null }> {
   const supabase = createClient();
-
   const normalizedEmail = email.trim().toLowerCase();
+  const accountType = options.accountType ?? 'customer';
 
   const { error } = await supabase.auth.signInWithOtp({
     email: normalizedEmail,
     options: {
-      shouldCreateUser: true,
+      shouldCreateUser: accountType !== 'admin',
     },
   });
 
@@ -31,14 +40,11 @@ export async function requestEmailOtp(email: string): Promise<{ error: Error | n
   return { error: null };
 }
 
-/**
- * Xác thực mã OTP email và hoàn tất đồng bộ hồ sơ người dùng
- */
 export async function verifyEmailOtp(
   email: string,
   token: string,
   accountType: AccountType = 'customer'
-): Promise<{ error: Error | null; redirectTo: string | null }> {
+): Promise<VerifyEmailOtpResult> {
   const supabase = createClient();
   const normalizedEmail = email.trim().toLowerCase();
   const normalizedToken = token.trim();
@@ -54,12 +60,13 @@ export async function verifyEmailOtp(
 
   if (error) {
     console.error('Email OTP verification error:', error);
-    return { error, redirectTo: null };
+    return { error, errorCode: null, redirectTo: null };
   }
 
   if (!session?.access_token) {
     return {
-      error: new Error('Không lấy được phiên đăng nhập sau khi xác thực OTP.'),
+      error: new Error('Khong lay duoc phien dang nhap sau khi xac thuc OTP.'),
+      errorCode: null,
       redirectTo: null,
     };
   }
@@ -73,27 +80,31 @@ export async function verifyEmailOtp(
     body: JSON.stringify({ accountType }),
   });
 
-  const result = (await response.json().catch(() => null)) as { error?: string; redirectTo?: string } | null;
+  const result = (await response.json().catch(() => null)) as {
+    error?: string;
+    errorCode?: string;
+    redirectTo?: string;
+  } | null;
 
   if (!response.ok) {
+    await supabase.auth.signOut();
+
     return {
-      error: new Error(result?.error || 'Không thể hoàn tất đăng nhập.'),
+      error: new Error(result?.error || 'Khong the hoan tat dang nhap.'),
+      errorCode: result?.errorCode ?? null,
       redirectTo: null,
     };
   }
 
   return {
     error: null,
+    errorCode: null,
     redirectTo: result?.redirectTo ?? null,
   };
 }
 
-/**
- * Sign out
- */
 export async function signOut(): Promise<{ error: Error | null }> {
   const supabase = createClient();
-  
   const { error } = await supabase.auth.signOut();
 
   if (error) {
@@ -104,13 +115,12 @@ export async function signOut(): Promise<{ error: Error | null }> {
   return { error: null };
 }
 
-/**
- * Get current user
- */
 export async function getCurrentUser(): Promise<User | null> {
   const supabase = createClient();
-  
-  const { data: { user }, error } = await supabase.auth.getUser();
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser();
 
   if (error) {
     console.error('Get user error:', error);
@@ -120,10 +130,6 @@ export async function getCurrentUser(): Promise<User | null> {
   return user;
 }
 
-/**
- * Check if current user is admin
- * Kiểm tra role admin từ database
- */
 export async function isAdmin(): Promise<boolean> {
   const response = await fetch('/api/users/me', {
     cache: 'no-store',
@@ -137,14 +143,10 @@ export async function isAdmin(): Promise<boolean> {
     return false;
   }
 
-  const result = await response.json().catch(() => null) as { role?: string } | null;
-
+  const result = (await response.json().catch(() => null)) as { role?: string } | null;
   return result?.role === 'admin';
 }
 
-/**
- * Check if user is authenticated
- */
 export async function isAuthenticated(): Promise<boolean> {
   const user = await getCurrentUser();
   return user !== null;

@@ -4,6 +4,7 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import type { CurrentUserProfile } from '@/lib/supabase/server';
 import type {
   SupportDirectoryEntry,
+  SupportLaunchpadMeta,
   SupportMessage,
   SupportParticipantSummary,
   SupportThreadSummary,
@@ -54,6 +55,7 @@ type PoiRow = {
 interface ListSupportThreadsResult {
   threads: SupportThreadSummary[];
   directory: SupportDirectoryEntry[];
+  meta: SupportLaunchpadMeta;
 }
 
 interface CreateSupportThreadInput {
@@ -323,6 +325,10 @@ export async function listSupportThreads(profile: CurrentUserProfile): Promise<L
   });
 
   const directory: SupportDirectoryEntry[] = [];
+  const meta: SupportLaunchpadMeta = {
+    availableOwnerPoiCount: 0,
+    availableAdminCount: adminUsers.length,
+  };
 
   if (profile.role === 'customer') {
     const { data: ownedPois, error: ownedPoisError } = await adminClient
@@ -340,6 +346,7 @@ export async function listSupportThreads(profile: CurrentUserProfile): Promise<L
       new Set((ownedPois ?? []).map((poi) => poi.owner_id).filter((value): value is string => Boolean(value)))
     );
     const ownerUsers = await loadUsersByIds(ownerIds);
+    meta.availableOwnerPoiCount = (ownedPois ?? []).length;
 
     (ownedPois ?? []).forEach((poi) => {
       const owner = poi.owner_id ? ownerUsers.get(poi.owner_id) ?? null : null;
@@ -359,19 +366,21 @@ export async function listSupportThreads(profile: CurrentUserProfile): Promise<L
       });
     });
 
-    const adminThread = threadByCompositeKey.get(`customer_admin:${profile.id}`);
-    directory.unshift({
-      id: 'support:customer_admin',
-      title: 'Nhắn admin',
-      subtitle: 'Cần hỗ trợ? Nhắn admin ở đây.',
-      thread_type: 'customer_admin',
-      poi: null,
-      counterpart: makeAdminParticipant(primaryAdminEmail),
-      existing_thread_id: adminThread?.id ?? null,
-    });
+    if (adminUsers.length > 0) {
+      const adminThread = threadByCompositeKey.get(`customer_admin:${profile.id}`);
+      directory.unshift({
+        id: 'support:customer_admin',
+        title: 'Nhắn admin',
+        subtitle: 'Cần hỗ trợ? Nhắn admin ở đây.',
+        thread_type: 'customer_admin',
+        poi: null,
+        counterpart: makeAdminParticipant(primaryAdminEmail),
+        existing_thread_id: adminThread?.id ?? null,
+      });
+    }
   }
 
-  if (profile.role === 'owner') {
+  if (profile.role === 'owner' && adminUsers.length > 0) {
     const adminThread = threadByCompositeKey.get(`owner_admin:${profile.id}`);
     directory.push({
       id: 'support:owner_admin',
@@ -387,6 +396,7 @@ export async function listSupportThreads(profile: CurrentUserProfile): Promise<L
   return {
     threads: summaries,
     directory,
+    meta,
   };
 }
 

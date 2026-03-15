@@ -281,6 +281,7 @@
     "invalidOtp": "Vui lòng nhập mã OTP gồm 6 số.",
     "sendOtpError": "Không thể gửi mã OTP. Vui lòng thử lại.",
     "verifyOtpError": "Xác thực OTP thất bại. Vui lòng thử lại.",
+    "adminPortalRequired": "Tài khoản quản trị cần đăng nhập tại cổng admin riêng.",
     "changeEmailHint": "Bạn có thể sửa email rồi gửi lại mã nếu nhập nhầm.",
     "or": "hoặc",
     "backToHome": "Quay lại trang chủ",

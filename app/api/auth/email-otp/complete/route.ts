@@ -3,14 +3,19 @@ import type { NextRequest } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { createServerClient } from '@/lib/supabase/server';
 
-type AccountType = 'customer' | 'owner';
+type AccountType = 'customer' | 'owner' | 'admin';
 
 export async function POST(request: NextRequest) {
   let accountType: AccountType = 'customer';
 
   try {
     const body = await request.json();
-    accountType = body?.accountType === 'owner' ? 'owner' : 'customer';
+
+    if (body?.accountType === 'owner') {
+      accountType = 'owner';
+    } else if (body?.accountType === 'admin') {
+      accountType = 'admin';
+    }
   } catch {
     accountType = 'customer';
   }
@@ -49,7 +54,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const desiredRole = accountType === 'owner' ? 'owner' : 'customer';
   const { data: existingProfile, error: existingProfileError } = await adminClient
     .from('users')
     .select('role')
@@ -60,34 +64,55 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: existingProfileError.message }, { status: 500 });
   }
 
-  const timestamp = new Date().toISOString();
-  const isExistingAdmin = existingProfile?.role === 'admin';
+  const existingRole = existingProfile?.role ?? null;
+  const isExistingAdmin = existingRole === 'admin';
 
-  const { error: upsertError } = isExistingAdmin
-    ? await adminClient
-        .from('users')
-        .upsert(
-          {
-            id: currentUser.id,
-            email: currentUser.email,
-            updated_at: timestamp,
-          },
-          { onConflict: 'id' }
-        )
-    : await adminClient
-        .from('users')
-        .upsert(
-          {
-            id: currentUser.id,
-            email: currentUser.email,
-            role: desiredRole,
-            updated_at: timestamp,
-          },
-          { onConflict: 'id' }
-        );
+  if (accountType === 'admin' && !isExistingAdmin) {
+    return NextResponse.json(
+      {
+        error: 'Email nay khong co quyen quan tri.',
+        errorCode: 'ADMIN_ONLY_PORTAL',
+      },
+      { status: 403 }
+    );
+  }
+
+  if (accountType !== 'admin' && isExistingAdmin) {
+    return NextResponse.json(
+      {
+        error: 'Tai khoan quan tri phai dang nhap tu cong admin rieng.',
+        errorCode: 'ADMIN_PORTAL_REQUIRED',
+      },
+      { status: 403 }
+    );
+  }
+
+  const desiredRole = accountType === 'owner' ? 'owner' : accountType === 'admin' ? 'admin' : 'customer';
+  const timestamp = new Date().toISOString();
+  const upsertPayload =
+    accountType === 'admin'
+      ? {
+          id: currentUser.id,
+          email: currentUser.email,
+          updated_at: timestamp,
+        }
+      : {
+          id: currentUser.id,
+          email: currentUser.email,
+          role: desiredRole,
+          updated_at: timestamp,
+        };
+
+  const { error: upsertError } = await adminClient
+    .from('users')
+    .upsert(upsertPayload, { onConflict: 'id' });
 
   if (upsertError) {
     return NextResponse.json({ error: upsertError.message }, { status: 500 });
+  }
+
+  if (accountType === 'admin') {
+    return NextResponse.json({ redirectTo: '/admin', role: 'admin' });
   }
 
   const { data: profile } = await adminClient
@@ -96,11 +121,8 @@ export async function POST(request: NextRequest) {
     .eq('id', currentUser.id)
     .maybeSingle();
 
-  const redirectTo = desiredRole === 'owner'
-    ? '/owner'
-    : profile?.customer_access_granted
-      ? '/tour'
-      : '/paywall';
+  const redirectTo =
+    desiredRole === 'owner' ? '/owner' : profile?.customer_access_granted ? '/tour' : '/paywall';
 
-  return NextResponse.json({ redirectTo, role: isExistingAdmin ? 'admin' : desiredRole });
+  return NextResponse.json({ redirectTo, role: desiredRole });
 }

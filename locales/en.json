@@ -281,6 +281,7 @@
     "invalidOtp": "Please enter the 6-digit OTP code.",
     "sendOtpError": "Unable to send OTP. Please try again.",
     "verifyOtpError": "OTP verification failed. Please try again.",
+    "adminPortalRequired": "Admin accounts must sign in through the dedicated admin portal.",
     "changeEmailHint": "You can edit your email and resend the code if needed.",
     "or": "or",
     "backToHome": "Back to Home",

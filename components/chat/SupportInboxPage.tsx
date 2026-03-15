@@ -14,7 +14,9 @@ import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/lib/contexts/AuthContext';
 import { useTranslations } from '@/lib/hooks/useTranslations';
 import type {
+  POI,
   SupportDirectoryEntry,
+  SupportLaunchpadMeta,
   SupportMessage,
   SupportThreadSummary,
   SupportThreadType,
@@ -29,6 +31,7 @@ interface SupportInboxPageProps {
 interface InboxResponse {
   threads: SupportThreadSummary[];
   directory: SupportDirectoryEntry[];
+  meta: SupportLaunchpadMeta;
 }
 
 interface MessagesResponse {
@@ -62,6 +65,11 @@ export function SupportInboxPage({ role, className = '' }: SupportInboxPageProps
   const { t, language } = useTranslations();
   const [threads, setThreads] = useState<SupportThreadSummary[]>([]);
   const [directory, setDirectory] = useState<SupportDirectoryEntry[]>([]);
+  const [fallbackDirectory, setFallbackDirectory] = useState<SupportDirectoryEntry[]>([]);
+  const [meta, setMeta] = useState<SupportLaunchpadMeta>({
+    availableOwnerPoiCount: 0,
+    availableAdminCount: 0,
+  });
   const [activeThreadId, setActiveThreadId] = useState<string | null>(null);
   const [messages, setMessages] = useState<SupportMessage[]>([]);
   const [draft, setDraft] = useState('');
@@ -153,6 +161,12 @@ export function SupportInboxPage({ role, className = '' }: SupportInboxPageProps
         startTransition(() => {
           setThreads(data.threads ?? []);
           setDirectory(data.directory ?? []);
+          setMeta(
+            data.meta ?? {
+              availableOwnerPoiCount: 0,
+              availableAdminCount: 0,
+            }
+          );
           setActiveThreadId((currentThreadId) => {
             if (currentThreadId && (data.threads ?? []).some((thread) => thread.id === currentThreadId)) {
               return currentThreadId;
@@ -254,6 +268,77 @@ export function SupportInboxPage({ role, className = '' }: SupportInboxPageProps
       mountedRef.current = false;
     };
   }, [fetchInbox]);
+
+  useEffect(() => {
+    if (role !== 'customer' || isLoadingInbox || directory.length > 0) {
+      setFallbackDirectory([]);
+      return;
+    }
+
+    const adminEmails = (process.env.NEXT_PUBLIC_ADMIN_EMAILS || '')
+      .split(',')
+      .map((value) => value.trim())
+      .filter(Boolean);
+
+    let isCancelled = false;
+
+    const loadFallbackDirectory = async () => {
+      try {
+        const response = await fetch('/api/pois', {
+          cache: 'no-store',
+          headers: {
+            'Cache-Control': 'no-cache',
+          },
+        });
+
+        if (!response.ok) {
+          return;
+        }
+
+        const pois = ((await response.json()) as POI[]).filter((poi) => Boolean(poi.owner_id));
+        const customerAdminThread = threads.find((thread) => thread.thread_type === 'customer_admin');
+
+        const nextDirectory: SupportDirectoryEntry[] = pois.map((poi) => ({
+          id: `fallback-poi:${poi.id}`,
+          title: poi.name_vi,
+          subtitle: 'Nhắn trực tiếp với chủ quán',
+          thread_type: 'customer_owner',
+          poi: {
+            id: poi.id,
+            name_vi: poi.name_vi,
+          },
+          counterpart: null,
+          existing_thread_id:
+            threads.find((thread) => thread.thread_type === 'customer_owner' && thread.poi?.id === poi.id)?.id ??
+            null,
+        }));
+
+        if (adminEmails.length > 0) {
+          nextDirectory.unshift({
+            id: 'fallback-admin',
+            title: 'Nhắn admin',
+            subtitle: 'Cần hỗ trợ? Nhắn admin ở đây.',
+            thread_type: 'customer_admin',
+            poi: null,
+            counterpart: null,
+            existing_thread_id: customerAdminThread?.id ?? null,
+          });
+        }
+
+        if (!isCancelled) {
+          setFallbackDirectory(nextDirectory);
+        }
+      } catch (error) {
+        console.error('[SupportInboxPage] fallback directory failed:', error);
+      }
+    };
+
+    void loadFallbackDirectory();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [directory.length, isLoadingInbox, role, threads]);
 
   useEffect(() => {
     if (!activeThreadId) {
@@ -408,6 +493,32 @@ export function SupportInboxPage({ role, className = '' }: SupportInboxPageProps
   );
 
   const unreadThreads = threads.filter((thread) => thread.unread_count > 0).length;
+  const displayedDirectory = directory.length > 0 ? directory : fallbackDirectory;
+
+  const launchpadEmptyMessage = useMemo(() => {
+    if (role === 'customer') {
+      const ownerCount = meta.availableOwnerPoiCount || fallbackDirectory.filter((entry) => entry.thread_type === 'customer_owner').length;
+      const adminCount = meta.availableAdminCount || fallbackDirectory.filter((entry) => entry.thread_type === 'customer_admin').length;
+
+      if (ownerCount === 0 && adminCount === 0) {
+        return 'Hiện chưa có quán nào được gán chủ quán và cũng chưa có tài khoản admin để bạn nhắn.';
+      }
+
+      if (ownerCount === 0) {
+        return 'Hiện chưa có quán nào được gán chủ quán để bạn nhắn trực tiếp.';
+      }
+
+      if (adminCount === 0) {
+        return 'Hiện chưa có tài khoản admin nào sẵn sàng để hỗ trợ qua chat.';
+      }
+    }
+
+    if (role === 'owner' && meta.availableAdminCount === 0) {
+      return 'Hiện chưa có tài khoản admin nào để bạn mở kênh hỗ trợ.';
+    }
+
+    return null;
+  }, [fallbackDirectory, meta.availableAdminCount, meta.availableOwnerPoiCount, role]);
 
   return (
     <div className={`space-y-6 ${className}`}>
@@ -462,8 +573,7 @@ export function SupportInboxPage({ role, className = '' }: SupportInboxPageProps
 
       <section className="grid gap-6 xl:grid-cols-[0.92fr_1.08fr]">
         <aside className="space-y-6">
-          {directory.length > 0 && (
-            <div className="rounded-[28px] border border-white/10 bg-[#2c1e16] p-5">
+          <div className="rounded-[28px] border border-white/10 bg-[#2c1e16] p-5">
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <p className="text-primary text-sm font-semibold">
@@ -478,62 +588,70 @@ export function SupportInboxPage({ role, className = '' }: SupportInboxPageProps
                   </p>
                 </div>
                 <span className="rounded-full border border-white/10 bg-black/20 px-3 py-1 text-[11px] font-semibold text-gray-300">
-                  {directory.length}
+                  {displayedDirectory.length}
                 </span>
               </div>
 
-              <div className="mt-5 space-y-3">
-                {directory.map((entry) => {
-                  const isPending = pendingDirectoryId === entry.id;
-                  const isActive = entry.existing_thread_id && entry.existing_thread_id === activeThreadId;
+              {displayedDirectory.length === 0 ? (
+                <div className="mt-5 rounded-2xl border border-dashed border-white/10 px-4 py-8 text-center">
+                  <p className="text-sm font-semibold text-white">Chưa có ai để bắt đầu cuộc trò chuyện.</p>
+                  <p className="mt-2 text-sm leading-6 text-gray-400">
+                    {launchpadEmptyMessage || 'Khi có đối tượng phù hợp, bạn sẽ thấy danh sách xuất hiện tại đây.'}
+                  </p>
+                </div>
+              ) : (
+                <div className="mt-5 space-y-3">
+                  {displayedDirectory.map((entry) => {
+                    const isPending = pendingDirectoryId === entry.id;
+                    const isActive = entry.existing_thread_id && entry.existing_thread_id === activeThreadId;
 
-                  return (
-                    <button
-                      key={entry.id}
-                      type="button"
-                      onClick={() => void openDirectoryEntry(entry)}
-                      disabled={isPending}
-                      className={`w-full rounded-2xl border px-4 py-4 text-left transition-colors ${
-                        isActive
-                          ? 'border-primary/35 bg-primary/12'
-                          : 'border-white/10 bg-black/15 hover:bg-white/5'
-                      } disabled:cursor-not-allowed disabled:opacity-70`}
-                    >
-                      <div className="flex items-start justify-between gap-3">
-                        <div>
-                          <p className="font-semibold text-white">{entry.title}</p>
-                          <p className="mt-2 text-sm leading-6 text-gray-400">{entry.subtitle}</p>
+                    return (
+                      <button
+                        key={entry.id}
+                        type="button"
+                        onClick={() => void openDirectoryEntry(entry)}
+                        disabled={isPending}
+                        className={`w-full rounded-2xl border px-4 py-4 text-left transition-colors ${
+                          isActive
+                            ? 'border-primary/35 bg-primary/12'
+                            : 'border-white/10 bg-black/15 hover:bg-white/5'
+                        } disabled:cursor-not-allowed disabled:opacity-70`}
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div>
+                            <p className="font-semibold text-white">{entry.title}</p>
+                            <p className="mt-2 text-sm leading-6 text-gray-400">{entry.subtitle}</p>
+                          </div>
+                          <span
+                            className={`rounded-full border px-3 py-1 text-[11px] font-bold ${getRoleBadgeTone(entry.thread_type)}`}
+                          >
+                            {entry.thread_type === 'customer_owner'
+                              ? t('support.threadTypes.customerOwner', undefined, 'Khách / Chủ quán')
+                              : entry.thread_type === 'owner_admin'
+                                ? t('support.threadTypes.ownerAdmin', undefined, 'Chủ quán / Admin')
+                                : t('support.threadTypes.customerAdmin', undefined, 'Khách / Admin')}
+                          </span>
                         </div>
-                        <span
-                          className={`rounded-full border px-3 py-1 text-[11px] font-bold ${getRoleBadgeTone(entry.thread_type)}`}
-                        >
-                          {entry.thread_type === 'customer_owner'
-                            ? t('support.threadTypes.customerOwner', undefined, 'Khách / Chủ quán')
-                            : entry.thread_type === 'owner_admin'
-                              ? t('support.threadTypes.ownerAdmin', undefined, 'Chủ quán / Admin')
-                              : t('support.threadTypes.customerAdmin', undefined, 'Khách / Admin')}
-                        </span>
-                      </div>
 
-                      {entry.poi && (
-                        <p className="mt-3 text-xs font-semibold tracking-[0.18em] text-gray-500 uppercase">
-                          {entry.poi.name_vi}
-                        </p>
-                      )}
+                        {entry.poi && (
+                          <p className="mt-3 text-xs font-semibold tracking-[0.18em] text-gray-500 uppercase">
+                            {entry.poi.name_vi}
+                          </p>
+                        )}
 
-                      <div className="mt-4 text-sm font-semibold text-primary">
-                        {isPending
-                          ? t('support.states.creating', undefined, 'Đang mở...')
-                          : entry.existing_thread_id
-                            ? t('support.actions.openThread', undefined, 'Mở cuộc trò chuyện')
-                            : t('support.actions.startThread', undefined, 'Nhắn ngay')}
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
+                        <div className="mt-4 text-sm font-semibold text-primary">
+                          {isPending
+                            ? t('support.states.creating', undefined, 'Đang mở...')
+                            : entry.existing_thread_id
+                              ? t('support.actions.openThread', undefined, 'Mở cuộc trò chuyện')
+                              : t('support.actions.startThread', undefined, 'Nhắn ngay')}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </div>
-          )}
 
           <div className="rounded-[28px] border border-white/10 bg-[#2c1e16] p-5">
             <div className="flex items-start justify-between gap-3">

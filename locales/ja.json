@@ -47,6 +47,7 @@
     "invalidOtp": "6桁のOTPコードを入力してください。",
     "sendOtpError": "OTPを送信できませんでした。もう一度お試しください。",
     "verifyOtpError": "OTPの確認に失敗しました。もう一度お試しください。",
+    "adminPortalRequired": "管理者アカウントは専用の管理ポータルからログインしてください。",
     "changeEmailHint": "必要に応じてメールアドレスを修正して再送できます。",
     "back": "戻る",
     "next": "次へ",
