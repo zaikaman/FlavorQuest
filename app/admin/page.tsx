@@ -512,19 +512,13 @@ export default function AdminDashboard() {
                 </p>
               </div>
 
-              <div className="grid gap-3 sm:grid-cols-3">
+              <div className="grid w-full gap-3 sm:max-w-xl sm:grid-cols-2">
                 {[
                   {
                     label: 'Lượt bắt đầu tour',
                     value: formatNumber(snapshot.analytics.overview.total_tours),
                     note: 'bắt đầu hành trình',
                     accent: 'text-primary',
-                  },
-                  {
-                    label: 'Tự động / Thủ công',
-                    value: `${formatNumber(derived.totalAutoPlays)} / ${formatNumber(derived.totalManualPlays)}`,
-                    note: 'cơ cấu phát âm thanh',
-                    accent: 'text-amber-200',
                   },
                   {
                     label: 'Thanh toán paywall',
