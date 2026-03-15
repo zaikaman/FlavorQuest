@@ -607,7 +607,7 @@ export function RoleChatbot({
   }
 
   return (
-    <div className={`fixed right-4 sm:right-6 lg:right-8 z-[65] flex flex-col items-end ${bottomOffsetClassName}`}>
+    <div className={`pointer-events-none fixed right-4 sm:right-6 lg:right-8 z-[65] flex flex-col items-end ${bottomOffsetClassName}`}>
       <div
         className={`transition-all duration-300 ${isOpen ? 'pointer-events-auto translate-y-0 opacity-100 scale-100' : 'pointer-events-none translate-y-4 opacity-0 scale-95'}`}
       >
@@ -617,7 +617,7 @@ export function RoleChatbot({
       <button
         type="button"
         onClick={() => setIsOpen((current) => !current)}
-        className={`group flex items-center gap-3 rounded-full border border-white/30 bg-gradient-to-br ${theme.button} px-4 py-3 text-white shadow-[0_20px_50px_rgba(22,18,15,0.4)] transition-all hover:scale-[1.02] active:scale-95`}
+        className={`pointer-events-auto group flex items-center gap-3 rounded-full border border-white/30 bg-gradient-to-br ${theme.button} px-4 py-3 text-white shadow-[0_20px_50px_rgba(22,18,15,0.4)] transition-all hover:scale-[1.02] active:scale-95`}
         aria-expanded={isOpen}
         aria-label={isOpen ? copy.closeLabel : copy.openLabel}
       >
