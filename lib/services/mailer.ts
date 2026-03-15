@@ -12,6 +12,23 @@ interface NewOrderEmailPayload {
   deliveryAddress?: string | null;
 }
 
+interface SupportChatEmailPayload {
+  to: string;
+  recipientRole: 'customer' | 'owner' | 'admin';
+  senderEmail?: string | null;
+  threadLabel: string;
+  messagePreview: string;
+}
+
+function escapeHtml(value: string) {
+  return value
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;');
+}
+
 function createTransporter() {
   const host = process.env.MAIL_HOST;
   const port = Number(process.env.MAIL_PORT || 587);
@@ -62,6 +79,49 @@ export async function sendNewOrderEmail(payload: NewOrderEmailPayload) {
           ${payload.deliveryAddress ? `<li>Địa chỉ giao: ${payload.deliveryAddress}</li>` : ''}
         </ul>
         <p>Vui lòng vào dashboard chủ quán để xác nhận và chuẩn bị món.</p>
+      </div>
+    `,
+  });
+}
+
+export async function sendSupportChatEmail(payload: SupportChatEmailPayload) {
+  const transporter = createTransporter();
+
+  if (!transporter) {
+    return;
+  }
+
+  const fromAddress = process.env.MAIL_FROM_ADDRESS || 'noreply@flavorquest.com';
+  const fromName = process.env.MAIL_FROM_NAME || 'FlavorQuest';
+  const greeting =
+    payload.recipientRole === 'owner'
+      ? 'Chủ quán'
+      : payload.recipientRole === 'admin'
+        ? 'Đội ngũ admin'
+        : 'Bạn';
+  const escapedThreadLabel = escapeHtml(payload.threadLabel);
+  const escapedMessagePreview = escapeHtml(payload.messagePreview);
+  const escapedSenderEmail = payload.senderEmail ? escapeHtml(payload.senderEmail) : null;
+
+  await transporter.sendMail({
+    from: `${fromName} <${fromAddress}>`,
+    to: payload.to,
+    subject: `Tin nhắn mới trong ${payload.threadLabel}`,
+    html: `
+      <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #1f2937;">
+        <h2 style="margin-bottom: 12px;">Bạn có tin nhắn chat mới</h2>
+        <p>Xin chào ${greeting},</p>
+        <p>
+          ${
+            escapedSenderEmail
+              ? `<strong>${escapedSenderEmail}</strong> vừa gửi tin nhắn mới trong <strong>${escapedThreadLabel}</strong>.`
+              : `Bạn vừa nhận được tin nhắn mới trong <strong>${escapedThreadLabel}</strong>.`
+          }
+        </p>
+        <div style="margin: 16px 0; padding: 14px 16px; border-radius: 12px; background: #fff7ed; border: 1px solid #fed7aa;">
+          ${escapedMessagePreview}
+        </div>
+        <p>Vui lòng mở trang chat trong FlavorQuest để phản hồi.</p>
       </div>
     `,
   });

@@ -50,6 +50,10 @@ export default function TourAssistantPage() {
               ? params.toString()
                 ? `/tour/assistant?${params.toString()}`
                 : '/tour/assistant'
+              : tab === 'chat'
+                ? params.toString()
+                  ? `/tour/chat?${params.toString()}`
+                  : '/tour/chat'
               : params.toString()
                 ? `/tour?${params.toString()}`
                 : '/tour';

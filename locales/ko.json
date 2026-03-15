@@ -436,6 +436,88 @@
       "faq": "이 앱은 오프라인 사용과 사전 주문을 지원하나요?"
     }
   },
+  "support": {
+    "nav": "채팅",
+    "openPage": "지원 채팅 페이지 열기",
+    "customer": {
+      "eyebrow": "지원 센터",
+      "title": "점주 또는 관리자와 바로 대화하기",
+      "subtitle": "각 매장은 판매 지점별로 별도 스레드를 가지며, 관리자는 계정과 서비스 경험 전반을 지원하는 공용 채널입니다.",
+      "emptyTitle": "아직 대화가 없습니다.",
+      "emptyBody": "왼쪽에서 매장이나 관리자 채널을 선택해 대화를 시작하세요. 답장이 오면 이메일 알림도 전송됩니다."
+    },
+    "owner": {
+      "eyebrow": "운영 채팅",
+      "title": "점주와 지원팀을 위한 채팅",
+      "subtitle": "고객 대화를 매장별로 정리하고, 운영 이슈가 생기면 관리자와 별도 채널을 열 수 있습니다.",
+      "emptyTitle": "아직 대화가 없습니다.",
+      "emptyBody": "고객이 매장에 메시지를 보내거나 관리자 채널을 열면 모든 대화가 여기에 표시됩니다."
+    },
+    "admin": {
+      "eyebrow": "지원 큐",
+      "title": "고객과 점주의 대화를 한곳에서 조율",
+      "subtitle": "관리자는 고객과 점주 지원 스레드를 하나의 받은편지함에서 받아 플로팅 위젯 없이 빠르게 응답할 수 있습니다.",
+      "emptyTitle": "큐가 비어 있습니다.",
+      "emptyBody": "고객이나 점주에게서 새로운 지원 요청이 오면 여기에 표시됩니다."
+    },
+    "stats": {
+      "activeThreads": "진행 중 스레드",
+      "activeThreadsBody": "각 스레드는 메인 화면 위에 겹치는 위젯이 아니라 독립된 전체 페이지로 제공됩니다.",
+      "unreadThreads": "응답 필요",
+      "unreadThreadsBody": "새 메시지가 도착하면 수신자에게 이메일 알림도 함께 전송됩니다."
+    },
+    "launchpad": {
+      "title": "새 스레드 열기",
+      "body": "대상자를 올바르게 선택하세요. 시스템이 해당 대화를 새로 만들거나 기존 스레드를 재사용합니다."
+    },
+    "inbox": {
+      "title": "대화 목록",
+      "body": "읽지 않은 메시지가 있는 스레드는 더 눈에 띄게 표시되어 빠르게 대응할 수 있습니다."
+    },
+    "threadTypes": {
+      "customerOwner": "고객 / 점주",
+      "customerAdmin": "고객 / 관리자",
+      "ownerAdmin": "점주 / 관리자"
+    },
+    "states": {
+      "creating": "열는 중...",
+      "waitingFirstMessage": "이 스레드에는 아직 메시지가 없습니다.",
+      "noThreadSelected": "대화를 선택해 시작하세요.",
+      "noThreadSelectedBody": "왼쪽 목록에서 역할과 업무 규칙에 맞는 스레드를 열 수 있습니다.",
+      "noMessages": "이 스레드에는 아직 메시지가 없습니다.",
+      "noMessagesBody": "첫 메시지를 보내세요. 답장이 오면 목록이 자동으로 갱신되고 이메일 알림도 전송됩니다."
+    },
+    "actions": {
+      "openThread": "대화 열기",
+      "startThread": "채팅 시작",
+      "refresh": "새로고침",
+      "sending": "전송 중...",
+      "send": "메시지 보내기"
+    },
+    "counterparts": {
+      "admin": "관리팀",
+      "unknown": "수신자",
+      "adminShort": "관리자",
+      "ownerShort": "점주",
+      "customerShort": "고객"
+    },
+    "thread": {
+      "title": "대화",
+      "poiContext": "이 대화는 판매 지점 {name}에 연결되어 있습니다.",
+      "emailHint": "새 메시지는 앱 알림과 이메일 알림을 함께 생성합니다.",
+      "emailBadge": "이메일 알림 사용"
+    },
+    "composer": {
+      "placeholder": "논의할 내용을 입력하세요. Enter로 전송하고 Shift + Enter로 줄바꿈합니다.",
+      "hint": "메시지는 실시간으로 표시되며 수신자에게 이메일 알림도 전송됩니다."
+    },
+    "errors": {
+      "loadThreads": "대화 목록을 불러올 수 없습니다.",
+      "loadMessages": "이 대화의 메시지를 불러올 수 없습니다.",
+      "createThread": "새 대화를 만들 수 없습니다.",
+      "sendMessage": "메시지를 보낼 수 없습니다."
+    }
+  },
   "notifications": {
     "title": "알림",
     "markAll": "모두 읽음 처리",

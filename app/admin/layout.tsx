@@ -27,6 +27,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   const navItems = [
     { href: '/admin', label: 'Tổng quan' },
+    { href: '/admin/chat', label: 'Tin nhắn' },
     { href: '/admin/pois', label: 'POI' },
     { href: '/admin/users', label: 'Người dùng' },
     { href: '/admin/tours', label: 'Tour' },

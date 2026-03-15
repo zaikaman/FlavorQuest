@@ -263,6 +263,51 @@ export interface AppNotification {
   created_at: string;
 }
 
+export type SupportThreadType = 'customer_owner' | 'customer_admin' | 'owner_admin';
+
+export interface SupportParticipantSummary {
+  id: string;
+  email: string;
+  role: UserRole;
+}
+
+export interface SupportThreadSummary {
+  id: string;
+  thread_type: SupportThreadType;
+  subject: string | null;
+  last_message_preview: string | null;
+  last_message_at: string;
+  created_at: string;
+  unread_count: number;
+  counterpart: SupportParticipantSummary | null;
+  poi: {
+    id: string;
+    name_vi: string;
+  } | null;
+}
+
+export interface SupportDirectoryEntry {
+  id: string;
+  title: string;
+  subtitle: string;
+  thread_type: SupportThreadType;
+  poi: {
+    id: string;
+    name_vi: string;
+  } | null;
+  counterpart: SupportParticipantSummary | null;
+  existing_thread_id?: string | null;
+}
+
+export interface SupportMessage {
+  id: string;
+  thread_id: string;
+  sender_id: string;
+  sender_role: UserRole;
+  content: string;
+  created_at: string;
+}
+
 // ============================================
 // GEOLOCATION TYPES
 // ============================================

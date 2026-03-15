@@ -134,20 +134,58 @@ CREATE TABLE public.preorder_orders (
   id uuid NOT NULL DEFAULT uuid_generate_v4(),
   poi_id uuid NOT NULL,
   customer_id uuid NOT NULL,
-  order_type character varying NOT NULL DEFAULT 'pickup'::character varying CHECK (order_type::text = ANY (ARRAY['pickup'::character varying, 'delivery'::character varying]::text[])),
   customer_name text,
   customer_phone text,
   note text,
-  delivery_address text,
-  delivery_time timestamp with time zone CHECK (delivery_time IS NULL OR delivery_time > now()) NOT VALID,
   pickup_time timestamp with time zone CHECK (pickup_time IS NULL OR pickup_time > now()) NOT VALI),
   status character varying NOT NULL DEFAULT 'pending'::character varying CHECK (status::text = ANY (ARRAY['pending'::character varying, 'confirmed'::character varying, 'preparing'::character varying, 'ready'::character varying, 'delivering'::character varying, 'delivered'::character varying, 'cancelled'::character varying]::text[])),
   total_amount numeric NOT NULL DEFAULT 0 CHECK (total_amount >= 0::numeric),
   created_at timestamp with time zone NOT NULL DEFAULT now(),
   updated_at timestamp with time zone NOT NULL DEFAULT now(),
+  order_type character varying NOT NULL DEFAULT 'pickup'::character varying CHECK (order_type::text = ANY (ARRAY['pickup'::character varying, 'delivery'::character varying]::text[])),
+  delivery_address text,
+  delivery_time timestamp with time zone CHECK (delivery_time IS NULL OR delivery_time > now()) NOT VALI),
   CONSTRAINT preorder_orders_pkey PRIMARY KEY (id),
   CONSTRAINT preorder_orders_poi_id_fkey FOREIGN KEY (poi_id) REFERENCES public.pois(id),
   CONSTRAINT preorder_orders_customer_id_fkey FOREIGN KEY (customer_id) REFERENCES public.users(id)
+);
+CREATE TABLE public.support_messages (
+  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  thread_id uuid NOT NULL,
+  sender_id uuid NOT NULL,
+  sender_role character varying NOT NULL CHECK (sender_role::text = ANY (ARRAY['customer'::character varying, 'owner'::character varying, 'admin'::character varying]::text[])),
+  content text NOT NULL CHECK (char_length(TRIM(BOTH FROM content)) > 0 AND char_length(content) <= 4000),
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT support_messages_pkey PRIMARY KEY (id),
+  CONSTRAINT support_messages_thread_id_fkey FOREIGN KEY (thread_id) REFERENCES public.support_threads(id),
+  CONSTRAINT support_messages_sender_id_fkey FOREIGN KEY (sender_id) REFERENCES public.users(id)
+);
+CREATE TABLE public.support_thread_reads (
+  thread_id uuid NOT NULL,
+  user_id uuid NOT NULL,
+  last_read_at timestamp with time zone NOT NULL DEFAULT now(),
+  updated_at timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT support_thread_reads_pkey PRIMARY KEY (thread_id, user_id),
+  CONSTRAINT support_thread_reads_thread_id_fkey FOREIGN KEY (thread_id) REFERENCES public.support_threads(id),
+  CONSTRAINT support_thread_reads_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id)
+);
+CREATE TABLE public.support_threads (
+  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  thread_type character varying NOT NULL CHECK (thread_type::text = ANY (ARRAY['customer_owner'::character varying, 'customer_admin'::character varying, 'owner_admin'::character varying]::text[])),
+  customer_id uuid,
+  owner_id uuid,
+  poi_id uuid,
+  created_by uuid NOT NULL,
+  subject text,
+  last_message_preview text,
+  last_message_at timestamp with time zone NOT NULL DEFAULT now(),
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  updated_at timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT support_threads_pkey PRIMARY KEY (id),
+  CONSTRAINT support_threads_customer_id_fkey FOREIGN KEY (customer_id) REFERENCES public.users(id),
+  CONSTRAINT support_threads_owner_id_fkey FOREIGN KEY (owner_id) REFERENCES public.users(id),
+  CONSTRAINT support_threads_poi_id_fkey FOREIGN KEY (poi_id) REFERENCES public.pois(id),
+  CONSTRAINT support_threads_created_by_fkey FOREIGN KEY (created_by) REFERENCES public.users(id)
 );
 CREATE TABLE public.tours (
   id uuid NOT NULL DEFAULT uuid_generate_v4(),

@@ -7,7 +7,7 @@
 
 import { useTranslations } from '@/lib/hooks/useTranslations';
 
-export type NavTab = 'map' | 'list' | 'assistant' | 'history' | 'settings';
+export type NavTab = 'map' | 'list' | 'chat' | 'assistant' | 'history' | 'settings';
 
 interface BottomNavProps {
   activeTab: NavTab;
@@ -18,6 +18,7 @@ interface BottomNavProps {
 const TABS: { id: NavTab; icon: string; labelKey: string }[] = [
   { id: 'map', icon: 'map', labelKey: 'map.title' },
   { id: 'list', icon: 'format_list_bulleted', labelKey: 'common.browse' },
+  { id: 'chat', icon: 'forum', labelKey: 'support.nav' },
   { id: 'assistant', icon: 'psychology_alt', labelKey: 'chatbot.nav' },
   { id: 'history', icon: 'headphones', labelKey: 'history.title' },
   { id: 'settings', icon: 'settings', labelKey: 'settings.title' },
