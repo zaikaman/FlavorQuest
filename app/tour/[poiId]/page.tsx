@@ -16,8 +16,8 @@ import { usePOIManager } from '@/lib/hooks/usePOIManager';
 import { getLocalizedPOI } from '@/lib/utils/localization';
 import { logManualPlay } from '@/lib/services/analytics';
 import { saveVisit } from '@/lib/services/storage';
-import { Spinner } from '@/components/ui/Spinner';
 import { Toast } from '@/components/ui/Toast';
+import { CardSkeleton, InlineSpinner, POIDetailSkeleton } from '@/components/ui/Loading';
 import type { Json } from '@/lib/types/database.types';
 import type { Dish, POI } from '@/lib/types/index';
 
@@ -56,6 +56,7 @@ export default function POIDetailPage() {
   const [pickupTime, setPickupTime] = useState('');
   const [orderNote, setOrderNote] = useState('');
   const [isOrdering, setIsOrdering] = useState(false);
+  const [isLoadingDishes, setIsLoadingDishes] = useState(true);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
   const pickupTimeMin = getMinimumPickupTimeValue();
@@ -85,6 +86,7 @@ export default function POIDetailPage() {
     if (!poiId) return;
 
     const loadDishes = async () => {
+      setIsLoadingDishes(true);
       try {
         const res = await fetch(`/api/dishes?poi_id=${poiId}`);
         if (!res.ok) return;
@@ -92,6 +94,8 @@ export default function POIDetailPage() {
         setDishes(data ?? []);
       } catch (error) {
         console.error('Load dishes failed:', error);
+      } finally {
+        setIsLoadingDishes(false);
       }
     };
 
@@ -213,11 +217,7 @@ export default function POIDetailPage() {
   };
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-screen bg-background-dark">
-        <Spinner size="lg" />
-      </div>
-    );
+    return <POIDetailSkeleton />;
   }
 
   if (!poi) {
@@ -398,7 +398,13 @@ export default function POIDetailPage() {
           </h2>
 
           <div className="space-y-3">
-            {dishes.map(dish => (
+            {isLoadingDishes ? (
+              <>
+                <CardSkeleton showMedia={false} lines={2} />
+                <CardSkeleton showMedia={false} lines={2} />
+                <CardSkeleton showMedia={false} lines={2} />
+              </>
+            ) : dishes.map(dish => (
               <div key={dish.id} className="rounded-xl border border-white/10 bg-[#2a1e16] p-3 flex items-center justify-between gap-3">
                 <div>
                   <p className="font-semibold">{dish.name}</p>
@@ -412,7 +418,7 @@ export default function POIDetailPage() {
                 </div>
               </div>
             ))}
-            {dishes.length === 0 && <p className="text-sm text-gray-400">{t('menu.empty')}</p>}
+            {!isLoadingDishes && dishes.length === 0 && <p className="text-sm text-gray-400">{t('menu.empty')}</p>}
           </div>
         </div>
 
@@ -452,7 +458,7 @@ export default function POIDetailPage() {
             disabled={orderItems.length === 0 || isOrdering}
             className="w-full py-3 rounded-lg bg-primary text-white font-bold disabled:opacity-50"
           >
-            {isOrdering ? t('common.loading') : t('menu.placeOrder')}
+            {isOrdering ? <InlineSpinner label={t('common.loading')} /> : t('menu.placeOrder')}
           </button>
         </div>
       </div>

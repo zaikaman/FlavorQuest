@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { TableSkeleton } from '@/components/ui/Loading';
 
 type PaymentStatus = 'PENDING' | 'PROCESSING' | 'PAID' | 'CANCELLED' | 'EXPIRED' | 'FAILED' | 'UNDERPAID';
 
@@ -161,9 +162,7 @@ export default function AdminPaymentsPage() {
         </div>
 
         {isLoading ? (
-          <div className="flex h-40 items-center justify-center">
-            <div className="h-10 w-10 rounded-full border-b-2 border-primary animate-spin" />
-          </div>
+          <TableSkeleton columns={8} rows={6} />
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full min-w-[1100px] text-left text-sm text-gray-300">

@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { TableSkeleton } from '@/components/ui/Loading';
 import type { POI } from '@/lib/types/index';
 
 interface OwnerOption {
@@ -152,8 +153,14 @@ export default function POIsPage() {
 
   if (isLoading) {
     return (
-      <div className="flex h-64 items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary"></div>
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-white">Quản lý địa điểm</h1>
+            <p className="text-gray-400">Danh sách địa điểm trong tour</p>
+          </div>
+        </div>
+        <TableSkeleton columns={6} rows={7} />
       </div>
     );
   }

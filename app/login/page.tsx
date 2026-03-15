@@ -10,6 +10,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/lib/contexts/AuthContext';
 import { useTranslations } from '@/lib/hooks/useTranslations';
 import { requestEmailOtp, verifyEmailOtp, type AccountType } from '@/lib/services/auth';
+import { InlineSpinner, Skeleton } from '@/components/ui/Loading';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -117,8 +118,20 @@ export default function LoginPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background-dark">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      <div className="min-h-screen bg-background-dark px-4 py-10">
+        <div className="mx-auto max-w-md">
+          <div className="mb-8 text-center">
+            <Skeleton className="mx-auto h-20 w-20 rounded-full" />
+            <Skeleton className="mx-auto mt-6 h-8 w-2/3" />
+            <Skeleton className="mx-auto mt-3 h-4 w-4/5 rounded-full" />
+          </div>
+          <div className="rounded-2xl border border-white/10 bg-white/5 p-8">
+            <Skeleton className="h-4 w-full rounded-full" />
+            <Skeleton className="mt-6 h-11 w-full rounded-xl" />
+            <Skeleton className="mt-3 h-11 w-full rounded-xl" />
+            <Skeleton className="mt-6 h-12 w-full rounded-xl" />
+          </div>
+        </div>
       </div>
     );
   }
@@ -220,7 +233,7 @@ export default function LoginPage() {
                 className="w-full rounded-xl bg-primary px-6 py-3 font-bold text-white transition-all duration-200 hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {isSendingOtp
-                  ? t('login.sendingOtp')
+                  ? <InlineSpinner label={t('login.sendingOtp')} />
                   : isOtpSent
                     ? isResendLocked
                       ? t('login.resendIn', { seconds: cooldown })
@@ -256,7 +269,7 @@ export default function LoginPage() {
                   disabled={isVerifyingOtp}
                   className="w-full rounded-xl border border-primary/30 bg-primary/15 px-6 py-3 font-bold text-primary transition-all duration-200 hover:bg-primary/20 disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  {isVerifyingOtp ? t('login.verifyingOtp') : t('login.verifyOtp')}
+                  {isVerifyingOtp ? <InlineSpinner label={t('login.verifyingOtp')} color="primary" /> : t('login.verifyOtp')}
                 </button>
               </div>
             )}

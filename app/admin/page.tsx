@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import type { RealtimeChannel } from '@supabase/supabase-js';
 import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/lib/contexts/AuthContext';
+import { DashboardSkeleton } from '@/components/ui/Loading';
 import type { POI, Tour } from '@/lib/types';
 import { USER_PRESENCE_CHANNEL } from '@/lib/realtime/presence';
 
@@ -364,11 +365,7 @@ export default function AdminDashboard() {
   }, [snapshot]);
 
   if (isLoading && !snapshot) {
-    return (
-      <div className="flex h-64 items-center justify-center">
-        <div className="border-primary h-10 w-10 animate-spin rounded-full border-b-2" />
-      </div>
-    );
+    return <DashboardSkeleton stats={6} />;
   }
 
   if (!snapshot || !derived) {

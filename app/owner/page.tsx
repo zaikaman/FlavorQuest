@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
+import { DashboardSkeleton, InlineSpinner } from '@/components/ui/Loading';
 import type { AppNotification, Dish, POI, PreorderOrder } from '@/lib/types';
 
 type OwnerTab = 'pois' | 'menu' | 'orders' | 'notifications';
@@ -418,14 +419,7 @@ export default function OwnerDashboardPage() {
   };
 
   if (isLoading) {
-    return (
-      <div className="flex min-h-[50vh] items-center justify-center">
-        <div className="rounded-[28px] border border-white/10 bg-[#2c1e16] px-8 py-10 text-center">
-          <div className="border-primary mx-auto h-12 w-12 animate-spin rounded-full border-b-2" />
-          <p className="mt-4 text-sm text-gray-400">Đang chuẩn bị bảng điều hành chủ quán...</p>
-        </div>
-      </div>
-    );
+    return <DashboardSkeleton stats={4} />;
   }
 
   const overviewCards = [
@@ -988,7 +982,7 @@ export default function OwnerDashboardPage() {
                       disabled={isSubmittingDish}
                       className="bg-primary rounded-2xl px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
                     >
-                      {isSubmittingDish ? 'Đang lưu...' : 'Lưu món'}
+                      {isSubmittingDish ? <InlineSpinner label="Đang lưu..." /> : 'Lưu món'}
                     </button>
                   </div>
                 </form>
@@ -1042,7 +1036,7 @@ export default function OwnerDashboardPage() {
                               disabled={deletingDishId === dish.id}
                               className="rounded-xl border border-white/10 px-3 py-2 text-sm font-semibold text-gray-300 transition-colors hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
                             >
-                              {deletingDishId === dish.id ? 'Đang xóa...' : 'Xóa'}
+                              {deletingDishId === dish.id ? <InlineSpinner label="Đang xóa..." /> : 'Xóa'}
                             </button>
                           </div>
                         </div>
@@ -1270,7 +1264,7 @@ export default function OwnerDashboardPage() {
               disabled={notifications.length === 0 || isMarkingNotifications}
               className="bg-primary mt-6 rounded-2xl px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {isMarkingNotifications ? 'Đang cập nhật...' : 'Đánh dấu tất cả đã đọc'}
+              {isMarkingNotifications ? <InlineSpinner label="Đang cập nhật..." /> : 'Đánh dấu tất cả đã đọc'}
             </button>
           </div>
 

@@ -11,6 +11,7 @@ import { useLanguage } from '@/lib/contexts/LanguageContext';
 import { useTranslations } from '@/lib/hooks/useTranslations';
 import { getLocalizedPOI } from '@/lib/utils/localization';
 import { calculateDistance } from '@/lib/utils/distance';
+import { CardSkeleton, Skeleton } from '@/components/ui/Loading';
 import type { POI, Coordinates } from '@/lib/types/index';
 
 interface POIListViewProps {
@@ -20,6 +21,7 @@ interface POIListViewProps {
   onViewPOI: (poi: POI) => void;
   playingPOIId?: string | null;
   isOfflineReady?: boolean;
+  isLoading?: boolean;
 }
 
 type SortOption = 'distance' | 'priority' | 'name';
@@ -31,6 +33,7 @@ export function POIListView({
   onViewPOI,
   playingPOIId,
   isOfflineReady = false,
+  isLoading = false,
 }: POIListViewProps) {
   const { language } = useLanguage();
   const { t } = useTranslations();
@@ -116,7 +119,10 @@ export function POIListView({
 
       {/* Filter Chips */}
       <div className="flex gap-2 px-4 py-3 overflow-x-auto scrollbar-hide">
-        {['all', 'snails', 'seafood', 'grill', 'nearMe'].map((catKey) => (
+        {(isLoading ? ['1', '2', '3', '4', '5'] : ['all', 'snails', 'seafood', 'grill', 'nearMe']).map((catKey) => (
+          isLoading ? (
+            <Skeleton key={catKey} className="h-10 w-24 shrink-0 rounded-lg" />
+          ) : (
           <button
             key={catKey}
             onClick={() => setFilterCategory(catKey)}
@@ -127,12 +133,19 @@ export function POIListView({
           >
             {t(`categories.${catKey}`)}
           </button>
+          )
         ))}
       </div>
 
       {/* POI List */}
       <div className="flex-1 overflow-y-auto px-4 pb-20">
-        {sortedPOIs.length === 0 ? (
+        {isLoading ? (
+          <div className="space-y-4">
+            <CardSkeleton lines={3} />
+            <CardSkeleton lines={3} />
+            <CardSkeleton lines={3} />
+          </div>
+        ) : sortedPOIs.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12 text-center">
             <span className="material-symbols-outlined text-6xl text-muted mb-4">search_off</span>
             <h3 className="text-white font-bold text-lg mb-2">{t('list.notFoundTitle')}</h3>

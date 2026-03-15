@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { ImageUploader } from '@/components/admin/ImageUploader';
+import { DashboardSkeleton } from '@/components/ui/Loading';
 import type { POI, Tour, TourPayload } from '@/lib/types/index';
 
 const TOUR_LANGUAGES = [
@@ -336,9 +337,7 @@ export default function AdminToursPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
+      <DashboardSkeleton stats={4} />
     );
   }
 

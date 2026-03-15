@@ -11,6 +11,7 @@ import { useLanguage } from '@/lib/contexts/LanguageContext';
 import { useAuth } from '@/lib/contexts/AuthContext';
 import { useTranslations } from '@/lib/hooks/useTranslations';
 import { loadSettings, saveSettings } from '@/lib/services/storage';
+import { FeedSkeleton, InlineSpinner, Skeleton } from '@/components/ui/Loading';
 import type { UserSettings, Language } from '@/lib/types/index';
 import { GEOFENCE_RADIUS_METERS } from '@/lib/constants/index';
 
@@ -124,8 +125,17 @@ export function SettingsPanel({ isOpen, onClose, onSettingsChange }: SettingsPan
         {/* Content */}
         <div className="overflow-y-auto p-4 pb-12 flex-1">
           {isLoading ? (
-            <div className="flex justify-center py-8">
-              <span className="material-symbols-outlined text-primary animate-spin text-3xl">sync</span>
+            <div className="space-y-6 py-2">
+              <div>
+                <Skeleton className="h-6 w-28" />
+                <div className="mt-4 grid grid-cols-3 gap-2">
+                  <Skeleton className="h-14 rounded-xl" />
+                  <Skeleton className="h-14 rounded-xl" />
+                  <Skeleton className="h-14 rounded-xl" />
+                </div>
+              </div>
+              <div className="h-px bg-white/10" />
+              <FeedSkeleton items={3} />
             </div>
           ) : (
             <>
@@ -250,7 +260,7 @@ export function SettingsPanel({ isOpen, onClose, onSettingsChange }: SettingsPan
                     className="w-full rounded-xl border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm font-semibold text-red-300 transition-colors hover:bg-red-500/20 disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     {isSigningOut
-                      ? t('settings.signingOut', undefined, 'Đang đăng xuất...')
+                      ? <InlineSpinner label={t('settings.signingOut', undefined, 'Đang đăng xuất...')} color="primary" />
                       : t('settings.signOut', undefined, 'Đăng xuất')}
                   </button>
                 </section>
