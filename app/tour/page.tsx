@@ -134,8 +134,7 @@ export default function TourPage() {
 
   const handlePOIOfflineReady = useCallback(() => {
     setIsOfflineReady(true);
-    showToastMessage(t('tour.dataSaved'));
-  }, [showToastMessage, t]);
+  }, []);
 
   // Offline Sync
   const { isOfflineReady: offlineSyncReady } = useOfflineSync({
