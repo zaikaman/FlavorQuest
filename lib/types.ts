@@ -33,6 +33,8 @@ export type LanguageConfig = {
  * POI database entity
  * Represents a food stall or point of interest on Vĩnh Khánh street
  */
+import type { POICategoryTag } from '@/lib/constants/poiCategories';
+
 export interface POI {
   id: string;
   lat: number;
@@ -67,6 +69,7 @@ export interface POI {
   // Media & metadata
   image_url?: string;
   signature_dish?: string;
+  category_tags?: POICategoryTag[];
   fun_fact?: string;
   estimated_hours?: string;
   owner_id?: string | null;
@@ -92,6 +95,7 @@ export interface LocalizedPOI {
   audio_url: string;
   image_url?: string;
   signature_dish?: string;
+  category_tags?: POICategoryTag[];
   fun_fact?: string;
   estimated_hours?: string;
 }
@@ -135,6 +139,7 @@ export interface POIPayload {
 
   image_url?: string;
   signature_dish?: string;
+  category_tags?: POICategoryTag[];
   fun_fact?: string;
   estimated_hours?: string;
   owner_id?: string | null;

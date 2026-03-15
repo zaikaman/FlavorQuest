@@ -89,6 +89,7 @@ CREATE TABLE public.pois (
   audio_url_zh text,
   image_url text,
   signature_dish text,
+  category_tags text[] DEFAULT ARRAY[]::text[],
   fun_fact text,
   estimated_hours text,
   created_at timestamp with time zone NOT NULL DEFAULT now(),

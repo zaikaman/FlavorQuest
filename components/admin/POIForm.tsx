@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ImageUploader } from './ImageUploader';
 import { TTSGenerator } from './TTSGenerator';
+import { POI_CATEGORY_OPTIONS, type POICategoryTag } from '@/lib/constants/poiCategories';
 import type { POI } from '@/lib/types/index';
 
 interface POIFormProps {
@@ -67,6 +68,23 @@ export function POIForm({ initialData, isNew = false, allowOwnerAssignment = tru
 
     const handleChange = (field: keyof POI, value: FormValue) => {
         setFormData(prev => ({ ...prev, [field]: value }));
+    };
+
+    const handleToggleCategory = (category: POICategoryTag) => {
+        setFormData(prev => {
+            const currentTags = new Set(prev.category_tags ?? []);
+
+            if (currentTags.has(category)) {
+                currentTags.delete(category);
+            } else {
+                currentTags.add(category);
+            }
+
+            return {
+                ...prev,
+                category_tags: Array.from(currentTags),
+            };
+        });
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -267,6 +285,28 @@ export function POIForm({ initialData, isNew = false, allowOwnerAssignment = tru
                                 onChange={e => handleChange('priority', parseInt(e.target.value))}
                                 className="w-full bg-black/20 border border-white/10 rounded-lg p-2.5 text-white"
                             />
+                        </div>
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-400 mb-2">Phân loại để lọc trên tour</label>
+                        <div className="flex flex-wrap gap-2">
+                            {POI_CATEGORY_OPTIONS.map(category => {
+                                const selected = (formData.category_tags ?? []).includes(category.value);
+
+                                return (
+                                    <button
+                                        key={category.value}
+                                        type="button"
+                                        onClick={() => handleToggleCategory(category.value)}
+                                        className={`rounded-lg border px-3 py-2 text-sm transition-colors ${selected
+                                            ? 'border-primary bg-primary/20 text-primary'
+                                            : 'border-white/10 bg-black/20 text-white hover:bg-white/5'
+                                            }`}
+                                    >
+                                        {category.label}
+                                    </button>
+                                );
+                            })}
                         </div>
                     </div>
                 </div>

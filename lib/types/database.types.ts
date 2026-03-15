@@ -56,9 +56,10 @@ export interface Database {
           audio_url_fr: string | null;
           audio_url_ko: string | null;
           audio_url_zh: string | null;
-          image_url: string | null;
-          signature_dish: string | null;
-          fun_fact: string | null;
+            image_url: string | null;
+            signature_dish: string | null;
+            category_tags: string[] | null;
+            fun_fact: string | null;
           estimated_hours: string | null;
         };
         Insert: {
@@ -89,9 +90,10 @@ export interface Database {
           audio_url_fr?: string | null;
           audio_url_ko?: string | null;
           audio_url_zh?: string | null;
-          image_url?: string | null;
-          signature_dish?: string | null;
-          fun_fact?: string | null;
+            image_url?: string | null;
+            signature_dish?: string | null;
+            category_tags?: string[] | null;
+            fun_fact?: string | null;
           estimated_hours?: string | null;
         };
         Update: {
@@ -122,9 +124,10 @@ export interface Database {
           audio_url_fr?: string | null;
           audio_url_ko?: string | null;
           audio_url_zh?: string | null;
-          image_url?: string | null;
-          signature_dish?: string | null;
-          fun_fact?: string | null;
+            image_url?: string | null;
+            signature_dish?: string | null;
+            category_tags?: string[] | null;
+            fun_fact?: string | null;
           estimated_hours?: string | null;
         };
         Relationships: [

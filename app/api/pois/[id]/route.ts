@@ -1,4 +1,5 @@
 import { createServerClient, getCurrentUserProfile } from '@/lib/supabase/server';
+import { normalizePOICategoryTags } from '@/lib/constants/poiCategories';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
@@ -45,6 +46,10 @@ export async function PUT(
     try {
         const body = await request.json();
 
+        if (Object.prototype.hasOwnProperty.call(body, 'category_tags')) {
+            body.category_tags = normalizePOICategoryTags(body.category_tags);
+        }
+
         const { data: poi, error: poiError } = await supabase
             .from('pois')
             .select('id, owner_id')
@@ -71,6 +76,7 @@ export async function PUT(
             delete body.radius;
             delete body.deleted_at;
             delete body.owner_id;
+            delete body.category_tags;
         }
 
         // Update timestamp
