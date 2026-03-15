@@ -75,30 +75,30 @@ export function SupportInboxPage({ role, className = '' }: SupportInboxPageProps
   const copy = useMemo(() => {
     if (role === 'owner') {
       return {
-        eyebrow: t('support.owner.eyebrow', undefined, 'Tin nhắn vận hành'),
-        title: t('support.owner.title', undefined, 'Chat giữa chủ quán và hệ thống hỗ trợ'),
+        eyebrow: t('support.owner.eyebrow', undefined, 'Hộp thư'),
+        title: t('support.owner.title', undefined, 'Tin nhắn từ khách và admin'),
         subtitle: t(
           'support.owner.subtitle',
           undefined,
-          'Tập trung trao đổi với khách theo từng điểm bán và mở một kênh riêng với admin khi cần xử lý vận hành.'
+          'Theo dõi trao đổi với khách theo từng quán và giữ một kênh riêng để làm việc với admin.'
         ),
-        emptyTitle: t('support.owner.emptyTitle', undefined, 'Chưa có cuộc trò chuyện nào.'),
+        emptyTitle: t('support.owner.emptyTitle', undefined, 'Hộp thư đang trống.'),
         emptyBody: t(
           'support.owner.emptyBody',
           undefined,
-          'Khi khách nhắn theo từng điểm bán hoặc bạn mở kênh với admin, toàn bộ cuộc trò chuyện sẽ xuất hiện tại đây.'
+          'Khi khách nhắn hoặc bạn trao đổi với admin, hội thoại sẽ hiện ở đây.'
         ),
       };
     }
 
     if (role === 'admin') {
       return {
-        eyebrow: t('support.admin.eyebrow', undefined, 'Hàng đợi hỗ trợ'),
-        title: t('support.admin.title', undefined, 'Điều phối trao đổi với khách và chủ quán'),
+        eyebrow: t('support.admin.eyebrow', undefined, 'Tin nhắn hỗ trợ'),
+        title: t('support.admin.title', undefined, 'Trao đổi với khách và chủ quán'),
         subtitle: t(
           'support.admin.subtitle',
           undefined,
-          'Admin nhận các luồng hỗ trợ từ khách hàng và chủ quán trong cùng một inbox để phản hồi nhanh, không cần widget nổi.'
+          'Tất cả yêu cầu hỗ trợ từ khách và chủ quán đều tập trung ở đây để bạn phản hồi nhanh.'
         ),
         emptyTitle: t('support.admin.emptyTitle', undefined, 'Hàng đợi đang trống.'),
         emptyBody: t(
@@ -110,18 +110,18 @@ export function SupportInboxPage({ role, className = '' }: SupportInboxPageProps
     }
 
     return {
-      eyebrow: t('support.customer.eyebrow', undefined, 'Trung tâm hỗ trợ'),
-      title: t('support.customer.title', undefined, 'Nhắn trực tiếp với chủ quán hoặc admin'),
+      eyebrow: t('support.customer.eyebrow', undefined, 'Chat hỗ trợ'),
+      title: t('support.customer.title', undefined, 'Nhắn cho quán hoặc admin'),
       subtitle: t(
         'support.customer.subtitle',
         undefined,
-        'Mỗi quán có một luồng riêng theo từng điểm bán, còn admin là kênh hỗ trợ chung cho tài khoản và trải nghiệm trên FlavorQuest.'
+        'Bạn có thể nhắn riêng cho từng quán, hoặc hỏi admin nếu cần hỗ trợ về tài khoản và trải nghiệm.'
       ),
-      emptyTitle: t('support.customer.emptyTitle', undefined, 'Chưa có cuộc trò chuyện nào.'),
+      emptyTitle: t('support.customer.emptyTitle', undefined, 'Chưa có tin nhắn nào.'),
       emptyBody: t(
         'support.customer.emptyBody',
         undefined,
-        'Hãy chọn một quán hoặc kênh admin ở cột trái để bắt đầu nhắn tin. Email thông báo sẽ được gửi khi có phản hồi mới.'
+        'Chọn một quán hoặc mở chat với admin để bắt đầu.'
       ),
     };
   }, [role, t]);
@@ -432,7 +432,7 @@ export function SupportInboxPage({ role, className = '' }: SupportInboxPageProps
                   {t(
                     'support.stats.activeThreadsBody',
                     undefined,
-                    'Mỗi luồng là một trang chat đầy đủ, không chồng lên giao diện chính.'
+                    'Mỗi hội thoại có một trang riêng, dễ theo dõi hơn.'
                   )}
                 </p>
               </div>
@@ -445,7 +445,7 @@ export function SupportInboxPage({ role, className = '' }: SupportInboxPageProps
                   {t(
                     'support.stats.unreadThreadsBody',
                     undefined,
-                    'Khi có tin nhắn mới, hệ thống cũng gửi thông báo qua email cho bên nhận.'
+                    'Khi có tin nhắn mới, người nhận cũng sẽ được báo qua email.'
                   )}
                 </p>
               </div>
@@ -470,11 +470,11 @@ export function SupportInboxPage({ role, className = '' }: SupportInboxPageProps
                     {t('support.launchpad.title', undefined, 'Mở luồng mới')}
                   </p>
                   <p className="mt-2 text-sm leading-6 text-gray-400">
-                    {t(
-                      'support.launchpad.body',
-                      undefined,
-                      'Chọn đúng đối tượng cần trao đổi. Hệ thống sẽ mở hoặc tái sử dụng luồng chat tương ứng.'
-                    )}
+                  {t(
+                    'support.launchpad.body',
+                    undefined,
+                    'Chọn đúng người cần nhắn. Nếu đã có hội thoại trước đó, hệ thống sẽ mở lại hội thoại đó.'
+                  )}
                   </p>
                 </div>
                 <span className="rounded-full border border-white/10 bg-black/20 px-3 py-1 text-[11px] font-semibold text-gray-300">
@@ -526,7 +526,7 @@ export function SupportInboxPage({ role, className = '' }: SupportInboxPageProps
                           ? t('support.states.creating', undefined, 'Đang mở...')
                           : entry.existing_thread_id
                             ? t('support.actions.openThread', undefined, 'Mở cuộc trò chuyện')
-                            : t('support.actions.startThread', undefined, 'Bắt đầu nhắn tin')}
+                            : t('support.actions.startThread', undefined, 'Nhắn ngay')}
                       </div>
                     </button>
                   );
@@ -545,7 +545,7 @@ export function SupportInboxPage({ role, className = '' }: SupportInboxPageProps
                   {t(
                     'support.inbox.body',
                     undefined,
-                    'Luồng nào có tin mới chưa đọc sẽ nổi bật để bạn phản hồi nhanh hơn.'
+                    'Tin nhắn chưa đọc sẽ được đưa lên trước để bạn xử lý nhanh hơn.'
                   )}
                 </p>
               </div>
@@ -647,7 +647,7 @@ export function SupportInboxPage({ role, className = '' }: SupportInboxPageProps
                       : t(
                           'support.thread.emailHint',
                           undefined,
-                          'Tin nhắn mới sẽ tạo thông báo trong hệ thống và gửi email cho bên nhận.'
+                          'Tin nhắn mới sẽ được báo trong ứng dụng và qua email.'
                         )}
                   </p>
                 </div>
@@ -675,7 +675,7 @@ export function SupportInboxPage({ role, className = '' }: SupportInboxPageProps
                   {t(
                     'support.states.noThreadSelectedBody',
                     undefined,
-                    'Danh sách bên trái cho phép bạn mở đúng luồng chat theo vai trò và quy tắc nghiệp vụ.'
+                    'Bạn cũng có thể mở nhanh một cuộc trò chuyện mới ở cột bên trái.'
                   )}
                 </p>
               </div>
@@ -702,7 +702,7 @@ export function SupportInboxPage({ role, className = '' }: SupportInboxPageProps
                     {t(
                       'support.states.noMessagesBody',
                       undefined,
-                      'Hãy gửi tin đầu tiên. Khi có phản hồi, hệ thống sẽ tự cập nhật danh sách và email thông báo.'
+                      'Gửi tin đầu tiên để bắt đầu.'
                     )}
                   </p>
                 </div>
@@ -755,7 +755,7 @@ export function SupportInboxPage({ role, className = '' }: SupportInboxPageProps
                 placeholder={t(
                   'support.composer.placeholder',
                   undefined,
-                  'Nhập nội dung cần trao đổi. Nhấn Enter để gửi, Shift + Enter để xuống dòng.'
+                  'Nhập tin nhắn...'
                 )}
                 rows={4}
                 className="focus:border-primary/40 min-h-[112px] w-full resize-none rounded-[24px] border border-white/10 bg-[#17100b] px-4 py-3 text-sm leading-6 text-white outline-none placeholder:text-gray-500 disabled:cursor-not-allowed disabled:opacity-60"
@@ -765,7 +765,7 @@ export function SupportInboxPage({ role, className = '' }: SupportInboxPageProps
                   {t(
                     'support.composer.hint',
                     undefined,
-                    'Tin nhắn sẽ xuất hiện theo thời gian thực và bên nhận cũng nhận được email thông báo.'
+                    'Tin nhắn mới sẽ hiện ngay tại đây. Email cũng sẽ được gửi cho bên nhận.'
                   )}
                 </p>
                 <button

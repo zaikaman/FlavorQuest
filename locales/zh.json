@@ -437,42 +437,42 @@
     }
   },
   "support": {
-    "nav": "聊天",
-    "openPage": "打开支持聊天页面",
+    "nav": "消息",
+    "openPage": "打开消息页面",
     "customer": {
-      "eyebrow": "支持中心",
-      "title": "直接联系店主或管理员",
-      "subtitle": "每个店铺都会按销售点拥有独立会话，而管理员则作为 FlavorQuest 中账号与体验问题的统一支持渠道。",
-      "emptyTitle": "暂时还没有会话。",
-      "emptyBody": "请在左侧选择店铺或管理员频道开始聊天。收到回复时，系统也会发送邮件通知。"
+      "eyebrow": "支持消息",
+      "title": "联系店铺或管理员",
+      "subtitle": "你可以分别联系每家店铺；如果是账号或使用体验问题，也可以直接找管理员。",
+      "emptyTitle": "暂时还没有消息。",
+      "emptyBody": "先选择一家店铺，或打开管理员聊天开始吧。"
     },
     "owner": {
-      "eyebrow": "运营聊天",
-      "title": "店主与支持团队的聊天页",
-      "subtitle": "把顾客沟通按销售点整理，并在需要处理运营问题时单独开启与管理员的频道。",
-      "emptyTitle": "暂时还没有会话。",
-      "emptyBody": "当顾客向门店发消息，或你开启管理员频道时，所有会话都会显示在这里。"
+      "eyebrow": "收件箱",
+      "title": "来自顾客和管理员的消息",
+      "subtitle": "按门店查看顾客对话，同时把和管理员的沟通单独整理清楚。",
+      "emptyTitle": "收件箱为空。",
+      "emptyBody": "顾客或管理员的会话会显示在这里。"
     },
     "admin": {
-      "eyebrow": "支持队列",
-      "title": "集中处理顾客与店主的消息",
-      "subtitle": "管理员会在同一个收件箱中收到顾客和店主的支持会话，无需依赖浮动小部件也能快速回复。",
+      "eyebrow": "支持消息",
+      "title": "与顾客和店主沟通",
+      "subtitle": "顾客和店主的支持请求都会汇总到这里，方便你快速回复。",
       "emptyTitle": "队列为空。",
       "emptyBody": "当顾客或店主发来新的支持请求时，会话会显示在这里。"
     },
     "stats": {
       "activeThreads": "进行中的会话",
-      "activeThreadsBody": "每个会话都是独立完整页面，不会叠在主界面上。",
+      "activeThreadsBody": "每个会话都有单独页面，更容易查看和跟进。",
       "unreadThreads": "需要回复",
-      "unreadThreadsBody": "有新消息时，接收方也会收到邮件通知。"
+      "unreadThreadsBody": "有新消息时，接收方也会同时收到邮件。"
     },
     "launchpad": {
       "title": "打开新会话",
-      "body": "选择正确的对象，系统会创建或复用对应的聊天会话。"
+      "body": "选择你想联系的人。如果之前聊过，系统会直接打开原来的会话。"
     },
     "inbox": {
       "title": "会话列表",
-      "body": "带有未读消息的会话会更醒目，方便你更快处理。"
+      "body": "未读消息会排在前面，方便你更快处理。"
     },
     "threadTypes": {
       "customerOwner": "顾客 / 店主",
@@ -483,13 +483,13 @@
       "creating": "正在打开...",
       "waitingFirstMessage": "这个会话里还没有消息。",
       "noThreadSelected": "请选择一个会话开始。",
-      "noThreadSelectedBody": "左侧列表会按照角色和业务规则帮助你打开正确的聊天会话。",
+      "noThreadSelectedBody": "你也可以直接在左侧快速开启新的会话。",
       "noMessages": "这个会话里还没有消息。",
-      "noMessagesBody": "先发送第一条消息。收到回复后，列表会自动更新，同时发送邮件通知。"
+      "noMessagesBody": "先发第一条消息，开始聊吧。"
     },
     "actions": {
       "openThread": "打开会话",
-      "startThread": "开始聊天",
+      "startThread": "立即发送消息",
       "refresh": "刷新",
       "sending": "发送中...",
       "send": "发送消息"
@@ -504,12 +504,12 @@
     "thread": {
       "title": "会话",
       "poiContext": "该会话绑定到销售点 {name}。",
-      "emailHint": "新消息会同时生成站内通知和邮件提醒。",
+      "emailHint": "新消息会在这里出现，也会通过邮件提醒对方。",
       "emailBadge": "已启用邮件通知"
     },
     "composer": {
-      "placeholder": "输入要沟通的内容。按 Enter 发送，Shift + Enter 换行。",
-      "hint": "消息会实时显示，接收方也会收到邮件通知。"
+      "placeholder": "输入消息...",
+      "hint": "回复会马上显示在这里，对方也会收到邮件提醒。"
     },
     "errors": {
       "loadThreads": "无法加载会话列表。",
