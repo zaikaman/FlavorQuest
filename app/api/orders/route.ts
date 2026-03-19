@@ -86,6 +86,17 @@ function normalizeOrderType(value: unknown): OrderType {
   return value === 'delivery' ? 'delivery' : 'pickup';
 }
 
+async function rollbackCreatedOrder(
+  supabase: Awaited<ReturnType<typeof createServerClient>>,
+  orderId: string
+) {
+  const { error } = await supabase.from('preorder_orders').delete().eq('id', orderId);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+}
+
 export async function GET() {
   const supabase = await createServerClient();
   const profile = await getCurrentUserProfile(supabase);
@@ -259,7 +270,17 @@ export async function POST(request: NextRequest) {
     const { error: itemsError } = await supabase.from('preorder_order_items').insert(orderItems);
 
     if (itemsError) {
-      return NextResponse.json({ error: itemsError.message }, { status: 500 });
+      try {
+        await rollbackCreatedOrder(supabase, order.id);
+      } catch (rollbackError) {
+        console.error('Rollback order failed after item insert error:', rollbackError);
+        return NextResponse.json(
+          { error: 'Create order failed and rollback did not complete cleanly' },
+          { status: 500 }
+        );
+      }
+
+      return NextResponse.json({ error: 'Create order failed' }, { status: 500 });
     }
 
     const notificationTasks: PromiseLike<unknown>[] = [
@@ -327,7 +348,14 @@ export async function POST(request: NextRequest) {
       })();
     }
 
-    await Promise.all(notificationTasks);
+    const notificationResults = await Promise.allSettled(notificationTasks);
+    const notificationError = notificationResults.find(
+      (result): result is PromiseRejectedResult => result.status === 'rejected'
+    );
+
+    if (notificationError) {
+      console.error('Create order notifications failed:', notificationError.reason);
+    }
 
     return NextResponse.json(order, { status: 201 });
   } catch {
