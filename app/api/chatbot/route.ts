@@ -35,6 +35,10 @@ interface MessageRow {
   created_at: string;
 }
 
+interface PersistedTurnResult {
+  updatedConversation: ConversationRow;
+}
+
 const NO_STORE_HEADERS = {
   'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
   Pragma: 'no-cache',
@@ -187,6 +191,67 @@ async function loadMessages(
   return (data ?? []) as MessageRow[];
 }
 
+async function persistConversationTurn(
+  supabase: Awaited<ReturnType<typeof createServerClient>>,
+  conversation: ConversationRow,
+  nextTitle: string,
+  userMessage: string,
+  assistantReply: string
+): Promise<PersistedTurnResult> {
+  const userMessageId = crypto.randomUUID();
+  const assistantMessageId = crypto.randomUUID();
+  const userCreatedAt = new Date().toISOString();
+  const assistantCreatedAt = new Date(Date.parse(userCreatedAt) + 1).toISOString();
+
+  const { error: insertMessagesError } = await supabase.from('chat_messages').insert([
+    {
+      id: userMessageId,
+      conversation_id: conversation.id,
+      role: 'user',
+      content: userMessage,
+      created_at: userCreatedAt,
+    },
+    {
+      id: assistantMessageId,
+      conversation_id: conversation.id,
+      role: 'assistant',
+      content: assistantReply,
+      created_at: assistantCreatedAt,
+    },
+  ]);
+
+  if (insertMessagesError) {
+    throw new Error(insertMessagesError.message);
+  }
+
+  const { data: updatedConversation, error: updateConversationError } = await supabase
+    .from('chat_conversations')
+    .update({
+      title: nextTitle,
+      last_message_at: assistantCreatedAt,
+    })
+    .eq('id', conversation.id)
+    .select('*')
+    .single();
+
+  if (updateConversationError || !updatedConversation) {
+    const { error: rollbackError } = await supabase
+      .from('chat_messages')
+      .delete()
+      .in('id', [userMessageId, assistantMessageId]);
+
+    if (rollbackError) {
+      console.error('[ChatbotRoute][POST] rollback failed:', rollbackError);
+    }
+
+    throw new Error(updateConversationError?.message || 'Cannot update conversation');
+  }
+
+  return {
+    updatedConversation: updatedConversation as ConversationRow,
+  };
+}
+
 export async function GET(request: NextRequest) {
   const supabase = await createServerClient();
   const profile = await getCurrentUserProfile(supabase);
@@ -304,16 +369,6 @@ export async function POST(request: NextRequest) {
 
     const previousMessages = await loadMessages(supabase, conversation.id);
 
-    const { error: insertUserMessageError } = await supabase.from('chat_messages').insert({
-      conversation_id: conversation.id,
-      role: 'user',
-      content: message,
-    });
-
-    if (insertUserMessageError) {
-      throw new Error(insertUserMessageError.message);
-    }
-
     const reply = await generateChatbotReply({
       profile,
       workspaceRole,
@@ -344,19 +399,13 @@ export async function POST(request: NextRequest) {
     const nextTitle =
       previousMessages.length === 0 ? buildConversationTitle(message, workspaceRole) : conversation.title;
 
-    const { data: updatedConversation, error: updateConversationError } = await supabase
-      .from('chat_conversations')
-      .update({
-        title: nextTitle,
-        last_message_at: new Date().toISOString(),
-      })
-      .eq('id', conversation.id)
-      .select('*')
-      .single();
-
-    if (updateConversationError || !updatedConversation) {
-      throw new Error(updateConversationError?.message || 'Cannot update conversation');
-    }
+    const { updatedConversation } = await persistConversationTurn(
+      supabase,
+      conversation,
+      nextTitle,
+      message,
+      reply
+    );
 
     const conversations = await listConversations(supabase, profile.id, workspaceRole);
     const messages = await loadMessages(supabase, conversation.id);
