@@ -158,7 +158,8 @@ export default function TourPage() {
     preloadNearbyAudio,
   } = usePOIManager({
     language,
-    autoPreloadAudio: devicePerformance.profile.autoPreloadAudio,
+    autoPreloadAudio:
+      shouldPreloadOffline && devicePerformance.profile.autoPreloadAudio,
     preloadRadius: devicePerformance.profile.nearbyPreloadRadius,
     onOfflineReady: handlePOIOfflineReady,
   });
@@ -354,11 +355,16 @@ export default function TourPage() {
 
   // Preload audio when position changes
   useEffect(() => {
-    if (filteredPosition && activePOIs.length > 0 && !hasPreloadedRef.current) {
+    if (
+      shouldPreloadOffline &&
+      filteredPosition &&
+      activePOIs.length > 0 &&
+      !hasPreloadedRef.current
+    ) {
       preloadNearbyAudio(filteredPosition);
       hasPreloadedRef.current = true;
     }
-  }, [activePOIs.length, filteredPosition, preloadNearbyAudio]);
+  }, [activePOIs.length, filteredPosition, preloadNearbyAudio, shouldPreloadOffline]);
 
   // Handle POI entry event
   const handlePOIEnter = async (event: { poi: POI; distance: number }) => {
