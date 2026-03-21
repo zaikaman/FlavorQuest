@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { MessageCircleMore, ShieldCheck, Store } from 'lucide-react';
+import { LogOut, MessageCircleMore, ShieldCheck, Store } from 'lucide-react';
 import { SupportInboxPage } from '@/components/chat/SupportInboxPage';
 import { DashboardSkeleton } from '@/components/ui/Loading';
 import { useAuth } from '@/lib/contexts/AuthContext';
@@ -17,8 +17,10 @@ export default function PendingOwnerPage() {
     isLoading,
     isRoleReady,
     refreshUserRole,
+    signOut,
   } = useAuth();
   const { t } = useTranslations();
+  const [isSigningOut, setIsSigningOut] = useState(false);
 
   useEffect(() => {
     if (!user?.id) {
@@ -52,6 +54,18 @@ export default function PendingOwnerPage() {
 
   const isRejected = ownerRequestStatus === 'rejected';
 
+  const handleSignOut = async () => {
+    try {
+      setIsSigningOut(true);
+      await signOut();
+      router.replace('/login?type=owner');
+      router.refresh();
+    } catch (error) {
+      console.error('[PendingOwnerPage] signOut failed:', error);
+      setIsSigningOut(false);
+    }
+  };
+
   const steps = useMemo(
     () => [
       {
@@ -65,7 +79,11 @@ export default function PendingOwnerPage() {
       },
       {
         icon: ShieldCheck,
-        title: t('pendingOwner.steps.review.title', undefined, 'Quản trị viên sẽ xác minh qua trò chuyện'),
+        title: t(
+          'pendingOwner.steps.review.title',
+          undefined,
+          'Quản trị viên sẽ xác minh qua trò chuyện'
+        ),
         body: isRejected
           ? t(
               'pendingOwner.steps.reviewRejected.body',
@@ -159,25 +177,48 @@ export default function PendingOwnerPage() {
                 </p>
               </div>
 
-              <button
-                type="button"
-                onClick={() => router.push('/')}
-                className="rounded-[26px] border border-white/10 bg-white/5 px-5 py-5 text-left transition-colors hover:bg-white/10"
-              >
-                <p className="text-[11px] font-semibold tracking-[0.24em] text-gray-500 uppercase">
-                  {t('pendingOwner.customerAreaLabel', undefined, 'Điều hướng')}
-                </p>
-                <p className="mt-3 text-lg font-bold text-white">
-                  {t('pendingOwner.customerCta', undefined, 'Quay về màn hình chào')}
-                </p>
-                <p className="mt-2 text-sm leading-6 text-gray-400">
-                  {t(
-                    'pendingOwner.customerHint',
-                    undefined,
-                    'Trong lúc chưa được duyệt, tài khoản này chỉ có thể theo dõi trạng thái và trao đổi với quản trị viên.'
-                  )}
-                </p>
-              </button>
+              <div className="grid gap-3">
+                <button
+                  type="button"
+                  onClick={() => router.push('/')}
+                  className="rounded-[26px] border border-white/10 bg-white/5 px-5 py-5 text-left transition-colors hover:bg-white/10"
+                >
+                  <p className="text-[11px] font-semibold tracking-[0.24em] text-gray-500 uppercase">
+                    {t('pendingOwner.customerAreaLabel', undefined, 'Điều hướng')}
+                  </p>
+                  <p className="mt-3 text-lg font-bold text-white">
+                    {t('pendingOwner.customerCta', undefined, 'Quay về màn hình chào')}
+                  </p>
+                  <p className="mt-2 text-sm leading-6 text-gray-400">
+                    {t(
+                      'pendingOwner.customerHint',
+                      undefined,
+                      'Trong lúc chưa được duyệt, tài khoản này chỉ có thể theo dõi trạng thái và trao đổi với quản trị viên.'
+                    )}
+                  </p>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => void handleSignOut()}
+                  disabled={isSigningOut}
+                  className="inline-flex min-h-[72px] items-center justify-between gap-4 rounded-[26px] border border-white/10 bg-white/5 px-5 py-4 text-left transition-colors hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  <div>
+                    <p className="text-[11px] font-semibold tracking-[0.24em] text-gray-500 uppercase">
+                      {t('pendingOwner.logoutLabel', undefined, 'Tài khoản')}
+                    </p>
+                    <p className="mt-2 text-lg font-bold text-white">
+                      {isSigningOut
+                        ? t('pendingOwner.logoutLoading', undefined, 'Đang đăng xuất...')
+                        : t('pendingOwner.logoutCta', undefined, 'Đăng xuất')}
+                    </p>
+                  </div>
+                  <span className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-black/20 text-white">
+                    <LogOut className="h-5 w-5" />
+                  </span>
+                </button>
+              </div>
             </div>
           </div>
 
