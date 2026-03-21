@@ -29,6 +29,25 @@ interface SettingsPanelProps {
   onSettingsChange?: (settings: UserSettings) => void;
 }
 
+type DeviceCopyKey =
+  | 'tourExperience'
+  | 'deviceProfileTitle'
+  | 'deviceProfileDescription'
+  | 'deviceProfileDetectedLabel'
+  | 'deviceProfileAppliedLabel'
+  | 'deviceProfileSystem'
+  | 'deviceProfileLight'
+  | 'deviceProfileBalanced'
+  | 'deviceProfileFull'
+  | 'deviceProfileAutoDescription'
+  | 'deviceProfileLightDescription'
+  | 'deviceProfileBalancedDescription'
+  | 'deviceProfileFullDescription'
+  | 'deviceProfileUnknown'
+  | 'deviceProfileMotionReduced'
+  | 'deviceProfileMotionStandard'
+  | 'deviceProfileBatteryHint';
+
 const LANGUAGE_FLAGS: Record<Language, string> = {
   vi: '🇻🇳',
   en: '🇬🇧',
@@ -39,6 +58,166 @@ const LANGUAGE_FLAGS: Record<Language, string> = {
 };
 
 const PERFORMANCE_OPTIONS: DevicePerformancePreference[] = ['system', 'light', 'balanced', 'full'];
+
+const DEVICE_PROFILE_COPY: Record<Language, Record<DeviceCopyKey, string>> = {
+  vi: {
+    tourExperience: 'Trải nghiệm tour',
+    deviceProfileTitle: 'Hồ sơ thiết bị',
+    deviceProfileDescription:
+      'FlavorQuest tự điều chỉnh chuyển động, bản đồ và tải nền để hợp với máy bạn đang dùng.',
+    deviceProfileDetectedLabel: 'Hệ thống nhận diện',
+    deviceProfileAppliedLabel: 'Đang áp dụng',
+    deviceProfileSystem: 'Tự động',
+    deviceProfileLight: 'Nhẹ',
+    deviceProfileBalanced: 'Cân bằng',
+    deviceProfileFull: 'Đầy đủ',
+    deviceProfileAutoDescription:
+      'Ứng dụng tự cân bằng chuyển động, độ chi tiết bản đồ và tải nền theo thiết bị hiện tại.',
+    deviceProfileLightDescription:
+      'Giảm hiệu ứng và hạn chế tải nền để ưu tiên pin cùng độ ổn định.',
+    deviceProfileBalancedDescription:
+      'Giữ trải nghiệm mượt cho đa số thiết bị mà không tải quá nặng.',
+    deviceProfileFullDescription:
+      'Ưu tiên chuyển động mượt và tải trước rộng hơn khi thiết bị còn dư sức.',
+    deviceProfileUnknown: 'Chưa rõ',
+    deviceProfileMotionReduced: 'Giảm chuyển động',
+    deviceProfileMotionStandard: 'Chuyển động chuẩn',
+    deviceProfileBatteryHint:
+      'Chế độ tiết kiệm pin đang làm hồ sơ hoạt động thận trọng hơn một nấc.',
+  },
+  en: {
+    tourExperience: 'Tour Experience',
+    deviceProfileTitle: 'Device profile',
+    deviceProfileDescription:
+      "FlavorQuest adapts map motion, visuals, and background loading to fit the device you're using.",
+    deviceProfileDetectedLabel: 'System detected',
+    deviceProfileAppliedLabel: 'Currently using',
+    deviceProfileSystem: 'Auto',
+    deviceProfileLight: 'Light',
+    deviceProfileBalanced: 'Balanced',
+    deviceProfileFull: 'Full',
+    deviceProfileAutoDescription:
+      'Let the app balance motion, map detail, and background loading for this device automatically.',
+    deviceProfileLightDescription:
+      'Reduce visual effects and background loading to favor battery life and stability.',
+    deviceProfileBalancedDescription:
+      'Keep the experience smooth for most devices without pushing resource use too far.',
+    deviceProfileFullDescription:
+      'Favor richer motion and wider preloading when the device has room to spare.',
+    deviceProfileUnknown: 'Unknown',
+    deviceProfileMotionReduced: 'Reduced motion',
+    deviceProfileMotionStandard: 'Standard motion',
+    deviceProfileBatteryHint:
+      'Battery Saver is making the active profile one step more conservative.',
+  },
+  ja: {
+    tourExperience: 'ツアー体験',
+    deviceProfileTitle: 'デバイスプロファイル',
+    deviceProfileDescription:
+      'FlavorQuest はお使いの端末に合わせて、地図の動きや表示、バックグラウンド読み込みを調整します。',
+    deviceProfileDetectedLabel: 'システム判定',
+    deviceProfileAppliedLabel: '現在の設定',
+    deviceProfileSystem: '自動',
+    deviceProfileLight: '軽量',
+    deviceProfileBalanced: '標準',
+    deviceProfileFull: 'フル',
+    deviceProfileAutoDescription:
+      '現在の端末に合わせて、動きや地図の詳細、バックグラウンド読み込みを自動で調整します。',
+    deviceProfileLightDescription:
+      '視覚効果とバックグラウンド読み込みを抑えて、電池持ちと安定性を優先します。',
+    deviceProfileBalancedDescription:
+      '多くの端末で快適さと負荷のバランスを保ちます。',
+    deviceProfileFullDescription:
+      '端末に余裕があるときは、より豊かな動きと広めの先読みを優先します。',
+    deviceProfileUnknown: '不明',
+    deviceProfileMotionReduced: '動きを抑える',
+    deviceProfileMotionStandard: '標準の動き',
+    deviceProfileBatteryHint:
+      '省電力モードにより、現在のプロファイルは一段控えめに調整されています。',
+  },
+  fr: {
+    tourExperience: 'Expérience de visite',
+    deviceProfileTitle: "Profil de l'appareil",
+    deviceProfileDescription:
+      "FlavorQuest adapte les mouvements, la carte et les chargements en arrière-plan selon l'appareil utilisé.",
+    deviceProfileDetectedLabel: 'Détection du système',
+    deviceProfileAppliedLabel: 'Profil actif',
+    deviceProfileSystem: 'Automatique',
+    deviceProfileLight: 'Léger',
+    deviceProfileBalanced: 'Équilibré',
+    deviceProfileFull: 'Complet',
+    deviceProfileAutoDescription:
+      "L'application ajuste automatiquement les animations, la carte et le chargement en arrière-plan.",
+    deviceProfileLightDescription:
+      'Réduit les effets visuels et les chargements en arrière-plan pour préserver la batterie et la stabilité.',
+    deviceProfileBalancedDescription:
+      'Conserve une expérience fluide pour la plupart des appareils sans consommer trop de ressources.',
+    deviceProfileFullDescription:
+      "Privilégie des animations plus riches et un préchargement plus large quand l'appareil le permet.",
+    deviceProfileUnknown: 'Inconnu',
+    deviceProfileMotionReduced: 'Mouvement réduit',
+    deviceProfileMotionStandard: 'Mouvement standard',
+    deviceProfileBatteryHint:
+      "Le mode économie d'énergie rend le profil actif un cran plus prudent.",
+  },
+  ko: {
+    tourExperience: '투어 경험',
+    deviceProfileTitle: '기기 프로필',
+    deviceProfileDescription:
+      'FlavorQuest는 현재 기기에 맞춰 지도 움직임, 화면 표현, 백그라운드 로딩을 조절합니다.',
+    deviceProfileDetectedLabel: '시스템 감지',
+    deviceProfileAppliedLabel: '현재 적용',
+    deviceProfileSystem: '자동',
+    deviceProfileLight: '가볍게',
+    deviceProfileBalanced: '균형',
+    deviceProfileFull: '풍부하게',
+    deviceProfileAutoDescription:
+      '현재 기기에 맞춰 움직임, 지도 디테일, 백그라운드 로딩을 자동으로 조절합니다.',
+    deviceProfileLightDescription:
+      '시각 효과와 백그라운드 로딩을 줄여 배터리와 안정성을 우선합니다.',
+    deviceProfileBalancedDescription:
+      '대부분의 기기에서 부드러움과 자원 사용의 균형을 맞춥니다.',
+    deviceProfileFullDescription:
+      '기기 여유가 충분할 때 더 풍부한 움직임과 넓은 사전 로딩을 우선합니다.',
+    deviceProfileUnknown: '알 수 없음',
+    deviceProfileMotionReduced: '움직임 줄이기',
+    deviceProfileMotionStandard: '기본 움직임',
+    deviceProfileBatteryHint:
+      '절전 모드로 인해 현재 프로필이 한 단계 더 보수적으로 적용됩니다.',
+  },
+  zh: {
+    tourExperience: '导览体验',
+    deviceProfileTitle: '设备配置',
+    deviceProfileDescription:
+      'FlavorQuest 会根据你当前设备的状态，调整地图动效、界面呈现和后台预加载。',
+    deviceProfileDetectedLabel: '系统识别',
+    deviceProfileAppliedLabel: '当前启用',
+    deviceProfileSystem: '自动',
+    deviceProfileLight: '轻量',
+    deviceProfileBalanced: '均衡',
+    deviceProfileFull: '完整',
+    deviceProfileAutoDescription:
+      '让应用根据当前设备自动平衡动效、地图细节和后台加载。',
+    deviceProfileLightDescription:
+      '减少视觉效果和后台加载，优先保证续航与稳定性。',
+    deviceProfileBalancedDescription:
+      '在大多数设备上兼顾流畅体验和资源占用。',
+    deviceProfileFullDescription:
+      '当设备性能充足时，优先启用更丰富的动效和更宽的预加载范围。',
+    deviceProfileUnknown: '未知',
+    deviceProfileMotionReduced: '减少动效',
+    deviceProfileMotionStandard: '标准动效',
+    deviceProfileBatteryHint: '省电模式会让当前配置再保守一级。',
+  },
+};
+
+function isCorruptedTranslation(value: string, fallback: string) {
+  if (value === fallback) {
+    return false;
+  }
+
+  return /Ã|�/.test(value) || (value.includes('?') && /[^\x00-\x7F]/.test(fallback));
+}
 
 export function SettingsPanel({ isOpen, onClose, onSettingsChange }: SettingsPanelProps) {
   const router = useRouter();
@@ -51,10 +230,20 @@ export function SettingsPanel({ isOpen, onClose, onSettingsChange }: SettingsPan
   const [settings, setSettings] = useState<UserSettings>(DEFAULT_USER_SETTINGS);
   const [isLoading, setIsLoading] = useState(true);
   const [isSigningOut, setIsSigningOut] = useState(false);
+  const deviceCopy = DEVICE_PROFILE_COPY[language];
 
   const effectivePerformance = useMemo(
     () => resolveDevicePerformance(settings, deviceAssessment),
     [deviceAssessment, settings]
+  );
+
+  const getDeviceCopy = useCallback(
+    (key: DeviceCopyKey) => {
+      const fallback = deviceCopy[key];
+      const translated = t(`settings.${key}`, undefined, fallback);
+      return isCorruptedTranslation(translated, fallback) ? fallback : translated;
+    },
+    [deviceCopy, t]
   );
 
   useEffect(() => {
@@ -116,44 +305,28 @@ export function SettingsPanel({ isOpen, onClose, onSettingsChange }: SettingsPan
   const getPerformanceLabel = (value: DevicePerformancePreference | DevicePerformanceTier) => {
     switch (value) {
       case 'system':
-        return t('settings.deviceProfileSystem', undefined, 'Tự động');
+        return getDeviceCopy('deviceProfileSystem');
       case 'light':
-        return t('settings.deviceProfileLight', undefined, 'Nhẹ');
+        return getDeviceCopy('deviceProfileLight');
       case 'balanced':
-        return t('settings.deviceProfileBalanced', undefined, 'Cân bằng');
+        return getDeviceCopy('deviceProfileBalanced');
       case 'full':
-        return t('settings.deviceProfileFull', undefined, 'Đầy đủ');
+        return getDeviceCopy('deviceProfileFull');
       default:
-        return t('settings.deviceProfileBalanced', undefined, 'Cân bằng');
+        return getDeviceCopy('deviceProfileBalanced');
     }
   };
 
   const getPerformanceDescription = (value: DevicePerformancePreference) => {
     switch (value) {
       case 'system':
-        return t(
-          'settings.deviceProfileAutoDescription',
-          undefined,
-          'Ứng dụng tự cân bằng chuyển động, bản đồ và tải nền theo máy của bạn.'
-        );
+        return getDeviceCopy('deviceProfileAutoDescription');
       case 'light':
-        return t(
-          'settings.deviceProfileLightDescription',
-          undefined,
-          'Giảm hiệu ứng và hạn chế tải nền để ưu tiên pin cùng độ ổn định.'
-        );
+        return getDeviceCopy('deviceProfileLightDescription');
       case 'balanced':
-        return t(
-          'settings.deviceProfileBalancedDescription',
-          undefined,
-          'Giữ trải nghiệm mượt cho phần lớn thiết bị mà không tải quá nặng.'
-        );
+        return getDeviceCopy('deviceProfileBalancedDescription');
       case 'full':
-        return t(
-          'settings.deviceProfileFullDescription',
-          undefined,
-          'Ưu tiên chuyển động mượt và tải trước rộng hơn khi thiết bị dư sức.'
-        );
+        return getDeviceCopy('deviceProfileFullDescription');
       default:
         return '';
     }
@@ -163,13 +336,13 @@ export function SettingsPanel({ isOpen, onClose, onSettingsChange }: SettingsPan
     `CPU ${deviceAssessment?.hardwareConcurrency ?? '—'}`,
     deviceAssessment?.deviceMemory
       ? `RAM ${deviceAssessment.deviceMemory} GB`
-      : `RAM ${t('settings.deviceProfileUnknown', undefined, 'Chưa rõ')}`,
+      : `RAM ${getDeviceCopy('deviceProfileUnknown')}`,
     deviceAssessment?.effectiveConnectionType && deviceAssessment.effectiveConnectionType !== 'unknown'
       ? deviceAssessment.effectiveConnectionType.toUpperCase()
-      : t('settings.deviceProfileUnknown', undefined, 'Chưa rõ'),
+      : getDeviceCopy('deviceProfileUnknown'),
     deviceAssessment?.prefersReducedMotion
-      ? t('settings.deviceProfileMotionReduced', undefined, 'Giảm chuyển động')
-      : t('settings.deviceProfileMotionStandard', undefined, 'Chuyển động chuẩn'),
+      ? getDeviceCopy('deviceProfileMotionReduced')
+      : getDeviceCopy('deviceProfileMotionStandard'),
   ];
 
   if (!isOpen) return null;
@@ -234,14 +407,10 @@ export function SettingsPanel({ isOpen, onClose, onSettingsChange }: SettingsPan
                 <div className="flex items-start justify-between gap-4">
                   <div>
                     <h3 className="text-lg font-bold text-white">
-                      {t('settings.deviceProfileTitle', undefined, 'Hồ sơ thiết bị')}
+                      {getDeviceCopy('deviceProfileTitle')}
                     </h3>
                     <p className="mt-1 max-w-xl text-sm leading-6 text-white/70">
-                      {t(
-                        'settings.deviceProfileDescription',
-                        undefined,
-                        'FlavorQuest tự điều chỉnh chuyển động, bản đồ và tải nền để hợp với máy bạn đang dùng.'
-                      )}
+                      {getDeviceCopy('deviceProfileDescription')}
                     </p>
                   </div>
                   <span className="rounded-full border border-white/10 bg-black/20 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-primary">
@@ -252,7 +421,7 @@ export function SettingsPanel({ isOpen, onClose, onSettingsChange }: SettingsPan
                 <div className="mt-4 grid grid-cols-2 gap-3">
                   <div className="rounded-2xl border border-white/10 bg-black/20 p-3">
                     <p className="text-xs uppercase tracking-[0.18em] text-white/45">
-                      {t('settings.deviceProfileDetectedLabel', undefined, 'Hệ thống nhận diện')}
+                      {getDeviceCopy('deviceProfileDetectedLabel')}
                     </p>
                     <p className="mt-2 text-base font-semibold text-white">
                       {getPerformanceLabel(effectivePerformance.detectedTier)}
@@ -260,7 +429,7 @@ export function SettingsPanel({ isOpen, onClose, onSettingsChange }: SettingsPan
                   </div>
                   <div className="rounded-2xl border border-white/10 bg-black/20 p-3">
                     <p className="text-xs uppercase tracking-[0.18em] text-white/45">
-                      {t('settings.deviceProfileAppliedLabel', undefined, 'Đang áp dụng')}
+                      {getDeviceCopy('deviceProfileAppliedLabel')}
                     </p>
                     <p className="mt-2 text-base font-semibold text-white">
                       {getPerformanceLabel(effectivePerformance.effectiveTier)}
@@ -281,11 +450,7 @@ export function SettingsPanel({ isOpen, onClose, onSettingsChange }: SettingsPan
 
                 {effectivePerformance.batterySaverAdjusted && (
                   <p className="mt-4 rounded-2xl border border-amber-400/20 bg-amber-500/10 px-3 py-2 text-sm text-amber-100">
-                    {t(
-                      'settings.deviceProfileBatteryHint',
-                      undefined,
-                      'Chế độ tiết kiệm pin đang làm hồ sơ hoạt động thận trọng hơn một nấc.'
-                    )}
+                    {getDeviceCopy('deviceProfileBatteryHint')}
                   </p>
                 )}
 
@@ -325,7 +490,7 @@ export function SettingsPanel({ isOpen, onClose, onSettingsChange }: SettingsPan
 
               <section className="mb-6">
                 <h3 className="mb-3 text-lg font-bold text-white">
-                  {t('settings.tourExperience', undefined, 'Trải nghiệm tour')}
+                  {getDeviceCopy('tourExperience')}
                 </h3>
 
                 <div className="flex items-center justify-between py-3">

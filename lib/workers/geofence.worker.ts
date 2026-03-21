@@ -31,6 +31,7 @@ import { calculateDistance, filterPOIsWithinRadius } from '@/lib/utils/distance'
 type WorkerRequest =
   | {
     type: 'CHECK_GEOFENCE';
+    requestId: number;
     payload: {
       userPosition: Coordinates;
       pois: POI[];
@@ -41,6 +42,7 @@ type WorkerRequest =
   }
   | {
     type: 'CALCULATE_DISTANCE';
+    requestId: number;
     payload: {
       from: Coordinates;
       to: Coordinates;
@@ -48,6 +50,7 @@ type WorkerRequest =
   }
   | {
     type: 'FILTER_NEARBY';
+    requestId: number;
     payload: {
       userPosition: Coordinates;
       pois: POI[];
@@ -61,6 +64,7 @@ type WorkerRequest =
 type WorkerResponse =
   | {
     type: 'GEOFENCE_RESULT';
+    requestId: number;
     payload: {
       triggeredPOIs: Array<{
         poi: POI;
@@ -74,12 +78,14 @@ type WorkerResponse =
   }
   | {
     type: 'DISTANCE_RESULT';
+    requestId: number;
     payload: {
       distance: number;
     };
   }
   | {
     type: 'NEARBY_POIS';
+    requestId: number;
     payload: {
       pois: Array<{
         poi: POI;
@@ -89,10 +95,40 @@ type WorkerResponse =
   }
   | {
     type: 'ERROR';
+    requestId: number;
     payload: {
       message: string;
     };
   };
+
+function createErrorResponse(requestId: number, message: string): WorkerResponse {
+  return {
+    type: 'ERROR',
+    requestId,
+    payload: { message },
+  };
+}
+
+function isValidPOI(poi: POI): boolean {
+  return Number.isFinite(poi.lat) && Number.isFinite(poi.lng);
+}
+
+function sortTriggeredPOIs(
+  a: { poi: POI; distance: number },
+  b: { poi: POI; distance: number }
+): number {
+  if (a.distance !== b.distance) {
+    return a.distance - b.distance;
+  }
+
+  const priorityA = a.poi.priority ?? 0;
+  const priorityB = b.poi.priority ?? 0;
+  if (priorityA !== priorityB) {
+    return priorityB - priorityA;
+  }
+
+  return a.poi.id.localeCompare(b.poi.id);
+}
 
 /**
  * Check if POI can be played (not in cooldown)
@@ -119,54 +155,48 @@ function canPlayPOI(
  */
 function processGeofenceCheck(request: WorkerRequest): WorkerResponse {
   if (request.type !== 'CHECK_GEOFENCE') {
-    return {
-      type: 'ERROR',
-      payload: { message: 'Invalid request type' },
-    };
+    return createErrorResponse(request.requestId, 'Invalid request type');
   }
 
+  const { requestId } = request;
   const { userPosition, pois, geofenceRadius, cooldownTracker, cooldownPeriod } = request.payload;
 
   try {
+    const validPOIs = pois.filter(isValidPOI);
+    const safeGeofenceRadius = Math.max(1, geofenceRadius);
+
     // Filter POIs within geofence radius
     const nearbyPOIs = filterPOIsWithinRadius(
       userPosition,
-      pois,
-      geofenceRadius * 2 // Check wider area for "nearby" list
+      validPOIs,
+      safeGeofenceRadius * 2 // Check wider area for "nearby" list
     );
 
     // Filter POIs that triggered geofence (within radius + not in cooldown)
     const triggeredPOIs = nearbyPOIs
       .filter(({ poi, distance }: { poi: POI; distance: number }) => {
         // Check if within POI's own radius
-        return distance <= Math.max(poi.radius || 0, geofenceRadius);
+        return distance <= Math.max(poi.radius || 0, safeGeofenceRadius);
       })
       .filter(({ poi }: { poi: POI; distance: number }) => {
         // Check cooldown
         return canPlayPOI(poi.id, cooldownTracker, cooldownPeriod);
       })
-      .sort((a: { poi: POI; distance: number }, b: { poi: POI; distance: number }) => {
-        // Sort by priority (higher first), then distance (closer first)
-        if (a.poi.priority !== b.poi.priority) {
-          return b.poi.priority - a.poi.priority;
-        }
-        return a.distance - b.distance;
-      });
+      .sort(sortTriggeredPOIs);
 
     return {
       type: 'GEOFENCE_RESULT',
+      requestId,
       payload: {
         triggeredPOIs,
         nearbyPOIs,
       },
     };
   } catch (error) {
-    return {
-      type: 'ERROR',
-      payload: {
-        message: error instanceof Error ? error.message : 'Unknown error',
-      },
-    };
+    return createErrorResponse(
+      requestId,
+      error instanceof Error ? error.message : 'Unknown error'
+    );
   }
 }
 
@@ -175,12 +205,10 @@ function processGeofenceCheck(request: WorkerRequest): WorkerResponse {
  */
 function processDistanceCalculation(request: WorkerRequest): WorkerResponse {
   if (request.type !== 'CALCULATE_DISTANCE') {
-    return {
-      type: 'ERROR',
-      payload: { message: 'Invalid request type' },
-    };
+    return createErrorResponse(request.requestId, 'Invalid request type');
   }
 
+  const { requestId } = request;
   const { from, to } = request.payload;
 
   try {
@@ -188,15 +216,14 @@ function processDistanceCalculation(request: WorkerRequest): WorkerResponse {
 
     return {
       type: 'DISTANCE_RESULT',
+      requestId,
       payload: { distance },
     };
   } catch (error) {
-    return {
-      type: 'ERROR',
-      payload: {
-        message: error instanceof Error ? error.message : 'Unknown error',
-      },
-    };
+    return createErrorResponse(
+      requestId,
+      error instanceof Error ? error.message : 'Unknown error'
+    );
   }
 }
 
@@ -205,28 +232,25 @@ function processDistanceCalculation(request: WorkerRequest): WorkerResponse {
  */
 function processNearbyFilter(request: WorkerRequest): WorkerResponse {
   if (request.type !== 'FILTER_NEARBY') {
-    return {
-      type: 'ERROR',
-      payload: { message: 'Invalid request type' },
-    };
+    return createErrorResponse(request.requestId, 'Invalid request type');
   }
 
+  const { requestId } = request;
   const { userPosition, pois, radius } = request.payload;
 
   try {
-    const nearbyPOIs = filterPOIsWithinRadius(userPosition, pois, radius);
+    const nearbyPOIs = filterPOIsWithinRadius(userPosition, pois.filter(isValidPOI), radius);
 
     return {
       type: 'NEARBY_POIS',
+      requestId,
       payload: { pois: nearbyPOIs },
     };
   } catch (error) {
-    return {
-      type: 'ERROR',
-      payload: {
-        message: error instanceof Error ? error.message : 'Unknown error',
-      },
-    };
+    return createErrorResponse(
+      requestId,
+      error instanceof Error ? error.message : 'Unknown error'
+    );
   }
 }
 
@@ -235,6 +259,7 @@ function processNearbyFilter(request: WorkerRequest): WorkerResponse {
  */
 self.onmessage = (event: MessageEvent<WorkerRequest>) => {
   const request = event.data;
+  const requestId = request.requestId;
 
   let response: WorkerResponse;
 
@@ -252,10 +277,7 @@ self.onmessage = (event: MessageEvent<WorkerRequest>) => {
       break;
 
     default:
-      response = {
-        type: 'ERROR',
-        payload: { message: 'Unknown request type' },
-      };
+      response = createErrorResponse(requestId, 'Unknown request type');
   }
 
   self.postMessage(response);

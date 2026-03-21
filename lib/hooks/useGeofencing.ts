@@ -1,11 +1,12 @@
 /**
  * useGeofencing Hook
  * Web Worker integration cho distance checking
- * 
+ *
  * Features:
  * - Offload distance calculations to Web Worker
  * - Monitor POI proximity
  * - Trigger callbacks khi enter/exit geofence
+ * - Keep results stable near geofence boundaries
  */
 
 'use client';
@@ -13,6 +14,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import type { Coordinates, POI } from '@/lib/types/index';
 import { GEOFENCE_TRIGGER_RADIUS_M } from '@/lib/constants/index';
+import { filterPOIsWithinRadius } from '@/lib/utils/distance';
 
 export interface GeofenceEvent {
   poi: POI;
@@ -32,87 +34,210 @@ const DEFAULT_OPTIONS: UseGeofencingOptions = {
   enabled: true,
 };
 
+const EXIT_BUFFER_METERS = 6;
+
+type WorkerPOIEntry = {
+  poi: POI;
+  distance: number;
+};
+
+type GeofenceWorkerResponse =
+  | {
+    type: 'GEOFENCE_RESULT';
+    requestId: number;
+    payload: {
+      triggeredPOIs: WorkerPOIEntry[];
+      nearbyPOIs: WorkerPOIEntry[];
+    };
+  }
+  | {
+    type: 'NEARBY_POIS';
+    requestId: number;
+    payload: {
+      pois: WorkerPOIEntry[];
+    };
+  }
+  | {
+    type: 'ERROR';
+    requestId: number;
+    payload: {
+      message: string;
+    };
+  };
+
+function isValidPOI(poi: POI): boolean {
+  return Number.isFinite(poi.lat) && Number.isFinite(poi.lng);
+}
+
+function sortTriggeredEntries(a: WorkerPOIEntry, b: WorkerPOIEntry): number {
+  if (a.distance !== b.distance) {
+    return a.distance - b.distance;
+  }
+
+  const priorityA = a.poi.priority ?? 0;
+  const priorityB = b.poi.priority ?? 0;
+  if (priorityA !== priorityB) {
+    return priorityB - priorityA;
+  }
+
+  return a.poi.id.localeCompare(b.poi.id);
+}
+
+function flattenEntries(entries: WorkerPOIEntry[]): Array<POI & { distance: number }> {
+  return entries.map(({ poi, distance }) => ({
+    ...poi,
+    distance,
+  }));
+}
+
+function processGeofenceLocally(
+  currentPosition: Coordinates,
+  pois: POI[],
+  radius: number
+): { nearbyPOIs: WorkerPOIEntry[]; triggeredPOIs: WorkerPOIEntry[] } {
+  const safeRadius = Math.max(1, radius);
+  const validPOIs = pois.filter(isValidPOI);
+  const nearbyPOIs = filterPOIsWithinRadius(currentPosition, validPOIs, safeRadius * 2);
+  const triggeredPOIs = nearbyPOIs
+    .filter(({ poi, distance }) => distance <= Math.max(poi.radius || 0, safeRadius))
+    .sort(sortTriggeredEntries);
+
+  return { nearbyPOIs, triggeredPOIs };
+}
+
 export function useGeofencing(
   currentPosition: Coordinates | null,
   pois: POI[],
   options: UseGeofencingOptions = {}
 ) {
   const opts = { ...DEFAULT_OPTIONS, ...options };
-  
+
   const [nearbyPOIs, setNearbyPOIs] = useState<Array<POI & { distance: number }>>([]);
   const [activePOIs, setActivePOIs] = useState<Set<string>>(new Set());
-  
+
   const workerRef = useRef<Worker | null>(null);
   const previousActivePOIsRef = useRef<Set<string>>(new Set());
+  const latestRequestIdRef = useRef(0);
+  const optionsRef = useRef(opts);
   const onEnterRef = useRef(opts.onEnter);
   const onExitRef = useRef(opts.onExit);
   const poisRef = useRef(pois);
 
-  // Update refs when callbacks or pois change
   useEffect(() => {
+    optionsRef.current = opts;
     onEnterRef.current = opts.onEnter;
     onExitRef.current = opts.onExit;
     poisRef.current = pois;
-  }, [opts.onEnter, opts.onExit, pois]);
+  }, [opts, pois]);
+
+  const resetState = useCallback(() => {
+    previousActivePOIsRef.current = new Set();
+    setNearbyPOIs([]);
+    setActivePOIs(new Set());
+  }, []);
+
+  const reconcileGeofenceResult = useCallback(
+    (result: { nearbyPOIs: WorkerPOIEntry[]; triggeredPOIs: WorkerPOIEntry[] }) => {
+      const flattenedNearby = flattenEntries(result.nearbyPOIs);
+      const previousActive = previousActivePOIsRef.current;
+      const nextActive = new Set<string>();
+      const distanceByPoiId = new Map(flattenedNearby.map((poi) => [poi.id, poi.distance]));
+      const onEnter = onEnterRef.current;
+      const onExit = onExitRef.current;
+      const radius = optionsRef.current.radius ?? GEOFENCE_TRIGGER_RADIUS_M;
+      const currentPOIs = poisRef.current;
+
+      result.triggeredPOIs.forEach(({ poi }) => {
+        nextActive.add(poi.id);
+      });
+
+      previousActive.forEach((poiId) => {
+        if (nextActive.has(poiId)) {
+          return;
+        }
+
+        const latestDistance = distanceByPoiId.get(poiId);
+        if (latestDistance !== undefined && latestDistance <= radius + EXIT_BUFFER_METERS) {
+          nextActive.add(poiId);
+        }
+      });
+
+      setNearbyPOIs(flattenedNearby);
+      setActivePOIs(nextActive);
+
+      if (onEnter) {
+        result.triggeredPOIs.forEach(({ poi, distance }) => {
+          if (previousActive.has(poi.id)) {
+            return;
+          }
+
+          onEnter({
+            poi,
+            distance,
+            timestamp: Date.now(),
+          });
+        });
+      }
+
+      if (onExit) {
+        previousActive.forEach((poiId) => {
+          if (nextActive.has(poiId)) {
+            return;
+          }
+
+          const poi = currentPOIs.find((item) => item.id === poiId);
+          if (!poi) {
+            return;
+          }
+
+          onExit({
+            poi,
+            distance: distanceByPoiId.get(poiId) ?? radius + EXIT_BUFFER_METERS,
+            timestamp: Date.now(),
+          });
+        });
+      }
+
+      previousActivePOIsRef.current = nextActive;
+    },
+    []
+  );
 
   // Initialize Web Worker
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    if (typeof window === 'undefined') {
+      return;
+    }
 
     try {
       workerRef.current = new Worker(new URL('@/lib/workers/geofence.worker.ts', import.meta.url));
-      
-      workerRef.current.onmessage = (e: MessageEvent) => {
-        const { type, payload } = e.data;
-        
-        if (type === 'NEARBY_POIS') {
-          const poisWithDistance = payload as Array<POI & { distance: number }>;
-          setNearbyPOIs(poisWithDistance);
-          
-          // Update active POIs
-          const newActivePOIs = new Set(poisWithDistance.map((p: POI) => p.id));
-          setActivePOIs(newActivePOIs);
-          
-          // Detect enter/exit events
-          const onEnter = onEnterRef.current;
-          const onExit = onExitRef.current;
-          const currentPOIs = poisRef.current;
-          
-          if (onEnter || onExit) {
-            const previousActive = previousActivePOIsRef.current;
-            
-            // Check for new POIs (enter events)
-            poisWithDistance.forEach((poi: POI & { distance: number }) => {
-              if (!previousActive.has(poi.id) && onEnter) {
-                onEnter({
-                  poi,
-                  distance: poi.distance,
-                  timestamp: Date.now(),
-                });
-              }
-            });
-            
-            // Check for left POIs (exit events)
-            if (onExit) {
-              previousActive.forEach((poiId: string) => {
-                if (!newActivePOIs.has(poiId)) {
-                  const poi = currentPOIs.find((p: POI) => p.id === poiId);
-                  if (poi) {
-                    onExit({
-                      poi,
-                      distance: opts.radius!,
-                      timestamp: Date.now(),
-                    });
-                  }
-                }
-              });
-            }
-            
-            previousActivePOIsRef.current = newActivePOIs;
-          }
+
+      workerRef.current.onmessage = (event: MessageEvent<GeofenceWorkerResponse>) => {
+        const response = event.data;
+
+        if (response.requestId !== latestRequestIdRef.current) {
+          return;
+        }
+
+        if (!optionsRef.current.enabled) {
+          return;
+        }
+
+        if (response.type === 'ERROR') {
+          console.error('Geofence worker error:', response.payload.message);
+          return;
+        }
+
+        if (response.type === 'GEOFENCE_RESULT') {
+          reconcileGeofenceResult(response.payload);
+          return;
+        }
+
+        if (response.type === 'NEARBY_POIS') {
+          setNearbyPOIs(flattenEntries(response.payload.pois));
         }
       };
-      
+
       workerRef.current.onerror = (error) => {
         console.error('Geofence worker error:', error.message || error);
       };
@@ -122,36 +247,53 @@ export function useGeofencing(
 
     return () => {
       workerRef.current?.terminate();
+      workerRef.current = null;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Chỉ initialize một lần
+  }, [reconcileGeofenceResult]);
 
-  // Send position updates to worker
+  // Send position updates to worker, or fall back to local processing
   useEffect(() => {
-    if (!workerRef.current || !currentPosition || !opts.enabled || pois.length === 0) {
+    if (!currentPosition || !opts.enabled || pois.length === 0) {
+      resetState();
       return;
     }
 
-    workerRef.current.postMessage({
-      type: 'CHECK_GEOFENCE',
-      payload: {
-        position: currentPosition,
-        pois,
-        radius: opts.radius,
-      },
-    });
-  }, [currentPosition, pois, opts.enabled, opts.radius]);
+    const requestId = latestRequestIdRef.current + 1;
+    latestRequestIdRef.current = requestId;
 
-  const checkDistance = useCallback((poi: POI): number | null => {
-    if (!currentPosition) return null;
-    
-    const poisWithDistance = nearbyPOIs.find((p: POI & { distance: number }) => p.id === poi.id);
-    return poisWithDistance?.distance ?? null;
-  }, [currentPosition, nearbyPOIs]);
+    if (workerRef.current) {
+      workerRef.current.postMessage({
+        type: 'CHECK_GEOFENCE',
+        requestId,
+        payload: {
+          userPosition: currentPosition,
+          pois,
+          geofenceRadius: opts.radius ?? GEOFENCE_TRIGGER_RADIUS_M,
+          cooldownTracker: {},
+          cooldownPeriod: 0,
+        },
+      });
+      return;
+    }
 
-  const isNearby = useCallback((poi: POI): boolean => {
-    return activePOIs.has(poi.id);
-  }, [activePOIs]);
+    reconcileGeofenceResult(
+      processGeofenceLocally(currentPosition, pois, opts.radius ?? GEOFENCE_TRIGGER_RADIUS_M)
+    );
+  }, [currentPosition, opts.enabled, opts.radius, pois, reconcileGeofenceResult, resetState]);
+
+  const checkDistance = useCallback(
+    (poi: POI): number | null => {
+      if (!currentPosition) {
+        return null;
+      }
+
+      const poiWithDistance = nearbyPOIs.find((item) => item.id === poi.id);
+      return poiWithDistance?.distance ?? null;
+    },
+    [currentPosition, nearbyPOIs]
+  );
+
+  const isNearby = useCallback((poi: POI): boolean => activePOIs.has(poi.id), [activePOIs]);
 
   return {
     nearbyPOIs,
