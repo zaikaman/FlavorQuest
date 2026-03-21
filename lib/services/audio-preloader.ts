@@ -19,6 +19,11 @@ import {
   type PreloadStatus,
 } from '@/lib/services/storage';
 
+const AUDIO_CACHE_PREFIX = 'flavorquest-audio-';
+const IMAGE_CACHE_PREFIX = 'flavorquest-images-';
+const AUDIO_CACHE_FALLBACK = 'flavorquest-audio-v3';
+const IMAGE_CACHE_FALLBACK = 'flavorquest-images-v3';
+
 export interface PreloadOptions {
   /** Ngôn ngữ hiện tại */
   language: Language;
@@ -96,6 +101,29 @@ function getAllAudioUrls(poi: POI): string[] {
   return urls;
 }
 
+async function resolveLatestCacheName(prefix: string, fallbackName: string): Promise<string> {
+  const cacheNames = await caches.keys();
+  const matchingNames = cacheNames
+    .filter((name) => name.startsWith(prefix))
+    .sort((left, right) => right.localeCompare(left));
+
+  return matchingNames[0] ?? fallbackName;
+}
+
+async function openVersionedCache(prefix: string, fallbackName: string): Promise<Cache> {
+  const cacheName = await resolveLatestCacheName(prefix, fallbackName);
+  return caches.open(cacheName);
+}
+
+export async function getPreloadCacheNames() {
+  const [audio, images] = await Promise.all([
+    resolveLatestCacheName(AUDIO_CACHE_PREFIX, AUDIO_CACHE_FALLBACK),
+    resolveLatestCacheName(IMAGE_CACHE_PREFIX, IMAGE_CACHE_FALLBACK),
+  ]);
+
+  return { audio, images };
+}
+
 /**
  * Preload audio files thông qua Service Worker
  */
@@ -168,7 +196,7 @@ async function preloadDirectly(
   let alreadyCached = 0;
 
   // Check cache first
-  const cache = await caches.open('flavorquest-audio-v1');
+  const cache = await openVersionedCache(AUDIO_CACHE_PREFIX, AUDIO_CACHE_FALLBACK);
 
   for (let i = 0; i < urls.length; i++) {
     const url = urls[i];
@@ -214,7 +242,14 @@ export class AudioPreloader {
    */
   async preload(pois: POI[], options: PreloadOptions): Promise<PreloadResult> {
     if (this.isPreloading) {
-      throw new Error('Preload already in progress');
+      console.log('[AudioPreloader] Preload already in progress, skipping duplicate request');
+      return {
+        successCount: 0,
+        failedCount: 0,
+        alreadyCachedCount: 0,
+        preloadedPOIIds: [],
+        completedAt: Date.now(),
+      };
     }
 
     this.isPreloading = true;
@@ -364,7 +399,14 @@ export class AudioPreloader {
     options: Omit<PreloadOptions, 'language' | 'preloadAll'>
   ): Promise<PreloadResult> {
     if (this.isPreloading) {
-      throw new Error('Preload already in progress');
+      console.log('[AudioPreloader] Full preload already in progress, skipping duplicate request');
+      return {
+        successCount: 0,
+        failedCount: 0,
+        alreadyCachedCount: 0,
+        preloadedPOIIds: [],
+        completedAt: Date.now(),
+      };
     }
 
     this.isPreloading = true;
@@ -482,7 +524,7 @@ export class AudioPreloader {
       console.error('Failed to preload images via SW, falling back to direct:', error);
 
       // Direct preload as fallback
-      const cache = await caches.open('flavorquest-images-v1');
+      const cache = await openVersionedCache(IMAGE_CACHE_PREFIX, IMAGE_CACHE_FALLBACK);
 
       for (let i = 0; i < imageUrls.length; i++) {
         const url = imageUrls[i];
@@ -569,7 +611,7 @@ export const audioPreloader = new AudioPreloader();
  */
 export async function isAudioCached(url: string): Promise<boolean> {
   try {
-    const cache = await caches.open('flavorquest-audio-v1');
+    const cache = await openVersionedCache(AUDIO_CACHE_PREFIX, AUDIO_CACHE_FALLBACK);
     const cached = await cache.match(url);
     return !!cached;
   } catch {
@@ -596,7 +638,12 @@ export async function getCachedAudioForPOI(
  */
 export async function clearPreloadedAudio(): Promise<void> {
   try {
-    await caches.delete('flavorquest-audio-v1');
+    const cacheNames = await caches.keys();
+    await Promise.all(
+      cacheNames
+        .filter((name) => name.startsWith(AUDIO_CACHE_PREFIX))
+        .map((name) => caches.delete(name))
+    );
     await savePreloadStatus({
       totalPOIs: 0,
       preloadedPOIs: 0,

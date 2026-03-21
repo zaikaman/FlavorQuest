@@ -15,7 +15,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from '@/lib/hooks/useTranslations';
 import type { POI, Language, Coordinates } from '@/lib/types/index';
-import { audioPreloader, type PreloadProgress } from '@/lib/services/audio-preloader';
+import {
+  audioPreloader,
+  getPreloadCacheNames,
+  type PreloadProgress,
+} from '@/lib/services/audio-preloader';
 import { loadPreloadStatus, type PreloadStatus } from '@/lib/services/storage';
 import { Toast } from '@/components/ui/Toast';
 
@@ -65,13 +69,14 @@ export function AudioPreloadIndicator({
   // Auto preload khi online và có POIs
   const verifyCache = useCallback(async () => {
     try {
+      const cacheNames = await getPreloadCacheNames();
       // Verify audio cache
-      const audioCache = await caches.open('flavorquest-audio-v1');
+      const audioCache = await caches.open(cacheNames.audio);
       const audioKeys = await audioCache.keys();
       console.log(`[Verify] Audio cache có ${audioKeys.length} files`);
 
       // Verify image cache
-      const imageCache = await caches.open('flavorquest-images-v1');
+      const imageCache = await caches.open(cacheNames.images);
       const imageKeys = await imageCache.keys();
       console.log(`[Verify] Image cache có ${imageKeys.length} files`);
     } catch (err) {

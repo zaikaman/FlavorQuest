@@ -17,6 +17,10 @@ import { useLanguage } from '@/lib/contexts/LanguageContext';
 import { useTranslations } from '@/lib/hooks/useTranslations';
 import { useAuth } from '@/lib/contexts/AuthContext';
 
+type WindowWithWebkitAudioContext = Window & typeof globalThis & {
+  webkitAudioContext?: typeof AudioContext;
+};
+
 export interface StartTourButtonProps {
   onStart?: () => void;
   className?: string;
@@ -28,13 +32,54 @@ export function StartTourButton({ onStart, className = '', disabled = false, isA
   const router = useRouter();
   const { language } = useLanguage();
   const { t } = useTranslations();
-  const { isOwner, isPendingOwner, user, userRole, hasCustomerAccess, isLoading: authLoading } =
+  const {
+    isOwner,
+    isPendingOwner,
+    user,
+    userRole,
+    hasCustomerAccess,
+    isLoading: authLoading,
+    isRoleReady,
+  } =
     useAuth();
   const [isLoading, setIsLoading] = useState(false);
 
-  const resolveAuthenticatedDestination = async () => {
+  const primeAudioPlayback = async () => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
     try {
-      const response = await fetch('/api/users/me', {
+      const AudioContextClass =
+        window.AudioContext ||
+        (window as WindowWithWebkitAudioContext).webkitAudioContext;
+
+      if (!AudioContextClass) {
+        return;
+      }
+
+      const ctx = new AudioContextClass();
+      if (ctx.state === 'suspended') {
+        await ctx.resume();
+      }
+
+      const oscillator = ctx.createOscillator();
+      const gain = ctx.createGain();
+      gain.gain.value = 0.0001;
+      oscillator.connect(gain);
+      gain.connect(ctx.destination);
+      oscillator.start();
+      oscillator.stop(ctx.currentTime + 0.01);
+      await ctx.close();
+      console.log('[StartTourButton] audio primed');
+    } catch (error) {
+      console.warn('[StartTourButton] failed to prime audio:', error);
+    }
+  };
+
+  const resolveAuthenticatedDestination = async (): Promise<string | null> => {
+    try {
+      const response = await fetch(`/api/users/me?t=${Date.now()}`, {
         cache: 'no-store',
         headers: {
           'Cache-Control': 'no-cache, no-store, must-revalidate',
@@ -43,6 +88,10 @@ export function StartTourButton({ onStart, className = '', disabled = false, isA
       });
 
       if (!response.ok) {
+        if (response.status === 401) {
+          return null;
+        }
+
         throw new Error(`/api/users/me -> ${response.status}`);
       }
 
@@ -66,6 +115,10 @@ export function StartTourButton({ onStart, className = '', disabled = false, isA
       return profile.customerAccessGranted ? '/tour' : '/paywall';
     } catch (error) {
       console.warn('[StartTourButton] fallback to local auth snapshot:', error);
+      if (!user) {
+        return null;
+      }
+
       return isOwner
         ? '/owner'
         : isPendingOwner
@@ -90,11 +143,13 @@ export function StartTourButton({ onStart, className = '', disabled = false, isA
         isOwner,
         hasCustomerAccess,
         authLoading,
+        isRoleReady,
       });
       
       // Đảm bảo language đã được lưu vào IndexedDB
       // Thêm delay nhỏ để tránh race condition với setLanguage
       await new Promise(resolve => setTimeout(resolve, 150));
+      await primeAudioPlayback();
 
       // Log analytics
       await logTourStart(language);
@@ -106,9 +161,8 @@ export function StartTourButton({ onStart, className = '', disabled = false, isA
 
       console.log('[StartTourButton] deciding navigation');
 
-      // Navigate based on auth state
-      if (isAuthenticated) {
-        const destination = await resolveAuthenticatedDestination();
+      const destination = await resolveAuthenticatedDestination();
+      if (destination) {
         console.log('[StartTourButton] push:', destination);
         router.push(destination);
       } else {
