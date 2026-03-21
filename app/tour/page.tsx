@@ -310,6 +310,12 @@ export default function TourPage() {
     if (!isAutoMode) return; // Skip if manual mode
 
     const { poi } = event;
+    const isCurrentPOI = audioPlayer.currentItem?.poi.id === poi.id;
+    const isQueuedPOI = audioPlayer.queue.some((item) => item.poi.id === poi.id);
+
+    if (isCurrentPOI || isQueuedPOI) {
+      return;
+    }
 
     // Check cooldown
     const onCooldown = await isCooldownActive(poi.id);

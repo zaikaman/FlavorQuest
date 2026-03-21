@@ -418,7 +418,17 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
     if (!audioRef.current) return;
     await safePause();
     audioRef.current.currentTime = 0;
-    setState(prev => ({ ...prev, isPlaying: false, isPaused: false, currentTime: 0 }));
+    setState(prev => ({
+      ...prev,
+      currentItem: null,
+      isPlaying: false,
+      isPaused: false,
+      isLoading: false,
+      isTTSFallback: false,
+      currentTime: 0,
+      duration: 0,
+      error: null,
+    }));
   }, [safePause]);
 
   const seek = useCallback((time: number) => {
@@ -469,6 +479,20 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
 
   const enqueue = useCallback((item: AudioQueueItem) => {
     setState(prev => {
+      const currentLanguage = prev.currentItem?.language ?? opts.language;
+      const itemLanguage = item.language ?? opts.language;
+      const isCurrentItemDuplicate =
+        prev.currentItem?.poi.id === item.poi.id && currentLanguage === itemLanguage;
+      const isQueuedDuplicate = prev.queue.some(
+        queuedItem =>
+          queuedItem.poi.id === item.poi.id &&
+          (queuedItem.language ?? opts.language) === itemLanguage
+      );
+
+      if (isCurrentItemDuplicate || isQueuedDuplicate) {
+        return prev;
+      }
+
       const shouldAutoPlay = !prev.currentItem && opts.autoPlay;
 
       if (shouldAutoPlay) {
@@ -483,7 +507,7 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
         queue: [...prev.queue, item],
       };
     });
-  }, [opts.autoPlay, play]);
+  }, [opts.autoPlay, opts.language, play]);
 
   const playNext = useCallback(() => {
     setState(prev => {
