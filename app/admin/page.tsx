@@ -7,7 +7,7 @@ import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/lib/contexts/AuthContext';
 import { DashboardSkeleton } from '@/components/ui/Loading';
 import type { POI, Tour } from '@/lib/types';
-import { USER_PRESENCE_CHANNEL } from '@/lib/realtime/presence';
+import { getOnlineUserIdsFromPresenceState, USER_PRESENCE_CHANNEL } from '@/lib/realtime/presence';
 
 interface DashboardTourAnalytics {
   id: string;
@@ -174,6 +174,8 @@ export default function AdminDashboard() {
     const supabase = createClient();
     const channels: RealtimeChannel[] = [];
 
+    setOnlineUsers(user?.id ? 1 : 0);
+
     const refreshDashboard = () => {
       void loadDashboard();
     };
@@ -198,28 +200,7 @@ export default function AdminDashboard() {
 
     const presenceChannel = supabase.channel(USER_PRESENCE_CHANNEL);
     const syncOnlineUsers = () => {
-      const state = presenceChannel.presenceState();
-      const onlineUserIds = new Set<string>();
-
-      Object.entries(state).forEach(([presenceKey, presences]) => {
-        if (Array.isArray(presences)) {
-          presences.forEach((presence) => {
-            if (
-              presence &&
-              typeof presence === 'object' &&
-              'userId' in presence &&
-              typeof presence.userId === 'string'
-            ) {
-              onlineUserIds.add(presence.userId);
-              return;
-            }
-          });
-        }
-
-        if (presenceKey) {
-          onlineUserIds.add(presenceKey);
-        }
-      });
+      const onlineUserIds = getOnlineUserIdsFromPresenceState(presenceChannel.presenceState());
 
       if (user?.id) {
         onlineUserIds.add(user.id);
@@ -232,7 +213,11 @@ export default function AdminDashboard() {
       .on('presence', { event: 'sync' }, syncOnlineUsers)
       .on('presence', { event: 'join' }, syncOnlineUsers)
       .on('presence', { event: 'leave' }, syncOnlineUsers)
-      .subscribe();
+      .subscribe((status) => {
+        if (status === 'SUBSCRIBED') {
+          syncOnlineUsers();
+        }
+      });
     channels.push(presenceChannel);
 
     return () => {
