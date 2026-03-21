@@ -119,12 +119,27 @@ export function POIForm({ initialData, isNew = false, allowOwnerAssignment = tru
     try {
       const url = isNew ? '/api/pois' : `/api/pois/${formData.id}`;
       const method = isNew ? 'POST' : 'PUT';
+      const payload = {
+        ...formData,
+        name_vi: typeof formData.name_vi === 'string' ? formData.name_vi.trim() : '',
+        name_en:
+          typeof formData.name_en === 'string' && formData.name_en.trim()
+            ? formData.name_en.trim()
+            : typeof formData.name_vi === 'string'
+              ? formData.name_vi.trim()
+              : '',
+      };
 
       const res = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
+
+      if (!res.ok) {
+        const errorBody = (await res.json().catch(() => null)) as { error?: string } | null;
+        throw new Error(errorBody?.error || 'LÆ°u tháº¥t báº¡i');
+      }
 
       if (!res.ok) throw new Error('Lưu thất bại');
 
@@ -133,6 +148,10 @@ export function POIForm({ initialData, isNew = false, allowOwnerAssignment = tru
       router.refresh();
     } catch (error) {
       console.error('Error saving POI:', error);
+      if (error instanceof Error) {
+        toast.error(error.message);
+        return;
+      }
       toast.error('Lỗi khi lưu địa điểm');
     } finally {
       setLoading(false);
