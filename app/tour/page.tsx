@@ -351,10 +351,23 @@ export default function TourPage() {
     if (!isAutoMode) return; // Skip if manual mode
 
     const { poi } = event;
+    console.log('[TourPage] handlePOIEnter:', {
+      poiId: poi.id,
+      name: poi.name_vi,
+      distance: Math.round(event.distance),
+      poiRadius: poi.radius,
+      autoMode: isAutoMode,
+    });
+
     const isCurrentPOI = audioPlayer.currentItem?.poi.id === poi.id;
     const isQueuedPOI = audioPlayer.queue.some((item) => item.poi.id === poi.id);
 
     if (isCurrentPOI || isQueuedPOI) {
+      console.log('[TourPage] skip auto-play because POI is already current or queued:', {
+        poiId: poi.id,
+        isCurrentPOI,
+        isQueuedPOI,
+      });
       return;
     }
 
@@ -368,6 +381,10 @@ export default function TourPage() {
     // Check speed
     const currentSpeed = speedCalculatorRef.current.getSpeedKmh();
     if (currentSpeed !== null && currentSpeed > MAX_WALKING_SPEED_KMH) {
+      console.log('[TourPage] skip auto-play because speed is too high:', {
+        poiId: poi.id,
+        currentSpeed,
+      });
       showToastMessage(t('tour.tooFast'));
       return;
     }
@@ -380,6 +397,13 @@ export default function TourPage() {
       console.warn(`No audio URL for POI ${poi.id}`);
       return;
     }
+
+    console.log('[TourPage] enqueue auto-play:', {
+      poiId: poi.id,
+      name: localizedPOI.name,
+      language,
+      audioUrl,
+    });
 
     enqueue({
       poi,

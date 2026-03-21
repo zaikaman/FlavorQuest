@@ -166,6 +166,19 @@ export function useGeofencing(
       setActivePOIs(nextActive);
 
       if (onEnter) {
+        if (result.triggeredPOIs.length > 0) {
+          console.log(
+            '[useGeofencing] triggered POIs:',
+            result.triggeredPOIs.map(({ poi, distance }) => ({
+              id: poi.id,
+              name: poi.name_vi,
+              distance: Math.round(distance),
+              poiRadius: poi.radius,
+              effectiveRadius: Math.max(poi.radius || 0, radius),
+            }))
+          );
+        }
+
         result.triggeredPOIs.forEach(({ poi, distance }) => {
           if (previousActive.has(poi.id)) {
             return;
@@ -180,6 +193,13 @@ export function useGeofencing(
       }
 
       if (onExit) {
+        if (previousActive.size > 0 && previousActive.size !== nextActive.size) {
+          console.log('[useGeofencing] active POIs updated:', {
+            previous: Array.from(previousActive),
+            next: Array.from(nextActive),
+          });
+        }
+
         previousActive.forEach((poiId) => {
           if (nextActive.has(poiId)) {
             return;

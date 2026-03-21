@@ -324,6 +324,13 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
     }
 
     if (targetItem) {
+      console.log('[useAudioPlayer] play requested:', {
+        poiId: targetItem.poi.id,
+        title: targetItem.title,
+        language: targetItem.language ?? optionsRef.current.language ?? 'vi',
+        hasAudioUrl: Boolean(targetItem.audioUrl),
+      });
+
       const requestId = ++playRequestIdRef.current;
 
       setState(prev => ({
@@ -398,6 +405,11 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
       if ((error as Error).name === 'NotAllowedError') {
         const blockedItem = targetItem ?? currentItemRef.current;
 
+        console.warn('[useAudioPlayer] autoplay blocked by browser:', {
+          poiId: blockedItem?.poi.id ?? null,
+          title: blockedItem?.title ?? null,
+        });
+
         if (blockedItem) {
           registerInteractionRetry(blockedItem);
         }
@@ -417,6 +429,7 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
         error: error instanceof Error ? error.message : 'Failed to play audio',
         isLoading: false,
       }));
+      console.error('[useAudioPlayer] play failed:', error);
     }
   }, [registerInteractionRetry, unlockAudio]);
 
@@ -567,6 +580,15 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
       }
 
       const shouldAutoPlay = !prev.currentItem && opts.autoPlay;
+
+      console.log('[useAudioPlayer] enqueue:', {
+        poiId: item.poi.id,
+        title: item.title,
+        language: item.language ?? opts.language ?? 'vi',
+        shouldAutoPlay,
+        queueLengthBefore: prev.queue.length,
+        hasCurrentItem: Boolean(prev.currentItem),
+      });
 
       if (shouldAutoPlay) {
         window.setTimeout(() => {
