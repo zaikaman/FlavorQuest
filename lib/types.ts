@@ -512,6 +512,42 @@ export interface UserSettings {
   batterySaverMode: boolean;
   showNotifications: boolean;
   preferredMapZoom: number;
+  performancePreference: DevicePerformancePreference;
+}
+
+export type DevicePerformancePreference = 'system' | 'light' | 'balanced' | 'full';
+
+export type DevicePerformanceTier = 'light' | 'balanced' | 'full';
+
+export interface DeviceCapabilityAssessment {
+  tier: DevicePerformanceTier;
+  score: number;
+  hardwareConcurrency: number | null;
+  deviceMemory: number | null;
+  effectiveConnectionType: 'slow-2g' | '2g' | '3g' | '4g' | 'unknown';
+  saveDataEnabled: boolean;
+  prefersReducedMotion: boolean;
+  isTouchDevice: boolean;
+  viewportWidth: number;
+  pixelRatio: number;
+}
+
+export interface DeviceResourceProfile {
+  tier: DevicePerformanceTier;
+  mapDefaultZoom: number;
+  mapFlyAnimation: boolean;
+  showAccuracyRing: boolean;
+  showUserPulse: boolean;
+  autoPreloadAudio: boolean;
+  nearbyPreloadRadius: number;
+}
+
+export interface EffectiveDevicePerformance {
+  source: DevicePerformancePreference;
+  detectedTier: DevicePerformanceTier;
+  effectiveTier: DevicePerformanceTier;
+  batterySaverAdjusted: boolean;
+  profile: DeviceResourceProfile;
 }
 
 /**
@@ -525,6 +561,7 @@ export const DEFAULT_USER_SETTINGS: UserSettings = {
   batterySaverMode: false,
   showNotifications: true,
   preferredMapZoom: 17,
+  performancePreference: 'system',
 };
 
 // ============================================
