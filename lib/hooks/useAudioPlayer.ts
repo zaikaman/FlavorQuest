@@ -15,10 +15,11 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import type { POI, Language } from '@/lib/types/index';
 import { getLocalizedPOI } from '@/lib/utils/localization';
-
-type WindowWithWebkitAudioContext = Window & typeof globalThis & {
-  webkitAudioContext?: typeof AudioContext;
-};
+import {
+  getSharedAudioElement,
+  isSharedAudioPrimed,
+  primeSharedAudioElement,
+} from '@/lib/services/audio-session';
 
 export interface AudioQueueItem {
   poi: POI;
@@ -223,21 +224,13 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
   const unlockAudio = useCallback(async () => {
     if (isUnlockedRef.current || !audioRef.current) return;
 
-    try {
-      const AudioContextClass = window.AudioContext || (window as WindowWithWebkitAudioContext).webkitAudioContext;
-      if (AudioContextClass) {
-        const ctx = new AudioContextClass();
-        const buffer = ctx.createBuffer(1, 1, 22050);
-        const source = ctx.createBufferSource();
-        source.buffer = buffer;
-        source.connect(ctx.destination);
-        source.start(0);
-        await ctx.close();
-      }
-      isUnlockedRef.current = true;
-    } catch (error) {
-      console.warn('Failed to unlock audio context:', error);
-    }
+    const didPrime = await primeSharedAudioElement();
+    isUnlockedRef.current = didPrime || isSharedAudioPrimed();
+    console.info('[useAudioPlayer] unlock result', {
+      didPrime,
+      isUnlocked: isUnlockedRef.current,
+      sharedPrimed: isSharedAudioPrimed(),
+    });
   }, []);
 
   const registerInteractionRetry = useCallback((item: AudioQueueItem) => {
@@ -392,6 +385,12 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
       await unlockAudio();
     }
 
+    console.info('[useAudioPlayer] play attempt', {
+      poiId: targetItem?.poi.id ?? currentItemRef.current?.poi.id ?? null,
+      isUnlocked: isUnlockedRef.current,
+      sharedPrimed: isSharedAudioPrimed(),
+    });
+
     try {
       playPromiseRef.current = audio.play();
       await playPromiseRef.current;
@@ -408,6 +407,7 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
         console.warn('[useAudioPlayer] autoplay blocked by browser:', {
           poiId: blockedItem?.poi.id ?? null,
           title: blockedItem?.title ?? null,
+          sharedPrimed: isSharedAudioPrimed(),
         });
 
         if (blockedItem) {
@@ -631,12 +631,11 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    const audio = new Audio();
+    const audio = getSharedAudioElement();
+    if (!audio) return;
     audio.preload = 'auto';
     audio.volume = opts.volume ?? 1;
     audio.playbackRate = opts.playbackRate ?? 1;
-    audio.style.display = 'none';
-    document.body.appendChild(audio);
     audioRef.current = audio;
 
     const onLoadedMetadata = () => {
@@ -677,6 +676,10 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
     };
     const onPlay = () => {
       setState(prev => ({ ...prev, isPlaying: true, isPaused: false }));
+      console.info('[useAudioPlayer] audio started', {
+        poiId: currentItemRef.current?.poi.id ?? null,
+        currentSrc: audio.currentSrc,
+      });
       if (currentItemRef.current) {
         optionsRef.current.onPlay?.(currentItemRef.current);
       }
@@ -705,9 +708,6 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
       audio.removeEventListener('play', onPlay);
       audio.removeEventListener('pause', onPause);
       audio.pause();
-      if (audio.parentNode) {
-        audio.parentNode.removeChild(audio);
-      }
       if (audioRef.current === audio) {
         audioRef.current = null;
       }

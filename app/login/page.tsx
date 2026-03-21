@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/lib/contexts/AuthContext';
 import { useTranslations } from '@/lib/hooks/useTranslations';
 import { requestEmailOtp, verifyEmailOtp, type AccountType } from '@/lib/services/auth';
+import { primeSharedAudioElement } from '@/lib/services/audio-session';
 import { InlineSpinner, Skeleton } from '@/components/ui/Loading';
 
 export default function LoginPage() {
@@ -152,6 +153,7 @@ export default function LoginPage() {
       setIsCompletingOwnerLogin(true);
     }
     setFeedback(null);
+    await primeSharedAudioElement();
 
     const {
       error: verifyError,
