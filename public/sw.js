@@ -23,7 +23,7 @@
  * - flavorquest-tiles-v1: Map tiles
  */
 
-const CACHE_VERSION = 'v3';
+const CACHE_VERSION = 'v4';
 const CACHE_NAMES = {
   static: `flavorquest-static-${CACHE_VERSION}`,
   dynamic: `flavorquest-dynamic-${CACHE_VERSION}`,
@@ -31,6 +31,26 @@ const CACHE_NAMES = {
   images: `flavorquest-images-${CACHE_VERSION}`,
   tiles: `flavorquest-tiles-${CACHE_VERSION}`,
 };
+
+const NETWORK_ONLY_API_PATTERNS = [
+  /^\/api\/auth(?:\/|$)/,
+  /^\/api\/payments(?:\/|$)/,
+  /^\/api\/users\/me(?:\/|$)/,
+  /^\/api\/notifications(?:\/|$)/,
+  /^\/api\/orders(?:\/|$)/,
+  /^\/api\/support(?:\/|$)/,
+  /^\/api\/upload(?:\/|$)/,
+  /^\/api\/translate(?:\/|$)/,
+  /^\/api\/tts(?:\/|$)/,
+];
+
+const NETWORK_FIRST_API_PATTERNS = [
+  /^\/api\/pois(?:\/|$)/,
+  /^\/api\/tours(?:\/|$)/,
+  /^\/api\/dishes(?:\/|$)/,
+  /^\/api\/users(?:\/owners(?:\/|$)|\/owner-requests(?:\/|$)|\/?$)/,
+  /^\/api\/analytics\/summary(?:\/|$)/,
+];
 
 const STATIC_ASSETS = [
   '/',
@@ -131,9 +151,19 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Same-origin API requests should prefer fresh network data.
+  // Same-origin API requests use route-specific freshness rules.
   if (isAppApiRequest(url)) {
-    event.respondWith(networkFirst(request, CACHE_NAMES.dynamic));
+    if (shouldBypassApiCache(url)) {
+      event.respondWith(networkOnly(request));
+      return;
+    }
+
+    if (shouldUseNetworkFirstForApi(url)) {
+      event.respondWith(networkFirst(request, CACHE_NAMES.dynamic));
+      return;
+    }
+
+    event.respondWith(networkOnly(request));
     return;
   }
 
@@ -231,6 +261,14 @@ function isAppApiRequest(url) {
   return url.origin === self.location.origin && url.pathname.startsWith('/api/');
 }
 
+function shouldBypassApiCache(url) {
+  return NETWORK_ONLY_API_PATTERNS.some((pattern) => pattern.test(url.pathname));
+}
+
+function shouldUseNetworkFirstForApi(url) {
+  return NETWORK_FIRST_API_PATTERNS.some((pattern) => pattern.test(url.pathname));
+}
+
 async function handleNavigationRequest(request) {
   const cache = await caches.open(CACHE_NAMES.static);
   const requestUrl = new URL(request.url);
@@ -324,6 +362,10 @@ async function networkFirst(request, cacheName) {
 
     return Response.error();
   }
+}
+
+async function networkOnly(request) {
+  return fetch(request);
 }
 
 /**

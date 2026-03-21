@@ -21,8 +21,8 @@ import {
 
 const AUDIO_CACHE_PREFIX = 'flavorquest-audio-';
 const IMAGE_CACHE_PREFIX = 'flavorquest-images-';
-const AUDIO_CACHE_FALLBACK = 'flavorquest-audio-v3';
-const IMAGE_CACHE_FALLBACK = 'flavorquest-images-v3';
+const AUDIO_CACHE_FALLBACK = 'flavorquest-audio-v4';
+const IMAGE_CACHE_FALLBACK = 'flavorquest-images-v4';
 
 export interface PreloadOptions {
   /** Ngôn ngữ hiện tại */
