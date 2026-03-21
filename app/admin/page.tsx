@@ -479,13 +479,6 @@ export default function AdminDashboard() {
         <div className="flex flex-wrap items-center gap-3">
           <button
             type="button"
-            onClick={() => window.open('/', '_blank')}
-            className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-gray-100 transition-colors hover:bg-white/10"
-          >
-            Mở giao diện khách hàng
-          </button>
-          <button
-            type="button"
             onClick={() => void loadDashboard()}
             className="bg-primary rounded-xl px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-orange-600"
           >
