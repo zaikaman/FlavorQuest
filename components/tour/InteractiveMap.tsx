@@ -71,6 +71,8 @@ export function InteractiveMap({
   useEffect(() => {
     if (!mapContainerRef.current || mapRef.current) return;
 
+     setMapLoaded(false);
+
     // Tạo map với style tối
     const map = L.map(mapContainerRef.current, {
       center: initialCenterRef.current, // Vĩnh Khánh street - center of POIs
@@ -96,10 +98,23 @@ export function InteractiveMap({
     });
 
     return () => {
+      userMarkerRef.current = null;
+      userCircleRef.current = null;
+      poiMarkersRef.current.clear();
+      setMapLoaded(false);
       map.remove();
       mapRef.current = null;
     };
-  }, [preferredZoom]);
+  }, []);
+
+  useEffect(() => {
+    if (!mapRef.current || !mapLoaded) return;
+
+    const currentZoom = mapRef.current.getZoom();
+    if (currentZoom === preferredZoom) return;
+
+    mapRef.current.setZoom(preferredZoom, { animate: false });
+  }, [mapLoaded, preferredZoom]);
 
   // Cập nhật vị trí người dùng
   useEffect(() => {
