@@ -23,7 +23,7 @@
  * - flavorquest-tiles-v1: Map tiles
  */
 
-const CACHE_VERSION = 'v2';
+const CACHE_VERSION = 'v3';
 const CACHE_NAMES = {
   static: `flavorquest-static-${CACHE_VERSION}`,
   dynamic: `flavorquest-dynamic-${CACHE_VERSION}`,
@@ -131,6 +131,12 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // Same-origin API requests should prefer fresh network data.
+  if (isAppApiRequest(url)) {
+    event.respondWith(networkFirst(request, CACHE_NAMES.dynamic));
+    return;
+  }
+
   // Supabase Storage audio files: Cache first (high priority for offline)
   if (isSupabaseAudioUrl(url.href)) {
     console.log('[SW] Matched audio pattern:', url.href);
@@ -221,6 +227,10 @@ function isNextAsset(url) {
   return url.origin === self.location.origin && url.pathname.startsWith('/_next/');
 }
 
+function isAppApiRequest(url) {
+  return url.origin === self.location.origin && url.pathname.startsWith('/api/');
+}
+
 async function handleNavigationRequest(request) {
   const cache = await caches.open(CACHE_NAMES.static);
   const requestUrl = new URL(request.url);
@@ -285,6 +295,33 @@ async function cacheFirst(request, cacheName) {
     return response;
   } catch (error) {
     console.error('[SW] Fetch failed:', error);
+    return Response.error();
+  }
+}
+
+/**
+ * Network First Strategy
+ * Always try network first and only fall back to cache when offline or the request fails.
+ */
+async function networkFirst(request, cacheName) {
+  const cache = await caches.open(cacheName);
+
+  try {
+    const response = await fetch(request);
+
+    if (response.ok) {
+      cache.put(request, response.clone());
+    }
+
+    return response;
+  } catch (error) {
+    console.error('[SW] Network-first fetch failed:', error);
+
+    const cached = await cache.match(request, { ignoreSearch: false });
+    if (cached) {
+      return cached;
+    }
+
     return Response.error();
   }
 }

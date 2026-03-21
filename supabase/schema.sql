@@ -85,8 +85,8 @@ CREATE TABLE public.notifications (
 );
 CREATE TABLE public.pois (
   id uuid NOT NULL DEFAULT uuid_generate_v4(),
-  lat double precision NOT NULL CHECK (lat >= 10.750::double precision AND lat <= 10.765::double precision),
-  lng double precision NOT NULL CHECK (lng >= 106.690::double precision AND lng <= 106.710::double precision),
+  lat double precision NOT NULL,
+  lng double precision NOT NULL,
   radius integer NOT NULL DEFAULT 20 CHECK (radius >= 1 AND radius <= 100),
   priority integer NOT NULL DEFAULT 5 CHECK (priority >= 1 AND priority <= 10),
   name_vi text NOT NULL,
