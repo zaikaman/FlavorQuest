@@ -156,7 +156,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       />
 
       {/* Sidebar (Desktop & Tablet) */}
-      <aside className="sticky top-0 z-20 h-screen w-64 flex-shrink-0 hidden flex-col border-r border-white/10 bg-[#2c1e16]/80 backdrop-blur-md lg:flex">
+      <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 border-r border-white/10 bg-[#2c1e16]/80 backdrop-blur-md lg:flex">
         <div className="flex h-full flex-col p-4 overflow-y-auto [&::-webkit-scrollbar]:hidden [scrollbar-width:none]">
           {/* Logo */}
           <div className="flex items-center gap-3 mb-8 px-2 mt-4">
@@ -309,9 +309,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </header>
 
       {/* Main Content */}
-      <main className="relative z-10 mx-auto w-full max-w-7xl flex-1 px-4 py-8 sm:px-6 lg:px-8">
-        {children}
-      </main>
+      <div className="w-full flex-1 lg:pl-64">
+        <main className="relative z-10 mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+          {children}
+        </main>
+      </div>
       <RoleChatbot
         role="admin"
         bottomOffsetClassName="bottom-4 sm:bottom-6 lg:bottom-8"
