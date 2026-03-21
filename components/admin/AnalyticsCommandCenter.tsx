@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { DashboardSkeleton } from '@/components/ui/Loading';
@@ -44,6 +44,26 @@ interface HourlyActivity {
   total_tours: number;
   total_plays: number;
   unique_sessions: number;
+}
+
+interface HeatmapCell {
+  hour: number;
+  plays: number;
+  unique_sessions: number;
+  total_tours: number;
+}
+
+interface HeatmapDay {
+  date: string;
+  label: string;
+  cells: HeatmapCell[];
+}
+
+interface HeatmapSummary {
+  timezone: string;
+  metric: 'plays';
+  maxValue: number;
+  days: HeatmapDay[];
 }
 
 interface EventMixItem {
@@ -170,6 +190,7 @@ interface AnalyticsSummaryResponse {
   availableTours: TourFilterOption[];
   selectedTourId: string | null;
   hourly: HourlyActivity[];
+  heatmap: HeatmapSummary;
   events: EventMixItem[];
   languages: LanguageItem[];
   sessionSegments: SessionSegment[];
@@ -187,6 +208,12 @@ interface AnalyticsSummaryResponse {
 }
 
 const EMPTY_ARRAY: never[] = [];
+const EMPTY_HEATMAP: HeatmapSummary = {
+  timezone: 'Asia/Ho_Chi_Minh',
+  metric: 'plays',
+  maxValue: 0,
+  days: [],
+};
 
 function formatNumber(value: number) {
   return new Intl.NumberFormat('vi-VN').format(value);
@@ -205,10 +232,13 @@ function formatDuration(value: number | null) {
 }
 
 function formatShortDate(value: string) {
-  return new Date(value).toLocaleDateString('vi-VN', {
-    day: '2-digit',
-    month: '2-digit',
-  });
+  const [, month, day] = value.split('-');
+  return day && month ? `${day}/${month}` : value;
+}
+
+function formatFullDate(value: string) {
+  const [year, month, day] = value.split('-');
+  return day && month && year ? `${day}/${month}/${year}` : value;
 }
 
 function formatHour(hour: number) {
@@ -227,6 +257,32 @@ function getPlaysPerSession(tour: TourAnalyticsItem) {
 
 function getTimelineMax<T>(items: T[], mapper: (item: T) => number) {
   return Math.max(...items.map(mapper), 1);
+}
+
+function getHeatmapTone(value: number, maxValue: number) {
+  if (!value || maxValue <= 0) {
+    return 'border-white/5 bg-[#241711] hover:bg-[#2d1d15]';
+  }
+
+  const ratio = value / maxValue;
+
+  if (ratio >= 0.8) {
+    return 'border-orange-200/40 bg-[#f58220] hover:bg-[#ff9a46]';
+  }
+
+  if (ratio >= 0.6) {
+    return 'border-orange-300/30 bg-[#d96b24] hover:bg-[#e97b35]';
+  }
+
+  if (ratio >= 0.4) {
+    return 'border-orange-500/25 bg-[#a95220] hover:bg-[#bb642f]';
+  }
+
+  if (ratio >= 0.2) {
+    return 'border-orange-700/20 bg-[#71361c] hover:bg-[#884427]';
+  }
+
+  return 'border-orange-900/20 bg-[#48261a] hover:bg-[#5a3121]';
 }
 
 function MiniTimeline<T extends TimelinePoint>({
@@ -309,6 +365,94 @@ function MiniTimeline<T extends TimelinePoint>({
           )}
         </div>
       </div>
+    </div>
+  );
+}
+
+function ActivityHeatmap({ heatmap }: { heatmap: HeatmapSummary }) {
+  const hasRows = heatmap.days.length > 0;
+  const legendLevels = [1, 2, 3, 4, 5];
+
+  return (
+    <div className="mt-8 rounded-[24px] border border-white/10 bg-black/15 p-5">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+        <div>
+          <p className="text-primary text-sm font-semibold">Heatmap nghe theo ngày x giờ</p>
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-gray-400">
+            Ô càng nóng thì số lượt nghe trong khung đó càng cao. Mỗi ô vẫn giữ số phiên và lượt bắt
+            đầu tour để đọc đúng ngữ cảnh thay vì chỉ nhìn màu.
+          </p>
+        </div>
+        <div className="flex flex-wrap items-center gap-3 text-[11px] uppercase tracking-[0.22em] text-gray-500">
+          <span>Thấp</span>
+          <div className="flex items-center gap-1.5">
+            {legendLevels.map((level) => (
+              <span
+                key={level}
+                className={`h-3.5 w-3.5 rounded-[4px] border ${getHeatmapTone(level, 5)}`}
+              />
+            ))}
+          </div>
+          <span>Cao</span>
+        </div>
+      </div>
+
+      <div className="mt-5 flex flex-wrap items-center gap-3 text-xs text-gray-500">
+        <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1">
+          Múi giờ báo cáo: {heatmap.timezone}
+        </span>
+        <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1">
+          Đỉnh ô: {formatNumber(heatmap.maxValue)} lượt nghe
+        </span>
+      </div>
+
+      {hasRows ? (
+        <div className="mt-6 overflow-x-auto pb-2 [scrollbar-color:rgba(245,130,32,0.55)_rgba(255,255,255,0.08)] [scrollbar-width:thin] [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-white/5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-primary/60 [&::-webkit-scrollbar-thumb:hover]:bg-primary/80">
+          <div
+            className="grid min-w-[760px] gap-1.5"
+            style={{
+              gridTemplateColumns: '72px repeat(24, minmax(18px, 1fr))',
+            }}
+          >
+            <div className="flex items-end pb-2 text-[10px] font-semibold uppercase tracking-[0.24em] text-gray-500">
+              Ngày
+            </div>
+            {Array.from({ length: 24 }, (_, hour) => (
+              <div
+                key={`hour-${hour}`}
+                className="pb-2 text-center text-[10px] font-semibold uppercase tracking-[0.18em] text-gray-500"
+              >
+                {String(hour).padStart(2, '0')}
+              </div>
+            ))}
+
+            {heatmap.days.map((day) => (
+              <Fragment key={day.date}>
+                <div className="flex items-center pr-2 text-xs font-semibold text-gray-300">
+                  {day.label}
+                </div>
+                {day.cells.map((cell) => {
+                  const cellLabel = `${formatFullDate(day.date)} ${formatHour(cell.hour)}: ${formatNumber(cell.plays)} lượt nghe, ${formatNumber(cell.unique_sessions)} phiên, ${formatNumber(cell.total_tours)} lượt bắt đầu tour.`;
+
+                  return (
+                    <div
+                      key={`${day.date}-${cell.hour}`}
+                      role="img"
+                      aria-label={cellLabel}
+                      title={cellLabel}
+                      className={`aspect-square min-h-[18px] rounded-[6px] border transition-transform duration-150 hover:scale-[1.04] ${getHeatmapTone(cell.plays, heatmap.maxValue)}`}
+                    />
+                  );
+                })}
+              </Fragment>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <div className="mt-6 rounded-2xl border border-dashed border-white/10 bg-white/5 px-4 py-8 text-sm text-gray-400">
+          Chưa có dữ liệu để dựng heatmap trong giai đoạn này.
+        </div>
+      )}
     </div>
   );
 }
@@ -404,6 +548,7 @@ export default function AnalyticsCommandCenter() {
 
   const dailyData = data?.daily ?? EMPTY_ARRAY;
   const hourlyData = data?.hourly ?? EMPTY_ARRAY;
+  const heatmap = data?.heatmap ?? EMPTY_HEATMAP;
   const tourData = data?.tours ?? EMPTY_ARRAY;
   const events = data?.events ?? EMPTY_ARRAY;
   const languages = data?.languages ?? EMPTY_ARRAY;
@@ -798,53 +943,7 @@ export default function AnalyticsCommandCenter() {
             </div>
           </div>
 
-          <div className="mt-8 grid gap-4 rounded-[24px] border border-white/10 bg-black/15 p-5 lg:grid-cols-[minmax(0,0.94fr)_minmax(0,1.06fr)]">
-            <div>
-              <p className="text-primary text-sm font-semibold">Nhịp theo giờ</p>
-              <p className="mt-2 text-sm leading-6 text-gray-400">
-                Dùng để nhìn ra khung giờ đông người nghe nhất, từ đó chọn thời điểm đẩy traffic
-                hoặc kiểm tra trải nghiệm thực địa.
-              </p>
-            </div>
-            <div className="min-w-0 overflow-x-auto pb-2 [scrollbar-color:rgba(245,130,32,0.55)_rgba(255,255,255,0.08)] [scrollbar-width:thin] [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-white/5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-primary/60 [&::-webkit-scrollbar-thumb:hover]:bg-primary/80">
-              <div
-                className="grid min-w-full items-end gap-2"
-                style={{
-                  gridTemplateColumns: `repeat(${Math.max(hourlyData.length, 1)}, minmax(18px, 1fr))`,
-                }}
-              >
-                {hourlyData.map((item) => {
-                  const hourlyMax = getTimelineMax(hourlyData, (entry) =>
-                    Math.max(entry.total_tours, entry.total_plays)
-                  );
-
-                  return (
-                    <div key={item.hour} className="flex min-w-0 flex-col items-center gap-2">
-                      <div className="flex h-24 w-full items-end gap-1">
-                        <div
-                          className="bg-primary/50 w-1/2 rounded-t-sm"
-                          style={{
-                            height: `${(item.total_tours / hourlyMax) * 100}%`,
-                            minHeight: item.total_tours > 0 ? 4 : 0,
-                          }}
-                        />
-                        <div
-                          className="w-1/2 rounded-t-sm bg-orange-300/60"
-                          style={{
-                            height: `${(item.total_plays / hourlyMax) * 100}%`,
-                            minHeight: item.total_plays > 0 ? 4 : 0,
-                          }}
-                        />
-                      </div>
-                      <span className="w-full truncate text-center text-[10px] text-gray-500">
-                        {item.hour}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
+          <ActivityHeatmap heatmap={heatmap} />
         </div>
 
         <div className="min-w-0 space-y-6">

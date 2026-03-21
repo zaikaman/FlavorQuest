@@ -111,10 +111,19 @@ interface SessionAccumulator {
   durationMs: number | null;
 }
 
+interface HeatmapCellAccumulator {
+  hour: number;
+  plays: number;
+  total_tours: number;
+  sessions: Set<string>;
+}
+
 const ANALYTICS_PAGE_SIZE = 1000;
 const DEFAULT_PERIOD = '30days';
 const PERIOD_WITH_FILLED_DATES = new Set(['7days', '30days']);
 const ANALYTICS_SUMMARY_CACHE_TTL_MS = 30_000;
+const REPORT_TIMEZONE = 'Asia/Ho_Chi_Minh';
+const REPORT_TIMEZONE_OFFSET_MS = 7 * 60 * 60 * 1000;
 const LANGUAGE_LABELS: Record<string, string> = {
   vi: 'Tiếng Việt',
   en: 'English',
@@ -130,20 +139,67 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === 'object' && !Array.isArray(value);
 }
 
-function getPeriodWindow(period: string) {
-  const now = new Date();
-  const startDate = new Date(now);
-  startDate.setUTCHours(0, 0, 0, 0);
+function toReportDate(date: Date) {
+  return new Date(date.getTime() + REPORT_TIMEZONE_OFFSET_MS);
+}
 
-  if (period === '7days') {
-    startDate.setUTCDate(startDate.getUTCDate() - 6);
-  } else if (period === '30days') {
-    startDate.setUTCDate(startDate.getUTCDate() - 29);
-  } else {
-    return { period: 'all', startDate: new Date(0), now };
+function getReportDateKeyFromDate(date: Date) {
+  return toReportDate(date).toISOString().slice(0, 10);
+}
+
+function getReportHourFromDate(date: Date) {
+  return toReportDate(date).getUTCHours();
+}
+
+function getReportDateKey(value: string) {
+  return getReportDateKeyFromDate(new Date(value));
+}
+
+function getReportDateLabel(dateKey: string) {
+  const [, month, day] = dateKey.split('-');
+  return `${day}/${month}`;
+}
+
+function getReportDateKeysInRange(startDate: Date, endDate: Date) {
+  const keys: string[] = [];
+  const cursor = new Date(startDate);
+  cursor.setUTCHours(0, 0, 0, 0);
+
+  while (cursor <= endDate) {
+    keys.push(cursor.toISOString().slice(0, 10));
+    cursor.setUTCDate(cursor.getUTCDate() + 1);
   }
 
-  return { period, startDate, now };
+  return keys;
+}
+
+function getPeriodWindow(period: string) {
+  const now = new Date();
+  const reportEndDate = toReportDate(now);
+  reportEndDate.setUTCHours(0, 0, 0, 0);
+  const reportStartDate = new Date(reportEndDate);
+
+  if (period === '7days') {
+    reportStartDate.setUTCDate(reportStartDate.getUTCDate() - 6);
+  } else if (period === '30days') {
+    reportStartDate.setUTCDate(reportStartDate.getUTCDate() - 29);
+  } else {
+    return {
+      period: 'all',
+      startDate: new Date(0),
+      now,
+      reportStartDate: new Date(0),
+      reportEndDate,
+    };
+  }
+
+  return {
+    period,
+    startDate: new Date(reportStartDate.getTime() - REPORT_TIMEZONE_OFFSET_MS),
+    now,
+    reportStartDate,
+    reportEndDate,
+  };
 }
 
 function normalizeRole(role: string | null | undefined) {
@@ -166,10 +222,6 @@ function getTourIdFromMetadata(metadata: Record<string, unknown> | null) {
 function getDurationFromMetadata(metadata: Record<string, unknown> | null) {
   if (!metadata) return null;
   return typeof metadata.duration === 'number' ? metadata.duration : null;
-}
-
-function getDateKey(value: string) {
-  return value.slice(0, 10);
 }
 
 function getAnalyticsCacheKey(period: string, selectedTourId: string | null) {
@@ -197,17 +249,9 @@ function finalizeTimeline<T>(
     return items;
   }
 
-  const filled: T[] = [];
-  const cursor = new Date(startDate);
-  cursor.setUTCHours(0, 0, 0, 0);
-
-  while (cursor <= endDate) {
-    const dateKey = cursor.toISOString().slice(0, 10);
-    filled.push(map.get(dateKey) ?? createEmpty(dateKey));
-    cursor.setUTCDate(cursor.getUTCDate() + 1);
-  }
-
-  return filled;
+  return getReportDateKeysInRange(startDate, endDate).map(
+    (dateKey) => map.get(dateKey) ?? createEmpty(dateKey)
+  );
 }
 
 async function fetchAnalyticsLogsInRange(
@@ -257,7 +301,9 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
     const requestedPeriod = searchParams.get('period') || DEFAULT_PERIOD;
     const selectedTourId = searchParams.get('tour_id');
-    const { period, startDate, now } = getPeriodWindow(requestedPeriod);
+    const { period, startDate, now, reportStartDate, reportEndDate } = getPeriodWindow(
+      requestedPeriod
+    );
     const cacheKey = getAnalyticsCacheKey(period, selectedTourId);
     const cachedSummary = analyticsSummaryCache.get(cacheKey);
 
@@ -323,6 +369,7 @@ export async function GET(request: NextRequest) {
       number,
       { hour: number; total_tours: number; total_plays: number; sessions: Set<string> }
     >();
+    const heatmapMap = new Map<string, Map<number, HeatmapCellAccumulator>>();
     const languageMap = new Map<string, { code: string; plays: number; sessions: Set<string> }>();
     const eventCounts = new Map<AnalyticsEventType, number>();
     const sessionMap = new Map<string, SessionAccumulator>();
@@ -380,6 +427,7 @@ export async function GET(request: NextRequest) {
     }
 
     for (const log of analyticsLogs) {
+      const logDate = new Date(log.timestamp);
       const metadata = isRecord(log.metadata) ? log.metadata : null;
       const metadataTourId = getTourIdFromMetadata(metadata);
 
@@ -394,17 +442,8 @@ export async function GET(request: NextRequest) {
       }
 
       const matchesSelectedTour = !selectedTourId || relatedTourIds.includes(selectedTourId);
-      const dayKey = getDateKey(log.timestamp);
-      const hour = new Date(log.timestamp).getUTCHours();
-      const hourlyItem =
-        hourlyMap.get(hour) ??
-        {
-          hour,
-          total_tours: 0,
-          total_plays: 0,
-          sessions: new Set<string>(),
-        };
-      hourlyMap.set(hour, hourlyItem);
+      const dayKey = getReportDateKeyFromDate(logDate);
+      const hour = getReportHourFromDate(logDate);
 
       eventCounts.set(log.event_type, (eventCounts.get(log.event_type) ?? 0) + 1);
 
@@ -422,6 +461,16 @@ export async function GET(request: NextRequest) {
       }
 
       if (matchesSelectedTour) {
+        const hourlyItem =
+          hourlyMap.get(hour) ??
+          {
+            hour,
+            total_tours: 0,
+            total_plays: 0,
+            sessions: new Set<string>(),
+          };
+        hourlyMap.set(hour, hourlyItem);
+
         if (log.session_id) {
           selectedSessionIds.add(log.session_id);
         }
@@ -437,12 +486,34 @@ export async function GET(request: NextRequest) {
           dailyItem.sessions.add(log.session_id);
         }
 
+        const heatmapDay = heatmapMap.get(dayKey) ?? new Map<number, HeatmapCellAccumulator>();
+        heatmapMap.set(dayKey, heatmapDay);
+
+        const heatmapCell =
+          heatmapDay.get(hour) ??
+          {
+            hour,
+            plays: 0,
+            total_tours: 0,
+            sessions: new Set<string>(),
+          };
+        heatmapDay.set(hour, heatmapCell);
+
+        if (log.session_id) {
+          heatmapCell.sessions.add(log.session_id);
+          hourlyItem.sessions.add(log.session_id);
+        }
+
         if (log.event_type === 'tour_start') {
           dailyItem.total_tours += 1;
+          hourlyItem.total_tours += 1;
+          heatmapCell.total_tours += 1;
         }
 
         if (log.event_type === 'auto_play' || log.event_type === 'manual_play') {
           dailyItem.total_plays += 1;
+          hourlyItem.total_plays += 1;
+          heatmapCell.plays += 1;
         }
       }
 
@@ -469,21 +540,19 @@ export async function GET(request: NextRequest) {
           currentSession.languages.add(log.language);
         }
 
-        if (log.event_type === 'tour_start') {
+        if (matchesSelectedTour && log.event_type === 'tour_start') {
           currentSession.starts += 1;
-          hourlyItem.total_tours += 1;
         }
 
-        if (log.event_type === 'auto_play' || log.event_type === 'manual_play') {
+        if (matchesSelectedTour && (log.event_type === 'auto_play' || log.event_type === 'manual_play')) {
           currentSession.plays += 1;
-          hourlyItem.total_plays += 1;
         }
 
-        if (log.event_type === 'skip') {
+        if (matchesSelectedTour && log.event_type === 'skip') {
           currentSession.skips += 1;
         }
 
-        if (log.event_type === 'tour_end') {
+        if (matchesSelectedTour && log.event_type === 'tour_end') {
           currentSession.completedTours += 1;
           const durationMs = getDurationFromMetadata(metadata);
           if (typeof durationMs === 'number') {
@@ -491,16 +560,7 @@ export async function GET(request: NextRequest) {
           }
         }
 
-        hourlyItem.sessions.add(log.session_id);
         sessionMap.set(log.session_id, currentSession);
-      } else {
-        if (log.event_type === 'tour_start') {
-          hourlyItem.total_tours += 1;
-        }
-
-        if (log.event_type === 'auto_play' || log.event_type === 'manual_play') {
-          hourlyItem.total_plays += 1;
-        }
       }
 
       if (log.poi_id) {
@@ -583,49 +643,28 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    const rawDailyEntries = Array.from(dailyMap.values())
-      .map((item) => ({
-        date: item.date,
-        total_tours: item.total_tours,
-        total_plays: item.total_plays,
-        unique_sessions: item.sessions.size,
-      }))
-      .sort((a, b) => a.date.localeCompare(b.date));
-
-    const dailyEntries: Array<{
-      date: string;
-      total_tours: number;
-      total_plays: number;
-      unique_sessions: number;
-    }> =
-      PERIOD_WITH_FILLED_DATES.has(period)
-        ? (() => {
-            const filled: Array<{
-              date: string;
-              total_tours: number;
-              total_plays: number;
-              unique_sessions: number;
-            }> = [];
-            const dailyByDate = new Map(rawDailyEntries.map((item) => [item.date, item]));
-            const cursor = new Date(startDate);
-            cursor.setUTCHours(0, 0, 0, 0);
-
-            while (cursor <= now) {
-              const dateKey = cursor.toISOString().slice(0, 10);
-              filled.push(
-                dailyByDate.get(dateKey) ?? {
-                  date: dateKey,
-                  total_tours: 0,
-                  total_plays: 0,
-                  unique_sessions: 0,
-                }
-              );
-              cursor.setUTCDate(cursor.getUTCDate() + 1);
-            }
-
-            return filled;
-          })()
-        : rawDailyEntries;
+    const dailyEntries = finalizeTimeline(
+      new Map(
+        Array.from(dailyMap.values()).map((item) => [
+          item.date,
+          {
+            date: item.date,
+            total_tours: item.total_tours,
+            total_plays: item.total_plays,
+            unique_sessions: item.sessions.size,
+          },
+        ])
+      ),
+      reportStartDate,
+      reportEndDate,
+      period,
+      (date) => ({
+        date,
+        total_tours: 0,
+        total_plays: 0,
+        unique_sessions: 0,
+      })
+    );
 
     const toursSummary = Array.from(tourStatsMap.values())
       .map((item) => {
@@ -763,6 +802,32 @@ export async function GET(request: NextRequest) {
       };
     });
 
+    const heatmapDateKeys = PERIOD_WITH_FILLED_DATES.has(period)
+      ? getReportDateKeysInRange(reportStartDate, reportEndDate)
+      : Array.from(heatmapMap.keys()).sort((a, b) => a.localeCompare(b));
+
+    const heatmapDays = heatmapDateKeys.map((dateKey) => {
+      const dayMap = heatmapMap.get(dateKey);
+      return {
+        date: dateKey,
+        label: getReportDateLabel(dateKey),
+        cells: Array.from({ length: 24 }, (_, hour) => {
+          const cell = dayMap?.get(hour);
+          return {
+            hour,
+            plays: cell?.plays ?? 0,
+            unique_sessions: cell?.sessions.size ?? 0,
+            total_tours: cell?.total_tours ?? 0,
+          };
+        }),
+      };
+    });
+
+    const heatmapMaxValue = heatmapDays.reduce(
+      (maxValue, day) => Math.max(maxValue, ...day.cells.map((cell) => cell.plays)),
+      0
+    );
+
     const topPois = Array.from(poiStatsMap.values())
       .map((item) => ({
         id: item.id,
@@ -885,7 +950,7 @@ export async function GET(request: NextRequest) {
     for (const user of userRows) {
       const createdAt = new Date(user.created_at);
       if (createdAt.getTime() >= startDate.getTime()) {
-        const dateKey = getDateKey(user.created_at);
+        const dateKey = getReportDateKey(user.created_at);
         const item = incrementDateMap(userTimelineMap, dateKey, () => ({
           date: dateKey,
           new_users: 0,
@@ -897,7 +962,7 @@ export async function GET(request: NextRequest) {
       if (user.customer_access_granted_at) {
         const grantedAt = new Date(user.customer_access_granted_at);
         if (grantedAt.getTime() >= startDate.getTime()) {
-          const dateKey = getDateKey(user.customer_access_granted_at);
+          const dateKey = getReportDateKey(user.customer_access_granted_at);
           const item = incrementDateMap(userTimelineMap, dateKey, () => ({
             date: dateKey,
             new_users: 0,
@@ -939,7 +1004,7 @@ export async function GET(request: NextRequest) {
         continue;
       }
 
-      const dateKey = getDateKey(effectiveDate);
+      const dateKey = getReportDateKey(effectiveDate);
       const item = incrementDateMap(paymentTimelineMap, dateKey, () => ({
         date: dateKey,
         paid_count: 0,
@@ -957,18 +1022,24 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    const userTimeline = finalizeTimeline(userTimelineMap, startDate, now, period, (date) => ({
+    const userTimeline = finalizeTimeline(userTimelineMap, reportStartDate, reportEndDate, period, (date) => ({
       date,
       new_users: 0,
       new_unlocks: 0,
     }));
 
-    const paymentTimeline = finalizeTimeline(paymentTimelineMap, startDate, now, period, (date) => ({
-      date,
-      paid_count: 0,
-      pending_count: 0,
-      paid_revenue: 0,
-    }));
+    const paymentTimeline = finalizeTimeline(
+      paymentTimelineMap,
+      reportStartDate,
+      reportEndDate,
+      period,
+      (date) => ({
+        date,
+        paid_count: 0,
+        pending_count: 0,
+        paid_revenue: 0,
+      })
+    );
 
     const journey = {
       total_manual_plays: totalManualPlays,
@@ -1000,6 +1071,12 @@ export async function GET(request: NextRequest) {
       })),
       selectedTourId,
       hourly,
+      heatmap: {
+        timezone: REPORT_TIMEZONE,
+        metric: 'plays',
+        maxValue: heatmapMaxValue,
+        days: heatmapDays,
+      },
       events,
       languages,
       sessionSegments,
