@@ -16,10 +16,7 @@ import { logTourStart } from '@/lib/services/analytics';
 import { useLanguage } from '@/lib/contexts/LanguageContext';
 import { useTranslations } from '@/lib/hooks/useTranslations';
 import { useAuth } from '@/lib/contexts/AuthContext';
-
-type WindowWithWebkitAudioContext = Window & typeof globalThis & {
-  webkitAudioContext?: typeof AudioContext;
-};
+import { primeSharedAudioElement } from '@/lib/services/audio-session';
 
 export interface StartTourButtonProps {
   onStart?: () => void;
@@ -43,39 +40,6 @@ export function StartTourButton({ onStart, className = '', disabled = false, isA
   } =
     useAuth();
   const [isLoading, setIsLoading] = useState(false);
-
-  const primeAudioPlayback = async () => {
-    if (typeof window === 'undefined') {
-      return;
-    }
-
-    try {
-      const AudioContextClass =
-        window.AudioContext ||
-        (window as WindowWithWebkitAudioContext).webkitAudioContext;
-
-      if (!AudioContextClass) {
-        return;
-      }
-
-      const ctx = new AudioContextClass();
-      if (ctx.state === 'suspended') {
-        await ctx.resume();
-      }
-
-      const oscillator = ctx.createOscillator();
-      const gain = ctx.createGain();
-      gain.gain.value = 0.0001;
-      oscillator.connect(gain);
-      gain.connect(ctx.destination);
-      oscillator.start();
-      oscillator.stop(ctx.currentTime + 0.01);
-      await ctx.close();
-      console.log('[StartTourButton] audio primed');
-    } catch (error) {
-      console.warn('[StartTourButton] failed to prime audio:', error);
-    }
-  };
 
   const resolveAuthenticatedDestination = async (): Promise<string | null> => {
     try {
@@ -149,7 +113,7 @@ export function StartTourButton({ onStart, className = '', disabled = false, isA
       // Đảm bảo language đã được lưu vào IndexedDB
       // Thêm delay nhỏ để tránh race condition với setLanguage
       await new Promise(resolve => setTimeout(resolve, 150));
-      await primeAudioPlayback();
+      await primeSharedAudioElement();
 
       // Log analytics
       await logTourStart(language);

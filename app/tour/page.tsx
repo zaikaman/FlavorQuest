@@ -273,6 +273,9 @@ export default function TourPage() {
     async (item: AudioQueueItem) => {
       const pendingEvent = pendingAutoPlayRef.current.get(item.poi.id);
       if (!pendingEvent) {
+        console.log('[TourPage] finalize auto-play skipped because item is not pending:', {
+          poiId: item.poi.id,
+        });
         return;
       }
 
@@ -298,6 +301,13 @@ export default function TourPage() {
         listened: true,
       });
 
+      console.log('[TourPage] auto-play finalized:', {
+        poiId: item.poi.id,
+        poiName,
+        distance: Math.round(pendingEvent.distance),
+        playbackLanguage,
+      });
+
       showToastMessage(t('tour.nowPlaying', { name: poiName }));
     },
     [language, selectedTourMetadata, showToastMessage, t]
@@ -320,7 +330,11 @@ export default function TourPage() {
   // Handle audio error
   const handleAudioError = useCallback(async (error: string, item: AudioQueueItem) => {
     pendingAutoPlayRef.current.delete(item.poi.id);
-    console.error('Audio playback error:', error);
+    console.error('[TourPage] audio playback error:', {
+      poiId: item.poi.id,
+      title: item.title,
+      error,
+    });
     // TTS fallback will be handled by useAudioPlayer
   }, []);
 
