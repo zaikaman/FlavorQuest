@@ -18,7 +18,7 @@ import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useGeolocation } from '@/lib/hooks/useGeolocation';
 import { useGeofencing } from '@/lib/hooks/useGeofencing';
-import { useAudioPlayer } from '@/lib/hooks/useAudioPlayer';
+import { useAudioPlayer, type AudioQueueItem } from '@/lib/hooks/useAudioPlayer';
 import { usePOIManager } from '@/lib/hooks/usePOIManager';
 import { useTourManager } from '@/lib/hooks/useTourManager';
 import { useOfflineSync } from '@/lib/hooks/useOfflineSync';
@@ -84,6 +84,7 @@ export default function TourPage() {
   // Refs
   const noiseFilterRef = useRef<NoiseFilter>(new NoiseFilter({ windowSize: 5 })); // 5 samples moving average
   const speedCalculatorRef = useRef<SpeedCalculator>(new SpeedCalculator({ windowSize: 10 }));
+  const pendingAutoPlayRef = useRef<Map<string, { distance: number }>>(new Map());
   const [filteredPosition, setFilteredPosition] = useState<Coordinates | null>(null);
   const hasPreloadedRef = useRef(false);
   const devicePerformance = useMemo(
@@ -268,10 +269,48 @@ export default function TourPage() {
   // Calculate estimated size
   const estimatedSize = Math.round(activePOIs.length * 2.5); // ~2.5MB per POI (audio + image)
 
+  const finalizeAutoPlay = useCallback(
+    async (item: AudioQueueItem) => {
+      const pendingEvent = pendingAutoPlayRef.current.get(item.poi.id);
+      if (!pendingEvent) {
+        return;
+      }
+
+      pendingAutoPlayRef.current.delete(item.poi.id);
+
+      const playbackLanguage = item.language ?? language;
+      const poiName = item.title || getLocalizedPOI(item.poi, playbackLanguage).name;
+
+      await setCooldown(item.poi.id);
+      setVisitedPOIs((prev) => new Set([...prev, item.poi.id]));
+      await logAutoPlay(item.poi.id, playbackLanguage, undefined, {
+        distance: pendingEvent.distance,
+        ...(selectedTourMetadata &&
+        typeof selectedTourMetadata === 'object' &&
+        !Array.isArray(selectedTourMetadata)
+          ? (selectedTourMetadata as Record<string, Json>)
+          : {}),
+      } as Json);
+      await saveVisit({
+        poi_id: item.poi.id,
+        poi_name: poiName,
+        visited_at: new Date().toISOString(),
+        listened: true,
+      });
+
+      showToastMessage(t('tour.nowPlaying', { name: poiName }));
+    },
+    [language, selectedTourMetadata, showToastMessage, t]
+  );
+
   // Handle TTS fallback
-  const handleTTSFallback = useCallback(() => {
-    showToastMessage(t('tour.usingTTS'));
-  }, [showToastMessage, t]);
+  const handleTTSFallback = useCallback(
+    async (item: AudioQueueItem) => {
+      showToastMessage(t('tour.usingTTS'));
+      await finalizeAutoPlay(item);
+    },
+    [finalizeAutoPlay, showToastMessage, t]
+  );
 
   // Handle audio ended
   const handleAudioEnded = useCallback(async () => {
@@ -279,7 +318,8 @@ export default function TourPage() {
   }, []);
 
   // Handle audio error
-  const handleAudioError = useCallback(async (error: string) => {
+  const handleAudioError = useCallback(async (error: string, item: AudioQueueItem) => {
+    pendingAutoPlayRef.current.delete(item.poi.id);
     console.error('Audio playback error:', error);
     // TTS fallback will be handled by useAudioPlayer
   }, []);
@@ -292,6 +332,7 @@ export default function TourPage() {
     language,
     onEnded: handleAudioEnded,
     onError: handleAudioError,
+    onPlay: finalizeAutoPlay,
     onTTSFallback: handleTTSFallback,
   });
 
@@ -347,25 +388,7 @@ export default function TourPage() {
       description: localizedPOI.description,
       language,
     });
-
-    await setCooldown(poi.id);
-    setVisitedPOIs((prev) => new Set([...prev, poi.id]));
-    await logAutoPlay(poi.id, language, undefined, {
-      distance: event.distance,
-      ...(selectedTourMetadata &&
-      typeof selectedTourMetadata === 'object' &&
-      !Array.isArray(selectedTourMetadata)
-        ? (selectedTourMetadata as Record<string, Json>)
-        : {}),
-    } as Json);
-    await saveVisit({
-      poi_id: poi.id,
-      poi_name: localizedPOI.name,
-      visited_at: new Date().toISOString(),
-      listened: true,
-    });
-
-    showToastMessage(t('tour.nowPlaying', { name: localizedPOI.name }));
+    pendingAutoPlayRef.current.set(poi.id, { distance: event.distance });
   };
 
   // Geofencing - detect POI entry
@@ -582,6 +605,7 @@ export default function TourPage() {
   // Handle play POI from map card
   const handlePlayPOI = useCallback(
     async (poi: POI) => {
+      pendingAutoPlayRef.current.delete(poi.id);
       const localizedPOI = getLocalizedPOI(poi, language);
       const audioUrl = localizedPOI.audio_url;
 
@@ -651,6 +675,12 @@ export default function TourPage() {
     },
     [accuracy, audioPlayer, language, selectedTourMetadata, setVisitedPOIs, showToastMessage, t]
   );
+
+  useEffect(() => {
+    return () => {
+      pendingAutoPlayRef.current.clear();
+    };
+  }, []);
 
   // Handle view POI detail
   const handleViewPOI = useCallback(

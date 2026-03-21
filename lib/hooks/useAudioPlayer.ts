@@ -98,6 +98,9 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
   const playNextRef = useRef<() => void>(() => {});
   const playWithTTSRef = useRef<(item: AudioQueueItem) => void>(() => {});
   const languageRef = useRef<Language | undefined>(opts.language);
+  const pendingInteractionItemRef = useRef<AudioQueueItem | null>(null);
+  const interactionRetryHandlerRef = useRef<(() => void) | null>(null);
+  const playRef = useRef<(item?: AudioQueueItem) => Promise<void>>(async () => {});
 
   useEffect(() => {
     currentItemRef.current = state.currentItem;
@@ -114,6 +117,18 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
   useEffect(() => {
     optionsRef.current = opts;
   }, [opts]);
+
+  const detachInteractionRetryListeners = useCallback(() => {
+    if (typeof window === 'undefined' || !interactionRetryHandlerRef.current) {
+      return;
+    }
+
+    const handler = interactionRetryHandlerRef.current;
+    window.removeEventListener('pointerdown', handler, true);
+    window.removeEventListener('keydown', handler, true);
+    window.removeEventListener('touchstart', handler, true);
+    interactionRetryHandlerRef.current = null;
+  }, []);
 
   const getLangCode = useCallback((lang?: Language): string => {
     const langMap: Record<Language, string> = {
@@ -136,6 +151,7 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
         isLoading: false,
         error: 'TTS not supported',
       }));
+      optionsRef.current.onError?.('TTS not supported', item);
       return;
     }
 
@@ -183,14 +199,16 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
     };
 
     utterance.onerror = event => {
+      const errorMessage = `TTS error: ${event.error}`;
       setState(prev => ({
         ...prev,
         isPlaying: false,
         isLoading: false,
         isTTSFallback: false,
-        error: `TTS error: ${event.error}`,
+        error: errorMessage,
       }));
       ttsUtteranceRef.current = null;
+      optionsRef.current.onError?.(errorMessage, item);
       playNextRef.current();
     };
 
@@ -221,6 +239,38 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
       console.warn('Failed to unlock audio context:', error);
     }
   }, []);
+
+  const registerInteractionRetry = useCallback((item: AudioQueueItem) => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    pendingInteractionItemRef.current = item;
+
+    if (interactionRetryHandlerRef.current) {
+      return;
+    }
+
+    const handler = () => {
+      const nextItem = pendingInteractionItemRef.current;
+      pendingInteractionItemRef.current = null;
+      detachInteractionRetryListeners();
+
+      if (!nextItem) {
+        return;
+      }
+
+      void (async () => {
+        await unlockAudio();
+        await playRef.current(nextItem);
+      })();
+    };
+
+    interactionRetryHandlerRef.current = handler;
+    window.addEventListener('pointerdown', handler, { capture: true, once: true });
+    window.addEventListener('keydown', handler, { capture: true, once: true });
+    window.addEventListener('touchstart', handler, { capture: true, once: true });
+  }, [detachInteractionRetryListeners, unlockAudio]);
 
   const safePause = useCallback(async () => {
     if (!audioRef.current) return;
@@ -345,13 +395,34 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
         return;
       }
 
+      if ((error as Error).name === 'NotAllowedError') {
+        const blockedItem = targetItem ?? currentItemRef.current;
+
+        if (blockedItem) {
+          registerInteractionRetry(blockedItem);
+        }
+
+        setState(prev => ({
+          ...prev,
+          isPlaying: false,
+          isPaused: true,
+          isLoading: false,
+          error: null,
+        }));
+        return;
+      }
+
       setState(prev => ({
         ...prev,
         error: error instanceof Error ? error.message : 'Failed to play audio',
         isLoading: false,
       }));
     }
-  }, [unlockAudio]);
+  }, [registerInteractionRetry, unlockAudio]);
+
+  useEffect(() => {
+    playRef.current = play;
+  }, [play]);
 
   const playNow = useCallback(async (item: AudioQueueItem, clearQueue = false) => {
     if (clearQueue) {
@@ -416,6 +487,8 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
 
   const stop = useCallback(async () => {
     if (!audioRef.current) return;
+    pendingInteractionItemRef.current = null;
+    detachInteractionRetryListeners();
     await safePause();
     audioRef.current.currentTime = 0;
     setState(prev => ({
@@ -429,7 +502,7 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
       duration: 0,
       error: null,
     }));
-  }, [safePause]);
+  }, [detachInteractionRetryListeners, safePause]);
 
   const seek = useCallback((time: number) => {
     if (!audioRef.current) return;
@@ -601,6 +674,8 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
     audio.addEventListener('pause', onPause);
 
     return () => {
+      pendingInteractionItemRef.current = null;
+      detachInteractionRetryListeners();
       audio.removeEventListener('loadedmetadata', onLoadedMetadata);
       audio.removeEventListener('timeupdate', onTimeUpdate);
       audio.removeEventListener('ended', onEnded);
@@ -615,7 +690,7 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
         audioRef.current = null;
       }
     };
-  }, [opts.playbackRate, opts.volume]);
+  }, [detachInteractionRetryListeners, opts.playbackRate, opts.volume]);
 
   useEffect(() => {
     if (!audioRef.current || typeof opts.volume !== 'number') return;
