@@ -113,6 +113,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }
 
   if (isAdminLoginPage) {
+    if (user && isRoleReady) {
+      return <LoadingScreen />;
+    }
+
     return (
       <div className={`${adminSans.className} bg-background-dark min-h-screen text-white`}>
         <div
