@@ -432,16 +432,19 @@ export async function GET(request: NextRequest) {
       const metadataTourId = getTourIdFromMetadata(metadata);
 
       let relatedTourIds: string[] = [];
+      let candidateTourIds: string[] = [];
       if (metadataTourId) {
         relatedTourIds = [metadataTourId];
+        candidateTourIds = [metadataTourId];
       } else if (log.poi_id) {
         const inferredTourIds = poiToTourIds.get(log.poi_id) ?? [];
+        candidateTourIds = inferredTourIds;
         if (inferredTourIds.length === 1) {
           relatedTourIds = inferredTourIds;
         }
       }
 
-      const matchesSelectedTour = !selectedTourId || relatedTourIds.includes(selectedTourId);
+      const matchesSelectedTour = !selectedTourId || candidateTourIds.includes(selectedTourId);
       const dayKey = getReportDateKeyFromDate(logDate);
       const hour = getReportHourFromDate(logDate);
 

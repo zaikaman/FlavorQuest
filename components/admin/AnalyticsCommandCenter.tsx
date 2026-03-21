@@ -617,13 +617,14 @@ export default function AnalyticsCommandCenter() {
 
   useEffect(() => {
     if (!tourData.length) {
-      setSelectedTourId('');
+      if (selectedTourId) {
+        setSelectedTourId('');
+      }
       return;
     }
 
-    const activeSelection = tourData.some((tour) => tour.id === selectedTourId);
-    if (!activeSelection) {
-      setSelectedTourId(tourData[0]?.id ?? '');
+    if (selectedTourId && !tourData.some((tour) => tour.id === selectedTourId)) {
+      setSelectedTourId('');
     }
   }, [selectedTourId, tourData]);
 
@@ -805,6 +806,7 @@ export default function AnalyticsCommandCenter() {
                 onChange={(event) => setSelectedTourId(event.target.value)}
                 className="min-w-[260px] rounded-xl border border-white/10 bg-black/20 px-4 py-2 text-sm text-white outline-none transition-colors focus:border-primary/40"
               >
+                <option value="">Tất cả tour</option>
                 {availableTours.map((tour) => (
                   <option key={tour.id} value={tour.id}>
                     {tour.name_vi}
