@@ -136,6 +136,30 @@ export default function AdminLoginPage() {
     );
   }
 
+  if (user && isRoleReady) {
+    return (
+      <div className="min-h-screen px-4 py-12">
+        <div className="mx-auto max-w-md">
+          <div className="mb-8 text-center">
+            <div className="mx-auto inline-flex h-20 w-20 items-center justify-center rounded-full border border-white/10 bg-white/5">
+              <InlineSpinner label="" />
+            </div>
+            <h1 className="mt-6 text-2xl font-black text-white">Đang đưa bạn vào khu quản trị</h1>
+            <p className="mt-3 text-sm leading-6 text-gray-400">
+              Phiên đăng nhập đã sẵn sàng. Hệ thống đang hoàn tất điều hướng.
+            </p>
+          </div>
+          <div className="rounded-[28px] border border-white/10 bg-white/5 p-8 backdrop-blur-xl">
+            <Skeleton className="h-4 w-full rounded-full" />
+            <Skeleton className="mt-6 h-11 w-full rounded-xl" />
+            <Skeleton className="mt-3 h-11 w-full rounded-xl" />
+            <Skeleton className="mt-6 h-12 w-full rounded-xl" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-12 text-white">
       <div className="pointer-events-none absolute inset-0">
