@@ -46,6 +46,7 @@ import { logAutoPlay, logManualPlay, logSkip, logTourEnd } from '@/lib/services/
 import { resolveDevicePerformance } from '@/lib/services/device-performance';
 import { saveVisit, loadSettings } from '@/lib/services/storage';
 import { getLocalizedPOI } from '@/lib/utils/localization';
+import { findNearestPOI } from '@/lib/utils/distance';
 import type { Json } from '@/lib/types/database.types';
 import type { AppNotification, POI, Coordinates, UserSettings } from '@/lib/types/index';
 import { GEOFENCE_TRIGGER_RADIUS_M, MAX_WALKING_SPEED_KMH } from '@/lib/constants/index';
@@ -181,6 +182,16 @@ export default function TourPage() {
       .map((poiId) => poiMap.get(poiId))
       .filter((poi): poi is POI => Boolean(poi));
   }, [pois, selectedTour]);
+
+  const baseGeofenceRadius = settings?.geofenceRadius || GEOFENCE_TRIGGER_RADIUS_M;
+  const effectiveGeofenceRadius = useMemo(() => {
+    if (!accuracy || !Number.isFinite(accuracy)) {
+      return baseGeofenceRadius;
+    }
+
+    return Math.max(baseGeofenceRadius, Math.min(Math.round(accuracy), 120));
+  }, [accuracy, baseGeofenceRadius]);
+  const isUsingAccuracyExpandedRadius = effectiveGeofenceRadius > baseGeofenceRadius;
 
   const handleSelectTour = useCallback(
     (tourId: string | null) => {
@@ -371,12 +382,30 @@ export default function TourPage() {
     if (!isAutoMode) return; // Skip if manual mode
 
     const { poi } = event;
+    if (isUsingAccuracyExpandedRadius && filteredPosition) {
+      const nearest = findNearestPOI(filteredPosition, activePOIs);
+
+      if (nearest && nearest.poi.id !== poi.id) {
+        console.log('[TourPage] skip auto-play because another POI is nearer under low GPS accuracy:', {
+          poiId: poi.id,
+          nearestPoiId: nearest.poi.id,
+          nearestDistance: Math.round(nearest.distance),
+          candidateDistance: Math.round(event.distance),
+          accuracy,
+          effectiveGeofenceRadius,
+        });
+        return;
+      }
+    }
+
     console.log('[TourPage] handlePOIEnter:', {
       poiId: poi.id,
       name: poi.name_vi,
       distance: Math.round(event.distance),
       poiRadius: poi.radius,
       autoMode: isAutoMode,
+      accuracy,
+      effectiveGeofenceRadius,
     });
 
     const isCurrentPOI = audioPlayer.currentItem?.poi.id === poi.id;
@@ -437,7 +466,7 @@ export default function TourPage() {
 
   // Geofencing - detect POI entry
   const { nearbyPOIs } = useGeofencing(filteredPosition, activePOIs, {
-    radius: settings?.geofenceRadius || GEOFENCE_TRIGGER_RADIUS_M,
+    radius: effectiveGeofenceRadius,
     enabled: isAutoMode,
     onEnter: handlePOIEnter,
   });
@@ -512,6 +541,37 @@ export default function TourPage() {
     // Track speed
     speedCalculatorRef.current.addReading(coordinates);
   }, [coordinates, accuracy]);
+
+  useEffect(() => {
+    if (!filteredPosition || activePOIs.length === 0) {
+      return;
+    }
+
+    const nearest = findNearestPOI(filteredPosition, activePOIs);
+    console.log('[TourPage] position summary:', {
+      filteredPosition,
+      accuracy,
+      geofenceRadius: baseGeofenceRadius,
+      effectiveGeofenceRadius,
+      isUsingAccuracyExpandedRadius,
+      activePOICount: activePOIs.length,
+      nearest: nearest
+        ? {
+            id: nearest.poi.id,
+            name: nearest.poi.name_vi,
+            distance: Math.round(nearest.distance),
+            poiRadius: nearest.poi.radius,
+          }
+        : null,
+    });
+  }, [
+    accuracy,
+    activePOIs,
+    baseGeofenceRadius,
+    effectiveGeofenceRadius,
+    filteredPosition,
+    isUsingAccuracyExpandedRadius,
+  ]);
 
   // Handle tour end (on unmount)
   useEffect(() => {
