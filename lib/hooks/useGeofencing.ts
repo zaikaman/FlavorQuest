@@ -274,12 +274,38 @@ export function useGeofencing(
   // Send position updates to worker, or fall back to local processing
   useEffect(() => {
     if (!currentPosition || !opts.enabled || pois.length === 0) {
+      console.log('[useGeofencing] reset state:', {
+        hasPosition: Boolean(currentPosition),
+        enabled: opts.enabled,
+        poiCount: pois.length,
+      });
       resetState();
       return;
     }
 
     const requestId = latestRequestIdRef.current + 1;
     latestRequestIdRef.current = requestId;
+
+    const previewNearby = filterPOIsWithinRadius(
+      currentPosition,
+      pois.filter(isValidPOI),
+      Math.max(25, (opts.radius ?? GEOFENCE_TRIGGER_RADIUS_M) * 4)
+    )
+      .slice(0, 3)
+      .map(({ poi, distance }) => ({
+        id: poi.id,
+        name: poi.name_vi,
+        distance: Math.round(distance),
+        poiRadius: poi.radius,
+      }));
+
+    console.log('[useGeofencing] check request:', {
+      requestId,
+      position: currentPosition,
+      radius: opts.radius ?? GEOFENCE_TRIGGER_RADIUS_M,
+      poiCount: pois.length,
+      previewNearby,
+    });
 
     if (workerRef.current) {
       workerRef.current.postMessage({

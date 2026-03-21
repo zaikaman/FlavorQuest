@@ -82,6 +82,16 @@ export function useGeolocation(options: UseGeolocationOptions = {}) {
 
   // Success callback
   const onSuccess = useCallback((position: GeolocationPosition) => {
+    console.log('[useGeolocation] success:', {
+      lat: position.coords.latitude,
+      lng: position.coords.longitude,
+      accuracy: position.coords.accuracy,
+      speed: position.coords.speed,
+      heading: position.coords.heading,
+      timestamp: position.timestamp,
+      highAccuracy: useHighAccuracy,
+    });
+
     setState({
       coordinates: {
         lat: position.coords.latitude,
@@ -99,6 +109,12 @@ export function useGeolocation(options: UseGeolocationOptions = {}) {
 
   // Error callback
   const onError = useCallback((error: GeolocationPositionError) => {
+    console.warn('[useGeolocation] error:', {
+      code: error.code,
+      message: error.message,
+      highAccuracy: useHighAccuracy,
+    });
+
     // If timeout (code 3) and using high accuracy, try falling back to low accuracy
     if (error.code === 3 && useHighAccuracy) {
       console.warn('Geolocation timed out, falling back to low accuracy...');
@@ -142,6 +158,13 @@ export function useGeolocation(options: UseGeolocationOptions = {}) {
       timeout: useHighAccuracy ? timeout : 20000,
       maximumAge,
     };
+
+    console.log('[useGeolocation] start watching:', {
+      watch,
+      enableHighAccuracy: watchOptions.enableHighAccuracy,
+      timeout: watchOptions.timeout,
+      maximumAge: watchOptions.maximumAge,
+    });
 
     if (watch) {
       watchIdRef.current = navigator.geolocation.watchPosition(
