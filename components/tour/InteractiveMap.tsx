@@ -30,7 +30,10 @@ interface InteractiveMapProps {
   onPlayPOI: (poi: POI) => void;
   playingPOIId?: string | null;
   isAudioPlaying?: boolean;
-
+  preferredZoom?: number;
+  enableFlyAnimation?: boolean;
+  showAccuracyRing?: boolean;
+  showUserPulse?: boolean;
 }
 
 export function InteractiveMap({
@@ -44,8 +47,10 @@ export function InteractiveMap({
   onPlayPOI,
   playingPOIId,
   isAudioPlaying = false,
-
-
+  preferredZoom = 16,
+  enableFlyAnimation = true,
+  showAccuracyRing = true,
+  showUserPulse = true,
 }: InteractiveMapProps) {
   const { language } = useLanguage();
   const { t } = useTranslations();
@@ -69,7 +74,7 @@ export function InteractiveMap({
     // Tạo map với style tối
     const map = L.map(mapContainerRef.current, {
       center: initialCenterRef.current, // Vĩnh Khánh street - center of POIs
-      zoom: 16,
+      zoom: preferredZoom,
       zoomControl: false,
       attributionControl: false,
     });
@@ -94,7 +99,7 @@ export function InteractiveMap({
       map.remove();
       mapRef.current = null;
     };
-  }, []);
+  }, [preferredZoom]);
 
   // Cập nhật vị trí người dùng
   useEffect(() => {
@@ -104,7 +109,7 @@ export function InteractiveMap({
       className: 'user-location-marker',
       html: `
         <div class="user-dot-container">
-          <div class="user-dot-ping"></div>
+          ${showUserPulse ? '<div class="user-dot-ping"></div>' : ''}
           <div class="user-dot"></div>
           <div class="user-heading-cone" style="transform: rotate(${(heading || 0) - 90}deg)"></div>
         </div>
@@ -121,7 +126,7 @@ export function InteractiveMap({
       }).addTo(mapRef.current);
 
       // Accuracy circle
-      if (accuracy) {
+      if (accuracy && showAccuracyRing) {
         userCircleRef.current = L.circle([userLocation.lat, userLocation.lng], {
           radius: accuracy,
           color: '#3b82f6',
@@ -135,12 +140,23 @@ export function InteractiveMap({
       userMarkerRef.current.setLatLng([userLocation.lat, userLocation.lng]);
       userMarkerRef.current.setIcon(userIcon);
 
-      if (userCircleRef.current && accuracy) {
+      if (userCircleRef.current && accuracy && showAccuracyRing) {
         userCircleRef.current.setLatLng([userLocation.lat, userLocation.lng]);
         userCircleRef.current.setRadius(accuracy);
+      } else if (userCircleRef.current && !showAccuracyRing) {
+        userCircleRef.current.remove();
+        userCircleRef.current = null;
+      } else if (!userCircleRef.current && accuracy && showAccuracyRing) {
+        userCircleRef.current = L.circle([userLocation.lat, userLocation.lng], {
+          radius: accuracy,
+          color: '#3b82f6',
+          fillColor: '#3b82f6',
+          fillOpacity: 0.1,
+          weight: 1,
+        }).addTo(mapRef.current);
       }
     }
-  }, [userLocation, heading, accuracy, mapLoaded]);
+  }, [userLocation, heading, accuracy, mapLoaded, showAccuracyRing, showUserPulse]);
 
   // Cập nhật POI markers
   useEffect(() => {
@@ -203,19 +219,25 @@ export function InteractiveMap({
       const bounds = L.latLngBounds(pois.map(p => [p.lat, p.lng]));
       // Only fit if user location is not set (first time)
       if (!userLocation) {
-        mapRef.current.fitBounds(bounds, { padding: [50, 50], maxZoom: 16 });
+        mapRef.current.fitBounds(bounds, { padding: [50, 50], maxZoom: preferredZoom });
       }
     }
-  }, [pois, selectedPOI, mapLoaded, language, onSelectPOI, onViewPOI, userLocation]);
+  }, [pois, preferredZoom, selectedPOI, mapLoaded, language, onSelectPOI, onViewPOI, userLocation]);
 
   // Center map on user
   const handleCenterOnUser = useCallback(() => {
     if (mapRef.current && userLocation) {
-      mapRef.current.flyTo([userLocation.lat, userLocation.lng], 17, {
-        duration: 1,
-      });
+      if (enableFlyAnimation) {
+        mapRef.current.flyTo([userLocation.lat, userLocation.lng], preferredZoom, {
+          duration: 1,
+        });
+      } else {
+        mapRef.current.setView([userLocation.lat, userLocation.lng], preferredZoom, {
+          animate: false,
+        });
+      }
     }
-  }, [userLocation]);
+  }, [enableFlyAnimation, preferredZoom, userLocation]);
 
   // Zoom controls
   const handleZoomIn = useCallback(() => {

@@ -17,7 +17,15 @@
  */
 
 import { get, set, del, clear, keys } from 'idb-keyval';
-import type { POI, Tour, UserSettings, VisitHistoryEntry, CooldownRecord, AnalyticsLog } from '@/lib/types/index';
+import {
+  DEFAULT_USER_SETTINGS,
+  type AnalyticsLog,
+  type CooldownRecord,
+  type POI,
+  type Tour,
+  type UserSettings,
+  type VisitHistoryEntry,
+} from '@/lib/types/index';
 
 /**
  * Storage Keys
@@ -103,18 +111,10 @@ export async function loadSettings(): Promise<UserSettings> {
   
   // Default settings nếu chưa có
   if (!settings) {
-    return {
-      language: 'vi',
-      volume: 0.8,
-      autoPlayEnabled: true,
-      geofenceRadius: 18,
-      batterySaverMode: false,
-      showNotifications: true,
-      preferredMapZoom: 15,
-    };
+    return DEFAULT_USER_SETTINGS;
   }
-  
-  return settings;
+
+  return { ...DEFAULT_USER_SETTINGS, ...settings };
 }
 
 /**

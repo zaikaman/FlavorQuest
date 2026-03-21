@@ -22,6 +22,7 @@ import { useAudioPlayer } from '@/lib/hooks/useAudioPlayer';
 import { usePOIManager } from '@/lib/hooks/usePOIManager';
 import { useTourManager } from '@/lib/hooks/useTourManager';
 import { useOfflineSync } from '@/lib/hooks/useOfflineSync';
+import { useDevicePerformance } from '@/lib/hooks/useDevicePerformance';
 import { useLanguage } from '@/lib/contexts/LanguageContext';
 import { useAuth } from '@/lib/contexts/AuthContext';
 import { useTranslations } from '@/lib/hooks/useTranslations';
@@ -42,6 +43,7 @@ import { NoiseFilter } from '@/lib/utils/noise-filter';
 import { SpeedCalculator } from '@/lib/utils/speed';
 import { isCooldownActive, setCooldown } from '@/lib/utils/cooldown';
 import { logAutoPlay, logManualPlay, logSkip, logTourEnd } from '@/lib/services/analytics';
+import { resolveDevicePerformance } from '@/lib/services/device-performance';
 import { saveVisit, loadSettings } from '@/lib/services/storage';
 import { getLocalizedPOI } from '@/lib/utils/localization';
 import type { Json } from '@/lib/types/database.types';
@@ -74,6 +76,7 @@ export default function TourPage() {
   const [shouldPreloadOffline, setShouldPreloadOffline] = useState(false);
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [showNotifications, setShowNotifications] = useState(false);
+  const deviceAssessment = useDevicePerformance();
 
   // Geolocation
   const { coordinates, accuracy, heading, error: geoError, permissionState } = useGeolocation();
@@ -83,6 +86,10 @@ export default function TourPage() {
   const speedCalculatorRef = useRef<SpeedCalculator>(new SpeedCalculator({ windowSize: 10 }));
   const [filteredPosition, setFilteredPosition] = useState<Coordinates | null>(null);
   const hasPreloadedRef = useRef(false);
+  const devicePerformance = useMemo(
+    () => resolveDevicePerformance(settings, deviceAssessment),
+    [deviceAssessment, settings]
+  );
 
   // Load settings on mount
   useEffect(() => {
@@ -150,8 +157,8 @@ export default function TourPage() {
     preloadNearbyAudio,
   } = usePOIManager({
     language,
-    autoPreloadAudio: true,
-    preloadRadius: 500,
+    autoPreloadAudio: devicePerformance.profile.autoPreloadAudio,
+    preloadRadius: devicePerformance.profile.nearbyPreloadRadius,
     onOfflineReady: handlePOIOfflineReady,
   });
 
@@ -906,6 +913,10 @@ export default function TourPage() {
                 onPlayPOI={handlePlayPOI}
                 playingPOIId={audioPlayer.currentItem?.poi.id}
                 isAudioPlaying={audioPlayer.isPlaying}
+                preferredZoom={devicePerformance.profile.mapDefaultZoom}
+                enableFlyAnimation={devicePerformance.profile.mapFlyAnimation}
+                showAccuracyRing={devicePerformance.profile.showAccuracyRing}
+                showUserPulse={devicePerformance.profile.showUserPulse}
               />
             )}
 
