@@ -2,6 +2,7 @@
 
 const SILENT_AUDIO_DATA_URI =
   'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAIlYAAESsAAACABAAZGF0YQAAAAA=';
+const PRIME_AUDIO_TIMEOUT_MS = 1200;
 
 let sharedAudioElement: HTMLAudioElement | null = null;
 let sharedAudioPrimed = false;
@@ -64,6 +65,25 @@ export function isSharedAudioPriming(): boolean {
   return sharedAudioPriming;
 }
 
+async function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T> {
+  let timeoutId: number | null = null;
+
+  try {
+    return await Promise.race([
+      promise,
+      new Promise<T>((_, reject) => {
+        timeoutId = window.setTimeout(() => {
+          reject(new Error(`audio prime timed out after ${timeoutMs}ms`));
+        }, timeoutMs);
+      }),
+    ]);
+  } finally {
+    if (timeoutId) {
+      window.clearTimeout(timeoutId);
+    }
+  }
+}
+
 export async function primeSharedAudioElement(): Promise<boolean> {
   const audio = ensureSharedAudioElement();
 
@@ -85,7 +105,7 @@ export async function primeSharedAudioElement(): Promise<boolean> {
       audio.muted = true;
       audio.src = SILENT_AUDIO_DATA_URI;
       audio.load();
-      await audio.play();
+      await withTimeout(audio.play(), PRIME_AUDIO_TIMEOUT_MS);
       audio.pause();
       audio.currentTime = 0;
       sharedAudioPrimed = true;

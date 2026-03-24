@@ -158,7 +158,7 @@ export default function LoginPage() {
     setFeedback(null);
 
     try {
-      await primeSharedAudioElement();
+      void primeSharedAudioElement();
 
       const {
         error: verifyError,
