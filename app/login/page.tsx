@@ -171,9 +171,12 @@ export default function LoginPage() {
       return;
     }
 
-    await refreshUserRole();
-    router.push(redirectTo ?? (accountType === 'owner' ? '/pending-owner' : '/tour'));
+    const destination = redirectTo ?? (accountType === 'owner' ? '/pending-owner' : '/tour');
+    router.push(destination);
     router.refresh();
+    refreshUserRole().catch((refreshError) => {
+      console.warn('[LoginPage] refreshUserRole failed after OTP verify:', refreshError);
+    });
   };
 
   if (isLoading) {

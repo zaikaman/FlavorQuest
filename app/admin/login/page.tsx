@@ -111,9 +111,11 @@ export default function AdminLoginPage() {
       return;
     }
 
-    await refreshUserRole();
     router.push(redirectTo ?? '/admin');
     router.refresh();
+    refreshUserRole().catch((refreshError) => {
+      console.warn('[AdminLoginPage] refreshUserRole failed after OTP verify:', refreshError);
+    });
   };
 
   if (isLoading || (user && !isRoleReady)) {

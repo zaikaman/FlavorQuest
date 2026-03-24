@@ -52,7 +52,6 @@ export default function TourLayout({
   if (
     isLoading ||
     !user ||
-    !isRoleReady ||
     isOwner ||
     isAdmin ||
     isPendingOwner
