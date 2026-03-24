@@ -35,8 +35,6 @@ import { HistoryView } from '@/components/tour/HistoryView';
 import { BottomNav, type NavTab } from '@/components/layout/BottomNav';
 import { SettingsPanel } from '@/components/layout/SettingsPanel';
 import { OfflineIndicator } from '@/components/layout/OfflineIndicator';
-import { AudioPreloadIndicator } from '@/components/layout/AudioPreloadIndicator';
-import { OfflineDownloadPrompt } from '@/components/layout/OfflineDownloadPrompt';
 import { Toast } from '@/components/ui/Toast';
 import { TourPageSkeleton } from '@/components/ui/Loading';
 import { NoiseFilter } from '@/lib/utils/noise-filter';
@@ -82,8 +80,6 @@ export default function TourPage() {
   const [isOfflineReady, setIsOfflineReady] = useState(false);
   const [isAutoMode, setIsAutoMode] = useState(true);
   const [settings, setSettings] = useState<UserSettings | null>(null);
-  const [showOfflinePrompt, setShowOfflinePrompt] = useState(false);
-  const [shouldPreloadOffline, setShouldPreloadOffline] = useState(false);
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [showNotifications, setShowNotifications] = useState(false);
   const deviceAssessment = useDevicePerformance();
@@ -109,23 +105,6 @@ export default function TourPage() {
       setSettings(s);
       setIsAutoMode(s.autoPlayEnabled);
     });
-
-    // Check offline preference from localStorage
-    const preferenceTimer = window.setTimeout(() => {
-      const savedPreference = localStorage.getItem('flavorquest-offline-preference');
-      if (savedPreference) {
-        setShouldPreloadOffline(savedPreference === 'accepted');
-      } else {
-        // Chưa có preference, hiển thị prompt sau 2 giây
-        window.setTimeout(() => {
-          setShowOfflinePrompt(true);
-        }, 2000);
-      }
-    }, 0);
-
-    return () => {
-      window.clearTimeout(preferenceTimer);
-    };
   }, []);
 
   // Toast helper
@@ -161,11 +140,10 @@ export default function TourPage() {
   const {
     pois,
     isLoading: poisLoading,
-    preloadNearbyAudio,
+    preloadAllAudio,
   } = usePOIManager({
     language,
-    autoPreloadAudio:
-      shouldPreloadOffline && devicePerformance.profile.autoPreloadAudio,
+    autoPreloadAudio: true,
     preloadRadius: devicePerformance.profile.nearbyPreloadRadius,
     onOfflineReady: handlePOIOfflineReady,
   });
@@ -267,25 +245,9 @@ export default function TourPage() {
   useEffect(() => {
     hasPreloadedRef.current = false;
     autoPlayCooldownRef.current.clear();
-  }, [selectedTourId]);
+  }, [language, selectedTourId]);
 
-  // Handle offline download acceptance
-  const handleOfflineAccept = useCallback(() => {
-    setShouldPreloadOffline(true);
-    localStorage.setItem('flavorquest-offline-preference', 'accepted');
-    setShowOfflinePrompt(false);
-    showToastMessage(t('offline.downloadStarted') || 'Bắt đầu tải xuống nội dung offline...');
-  }, [setShouldPreloadOffline, setShowOfflinePrompt, showToastMessage, t]);
 
-  // Handle offline download decline
-  const handleOfflineDecline = useCallback(() => {
-    setShouldPreloadOffline(false);
-    localStorage.setItem('flavorquest-offline-preference', 'declined');
-    setShowOfflinePrompt(false);
-  }, [setShouldPreloadOffline, setShowOfflinePrompt]);
-
-  // Calculate estimated size
-  const estimatedSize = Math.round(activePOIs.length * 2.5); // ~2.5MB per POI (audio + image)
 
   const isAutoPlayOnCooldown = useCallback((poiId: string) => {
     const lastPlayedAt = autoPlayCooldownRef.current.get(poiId);
@@ -383,18 +345,13 @@ export default function TourPage() {
 
   const { enqueue } = audioPlayer;
 
-  // Preload audio when position changes
+  // Preload all narration audio in the background as soon as the current dataset is ready.
   useEffect(() => {
-    if (
-      shouldPreloadOffline &&
-      filteredPosition &&
-      activePOIs.length > 0 &&
-      !hasPreloadedRef.current
-    ) {
-      preloadNearbyAudio(filteredPosition);
+    if (activePOIs.length > 0 && !hasPreloadedRef.current) {
+      void preloadAllAudio();
       hasPreloadedRef.current = true;
     }
-  }, [activePOIs.length, filteredPosition, preloadNearbyAudio, shouldPreloadOffline]);
+  }, [activePOIs.length, preloadAllAudio]);
 
   // Handle POI entry event
   const handlePOIEnter = async (event: { poi: POI; distance: number }) => {
@@ -1240,29 +1197,7 @@ export default function TourPage() {
           <Toast message={toastMessage} type="info" onClose={() => setShowToast(false)} />
         </div>
       )}
-      {/* Audio Preload Indicator */}
-      {activePOIs.length > 0 && shouldPreloadOffline && (
-        <AudioPreloadIndicator
-          pois={activePOIs}
-          language={language}
-          currentPosition={filteredPosition || undefined}
-          preloadRadius={5000} // Tải hết tất cả POIs
-          autoPreload={true}
-          compact={false}
-          showUI={true}
-          onComplete={() => {
-            setIsOfflineReady(true);
-          }}
-        />
-      )}
-      {/* Offline Download Prompt */}
-      <OfflineDownloadPrompt
-        isOpen={showOfflinePrompt}
-        onAccept={handleOfflineAccept}
-        onDecline={handleOfflineDecline}
-        poisCount={activePOIs.length}
-        estimatedSize={estimatedSize}
-      />
+
       {/* Bottom Navigation */}
       <BottomNav
         activeTab={activeTab}
