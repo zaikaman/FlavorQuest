@@ -6,6 +6,7 @@ const SILENT_AUDIO_DATA_URI =
 let sharedAudioElement: HTMLAudioElement | null = null;
 let sharedAudioPrimed = false;
 let sharedAudioPriming = false;
+let sharedAudioPrimingPromise: Promise<boolean> | null = null;
 const warmedAudioUrls = new Map<string, number>();
 const warmingAudioUrls = new Map<string, Promise<void>>();
 const WARM_AUDIO_TTL_MS = 5 * 60 * 1000;
@@ -70,46 +71,51 @@ export async function primeSharedAudioElement(): Promise<boolean> {
     return false;
   }
 
-  if (sharedAudioPriming) {
-    return sharedAudioPrimed;
+  if (sharedAudioPrimingPromise) {
+    return sharedAudioPrimingPromise;
   }
 
   sharedAudioPriming = true;
-  const previousMuted = audio.muted;
-  const previousSrc = audio.currentSrc || audio.src;
-  const previousCurrentTime = audio.currentTime;
+  sharedAudioPrimingPromise = (async () => {
+    const previousMuted = audio.muted;
+    const previousSrc = audio.currentSrc || audio.src;
+    const previousCurrentTime = audio.currentTime;
 
-  try {
-    audio.muted = true;
-    audio.src = SILENT_AUDIO_DATA_URI;
-    audio.load();
-    await audio.play();
-    audio.pause();
-    audio.currentTime = 0;
-    sharedAudioPrimed = true;
-    console.info('[audio-session] shared audio primed');
-    return true;
-  } catch (error) {
-    console.warn('[audio-session] failed to prime shared audio:', error);
-    return false;
-  } finally {
-    audio.pause();
-    audio.currentTime = 0;
-
-    if (previousSrc) {
-      audio.src = previousSrc;
+    try {
+      audio.muted = true;
+      audio.src = SILENT_AUDIO_DATA_URI;
       audio.load();
-      if (Number.isFinite(previousCurrentTime) && previousCurrentTime > 0) {
-        audio.currentTime = previousCurrentTime;
+      await audio.play();
+      audio.pause();
+      audio.currentTime = 0;
+      sharedAudioPrimed = true;
+      console.info('[audio-session] shared audio primed');
+      return true;
+    } catch (error) {
+      console.warn('[audio-session] failed to prime shared audio:', error);
+      return false;
+    } finally {
+      audio.pause();
+      audio.currentTime = 0;
+
+      if (previousSrc) {
+        audio.src = previousSrc;
+        audio.load();
+        if (Number.isFinite(previousCurrentTime) && previousCurrentTime > 0) {
+          audio.currentTime = previousCurrentTime;
+        }
+      } else {
+        audio.removeAttribute('src');
+        audio.load();
       }
-    } else {
-      audio.removeAttribute('src');
-      audio.load();
-    }
 
-    audio.muted = previousMuted;
-    sharedAudioPriming = false;
-  }
+      audio.muted = previousMuted;
+      sharedAudioPriming = false;
+      sharedAudioPrimingPromise = null;
+    }
+  })();
+
+  return sharedAudioPrimingPromise;
 }
 
 export function warmAudioUrl(url: string | null | undefined): Promise<void> {
