@@ -324,6 +324,46 @@ export function usePOIManager(options: UsePOIManagerOptions = {}) {
     }
   }, [language, onOfflineReady, pois]);
 
+  const preloadAllAssets = useCallback(async () => {
+    if (pois.length === 0) return;
+
+    try {
+      setIsPreloading(true);
+      setPreloadProgress(0);
+
+      const { audioPreloader } = await import('@/lib/services/audio-preloader');
+
+      await audioPreloader.preload(pois, {
+        language,
+        preloadAll: true,
+        onProgress: (progress) => {
+          setPreloadProgress(Math.round(progress.percent * 0.7));
+        },
+        onError: (error) => {
+          console.error('Audio preload error:', error);
+        },
+      });
+
+      await audioPreloader.preloadImages(pois, {
+        onProgress: (progress) => {
+          const imageProgress = Math.round(progress.percent * 0.3);
+          setPreloadProgress(70 + imageProgress);
+        },
+      });
+
+      setIsPreloading(false);
+      setPreloadProgress(100);
+
+      if (!offlineReadyTriggeredRef.current) {
+        offlineReadyTriggeredRef.current = true;
+        onOfflineReady?.();
+      }
+    } catch (error) {
+      console.error('Failed to preload all assets:', error);
+      setIsPreloading(false);
+    }
+  }, [language, onOfflineReady, pois]);
+
   // Get localized POIs
   const getLocalizedPOIs = useCallback((lang: Language = language): LocalizedPOI[] => {
     return pois.map((poi) => getLocalizedPOI(poi, lang));
@@ -384,5 +424,6 @@ export function usePOIManager(options: UsePOIManagerOptions = {}) {
     getPOIById,
     preloadNearbyAudio,
     preloadAllAudio,
+    preloadAllAssets,
   };
 }

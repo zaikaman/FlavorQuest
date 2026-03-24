@@ -140,7 +140,7 @@ export default function TourPage() {
   const {
     pois,
     isLoading: poisLoading,
-    preloadAllAudio,
+    preloadAllAssets,
   } = usePOIManager({
     language,
     autoPreloadAudio: true,
@@ -365,13 +365,13 @@ export default function TourPage() {
     };
   }, [unlockAudio]);
 
-  // Preload all narration audio in the background as soon as the current dataset is ready.
+  // Preload narration audio and POI images in the background as soon as the current dataset is ready.
   useEffect(() => {
     if (activePOIs.length > 0 && !hasPreloadedRef.current) {
-      void preloadAllAudio();
+      void preloadAllAssets();
       hasPreloadedRef.current = true;
     }
-  }, [activePOIs.length, preloadAllAudio]);
+  }, [activePOIs.length, preloadAllAssets]);
 
   // Handle POI entry event
   const handlePOIEnter = async (event: { poi: POI; distance: number }) => {
