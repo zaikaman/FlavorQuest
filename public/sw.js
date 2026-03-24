@@ -171,7 +171,7 @@ self.addEventListener('fetch', (event) => {
   // Supabase Storage audio files: Cache first (high priority for offline)
   if (isSupabaseAudioUrl(url.href)) {
     console.log('[SW] Matched audio pattern:', url.href);
-    event.respondWith(cacheFirstWithTimeout(request, CACHE_NAMES.audio, 10000));
+    event.respondWith(handleAudioRequest(request, CACHE_NAMES.audio, 10000));
     return;
   }
 
@@ -184,7 +184,7 @@ self.addEventListener('fetch', (event) => {
 
   // Audio files by extension: Cache first
   if (isAudioFile(url.pathname)) {
-    event.respondWith(cacheFirstWithTimeout(request, CACHE_NAMES.audio, 10000));
+    event.respondWith(handleAudioRequest(request, CACHE_NAMES.audio, 10000));
     return;
   }
 
@@ -373,6 +373,96 @@ async function networkOnly(request) {
   return fetch(request);
 }
 
+async function handleAudioRequest(request, cacheName, timeoutMs = 5000) {
+  if (request.headers.has('range')) {
+    return handleAudioRangeRequest(request, cacheName, timeoutMs);
+  }
+
+  return cacheFirstWithTimeout(request, cacheName, timeoutMs);
+}
+
+async function getCachedAudioResponse(cache, request) {
+  let cached = await cache.match(request, { ignoreSearch: false });
+
+  if (!cached && request.url.includes('?')) {
+    const urlWithoutQuery = request.url.split('?')[0];
+    cached = await cache.match(urlWithoutQuery);
+  }
+
+  return cached;
+}
+
+async function handleAudioRangeRequest(request, cacheName, timeoutMs = 5000) {
+  const cache = await caches.open(cacheName);
+  const cached = await getCachedAudioResponse(cache, request);
+  const rangeHeader = request.headers.get('range');
+
+  if (cached && rangeHeader) {
+    try {
+      const blob = await cached.blob();
+      const size = blob.size;
+      const matches = /bytes=(\d+)-(\d+)?/.exec(rangeHeader);
+
+      if (!matches) {
+        return fetch(request);
+      }
+
+      const start = Number(matches[1]);
+      const end = matches[2] ? Number(matches[2]) : size - 1;
+
+      if (!Number.isFinite(start) || !Number.isFinite(end) || start > end || start >= size) {
+        return new Response(null, {
+          status: 416,
+          statusText: 'Range Not Satisfiable',
+          headers: {
+            'Content-Range': `bytes */${size}`,
+            'Accept-Ranges': 'bytes',
+          },
+        });
+      }
+
+      const sliced = blob.slice(start, end + 1);
+      const headers = new Headers(cached.headers);
+      headers.set('Content-Length', String(sliced.size));
+      headers.set('Content-Range', `bytes ${start}-${end}/${size}`);
+      headers.set('Accept-Ranges', 'bytes');
+
+      if (!headers.get('Content-Type')) {
+        headers.set('Content-Type', 'audio/mpeg');
+      }
+
+      headers.delete('Content-Encoding');
+
+      console.log('[SW] Serving audio range from cache:', request.url, rangeHeader);
+
+      return new Response(sliced, {
+        status: 206,
+        statusText: 'Partial Content',
+        headers,
+      });
+    } catch (error) {
+      console.error('[SW] Failed to serve cached audio range:', error);
+    }
+  }
+
+  try {
+    console.log('[SW] Fetching audio range from network:', request.url, rangeHeader);
+    return await fetchWithTimeout(request, timeoutMs);
+  } catch (error) {
+    console.error('[SW] Audio range fetch failed:', error);
+
+    if (cached) {
+      return cached;
+    }
+
+    return new Response('Không thể tải âm thanh. Vui lòng thử lại khi mạng ổn định hơn.', {
+      status: 503,
+      statusText: 'Service Unavailable',
+      headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+    });
+  }
+}
+
 /**
  * Cache First with Timeout Strategy
  * Try cache first, fallback to network with timeout
@@ -381,14 +471,7 @@ async function networkOnly(request) {
 async function cacheFirstWithTimeout(request, cacheName, timeoutMs = 5000) {
   const cache = await caches.open(cacheName);
 
-  // IMPORTANT: Try cache with exact URL match first
-  let cached = await cache.match(request, { ignoreSearch: false });
-
-  // Also try without query params if not found
-  if (!cached && request.url.includes('?')) {
-    const urlWithoutQuery = request.url.split('?')[0];
-    cached = await cache.match(urlWithoutQuery);
-  }
+  const cached = await getCachedAudioResponse(cache, request);
 
   if (cached) {
     console.log('[SW] Serving audio from cache:', request.url);
