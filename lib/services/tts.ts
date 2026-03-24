@@ -10,6 +10,7 @@
  */
 
 import type { Language } from '@/lib/types/index';
+import { LANGUAGE_CONFIG_MAP } from '@/lib/constants';
 
 export interface TTSOptions {
   lang?: Language;
@@ -27,15 +28,6 @@ export const DEFAULT_TTS_OPTIONS: TTSOptions = {
 };
 
 // Language code mapping
-const LANG_CODE_MAP: Record<Language, string> = {
-  vi: 'vi-VN',
-  en: 'en-US',
-  ja: 'ja-JP',
-  fr: 'fr-FR',
-  ko: 'ko-KR',
-  zh: 'zh-CN',
-};
-
 export class TTSService {
   private synthesis: SpeechSynthesis;
   private voices: SpeechSynthesisVoice[] = [];
@@ -68,7 +60,7 @@ export class TTSService {
    * Get available voices for a language
    */
   getVoicesForLanguage(lang: Language): SpeechSynthesisVoice[] {
-    const langCode = LANG_CODE_MAP[lang];
+    const langCode = LANGUAGE_CONFIG_MAP[lang]?.ttsLang ?? 'vi-VN';
     return this.voices.filter(voice => voice.lang.startsWith(langCode.split('-')[0]!));
   }
 
@@ -76,7 +68,7 @@ export class TTSService {
    * Get best voice for language
    */
   getBestVoice(lang: Language): SpeechSynthesisVoice | null {
-    const langCode = LANG_CODE_MAP[lang];
+    const langCode = LANGUAGE_CONFIG_MAP[lang]?.ttsLang ?? 'vi-VN';
     const voices = this.getVoicesForLanguage(lang);
 
     // Prefer exact match
@@ -102,7 +94,7 @@ export class TTSService {
       this.cancel();
 
       const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = LANG_CODE_MAP[opts.lang!];
+      utterance.lang = LANGUAGE_CONFIG_MAP[opts.lang!]?.ttsLang ?? 'vi-VN';
       utterance.rate = opts.rate!;
       utterance.pitch = opts.pitch!;
       utterance.volume = opts.volume!;

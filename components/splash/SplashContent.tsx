@@ -4,7 +4,7 @@
  * 
  * Features:
  * - Thay đổi ngôn ngữ real-time
- * - LanguageSelector với 6 ngôn ngữ
+ * - LanguageSelector với danh sách ngôn ngữ mở rộng
  * - StartTourButton với text localized
  */
 
@@ -70,7 +70,7 @@ export function SplashContent({ isAuthenticated }: SplashContentProps) {
 
         {/* Action Section (Bottom) */}
         <div className="flex flex-col items-center w-full gap-5 pb-12">
-          {/* Language Pills - 6 ngôn ngữ */}
+          {/* Language Pills */}
           <LanguageSelector variant="splash" />
 
           {/* Primary Action Button */}

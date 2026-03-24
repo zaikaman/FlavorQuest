@@ -1,0 +1,518 @@
+{
+  "locale": "id",
+  "app": {
+    "name": "FlavorQuest",
+    "tagline": "Temukan kuliner Vĩnh Khánh lewat audio"
+  },
+  "metadata": {
+    "title": "FlavorQuest - Temukan Kuliner Vĩnh Khánh",
+    "description": "Tur audio otomatis untuk menjelajahi kuliner jalan Vĩnh Khánh, Cần Thơ. PWA offline-first dengan dukungan multi bahasa.",
+    "keywords": [
+      "tur kuliner",
+      "panduan audio",
+      "Vĩnh Khánh",
+      "Cần Thơ",
+      "kuliner",
+      "PWA"
+    ]
+  },
+  "manifest": {
+    "name": "FlavorQuest - Pengalaman Narasi Audio Otomatis",
+    "shortName": "FlavorQuest",
+    "description": "Jelajahi jalan kuliner Vĩnh Khánh dengan narasi audio otomatis berbasis lokasi. Mendukung 18 bahasa dan dapat digunakan offline.",
+    "shortcuts": {
+      "startTour": {
+        "name": "Mulai tur",
+        "description": "Mulai tur otomatis"
+      },
+      "viewMap": {
+        "name": "Lihat peta",
+        "description": "Lihat peta lokasi"
+      }
+    }
+  },
+  "common": {
+    "loading": "Memuat...",
+    "error": "Kesalahan",
+    "retry": "Coba lagi",
+    "cancel": "Batal",
+    "confirm": "Konfirmasi",
+    "save": "Simpan",
+    "close": "Tutup",
+    "back": "Kembali",
+    "next": "Berikutnya",
+    "done": "Selesai",
+    "yes": "Ya",
+    "no": "Tidak",
+    "allow": "Izinkan",
+    "deny": "Tolak",
+    "browse": "Jelajahi",
+    "privacyPolicy": "Kebijakan privasi"
+  },
+  "list": {
+    "searchPlaceholder": "Cari siput, seafood, bánh mì...",
+    "notFoundTitle": "Tidak ditemukan",
+    "notFoundDesc": "Coba cari dengan kata kunci lain",
+    "offlineBadge": "Offline"
+  },
+  "categories": {
+    "all": "Semua",
+    "snails": "Siput",
+    "seafood": "Hidangan laut",
+    "grill": "Panggang",
+    "nearMe": "Dekat saya"
+  },
+  "tour": {
+    "startTour": "Mulai Tur",
+    "pauseTour": "Jeda",
+    "resumeTour": "Lanjutkan",
+    "stopTour": "Hentikan Tur",
+    "autoMode": "Mode otomatis",
+    "manualMode": "Mode manual",
+    "auto": "Otomatis",
+    "manual": "Manual",
+    "loadingPOIs": "Memuat lokasi...",
+    "searchingPOIs": "Mencari lokasi terdekat...",
+    "nearbyPOIs": "Lokasi terdekat",
+    "currentLocation": "Lokasi saat ini",
+    "distance": "Jarak",
+    "nowPlaying": "Sedang dimainkan: {name}",
+    "syncedEvents": "{count} acara tersinkron",
+    "dataSaved": "Data berhasil disimpan, siap digunakan offline",
+    "usingTTS": "Menggunakan text-to-speech (offline)",
+    "tooFast": "Bergerak terlalu cepat. Silakan berjalan untuk mendengar narasi.",
+    "locationDenied": "Akses lokasi ditolak. Beralih ke mode manual.",
+    "httpsRequired": "Kesalahan: GPS memerlukan HTTPS. Gunakan localhost atau pasang SSL.",
+    "gpsError": "Kesalahan GPS: {message}",
+    "noAudioForPOI": "Tidak ada audio untuk lokasi ini",
+    "tapToResumeAudio": "Ketuk layar untuk melanjutkan narasi",
+    "invalidSelectedTour": "Tur yang dipilih tidak tersedia",
+    "stoppedOutsideSelectedTour": "Audio dihentikan karena lokasi ini di luar tur yang dipilih"
+  },
+  "tourSelector": {
+    "title": "Dengar sesuai tur",
+    "subtitle": "Pilih tur untuk menampilkan lokasi POI pada rute tersebut",
+    "show": "Perluas",
+    "hide": "Ciutkan",
+    "collapsedHint": "Perluas untuk memilih atau mengganti tur dengan cepat",
+    "allOption": "Semua lokasi",
+    "allDescription": "Tampilkan semua lokasi aktif",
+    "clear": "Hapus",
+    "loading": "Memuat tur...",
+    "empty": "Tidak ada tur tersedia.",
+    "poiCount": "{count} titik",
+    "duration": "{count} menit",
+    "selectedSummary": "Menampilkan {count} titik dari tur yang dipilih",
+    "allSummary": "Menampilkan {count} titik aktif"
+  },
+  "audio": {
+    "play": "Putar",
+    "pause": "Jeda",
+    "stop": "Hentikan",
+    "replay": "Ulangi",
+    "volume": "Volume",
+    "speed": "Kecepatan putar",
+    "loading": "Memuat audio...",
+    "error": "Tidak dapat memutar audio",
+    "noAudio": "Tidak ada audio",
+    "useTTS": "Gunakan text-to-speech"
+  },
+  "location": {
+    "requesting": "Meminta lokasi...",
+    "denied": "Akses lokasi ditolak",
+    "unavailable": "Lokasi tidak tersedia",
+    "timeout": "Permintaan lokasi habis waktu",
+    "enableLocation": "Aktifkan lokasi",
+    "accuracy": "Akurasi",
+    "lastUpdate": "Pembaruan terakhir"
+  },
+  "settings": {
+    "title": "Pengaturan",
+    "language": "Bahasa",
+    "volume": "Volume",
+    "autoMode": "Putar otomatis",
+    "geofenceRadius": "Radius pemicu",
+    "ttsEnabled": "Text-to-Speech",
+    "ttsRate": "Kecepatan bicara",
+    "ttsPitch": "Nada suara",
+    "mapType": "Jenis peta",
+    "showVisitedPOIs": "Tampilkan titik yang dikunjungi",
+    "batteryOptimization": "Optimasi baterai",
+    "geofenceClose": "Dekat (tepat)",
+    "geofenceFar": "Jauh (luas)",
+    "tourExperience": "Pengalaman tur",
+    "account": "Akun",
+    "signOut": "Keluar",
+    "signingOut": "Sedang keluar...",
+    "signOutConfirm": "Apakah Anda yakin ingin keluar?",
+    "signOutFailed": "Gagal keluar. Silakan coba lagi.",
+    "deviceProfileTitle": "Profil perangkat",
+    "deviceProfileDescription": "FlavorQuest menyesuaikan gerakan, tampilan peta, dan pemuatan latar sesuai perangkat Anda.",
+    "deviceProfileDetectedLabel": "Teridentifikasi sistem",
+    "deviceProfileAppliedLabel": "Sedang digunakan",
+    "deviceProfileSystem": "Otomatis",
+    "deviceProfileLight": "Ringan",
+    "deviceProfileBalanced": "Seimbang",
+    "deviceProfileFull": "Lengkap",
+    "deviceProfileAutoDescription": "Biarkan aplikasi menyeimbangkan gerakan, detail peta, dan pemuatan latar sesuai perangkat ini secara otomatis.",
+    "deviceProfileLightDescription": "Kurangi efek visual dan pemuatan latar untuk hemat baterai dan menjaga stabilitas.",
+    "deviceProfileBalancedDescription": "Pengalaman lancar untuk sebagian besar perangkat tanpa membebani sumber daya.",
+    "deviceProfileFullDescription": "Memprioritaskan gerakan kaya dan preloading luas jika perangkat mampu.",
+    "deviceProfileUnknown": "Tidak diketahui",
+    "deviceProfileMotionReduced": "Gerakan berkurang",
+    "deviceProfileMotionStandard": "Gerakan standar",
+    "deviceProfileBatteryHint": "Penghemat baterai membuat profil aktif menjadi lebih hemat satu tingkat"
+  },
+  "history": {
+    "title": "Riwayat",
+    "visited": "Sudah dikunjungi",
+    "notVisited": "Belum dikunjungi",
+    "visitedAt": "Dikunjungi pada",
+    "clear": "Hapus riwayat",
+    "empty": "Belum ada riwayat",
+    "justNow": "Baru saja",
+    "minsAgo": "{mins} menit lalu",
+    "hoursAgo": "{hours} jam lalu",
+    "today": "Hari ini, {time}",
+    "yesterday": "Kemarin, {time}",
+    "listened": "Sudah mendengar"
+  },
+  "map": {
+    "title": "Peta",
+    "zoomIn": "Perbesar",
+    "zoomOut": "Perkecil",
+    "centerMap": "Pusatkan ke lokasi saat ini",
+    "fullscreen": "Layar penuh",
+    "layers": "Lapisan peta",
+    "loadingMap": "Memuat peta..."
+  },
+  "poi": {
+    "details": "Detail",
+    "signatureDish": "Hidangan khas",
+    "funFact": "Fakta menarik",
+    "estimatedHours": "Jam buka",
+    "directions": "Petunjuk arah",
+    "playAudio": "Dengarkan narasi",
+    "viewOnMap": "Lihat di peta",
+    "cuisine": "Kuliner",
+    "upNext": "POI berikutnya terdekat",
+    "district4": "Distrik 4, Ho Chi Minh City",
+    "transcript": "Teks narasi",
+    "estimatedWalk": "3 menit berjalan"
+  },
+  "offline": {
+    "status": "Offline",
+    "ready": "Siap digunakan offline",
+    "syncing": "Sedang sinkronisasi...",
+    "syncComplete": "Sinkronisasi selesai",
+    "cacheSize": "Ukuran cache",
+    "clearCache": "Hapus cache",
+    "usingCachedData": "Menggunakan data cache",
+    "limitedFeatures": "Beberapa fitur tidak tersedia",
+    "uploading": "Mengunggah data ke server",
+    "syncError": "Kesalahan sinkronisasi",
+    "retrySync": "Ketuk untuk mencoba lagi",
+    "pendingSync": "Menunggu sinkronisasi",
+    "pendingItems": "{count} item menunggu",
+    "online": "Online",
+    "synced": "Telah sinkron",
+    "offlineMode": "Mode offline",
+    "noConnection": "Tidak ada koneksi",
+    "statusLabel": "Status",
+    "lastSync": "Sinkron terakhir",
+    "notSyncedYet": "Belum sinkron",
+    "syncNow": "Sinkron sekarang",
+    "tapToSync": "Ketuk untuk sinkron",
+    "downloadingAudio": "Mengunduh audio offline",
+    "downloadingContent": "Mengunduh konten offline",
+    "audioReady": "Audio siap offline",
+    "audioDownloaded": "Audio selesai diunduh untuk offline",
+    "downloadError": "Kesalahan unduh",
+    "retry": "Coba lagi",
+    "noAudioCache": "Belum ada audio offline. Hubungkan ke jaringan untuk mengunduh.",
+    "updateCache": "Perbarui cache",
+    "downloadPromptTitle": "Unduh konten offline?",
+    "downloadPromptDesc": "Apakah Anda ingin mengunduh semua audio dan gambar untuk digunakan saat tidak ada jaringan?",
+    "downloadPromptNote": "Anda dapat mengubah pilihan ini di Pengaturan kapan saja.",
+    "downloadNow": "Unduh sekarang",
+    "downloadLater": "Nanti",
+    "downloadStarted": "Mulai mengunduh konten offline...",
+    "poisLabel": "lokasi",
+    "audioLabel": "Audio narasi",
+    "imageLabel": "Gambar lokasi",
+    "successTitle": "Siap offline",
+    "successMessage": "Konten berhasil diunduh"
+  },
+  "battery": {
+    "level": "Level baterai",
+    "charging": "Sedang mengisi",
+    "notCharging": "Tidak mengisi",
+    "lowPowerMode": "Mode hemat daya",
+    "recommendation": "Rekomendasi",
+    "warning": "Baterai lemah! Beberapa fitur mungkin terbatas"
+  },
+  "speed": {
+    "stationary": "Diam",
+    "walking": "Berjalan",
+    "jogging": "Lari kecil",
+    "running": "Berlari",
+    "vehicle": "Menggunakan kendaraan",
+    "tooFast": "Anda bergerak terlalu cepat! Silakan berjalan untuk pengalaman terbaik"
+  },
+  "errors": {
+    "generic": "Terjadi kesalahan",
+    "network": "Kesalahan koneksi jaringan",
+    "locationDenied": "Anda harus mengizinkan akses lokasi untuk menggunakan fitur ini",
+    "audioPlayback": "Tidak dapat memutar audio. Silakan coba lagi.",
+    "storageQuota": "Penyimpanan penuh. Silakan hapus beberapa data.",
+    "unsupported": "Browser Anda tidak mendukung fitur ini"
+  },
+  "welcome": {
+    "title": "Selamat datang di FlavorQuest!",
+    "description": "Jelajahi kuliner jalan Vĩnh Khánh dengan narasi audio otomatis",
+    "step1": "Aktifkan GPS",
+    "step2": "Pergi ke jalan Vĩnh Khánh",
+    "step3": "Narasi akan otomatis diputar saat dekat lokasi kuliner",
+    "getStarted": "Mulai"
+  },
+  "splash": {
+    "subtitle": "Temukan Perjalanan Kuliner Vĩnh Khánh",
+    "startTour": "Mulai tur",
+    "browse": "Jelajahi manual",
+    "settings": "Pengaturan"
+  },
+  "login": {
+    "title": "Masuk ke FlavorQuest",
+    "subtitle": "Simpan progres dan sinkronkan pengalaman Anda",
+    "prompt": "Masukkan email untuk menerima kode OTP login",
+    "signInWithGoogle": "Masuk dengan Google",
+    "customer": "Pelanggan",
+    "owner": "Pemilik",
+    "selectedType": "Jenis akun yang dipilih: {type}",
+    "ownerApprovalNote": "Masuk sebagai pemilik perlu verifikasi admin terlebih dahulu. Setelah OTP validasi, Anda akan diarahkan ke halaman tunggu persetujuan dan chat langsung dengan admin.",
+    "emailLabel": "Email login",
+    "emailPlaceholder": "kamu@contoh.com",
+    "otpLabel": "Kode OTP",
+    "otpPlaceholder": "123456",
+    "sendOtp": "Kirim kode OTP",
+    "sendingOtp": "Mengirim kode...",
+    "resendOtp": "Kirim ulang kode",
+    "resendIn": "Kirim ulang dalam {seconds}s",
+    "verifyOtp": "Verifikasi dan masuk",
+    "verifyingOtp": "Memverifikasi...",
+    "codeSent": "Kode OTP telah dikirim ke email Anda.",
+    "codeSentTo": "Kode OTP dikirim ke {email}",
+    "invalidEmail": "Masukkan email yang valid.",
+    "invalidOtp": "Masukkan kode OTP enam digit.",
+    "sendOtpError": "Tidak dapat mengirim kode. Silakan coba lagi.",
+    "verifyOtpError": "Verifikasi OTP gagal. Silakan coba lagi.",
+    "adminPortalRequired": "Akun admin harus masuk melalui portal admin khusus.",
+    "changeEmailHint": "Anda dapat mengubah email lalu mengirim ulang kode jika salah ketik.",
+    "or": "atau",
+    "backToHome": "Kembali ke beranda",
+    "error": "Masuk gagal. Silakan coba lagi"
+  },
+  "pendingOwner": {
+    "eyebrow": "Ruang tunggu pemilik",
+    "titlePending": "Akun menunggu verifikasi admin untuk akses pemilik",
+    "titleRejected": "Permintaan pemilik Anda memerlukan diskusi lebih lanjut dengan admin",
+    "subtitlePending": "Akun ini sedang menunggu persetujuan sebagai pemilik sehingga tidak bisa menggunakan area pelanggan atau pemilik. Chat di bawah ini adalah saluran utama untuk pantau dan merespon jika admin perlu verifikasi tambahan.",
+    "subtitleRejected": "Admin telah menolak permintaan ini. Anda masih bisa berdiskusi di chat bawah untuk menambah konteks atau informasi verifikasi.",
+    "statusLabel": "Status",
+    "statusPending": "Menunggu persetujuan",
+    "statusRejected": "Ditolak",
+    "customerAreaLabel": "Navigasi",
+    "customerCta": "Kembali ke layar selamat datang",
+    "customerHint": "Selama belum disetujui, akun ini hanya bisa memantau status dan berkomunikasi dengan admin.",
+    "steps": {
+      "request": {
+        "title": "Permintaan telah tercatat",
+        "body": "Sistem telah membuka saluran chat dengan admin sehingga Anda dapat melengkapi informasi verifikasi bila diperlukan."
+      },
+      "review": {
+        "title": "Admin akan memverifikasi melalui chat",
+        "body": "Pantau pesan di sini untuk merespons cepat jika admin butuh informasi sebelum persetujuan."
+      },
+      "reviewRejected": {
+        "body": "Permintaan sebelumnya telah ditolak. Anda masih bisa berdiskusi di chat bawah untuk klarifikasi."
+      },
+      "workspace": {
+        "title": "Workspace pemilik akan dibuka setelah persetujuan",
+        "body": "Setelah disetujui, Anda akan masuk area pemilik. Jika belum diberi POI, area pemilik akan menampilkan status kosong hingga admin menetapkan POI."
+      }
+    }
+  },
+  "menu": {
+    "title": "Menu makanan",
+    "empty": "Restoran belum memperbarui menu.",
+    "addToCart": "Tambah menu",
+    "quantity": "Jumlah",
+    "cart": "Detail pesanan",
+    "placeOrder": "Kirim pesanan",
+    "placePickupOrder": "Pesan ambil di restoran",
+    "placeDeliveryOrder": "Pesan antar",
+    "pickup": "Ambil di restoran",
+    "pickupDescription": "Pelanggan datang mengambil makanan di restoran dan membayar saat menerima.",
+    "delivery": "Antar ke alamat",
+    "deliveryDescription": "Restoran mengantar makanan ke alamat Anda dan pembayaran dilakukan saat menerima.",
+    "subtotal": "Total sementara: {amount}đ",
+    "pickupTime": "Waktu ambil",
+    "pickupTimeFuture": "Pilih waktu ambil di masa depan",
+    "deliveryTimeFuture": "Pilih waktu pengantaran di masa depan",
+    "customerName": "Nama penerima",
+    "customerPhone": "Nomor telepon",
+    "deliveryAddress": "Alamat pengiriman",
+    "deliveryContactRequired": "Masukkan nama, nomor telepon, dan alamat pengiriman",
+    "note": "Catatan",
+    "success": "Pesanan berhasil",
+    "pickupSuccess": "Pesanan ambil di restoran berhasil",
+    "deliverySuccess": "Pesanan antar berhasil"
+  },
+  "chatbot": {
+    "badge": "Asisten pintar",
+    "title": "Asisten FlavorQuest",
+    "subtitle": "Rekomendasikan makanan, titik berhenti, dan jawab cepat untuk perjalanan Anda.",
+    "welcome": "Saya dapat merekomendasikan makanan yang layak dicoba, titik yang sebaiknya dikunjungi dahulu, dan menjawab pertanyaan umum langsung di FlavorQuest.",
+    "inputPlaceholder": "Tanya makanan yang layak dicoba, titik yang dikunjungi, atau cara menggunakan aplikasi...",
+    "open": "Buka asisten",
+    "close": "Tutup asisten",
+    "openPage": "Buka halaman asisten",
+    "nav": "Asisten",
+    "pageTitle": "Asisten perjalanan",
+    "pageSubtitle": "Area khusus untuk bertanya cepat tentang makanan, tur yang sesuai, dan cara menggunakan FlavorQuest tanpa menutupi peta atau daftar POI.",
+    "backToTour": "Kembali ke tur",
+    "pageInfoTitle": "Apa yang bisa Anda tanyakan di sini?",
+    "pageInfoBody": "Asisten akan menggunakan data yang ada di FlavorQuest untuk merekomendasikan makanan, titik berhenti, rute yang sesuai, dan menjawab pertanyaan umum selama eksplorasi.",
+    "thinking": "Sedang berpikir...",
+    "error": "Tidak dapat terhubung ke asisten. Silakan coba lagi nanti.",
+    "footer": "Rekomendasi berdasarkan data yang ada di FlavorQuest.",
+    "newChat": "Obrolan baru",
+    "historyEmpty": "Anda belum memiliki percakapan.",
+    "loadingHistory": "Memuat riwayat percakapan...",
+    "suggestions": {
+      "food": "Hari ini saya sebaiknya mencoba makanan apa dulu?",
+      "route": "Jika baru pertama kali, tur mana atau lokasi mana yang sebaiknya dikunjungi dahulu?",
+      "faq": "Apakah aplikasi ini bisa digunakan offline dan memesan makanan sebelumnya?"
+    }
+  },
+  "support": {
+    "nav": "Pesan",
+    "openPage": "Buka halaman pesan",
+    "customer": {
+      "eyebrow": "Chat dukungan",
+      "title": "Pesan ke restoran atau admin",
+      "subtitle": "Anda bisa mengirim pesan ke setiap restoran, atau bertanya ke admin jika butuh bantuan terkait akun dan pengalaman.",
+      "emptyTitle": "Belum ada pesan.",
+      "emptyBody": "Pilih restoran atau buka chat dengan admin untuk memulai."
+    },
+    "owner": {
+      "eyebrow": "Kotak masuk",
+      "title": "Pesan dari pelanggan dan admin",
+      "subtitle": "Pantau komunikasi dengan pelanggan per restoran dan gunakan saluran khusus untuk bekerja dengan admin.",
+      "emptyTitle": "Kotak masuk kosong.",
+      "emptyBody": "Saat pelanggan mengirim pesan atau Anda berkomunikasi dengan admin, percakapan akan muncul di sini."
+    },
+    "admin": {
+      "eyebrow": "Pesan dukungan",
+      "title": "Diskusi dengan pelanggan dan pemilik",
+      "subtitle": "Semua permintaan dukungan pelanggan dan pemilik terkumpul di sini untuk respons cepat.",
+      "emptyTitle": "Antrean kosong.",
+      "emptyBody": "Saat ada permintaan dukungan baru dari pelanggan atau pemilik, percakapan akan muncul di sini."
+    },
+    "stats": {
+      "activeThreads": "Obrolan aktif",
+      "activeThreadsBody": "Setiap percakapan memiliki halaman tersendiri sehingga mudah dipantau.",
+      "unreadThreads": "Perlu dibalas",
+      "unreadThreadsBody": "Saat ada pesan baru, penerima juga akan diberitahu lewat email."
+    },
+    "launchpad": {
+      "title": "Buka percakapan baru",
+      "body": "Pilih orang yang tepat untuk dikirimi pesan. Jika sudah ada percakapan sebelumnya, sistem akan membukanya kembali."
+    },
+    "inbox": {
+      "title": "Daftar percakapan",
+      "body": "Pesan yang belum dibaca akan ditampilkan di depan untuk diproses lebih cepat."
+    },
+    "threadTypes": {
+      "customerOwner": "Pelanggan / Pemilik",
+      "customerAdmin": "Pelanggan / Admin",
+      "ownerAdmin": "Pemilik / Admin"
+    },
+    "states": {
+      "creating": "Sedang membuka...",
+      "waitingFirstMessage": "Belum ada pesan di percakapan ini.",
+      "noThreadSelected": "Pilih percakapan untuk memulai.",
+      "noThreadSelectedBody": "Anda juga bisa membuka percakapan baru di kolom kiri.",
+      "noMessages": "Percakapan ini belum ada pesan.",
+      "noMessagesBody": "Kirim pesan pertama untuk memulai."
+    },
+    "actions": {
+      "openThread": "Buka percakapan",
+      "startThread": "Mulai pesan",
+      "refresh": "Muat ulang",
+      "sending": "Mengirim...",
+      "send": "Kirim pesan"
+    },
+    "counterparts": {
+      "admin": "Tim admin",
+      "unknown": "Penerima",
+      "adminShort": "Admin",
+      "ownerShort": "Pemilik",
+      "customerShort": "Pelanggan"
+    },
+    "thread": {
+      "title": "Percakapan",
+      "poiContext": "Diskusi terkait lokasi {name}.",
+      "emailHint": "Pesan baru akan diberitahu di aplikasi dan via email.",
+      "emailBadge": "Ada notifikasi email"
+    },
+    "composer": {
+      "placeholder": "Ketik pesan...",
+      "hint": "Pesan baru akan muncul di sini segera. Email juga akan dikirim ke penerima."
+    },
+    "errors": {
+      "loadThreads": "Tidak dapat memuat daftar percakapan.",
+      "loadMessages": "Tidak dapat memuat pesan percakapan.",
+      "createThread": "Tidak dapat membuat percakapan baru.",
+      "sendMessage": "Tidak dapat mengirim pesan"
+    }
+  },
+  "notifications": {
+    "title": "Notifikasi",
+    "markAll": "Tandai semua sudah dibaca",
+    "empty": "Anda belum memiliki notifikasi"
+  },
+  "owner": {
+    "title": "Dasbor pemilik",
+    "subtitle": "Kelola POI, menu, dan pesanan",
+    "myPois": "POI saya",
+    "orders": "Pesanan",
+    "menu": "Menu makanan",
+    "noPoi": "Anda belum diberi POI. Hubungi admin."
+  },
+  "poiDetail": {
+    "notFound": "Lokasi tidak ditemukan",
+    "notFoundMessage": "Lokasi ini mungkin telah dihapus atau tidak ada.",
+    "playNarration": "Dengar narasi",
+    "introduction": "Pengantar",
+    "noDescription": "Belum ada deskripsi untuk lokasi ini.",
+    "didYouKnow": "Tahukah Anda?",
+    "nowPlaying": "Sedang dimainkan: {name}",
+    "errorPlaying": "Kesalahan memutar audio, menggunakan text-to-speech"
+  },
+  "permissions": {
+    "checking": "Memeriksa izin akses...",
+    "locationTitle": "Izinkan lokasi untuk memutar narasi otomatis saat dekat restoran",
+    "locationDesc": "Pengalaman terbaik saat aplikasi otomatis mengenali lokasi Anda di jalan Vĩnh Khánh.",
+    "denyPrompt": "Tidak diizinkan?",
+    "switchToManual": "Beralih ke mode manual"
+  },
+  "units": {
+    "meters": "m",
+    "kilometers": "km",
+    "number": "Nomor"
+  },
+  "sort": {
+    "az": "A-Z"
+  }
+}

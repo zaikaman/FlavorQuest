@@ -1,5 +1,12 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import {
+  NON_DEFAULT_LANGUAGE_CODES,
+  SUPPORTED_LANGUAGE_CODES,
+  SUPPORTED_LANGUAGES,
+  getLocalizedFieldName,
+  type SupportedLanguageCode,
+} from '@/lib/constants';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { createServerClient, isUserAdmin } from '@/lib/supabase/server';
 
@@ -30,21 +37,14 @@ interface TourRow {
   is_active: boolean;
 }
 
-interface PoiRow {
+type LocalizedAnalyticsPoiRecord = Partial<
+  Record<`name_${SupportedLanguageCode}` | `audio_url_${SupportedLanguageCode}`, string | null>
+>;
+
+interface PoiRow extends LocalizedAnalyticsPoiRecord {
   id: string;
   name_vi: string;
   image_url: string | null;
-  audio_url_vi: string | null;
-  audio_url_en: string | null;
-  audio_url_ja: string | null;
-  audio_url_fr: string | null;
-  audio_url_ko: string | null;
-  audio_url_zh: string | null;
-  name_en: string | null;
-  name_ja: string | null;
-  name_fr: string | null;
-  name_ko: string | null;
-  name_zh: string | null;
   owner_id: string | null;
   deleted_at: string | null;
 }
@@ -114,14 +114,18 @@ const PERIOD_WITH_FILLED_DATES = new Set(['7days', '30days']);
 const ANALYTICS_SUMMARY_CACHE_TTL_MS = 30_000;
 const REPORT_TIMEZONE = 'Asia/Ho_Chi_Minh';
 const REPORT_TIMEZONE_OFFSET_MS = 7 * 60 * 60 * 1000;
-const LANGUAGE_LABELS: Record<string, string> = {
-  vi: 'Tiếng Việt',
-  en: 'English',
-  ja: '日本語',
-  fr: 'Français',
-  ko: '한국어',
-  zh: '中文',
-};
+const LANGUAGE_LABELS: Record<string, string> = Object.fromEntries(
+  SUPPORTED_LANGUAGES.map((language) => [language.code, language.nativeName])
+);
+const ANALYTICS_POI_SELECT = [
+  'id',
+  'name_vi',
+  'image_url',
+  ...SUPPORTED_LANGUAGE_CODES.map((language) => getLocalizedFieldName('audio_url', language)),
+  ...NON_DEFAULT_LANGUAGE_CODES.map((language) => getLocalizedFieldName('name', language)),
+  'owner_id',
+  'deleted_at',
+].join(', ');
 
 const analyticsSummaryCache = new Map<string, { payload: unknown; cachedAt: number }>();
 
@@ -311,9 +315,7 @@ export async function GET(request: NextRequest) {
         .order('created_at', { ascending: false }),
       adminClient
         .from('pois')
-        .select(
-          'id, name_vi, image_url, audio_url_vi, audio_url_en, audio_url_ja, audio_url_fr, audio_url_ko, audio_url_zh, name_en, name_ja, name_fr, name_ko, name_zh, owner_id, deleted_at'
-        )
+        .select(ANALYTICS_POI_SELECT)
         .order('name_vi', { ascending: true }),
       adminClient
         .from('users')
@@ -333,9 +335,9 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: usersResult.error.message }, { status: 500 });
     }
 
-    const tourRows = (toursResult.data ?? []) as TourRow[];
-    const poiRows = (poisResult.data ?? []) as PoiRow[];
-    const userRows = (usersResult.data ?? []) as UserRow[];
+    const tourRows = (toursResult.data ?? []) as unknown as TourRow[];
+    const poiRows = (poisResult.data ?? []) as unknown as PoiRow[];
+    const userRows = (usersResult.data ?? []) as unknown as UserRow[];
 
     const dailyMap = new Map<
       string,
@@ -838,14 +840,16 @@ export async function GET(request: NextRequest) {
     const totalCustomers = userRows.filter((user) => normalizeRole(user.role) === 'customer').length;
 
     const poisWithFullLanguageNames = activePois.filter((poi) =>
-      [poi.name_en, poi.name_ja, poi.name_fr, poi.name_ko, poi.name_zh].every(
-        (value) => typeof value === 'string' && value.trim().length > 0
-      )
+      NON_DEFAULT_LANGUAGE_CODES.every((language) => {
+        const value = poi[getLocalizedFieldName('name', language) as keyof PoiRow];
+        return typeof value === 'string' && value.trim().length > 0;
+      })
     ).length;
     const poisWithFullLanguageAudio = activePois.filter((poi) =>
-      [poi.audio_url_en, poi.audio_url_ja, poi.audio_url_fr, poi.audio_url_ko, poi.audio_url_zh].every(
-        (value) => typeof value === 'string' && value.trim().length > 0
-      )
+      NON_DEFAULT_LANGUAGE_CODES.every((language) => {
+        const value = poi[getLocalizedFieldName('audio_url', language) as keyof PoiRow];
+        return typeof value === 'string' && value.trim().length > 0;
+      })
     ).length;
 
     const content = {

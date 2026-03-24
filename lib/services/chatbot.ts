@@ -1,3 +1,8 @@
+import {
+  NON_DEFAULT_LANGUAGE_CODES,
+  getLanguageConfig,
+  getLocalizedFieldName,
+} from '@/lib/constants';
 import { createOpenAIClient, getOpenAIModel } from '@/lib/services/openai-client';
 import { createAdminClient } from '@/lib/supabase/admin';
 import type { CurrentUserProfile } from '@/lib/supabase/server';
@@ -26,40 +31,50 @@ interface ChatbotRequestPayload {
   pageContext?: ChatbotPageContext;
 }
 
-interface POIRow {
+type LocalizedChatbotRecord = Partial<Record<`name_${Language}` | `description_${Language}`, string | null>>;
+
+const LOCALIZED_NAME_SELECT_FIELDS = [
+  'name_vi',
+  ...NON_DEFAULT_LANGUAGE_CODES.map((language) => getLocalizedFieldName('name', language)),
+].join(', ');
+
+const LOCALIZED_DESCRIPTION_SELECT_FIELDS = [
+  'description_vi',
+  ...NON_DEFAULT_LANGUAGE_CODES.map((language) => getLocalizedFieldName('description', language)),
+].join(', ');
+
+const CUSTOMER_POI_SELECT = [
+  'id',
+  LOCALIZED_NAME_SELECT_FIELDS,
+  LOCALIZED_DESCRIPTION_SELECT_FIELDS,
+  'signature_dish',
+  'category_tags',
+  'estimated_hours',
+  'fun_fact',
+].join(', ');
+
+const CUSTOMER_TOUR_SELECT = [
+  'id',
+  LOCALIZED_NAME_SELECT_FIELDS,
+  LOCALIZED_DESCRIPTION_SELECT_FIELDS,
+  'estimated_duration_min',
+  'poi_ids',
+].join(', ');
+
+interface POIRow extends LocalizedChatbotRecord {
   id: string;
   name_vi: string;
-  name_en: string | null;
-  name_ja: string | null;
-  name_fr: string | null;
-  name_ko: string | null;
-  name_zh: string | null;
   description_vi: string | null;
-  description_en: string | null;
-  description_ja: string | null;
-  description_fr: string | null;
-  description_ko: string | null;
-  description_zh: string | null;
   signature_dish: string | null;
   category_tags: string[] | null;
   estimated_hours: string | null;
   fun_fact: string | null;
 }
 
-interface TourRow {
+interface TourRow extends LocalizedChatbotRecord {
   id: string;
   name_vi: string;
-  name_en: string | null;
-  name_ja: string | null;
-  name_fr: string | null;
-  name_ko: string | null;
-  name_zh: string | null;
   description_vi: string | null;
-  description_en: string | null;
-  description_ja: string | null;
-  description_fr: string | null;
-  description_ko: string | null;
-  description_zh: string | null;
   estimated_duration_min: number | null;
   poi_ids: string[];
 }
@@ -136,48 +151,17 @@ function formatDateTime(value: string | null | undefined) {
 }
 
 function pickLocalizedValue(
-  record: {
+  record: LocalizedChatbotRecord & {
     name_vi?: string | null;
-    name_en?: string | null;
-    name_ja?: string | null;
-    name_fr?: string | null;
-    name_ko?: string | null;
-    name_zh?: string | null;
     description_vi?: string | null;
-    description_en?: string | null;
-    description_ja?: string | null;
-    description_fr?: string | null;
-    description_ko?: string | null;
-    description_zh?: string | null;
   },
   baseField: 'name' | 'description',
   language: Language
 ) {
-  const localizedValue =
-    baseField === 'name'
-      ? language === 'en'
-        ? record.name_en
-        : language === 'ja'
-          ? record.name_ja
-          : language === 'fr'
-            ? record.name_fr
-            : language === 'ko'
-              ? record.name_ko
-              : language === 'zh'
-                ? record.name_zh
-                : record.name_vi
-      : language === 'en'
-        ? record.description_en
-        : language === 'ja'
-          ? record.description_ja
-          : language === 'fr'
-            ? record.description_fr
-            : language === 'ko'
-              ? record.description_ko
-              : language === 'zh'
-                ? record.description_zh
-                : record.description_vi;
-  const fallbackValue = baseField === 'name' ? record.name_vi : record.description_vi;
+  const localizedKey = getLocalizedFieldName(baseField, language) as keyof typeof record;
+  const fallbackKey = getLocalizedFieldName(baseField, 'vi') as keyof typeof record;
+  const localizedValue = record[localizedKey];
+  const fallbackValue = record[fallbackKey];
 
   if (typeof localizedValue === 'string' && localizedValue.trim().length > 0) {
     return localizedValue;
@@ -191,18 +175,7 @@ function pickLocalizedValue(
 }
 
 function buildRolePrompt(role: WorkspaceRole, language: Language) {
-  const responseLanguage =
-    language === 'en'
-      ? 'English'
-      : language === 'ja'
-        ? 'Japanese'
-        : language === 'fr'
-          ? 'French'
-          : language === 'ko'
-            ? 'Korean'
-            : language === 'zh'
-              ? 'Simplified Chinese'
-              : 'Vietnamese';
+  const responseLanguage = getLanguageConfig(language).translationName;
 
   if (role === 'customer') {
     return `You are FlavorQuest's in-app concierge for customers.
@@ -247,17 +220,13 @@ async function buildCustomerContext(
   ] = await Promise.all([
     adminClient
       .from('pois')
-      .select(
-        'id, name_vi, name_en, name_ja, name_fr, name_ko, name_zh, description_vi, description_en, description_ja, description_fr, description_ko, description_zh, signature_dish, category_tags, estimated_hours, fun_fact'
-      )
+      .select(CUSTOMER_POI_SELECT)
       .is('deleted_at', null)
       .order('name_vi', { ascending: true })
       .limit(16),
     adminClient
       .from('tours')
-      .select(
-        'id, name_vi, name_en, name_ja, name_fr, name_ko, name_zh, description_vi, description_en, description_ja, description_fr, description_ko, description_zh, estimated_duration_min, poi_ids'
-      )
+      .select(CUSTOMER_TOUR_SELECT)
       .eq('is_active', true)
       .is('deleted_at', null)
       .order('created_at', { ascending: false })
@@ -282,10 +251,10 @@ async function buildCustomerContext(
       .limit(5),
   ]);
 
-  const poiRows = (pois ?? []) as POIRow[];
-  const tourRows = (tours ?? []) as TourRow[];
-  const dishRows = (dishes ?? []) as DishRow[];
-  const orderRows = (orders ?? []) as OrderRow[];
+  const poiRows = (pois ?? []) as unknown as POIRow[];
+  const tourRows = (tours ?? []) as unknown as TourRow[];
+  const dishRows = (dishes ?? []) as unknown as DishRow[];
+  const orderRows = (orders ?? []) as unknown as OrderRow[];
   const notificationRows = (notifications ?? []) as NotificationRow[];
 
   const selectedTour = tourRows.find((tour) => tour.id === pageContext?.selectedTourId);

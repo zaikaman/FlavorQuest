@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { generateChatbotReply, type WorkspaceRole } from '@/lib/services/chatbot';
+import { isSupportedLanguageCode } from '@/lib/constants';
 import { createServerClient, getCurrentUserProfile } from '@/lib/supabase/server';
 import type { Language } from '@/lib/types';
 
@@ -46,13 +47,7 @@ const NO_STORE_HEADERS = {
 };
 
 function normalizeLanguage(language: Language | undefined): Language {
-  if (
-    language === 'en' ||
-    language === 'ja' ||
-    language === 'fr' ||
-    language === 'ko' ||
-    language === 'zh'
-  ) {
+  if (isSupportedLanguageCode(language)) {
     return language;
   }
 

@@ -18,7 +18,7 @@
   "manifest": {
     "name": "FlavorQuest - Trải Nghiệm Thuyết Minh Âm Thanh Tự Động",
     "shortName": "FlavorQuest",
-    "description": "Khám phá phố ẩm thực Vĩnh Khánh với thuyết minh âm thanh tự động dựa trên vị trí. Hỗ trợ 6 ngôn ngữ, hoạt động offline.",
+    "description": "Khám phá phố ẩm thực Vĩnh Khánh với thuyết minh âm thanh tự động dựa trên vị trí. Hỗ trợ 18 ngôn ngữ, hoạt động offline.",
     "shortcuts": {
       "startTour": {
         "name": "Bắt đầu tour",

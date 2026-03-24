@@ -1,24 +1,20 @@
 /**
- * Translator Service
- * Translate text using OpenAI-compatible API
+ * Translator service backed by the configured OpenAI-compatible API.
  */
 
 import { createHash } from 'node:crypto';
+import {
+  LANGUAGE_CONFIG_MAP,
+  NON_DEFAULT_LANGUAGE_CODES,
+  type SupportedLanguageCode,
+} from '@/lib/constants';
 import { createOpenAIClient, getOpenAIModel } from '@/lib/services/openai-client';
 import { runWithConcurrency } from '@/lib/utils/async';
 
-interface TranslationResponse {
-  en: string;
-  ja: string;
-  fr: string;
-  ko: string;
-  zh: string;
-  [key: string]: string;
-}
+type TranslationLanguage = Exclude<SupportedLanguageCode, 'vi'>;
+type TranslationResponse = Record<TranslationLanguage, string>;
 
-type TranslationLanguage = 'en' | 'ja' | 'fr' | 'ko' | 'zh';
-
-const TARGET_LANGUAGES: readonly TranslationLanguage[] = ['en', 'ja', 'fr', 'ko', 'zh'];
+const TARGET_LANGUAGES = NON_DEFAULT_LANGUAGE_CODES as readonly TranslationLanguage[];
 const MAX_TRANSLATION_CONCURRENCY = 5;
 const translationValueCache = new Map<string, string>();
 const translationInFlightCache = new Map<string, Promise<string>>();
@@ -29,6 +25,10 @@ function normalizeTranslationText(text: string) {
 
 function getTranslationCacheKey(text: string, language: TranslationLanguage) {
   return `${language}:${createHash('sha256').update(text).digest('hex')}`;
+}
+
+function getLanguageName(language: TranslationLanguage) {
+  return LANGUAGE_CONFIG_MAP[language].translationName;
 }
 
 async function translateIntoLanguage(
@@ -88,26 +88,19 @@ Return only the translated text with natural product copy. Do not add explanatio
   return request;
 }
 
-function getLanguageName(language: TranslationLanguage) {
-  switch (language) {
-    case 'en':
-      return 'English';
-    case 'ja':
-      return 'Japanese';
-    case 'fr':
-      return 'French';
-    case 'ko':
-      return 'Korean';
-    case 'zh':
-      return 'Simplified Chinese';
-    default:
-      return language;
-  }
+function createEmptyTranslationResponse(): TranslationResponse {
+  return TARGET_LANGUAGES.reduce(
+    (accumulator, language) => {
+      accumulator[language] = '';
+      return accumulator;
+    },
+    {} as TranslationResponse
+  );
 }
 
 export async function translateText(text: string): Promise<TranslationResponse> {
   const translationsByField = await translateTexts({ default: text });
-  return translationsByField.default!;
+  return translationsByField.default ?? createEmptyTranslationResponse();
 }
 
 export async function translateTexts(
@@ -132,13 +125,7 @@ export async function translateTexts(
     const result: Record<string, TranslationResponse> = {};
 
     for (const [fieldKey] of textEntries) {
-      result[fieldKey] = {
-        en: '',
-        ja: '',
-        fr: '',
-        ko: '',
-        zh: '',
-      };
+      result[fieldKey] = createEmptyTranslationResponse();
     }
 
     for (const entry of translatedEntries) {

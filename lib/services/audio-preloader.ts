@@ -12,6 +12,7 @@
  */
 
 import type { POI, Language, Coordinates } from '@/lib/types/index';
+import { FALLBACK_LANGUAGE, SUPPORTED_LANGUAGE_CODES, getLocalizedFieldName } from '@/lib/constants';
 import { filterPOIsWithinRadius } from '@/lib/utils/distance';
 import {
   savePreloadStatus,
@@ -73,12 +74,13 @@ export interface PreloadResult {
  * Lấy audio URL cho ngôn ngữ cụ thể
  */
 function getAudioUrlForLanguage(poi: POI, language: Language): string | undefined {
-  const audioKey = `audio_url_${language}` as keyof POI;
+  const audioKey = getLocalizedFieldName('audio_url', language) as keyof POI;
   const audioUrl = poi[audioKey] as string | undefined;
 
   // Fallback to English if not available
-  if (!audioUrl && language !== 'en') {
-    return poi.audio_url_en;
+  if (!audioUrl && language !== FALLBACK_LANGUAGE) {
+    const fallbackKey = getLocalizedFieldName('audio_url', FALLBACK_LANGUAGE) as keyof POI;
+    return poi[fallbackKey] as string | undefined;
   }
 
   return audioUrl;
@@ -88,10 +90,9 @@ function getAudioUrlForLanguage(poi: POI, language: Language): string | undefine
  * Lấy tất cả audio URLs từ POI (tất cả ngôn ngữ)
  */
 function getAllAudioUrls(poi: POI): string[] {
-  const languages: Language[] = ['vi', 'en', 'ja', 'fr', 'ko', 'zh'];
   const urls: string[] = [];
 
-  for (const lang of languages) {
+  for (const lang of SUPPORTED_LANGUAGE_CODES) {
     const url = getAudioUrlForLanguage(poi, lang);
     if (url && !urls.includes(url)) {
       urls.push(url);

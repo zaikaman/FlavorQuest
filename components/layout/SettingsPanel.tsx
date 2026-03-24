@@ -48,18 +48,9 @@ type DeviceCopyKey =
   | 'deviceProfileMotionStandard'
   | 'deviceProfileBatteryHint';
 
-const LANGUAGE_FLAGS: Record<Language, string> = {
-  vi: '🇻🇳',
-  en: '🇬🇧',
-  ja: '🇯🇵',
-  fr: '🇫🇷',
-  ko: '🇰🇷',
-  zh: '🇨🇳',
-};
-
 const PERFORMANCE_OPTIONS: DevicePerformancePreference[] = ['system', 'light', 'balanced', 'full'];
 
-const DEVICE_PROFILE_COPY: Record<Language, Record<DeviceCopyKey, string>> = {
+const DEVICE_PROFILE_COPY: Partial<Record<Language, Record<DeviceCopyKey, string>>> = {
   vi: {
     tourExperience: 'Trải nghiệm tour',
     deviceProfileTitle: 'Hồ sơ thiết bị',
@@ -230,7 +221,7 @@ export function SettingsPanel({ isOpen, onClose, onSettingsChange }: SettingsPan
   const [settings, setSettings] = useState<UserSettings>(DEFAULT_USER_SETTINGS);
   const [isLoading, setIsLoading] = useState(true);
   const [isSigningOut, setIsSigningOut] = useState(false);
-  const deviceCopy = DEVICE_PROFILE_COPY[language];
+  const deviceCopy = DEVICE_PROFILE_COPY[language] ?? DEVICE_PROFILE_COPY.en!;
 
   const effectivePerformance = useMemo(
     () => resolveDevicePerformance(settings, deviceAssessment),
@@ -383,19 +374,30 @@ export function SettingsPanel({ isOpen, onClose, onSettingsChange }: SettingsPan
             <>
               <section className="mb-6">
                 <h3 className="mb-3 text-lg font-bold text-white">{t('settings.language')}</h3>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid max-h-[20rem] grid-cols-1 gap-2 overflow-y-auto pr-1 sm:grid-cols-2">
                   {availableLanguages.map((lang) => (
                     <button
                       key={lang.code}
                       onClick={() => handleLanguageChange(lang.code)}
-                      className={`flex items-center justify-center gap-2 rounded-xl border p-3 transition-all ${
+                      className={`rounded-2xl border p-3 text-left transition-all ${
                         language === lang.code
-                          ? 'border-primary bg-primary text-white'
+                          ? 'border-primary bg-primary/18 text-white shadow-[0_12px_30px_rgba(242,108,13,0.18)]'
                           : 'border-white/10 bg-white/5 text-white hover:bg-white/10'
                       }`}
                     >
-                      <span className="text-lg">{LANGUAGE_FLAGS[lang.code]}</span>
-                      <span className="text-sm font-medium">{lang.code.toUpperCase()}</span>
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="text-sm font-semibold leading-5">{lang.nativeName}</p>
+                          <p className="mt-1 text-xs text-white/65">{lang.name}</p>
+                        </div>
+                        <span
+                          className={`rounded-full px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] ${
+                            language === lang.code ? 'bg-white/18 text-white' : 'bg-white/8 text-white/55'
+                          }`}
+                        >
+                          {lang.shortLabel}
+                        </span>
+                      </div>
                     </button>
                   ))}
                 </div>

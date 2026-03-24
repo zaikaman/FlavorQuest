@@ -13,6 +13,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { LANGUAGE_CONFIG_MAP } from '@/lib/constants';
 import { AUDIO_LOAD_TIMEOUT_MS } from '@/lib/constants';
 import type { POI, Language } from '@/lib/types/index';
 import { getLocalizedPOI } from '@/lib/utils/localization';
@@ -154,16 +155,7 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
   }, []);
 
   const getLangCode = useCallback((lang?: Language): string => {
-    const langMap: Record<Language, string> = {
-      vi: 'vi-VN',
-      en: 'en-US',
-      ja: 'ja-JP',
-      fr: 'fr-FR',
-      ko: 'ko-KR',
-      zh: 'zh-CN',
-    };
-
-    return langMap[lang || 'vi'] || 'vi-VN';
+    return LANGUAGE_CONFIG_MAP[lang || 'vi']?.ttsLang || 'vi-VN';
   }, []);
 
   const playWithTTS = useCallback((item: AudioQueueItem) => {

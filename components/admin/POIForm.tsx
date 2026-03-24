@@ -6,8 +6,9 @@ import { ImageUploader } from './ImageUploader';
 import { POILocationPicker } from './POILocationPicker';
 import { TTSGenerator } from './TTSGenerator';
 import { useToast } from '@/components/ui/ToastProvider';
+import { SUPPORTED_LANGUAGES } from '@/lib/constants';
 import { POI_CATEGORY_OPTIONS, type POICategoryTag } from '@/lib/constants/poiCategories';
-import type { Coordinates, POI } from '@/lib/types/index';
+import type { Coordinates, Language, POI } from '@/lib/types/index';
 
 interface POIFormProps {
   initialData?: Partial<POI>;
@@ -22,32 +23,14 @@ interface OwnerOption {
 }
 
 type FormValue = string | number | null | undefined;
-type LocalizedNameField = 'name_en' | 'name_ja' | 'name_fr' | 'name_ko' | 'name_zh';
-type LocalizedDescriptionField =
-  | 'description_en'
-  | 'description_ja'
-  | 'description_fr'
-  | 'description_ko'
-  | 'description_zh';
-type LocalizedAudioField =
-  | 'audio_url_vi'
-  | 'audio_url_en'
-  | 'audio_url_ja'
-  | 'audio_url_fr'
-  | 'audio_url_ko'
-  | 'audio_url_zh';
+type LocalizedNameField = `name_${Exclude<Language, 'vi'>}`;
+type LocalizedDescriptionField = `description_${Exclude<Language, 'vi'>}`;
+type LocalizedAudioField = `audio_url_${Language}`;
 type TranslationUpdates = Partial<
   Record<LocalizedNameField | LocalizedDescriptionField | LocalizedAudioField, string>
 >;
 
-const LANGUAGES = [
-  { code: 'vi', label: 'Tiếng Việt' },
-  { code: 'en', label: 'Tiếng Anh (English)' },
-  { code: 'ja', label: 'Tiếng Nhật (日本語)' },
-  { code: 'fr', label: 'Tiếng Pháp (Français)' },
-  { code: 'ko', label: 'Tiếng Hàn (한국어)' },
-  { code: 'zh', label: 'Tiếng Trung (中文)' },
-];
+const LANGUAGES = SUPPORTED_LANGUAGES;
 
 export function POIForm({
   initialData,
@@ -67,7 +50,7 @@ export function POIForm({
     description_vi: '',
     ...initialData,
   });
-  const [activeTab, setActiveTab] = useState('vi');
+  const [activeTab, setActiveTab] = useState<Language>('vi');
   const [translating, setTranslating] = useState(false);
   const [genAllLoading, setGenAllLoading] = useState(false);
 
@@ -278,7 +261,7 @@ export function POIForm({
       typeof formData.description_vi === 'string' ? formData.description_vi.trim() : '';
 
     if (!vietnameseName && !vietnameseDescription) {
-      toast.warning('Please enter a Vietnamese name or description before translating.');
+      toast.warning('Vui lòng nhập tên hoặc mô tả tiếng Việt trước khi dịch.');
       return;
     }
 
@@ -297,7 +280,7 @@ export function POIForm({
 
       if (!res.ok) {
         const payload = (await res.json().catch(() => null)) as { error?: string } | null;
-        throw new Error(payload?.error || 'Auto-translate failed');
+        throw new Error(payload?.error || 'Dịch tự động thất bại');
       }
 
       const payload = (await res.json()) as {
@@ -322,10 +305,10 @@ export function POIForm({
       });
 
       setFormData((prev) => ({ ...prev, ...updates }));
-      toast.success('Translations updated. Please review the content before saving.');
+      toast.success('Đã cập nhật bản dịch. Vui lòng kiểm tra lại trước khi lưu.');
     } catch (error) {
       console.error('Translate error:', error);
-      toast.error('Auto-translate failed');
+      toast.error('Dịch tự động thất bại');
     } finally {
       setTranslating(false);
     }
@@ -334,7 +317,7 @@ export function POIForm({
   const handleGenerateAllAudioFast = async () => {
     if (
       !confirm(
-        'Generate audio for every language now? Longer descriptions can still take a few minutes.'
+        'Tạo âm thanh cho toàn bộ ngôn ngữ ngay bây giờ? Với mô tả dài, quá trình này có thể mất vài phút.'
       )
     )
       return;
@@ -356,7 +339,7 @@ export function POIForm({
       }).filter((item): item is NonNullable<typeof item> => item !== null);
 
       if (items.length === 0) {
-        toast.warning('There is no description content to turn into audio yet.');
+        toast.warning('Chưa có mô tả nào để tạo âm thanh.');
         return;
       }
 
@@ -368,7 +351,7 @@ export function POIForm({
 
       if (!res.ok) {
         const payload = (await res.json().catch(() => null)) as { error?: string } | null;
-        throw new Error(payload?.error || 'Bulk audio generation failed');
+        throw new Error(payload?.error || 'Tạo âm thanh hàng loạt thất bại');
       }
 
       const payload = (await res.json()) as {
@@ -388,14 +371,14 @@ export function POIForm({
       if (payload.errors && payload.errors.length > 0) {
         console.error('Generate all audio partial errors:', payload.errors);
         toast.warning(
-          `Generated ${payload.items?.length ?? 0} audio files, with ${payload.errors.length} languages still needing retry.`
+          `Đã tạo ${payload.items?.length ?? 0} tệp âm thanh, còn ${payload.errors.length} ngôn ngữ cần thử lại.`
         );
       } else {
-        toast.success('Finished generating audio for all available languages.');
+        toast.success('Đã tạo xong âm thanh cho các ngôn ngữ hiện có.');
       }
     } catch (error) {
       console.error('Generate all audio error:', error);
-      toast.error('Bulk audio generation failed');
+      toast.error('Tạo âm thanh hàng loạt thất bại');
     } finally {
       setGenAllLoading(false);
     }
@@ -585,19 +568,27 @@ export function POIForm({
           </div>
 
           {/* Tab ngôn ngữ */}
-          <div className="flex flex-wrap gap-2 border-b border-white/10 pb-2">
+          <div className="grid max-h-64 grid-cols-1 gap-2 overflow-y-auto border-b border-white/10 pb-2 pr-1 sm:grid-cols-2">
             {LANGUAGES.map((lang) => (
               <button
                 key={lang.code}
                 type="button"
                 onClick={() => setActiveTab(lang.code)}
-                className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
+                className={`rounded-xl border px-3 py-3 text-left transition-colors ${
                   activeTab === lang.code
-                    ? 'bg-primary text-white'
-                    : 'bg-white/5 text-gray-400 hover:bg-white/10'
+                    ? 'border-primary bg-primary/15 text-white'
+                    : 'border-white/10 bg-white/5 text-gray-300 hover:bg-white/10'
                 }`}
               >
-                {lang.label}
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-semibold">{lang.nativeName}</p>
+                    <p className="mt-1 text-xs text-white/55">{lang.name}</p>
+                  </div>
+                  <span className="rounded-full bg-white/8 px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.18em]">
+                    {lang.shortLabel}
+                  </span>
+                </div>
               </button>
             ))}
           </div>
@@ -614,7 +605,7 @@ export function POIForm({
                   value={(formData[`name_${lang.code}` as keyof POI] as string) || ''}
                   onChange={(e) => handleChange(`name_${lang.code}` as keyof POI, e.target.value)}
                   className="focus:border-primary focus:ring-primary w-full rounded-lg border border-white/10 bg-black/20 p-2.5 text-white focus:ring-1"
-                  placeholder={`Tên địa điểm (${lang.label})`}
+                  placeholder={`Tên địa điểm (${lang.nativeName})`}
                 />
               </div>
 

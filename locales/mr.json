@@ -1,0 +1,517 @@
+{
+  "app": {
+    "name": "FlavorQuest",
+    "tagline": "ऑडिओद्वारे व्हिन्ह खान्हची पाककला शोधा"
+  },
+  "metadata": {
+    "title": "FlavorQuest - व्हिन्ह खान्ह पाककला शोधा",
+    "description": "स्थानआधारित स्वयंचलित ऑडिओ टूर, व्हिन्ह खान्ह रस्ता, क़न थो. बहुभाषा समर्थन असलेले ऑफलाइन-प्रथम PWA.",
+    "keywords": [
+      "अन्न टूर",
+      "ऑडिओ गाईड",
+      "व्हिन्ह खान्ह",
+      "क़न थो",
+      "पाककला",
+      "PWA"
+    ]
+  },
+  "manifest": {
+    "name": "FlavorQuest - स्वयंचलित ऑडिओ टूर अनुभव",
+    "shortName": "FlavorQuest",
+    "description": "व्हिन्ह खान्ह पाककला रस्ता स्वयंचलित ऑडिओ वर्णनासह शोधा. १८ भाषा समर्थित आणि ऑफलाइन.",
+    "shortcuts": {
+      "startTour": {
+        "name": "टूर सुरू करा",
+        "description": "स्वयंचलित टूर सुरू करा"
+      },
+      "viewMap": {
+        "name": "नकाशा पाहा",
+        "description": "टूर नकाशा पाहा"
+      }
+    }
+  },
+  "common": {
+    "loading": "लोड होत आहे...",
+    "error": "त्रुटी",
+    "retry": "पुन्हा प्रयत्न करा",
+    "cancel": "रद्द करा",
+    "confirm": "पुष्टी करा",
+    "save": "जतन करा",
+    "close": "बंद करा",
+    "back": "मागे",
+    "next": "पुढे",
+    "done": "पूर्ण",
+    "yes": "होय",
+    "no": "नाही",
+    "allow": "परवानगी द्या",
+    "deny": "नकार द्या",
+    "browse": "ब्राउझ करा",
+    "privacyPolicy": "गोपनीयता धोरण"
+  },
+  "list": {
+    "searchPlaceholder": "शिंपले, समुद्री खाद्य, bánh mì शोधा...",
+    "notFoundTitle": "सापडले नाही",
+    "notFoundDesc": "वेगळ्या कीवर्डसह शोधून पहा",
+    "offlineBadge": "ऑफलाइन"
+  },
+  "categories": {
+    "all": "सर्व",
+    "snails": "शिंपले",
+    "seafood": "समुद्री खाद्य",
+    "grill": "ग्रिल",
+    "nearMe": "जवळचे"
+  },
+  "tour": {
+    "startTour": "टूर सुरू करा",
+    "pauseTour": "थांबा",
+    "resumeTour": "पुन्हा सुरू करा",
+    "stopTour": "टूर थांबवा",
+    "autoMode": "स्वयंचलित मोड",
+    "manualMode": "मॅन्युअल मोड",
+    "auto": "ऑटो",
+    "manual": "मॅन्युअल",
+    "loadingPOIs": "ठिकाणे लोड होत आहेत...",
+    "searchingPOIs": "जवळची ठिकाणे शोधत आहे...",
+    "nearbyPOIs": "जवळची ठिकाणे",
+    "currentLocation": "सध्याचे स्थान",
+    "distance": "अंतर",
+    "nowPlaying": "आता प्ले होत आहे: {name}",
+    "syncedEvents": "समक्रमित {count} कार्यक्रम",
+    "dataSaved": "डेटा जतन केला, ऑफलाइन तयार",
+    "usingTTS": "टेक्स्ट-टू-स्पीच वापरत आहे (ऑफलाइन)",
+    "tooFast": "तुम्ही खूप वेगाने चालत आहात. कृपया चालत रहा.",
+    "locationDenied": "स्थान परवानगी नाकारली. मॅन्युअल मोडला स्विच करत आहे.",
+    "httpsRequired": "त्रुटी: GPSसाठी HTTPS आवश्यक आहे. कृपया localhost वापरा किंवा SSL स्थापित करा.",
+    "gpsError": "GPS त्रुटी: {message}",
+    "noAudioForPOI": "या ठिकाणासाठी ऑडिओ उपलब्ध नाही",
+    "tapToResumeAudio": "ऑडिओ चालू ठेवण्यासाठी स्क्रीनवर टॅप करा",
+    "invalidSelectedTour": "निवडलेल्या टूर उपलब्ध नाही",
+    "stoppedOutsideSelectedTour": "निवडलेल्या टूर बाहेरील POI असल्यामुळे ऑडिओ थांबले"
+  },
+  "tourSelector": {
+    "title": "टूरनुसार ऐका",
+    "subtitle": "त्या मार्गातील POI दाखवण्यासाठी टूर निवडा",
+    "show": "दर्शवा",
+    "hide": "लपवा",
+    "collapsedHint": "टूर निवडण्यासाठी विस्तृत करा",
+    "allOption": "सर्व ठिकाणे",
+    "allDescription": "सर्व सक्रिय POI दाखवा",
+    "clear": "स्पष्ट करा",
+    "loading": "टूर लोड होत आहेत...",
+    "empty": "आत्ता टूर नाही.",
+    "poiCount": "{count} POIs",
+    "duration": "{count} मिनिटे",
+    "selectedSummary": "निवडलेल्या टूरमधील {count} POIs दाखवित आहे",
+    "allSummary": "सक्रिय POIs {count} दाखवित आहे"
+  },
+  "audio": {
+    "play": "प्ले",
+    "pause": "थांबा",
+    "stop": "थांबवा",
+    "replay": "पुन्हा प्ले करा",
+    "volume": "आवाज",
+    "speed": "प्लेबॅक वेग",
+    "loading": "ऑडिओ लोड होत आहे...",
+    "error": "ऑडिओ प्ले करता येत नाही",
+    "noAudio": "ऑडिओ उपलब्ध नाही",
+    "useTTS": "टेक्स्ट-टू-स्पीच वापरा"
+  },
+  "location": {
+    "requesting": "स्थान मागत आहे...",
+    "denied": "स्थान प्रवेश नाकारला",
+    "unavailable": "स्थान उपलब्ध नाही",
+    "timeout": "विनंती वेळ संपली",
+    "enableLocation": "स्थान सक्षम करा",
+    "accuracy": "अचूकता",
+    "lastUpdate": "शेवटचे अपडेट"
+  },
+  "settings": {
+    "title": "सेटिंग्ज",
+    "language": "भाषा",
+    "volume": "आवाज",
+    "autoMode": "स्वयंचलित प्ले",
+    "geofenceRadius": "ट्रिगर त्रिज्या",
+    "ttsEnabled": "टेक्स्ट-टू-स्पीच",
+    "ttsRate": "वाचन वेग",
+    "ttsPitch": "उच्चार",
+    "mapType": "नकाशा प्रकार",
+    "showVisitedPOIs": "भेट दिलेले POIs दाखवा",
+    "batteryOptimization": "बॅटरी ऑप्टिमायझेशन",
+    "geofenceClose": "जवळ (अचूक)",
+    "geofenceFar": "दूर (रुंद)",
+    "tourExperience": "टूर अनुभव",
+    "account": "खाते",
+    "signOut": "साइनआऊट",
+    "signingOut": "साइनआऊट होत आहे...",
+    "signOutConfirm": "तुम्हाला नक्की साइनआऊट करायचे आहे का?",
+    "signOutFailed": "साइनआऊट अयशस्वी. कृपया पुन्हा प्रयत्न करा.",
+    "deviceProfileTitle": "डिव्हाइस प्रोफाइल",
+    "deviceProfileDescription": "FlavorQuest आपल्याच्या डिव्हाइससाठी हालचाल, नकाशा आणि पार्श्वभूमी लोडिंग समायोजित करते.",
+    "deviceProfileDetectedLabel": "ओळखलेले",
+    "deviceProfileAppliedLabel": "लागू आहे",
+    "deviceProfileSystem": "स्वयंचलित",
+    "deviceProfileLight": "हलके",
+    "deviceProfileBalanced": "समतोल",
+    "deviceProfileFull": "पूर्ण",
+    "deviceProfileAutoDescription": "अॅप डिव्हाइसप्रमाणे हालचाल, नकाशा तपशील व लोडिंग समतोल करेल.",
+    "deviceProfileLightDescription": "दृश्य प्रभाव कमी करा व पार्श्वभूमी लोडिंग मर्यादित करा जेणेकरून बॅटरी आयुष्य वाढेल.",
+    "deviceProfileBalancedDescription": "बहुतेक डिव्हाइससाठी अनुभव सुरळीत ठेवा.",
+    "deviceProfileFullDescription": "डिव्हाइस सक्षम असताना अधिक समृद्ध हालचाल व प्रीलोडिंगला प्राधान्य द्या.",
+    "deviceProfileUnknown": "अज्ञात",
+    "deviceProfileMotionReduced": "हालचाल कमी",
+    "deviceProfileMotionStandard": "मानक हालचाल",
+    "deviceProfileBatteryHint": "बॅटरी सेव्हरमुळे प्रोफाइल अधिक संयमित आहे."
+  },
+  "history": {
+    "title": "इतिहास",
+    "visited": "भेट दिले",
+    "notVisited": "भेट दिले नाही",
+    "visitedAt": "भेट वेळ",
+    "clear": "इतिहास साफ करा",
+    "empty": "इतिहास नाही",
+    "justNow": "आत्ता",
+    "minsAgo": "{mins} मिनिटांपूर्वी",
+    "hoursAgo": "{hours} तासांपूर्वी",
+    "today": "आज, {time}",
+    "yesterday": "काल, {time}",
+    "listened": "ऐकले"
+  },
+  "map": {
+    "title": "नकाशा",
+    "zoomIn": "झूम इन",
+    "zoomOut": "झूम आउट",
+    "centerMap": "स्थानावर केंद्रित करा",
+    "fullscreen": "पूर्ण स्क्रीन",
+    "layers": "नकाशा स्तर",
+    "loadingMap": "नकाशा लोड होत आहे..."
+  },
+  "poi": {
+    "details": "तपशील",
+    "signatureDish": "विशेष डिश",
+    "funFact": "रोचक तथ्य",
+    "estimatedHours": "उघडण्याचे तास",
+    "directions": "दिशा",
+    "playAudio": "ऑडिओ प्ले",
+    "viewOnMap": "नकाशावर पहा",
+    "cuisine": "पाककला",
+    "upNext": "पुढे",
+    "district4": "जिल्हा ४, HCMC",
+    "transcript": "ट्रान्सक्रिप्ट",
+    "estimatedWalk": "३ मिनिट चाल"
+  },
+  "offline": {
+    "status": "ऑफलाइन",
+    "ready": "ऑफलाइन तयार",
+    "syncing": "समक्रमण करत आहे...",
+    "syncComplete": "समक्रमित",
+    "cacheSize": "कॅश आकार",
+    "clearCache": "कॅश साफ करा",
+    "usingCachedData": "कॅश डेटा वापरला जात आहे",
+    "limitedFeatures": "काही वैशिष्ट्ये उपलब्ध नाहीत",
+    "uploading": "सर्व्हरवर डेटा अपलोड करत आहे",
+    "syncError": "समक्रमण त्रुटी",
+    "retrySync": "पुन्हा प्रयत्न करा",
+    "pendingSync": "समक्रमण प्रतीक्षा",
+    "pendingItems": "{count} आयटम प्रतीक्षा",
+    "online": "ऑनलाइन",
+    "synced": "समक्रमित",
+    "offlineMode": "ऑफलाइन मोड",
+    "noConnection": "कनेक्शन नाही",
+    "statusLabel": "स्थिती",
+    "lastSync": "शेवटचे समक्रमण",
+    "notSyncedYet": "अजून समक्रमित झाले नाही",
+    "syncNow": "आता समक्रमित करा",
+    "tapToSync": "समक्रमित करण्यासाठी टॅप करा",
+    "downloadingAudio": "ऑफलाइनसाठी ऑडिओ डाऊनलोड करत आहे",
+    "downloadingContent": "ऑफलाइन सामग्री डाऊनलोड करत आहे",
+    "audioReady": "ऑडिओ ऑफलाइन तयार",
+    "audioDownloaded": "ऑडिओ ऑफलाइनसाठी डाऊनलोड झाले",
+    "downloadError": "डाउनलोड त्रुटी",
+    "retry": "पुन्हा प्रयत्न करा",
+    "noAudioCache": "ऑडिओ कॅश नाही. कनेक्शन करा.",
+    "updateCache": "कॅश अपडेट करा",
+    "downloadPromptTitle": "ऑफलाइन सामग्री डाऊनलोड करायची?",
+    "downloadPromptDesc": "ऑफलाइन वापरासाठी सर्व ऑडिओ आणि इमेजेस डाऊनलोड करायच्या?",
+    "downloadPromptNote": "सेटिंगमध्ये बदलू शकता.",
+    "downloadNow": "आता डाऊनलोड करा",
+    "downloadLater": "नंतर",
+    "downloadStarted": "ऑफलाइन सामग्री डाऊनलोड सुरू...",
+    "poisLabel": "रुचि ठिकाणे",
+    "audioLabel": "ऑडिओ वर्णन",
+    "imageLabel": "ठिकाण प्रतिमा",
+    "successTitle": "ऑफलाइन तयार",
+    "successMessage": "सामग्री यशस्वीपणे डाऊनलोड झाली"
+  },
+  "battery": {
+    "level": "बॅटरी स्तर",
+    "charging": "चार्ज होत आहे",
+    "notCharging": "चार्ज होत नाही",
+    "lowPowerMode": "लो पॉवर मोड",
+    "recommendation": "शिफारस",
+    "warning": "कमी बॅटरी! काही वैशिष्ट्ये मर्यादित"
+  },
+  "speed": {
+    "stationary": "स्थिर",
+    "walking": "चालणे",
+    "jogging": "जॉगिंग",
+    "running": "धावणे",
+    "vehicle": "वाहनात",
+    "tooFast": "तुम्ही खूप वेगाने हलत आहात! कृपया चालत रहा"
+  },
+  "errors": {
+    "generic": "त्रुटी",
+    "network": "नेटवर्क त्रुटी",
+    "locationDenied": "स्थान आवश्यक आहे",
+    "audioPlayback": "ऑडिओ प्ले होत नाही",
+    "storageQuota": "संग्रह भरला",
+    "unsupported": "ब्राउझर सपोर्ट नाही"
+  },
+  "welcome": {
+    "title": "FlavorQuest मध्ये स्वागत आहे!",
+    "description": "स्वयंचलित ऑडिओ वर्णनासह व्हिन्ह खान्ह पाककला रस्ता शोधा",
+    "step1": "GPS सक्षम करा",
+    "step2": "व्हिन्ह खान्ह रस्त्यावर चालत जा",
+    "step3": "खाद्य स्टॉलच्या जवळ येताच ऑडिओ आपोआप चालेल",
+    "getStarted": "सुरू करा"
+  },
+  "splash": {
+    "subtitle": "व्हिन्ह खान्ह पाककला प्रवास",
+    "startTour": "टूर सुरू करा",
+    "browse": "हाताने ब्राउझ करा",
+    "settings": "सेटिंग्ज"
+  },
+  "login": {
+    "title": "FlavorQuest लॉगिन",
+    "subtitle": "प्रगती जतन करा व अनुभव समक्रमित करा",
+    "prompt": "लॉगिनसाठी OTP मिळवण्यासाठी ईमेल प्रविष्ट करा",
+    "signInWithGoogle": "Google सह साइनइन",
+    "customer": "ग्राहक",
+    "owner": "मालक",
+    "selectedType": "निवडलेला खाते प्रकार: {type}",
+    "ownerApprovalNote": "मालक साइनइनला admin मंजुरी हवी",
+    "emailLabel": "लॉगिन ईमेल",
+    "emailPlaceholder": "you@example.com",
+    "otpLabel": "OTP कोड",
+    "otpPlaceholder": "123456",
+    "sendOtp": "OTP पाठवा",
+    "sendingOtp": "कोड पाठवत आहे...",
+    "resendOtp": "पुन्हा कोड पाठवा",
+    "resendIn": "पुन्हा {seconds}s",
+    "verifyOtp": "पडताळून साइनइन करा",
+    "verifyingOtp": "पडताळत आहे...",
+    "codeSent": "OTP ईमेलवर पाठवला",
+    "codeSentTo": "OTP {email} वर पाठवला",
+    "invalidEmail": "वैध ईमेल प्रविष्ट करा",
+    "invalidOtp": "६ अंकी OTP प्रविष्ट करा",
+    "sendOtpError": "OTP पाठवू शकलो नाही",
+    "verifyOtpError": "OTP पडताळणी अयशस्वी",
+    "adminPortalRequired": "Admin खाते portal द्वारे साइनइन",
+    "changeEmailHint": "ईमेल संपादित करून पुन्हा OTP पाठवू शकता",
+    "or": "किंवा",
+    "backToHome": "होमला परत",
+    "error": "साइनइन अयशस्वी"
+  },
+  "pendingOwner": {
+    "eyebrow": "मालक मंजुरी डेस्क",
+    "titlePending": "खाते admin पडताळणी प्रतीक्षा",
+    "titleRejected": "मालक विनंतीला अधिक चर्चा",
+    "subtitlePending": "हे खाते मालक-रीव्ह्यू स्थितीत आहे, अजून ग्राहक वा मालक क्षेत्र वापरू शकत नाही",
+    "subtitleRejected": "Adminने विद्यमान विनंती नाकारली",
+    "statusLabel": "स्थिती",
+    "statusPending": "मंजुरी प्रतीक्षा",
+    "statusRejected": "नाकारले",
+    "customerAreaLabel": "नेव्हिगेशन",
+    "customerCta": "स्वागत स्क्रीनला परत",
+    "customerHint": "मंजुरी येईपर्यंत येथे स्थिती ट्रॅक करता येईल व adminशी बोलता येईल",
+    "steps": {
+      "request": {
+        "title": "तुमची विनंती नोंदली",
+        "body": "सिस्टमने adminशी चॅट उघडले"
+      },
+      "review": {
+        "title": "Admin चॅटद्वारे पडताळणी",
+        "body": "संदेशांवर लक्ष ठेवा"
+      },
+      "reviewRejected": {
+        "body": "मागील विनंती नाकारली"
+      },
+      "workspace": {
+        "title": "मालक वर्कस्पेस मंजुरीनंतर उघडेल",
+        "body": "जर दुकान नियुक्त नसल्यास ते रिकामे राहील"
+      }
+    }
+  },
+  "menu": {
+    "title": "खाण्याचे मेन्यू",
+    "empty": "रेस्टॉरंटने अद्याप मेनू अद्ययावत केला नाही.",
+    "addToCart": "खाणे जोडा",
+    "quantity": "प्रमाण",
+    "cart": "ऑर्डरची माहिती",
+    "placeOrder": "ऑर्डर पाठवा",
+    "placePickupOrder": "रेस्टॉरंटमध्ये घेण्यासाठी ऑर्डर द्या",
+    "placeDeliveryOrder": "घरपोच वितरणासाठी ऑर्डर द्या",
+    "pickup": "रेस्टॉरंटमध्ये घेणे",
+    "pickupDescription": "ग्राहक रेस्टॉरंटमध्ये पदार्थ घेते आणि घेताना पैसे भरणे.",
+    "delivery": "घरपोच वितरण",
+    "deliveryDescription": "रेस्टॉरंट आपला दिलेला पत्तााकडे अन्न स्वतः पोहोचवते आणि घेताना पैसे भरा.",
+    "subtotal": "तात्पुरते एकूण: {amount}đ",
+    "pickupTime": "खाणे घेण्याची वेळ",
+    "pickupTimeFuture": "कृपया भविष्यातील घेण्याची वेळ निवडा",
+    "deliveryTimeFuture": "कृपया भविष्यातील वितरणाची वेळ निवडा",
+    "customerName": "प्राप्तकर्त्याचे नाव",
+    "customerPhone": "फोन नंबर",
+    "deliveryAddress": "वितरणाचा पत्ता",
+    "deliveryContactRequired": "कृपया वितरणाचे नाव, फोन नंबर आणि पत्ता प्रविष्ट करा",
+    "note": "टीप",
+    "success": "ऑर्डर यशस्वीरित्या झाले",
+    "pickupSuccess": "रेस्टॉरंटमध्ये घेण्यासाठी ऑर्डर यशस्वी",
+    "deliverySuccess": "घरपोच ऑर्डर यशस्वी"
+  },
+  "chatbot": {
+    "badge": "बुद्धिमान सहाय्यक",
+    "title": "FlavorQuest सहाय्यक",
+    "subtitle": "खाण्याचे सुचवणे, थांबण्याची ठिकाणं आणि प्रवासासाठी त्वरित उत्तरं.",
+    "welcome": "मी कोणते पदार्थ चाखायचे ते सुचवू शकतो, कोणत्या ठिकाणी प्रथम थांबावे आणि FlavorQuest मध्ये सामान्य प्रश्नांची उत्तरं देऊ.",
+    "inputPlaceholder": "कोणते पदार्थ चाखायचे, कोणत्या ठिकाणी पहिले भेट देण्याची, किंवा अॅप कसा वापरायचा...",
+    "open": "सहाय्यक उघडा",
+    "close": "सहाय्यक बंद करा",
+    "openPage": "सहाय्यक पृष्ठ उघडा",
+    "nav": "सहाय्यक",
+    "pageTitle": "यात्रा सहाय्यक",
+    "pageSubtitle": "खाणे, योग्य टूर आणि FlavorQuest कसा वापरायचा ह्यावर एक खास जागा, जी नकाशा किंवा POI सूची अडथळा न करता.",
+    "backToTour": "टूरवर परत जा",
+    "pageInfoTitle": "येथे तुम्ही काय विचारू शकता?",
+    "pageInfoBody": "सहाय्यक FlavorQuest मध्ये विद्यमान डेटावर आधारित पदार्थांचे/गंतव्ये/योग्य मार्ग सुचवेल आणि आपला अन्वेषण करत असताना सामान्य विचारांचे उत्तर देईल.",
+    "thinking": "विचार करत आहे...",
+    "error": "सहाय्यक कनेक्ट होऊ शकले नाही. कृपया नंतर पुन्हा प्रयत्न करा.",
+    "footer": "FlavorQuest मधील विद्यमान डेटावर आधारित सूचना.",
+    "newChat": "नवीन चॅट",
+    "historyEmpty": "तुमच्याकडे कोणताही चॅट नाही.",
+    "loadingHistory": "चॅट इतिहास लोड केला जात आहे...",
+    "suggestions": {
+      "food": "आज मला कोणते पदार्थ प्रथम चाखायचे?",
+      "route": "जर आपण पहिल्यांदाच जात आहात तर कोणत्या टूरपासून सुरुवात करावी किंवा कोणते ठिकाण आधी भेट द्यावे?",
+      "faq": "या अॅपचा ऑफलाइन वापर होतो का आणि पूर्व ऑर्डर देता येते काय?"
+    }
+  },
+  "support": {
+    "nav": "संदेश पाठवा",
+    "openPage": "संदेश पृष्ठ उघडा",
+    "customer": {
+      "eyebrow": "समर्थन चॅट",
+      "title": "क्वॅन किंवा adminना संदेश पाठवा",
+      "subtitle": "तुम्ही प्रत्येक दुकानासाठी खास संदेश पाठवू शकता, किंवा अकाउंट आणि अनुभवाबद्दल सहाय्यासाठी admin शी संपर्क करा.",
+      "emptyTitle": "फक्त कोणतेही संदेश नाही.",
+      "emptyBody": "एखाद्या दुकानाचा चयन करा किंवा admin सोबत चॅट उघडा सुरुवात करण्यासाठी."
+    },
+    "owner": {
+      "eyebrow": "इनबॉक्स",
+      "title": "ग्राहक आणि दुकान मालक कडून संदेश",
+      "subtitle": "ग्राहकांशी संवाद ट्रॅक करा आणि admin सोबत काम करण्यासाठी एक खास चॅनेल ठेवा.",
+      "emptyTitle": "इनबॉक्स रिक्त आहे.",
+      "emptyBody": "ग्राहक संदेश पाठवल्यास किंवा admin सोबत संवाद झाला तर हा संभाषण येथे दिसेल."
+    },
+    "admin": {
+      "eyebrow": "समर्थन संदेश",
+      "title": "ग्राहक आणि दुकान मालकांशी चर्चा",
+      "subtitle": "ग्राहक आणि दुकान मालकांकडून सर्व सहाय्य विनंती येथे केंद्रीत केल्या जातात जेणेकरून तुम्ही तातडीने प्रतिसाद देऊ शकता.",
+      "emptyTitle": "थांबण्याची रांग रिक्त आहे.",
+      "emptyBody": "ग्राहक किंवा दुकान मालकांकडून नवीन सहाय्य विनंती आल्यास संभाषण येथे दिसेल."
+    },
+    "stats": {
+      "activeThreads": "सक्रिय थ्रेड्स",
+      "activeThreadsBody": "प्रत्येक संभाषणासाठी एक स्वतंत्र पान असते, अधिक सहजपणे ट्रॅक करण्यासाठी.",
+      "unreadThreads": "उत्तर आवश्यक",
+      "unreadThreadsBody": "नवीन संदेश आल्यास प्राप्तकर्ता ईमेलद्वारे सूचित केला जाईल."
+    },
+    "launchpad": {
+      "title": "नवीन थ्रेड उघडा",
+      "body": "योग्य व्यक्तीची निवड करा ज्याला संदेश पाठवायचा आहे. आधीचे संभाषण असल्यास, सिस्टम तेच संभाषण पुन्हा उघडेल."
+    },
+    "inbox": {
+      "title": "चॅटची यादी",
+      "body": "वाचन न झालेल्या संदेशांना आधी दाखवले जाते."
+    },
+    "threadTypes": {
+      "customerOwner": "ग्राहक / दुकान मालक",
+      "customerAdmin": "ग्राहक / Admin",
+      "ownerAdmin": "दुकान मालक / Admin"
+    },
+    "states": {
+      "creating": "वाढत आहे...",
+      "waitingFirstMessage": "या थ्रेडमध्ये अजून कोणतेही संदेश नाही.",
+      "noThreadSelected": "सुरुवात करण्यासाठी कोणती चॅट निवडा.",
+      "noThreadSelectedBody": "डाव्या बाजूस एका नवीन संभाषणासाठी आताच उघडा.",
+      "noMessages": "या थ्रेडमध्ये अजून संदेश नाहीत.",
+      "noMessagesBody": "पहिला संदेश पाठवा सुरुवात करण्यासाठी."
+    },
+    "actions": {
+      "openThread": "चॅट उघडा",
+      "startThread": "तुरत संदेश पाठवा",
+      "refresh": "रीफ्रेश",
+      "sending": "पाठवत आहेत...",
+      "send": "संदेश पाठवा"
+    },
+    "counterparts": {
+      "admin": "Admin",
+      "unknown": "प्राप्तकर्ता",
+      "adminShort": "Admin",
+      "ownerShort": "दुकान मालक",
+      "customerShort": "ग्राहक"
+    },
+    "thread": {
+      "title": "चॅट",
+      "poiContext": "चर्चा {name} या विक्रय स्थानाशी जोडलेली आहे.",
+      "emailHint": "नवीन संदेश अॅपमध्येही आणि ईमेलद्वारे सूचित केला जाईल.",
+      "emailBadge": "ईमेल सूचना आहे"
+    },
+    "composer": {
+      "placeholder": "संदेश लिहा...",
+      "hint": "नवीन संदेश येथे थेट दिसेल. प्राप्तकर्त्यास ईमेल देखील पाठवेल."
+    },
+    "errors": {
+      "loadThreads": "चॅटची यादी लोड करता येत नाही.",
+      "loadMessages": "चॅटच्या संदेश लोड करता येत नाहीत.",
+      "createThread": "नवीन चॅट तयार करता येत नाही.",
+      "sendMessage": "संदेश पाठवता येत नाही."
+    }
+  },
+  "notifications": {
+    "title": "सूचना",
+    "markAll": "सर्व वाचलेले चिन्हित करा",
+    "empty": "तुमच्याकडे कोणतीही नवीन सूचना नाही"
+  },
+  "owner": {
+    "title": "दुकान मालकाचे नियंत्रण पॅनेल",
+    "subtitle": "POI, मेन्यू आणि आरक्षणे व्यवस्थापित करा",
+    "myPois": "माझे POI",
+    "orders": "आरक्षणे",
+    "menu": "खाण्याचे मेन्यू",
+    "noPoi": "तुम्हाला POI देण्यात आलेले नाहीत. कृपया admin शी संपर्क करा."
+  },
+  "poiDetail": {
+    "notFound": "जगह सापडली नाही",
+    "notFoundMessage": "ही जागा काढून टाकली गेली असेल किंवा अस्तित्वात नाही.",
+    "playNarration": "वर्णन ऐका",
+    "introduction": "परिचय",
+    "noDescription": "या ठिकाणाचे वर्णन उपलब्ध नाही.",
+    "didYouKnow": "तूला माहिती आहे का?",
+    "nowPlaying": "आत्ता प्ले: {name}",
+    "errorPlaying": "ऑडिओ प्ले करताना त्रुटी, कृत्रिम आवाजाचा वापर केला जात आहे."
+  },
+  "permissions": {
+    "checking": "परवानग्या तपासत आहात...",
+    "locationTitle": "रेस्टॉरंट जवळील वर्णन ऑटोमॅटिकपणे चालवण्यासाठी स्थान परवानगी द्या",
+    "locationDesc": "Vĩnh Khánh मार्गावर आपले स्थान स्वयंचलितपणे ओळखले जाईल तेव्हा सर्वोत्तम अनुभव मिळेल.",
+    "denyPrompt": "परवानगी देणार नाही?",
+    "switchToManual": "हस्तचालित मोडवर स्विच करा"
+  },
+  "units": {
+    "meters": "m",
+    "kilometers": "km",
+    "number": "संख्या"
+  },
+  "sort": {
+    "az": "A ते Z"
+  }
+}

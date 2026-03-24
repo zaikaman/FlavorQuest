@@ -1,0 +1,517 @@
+{
+  "app": {
+    "name": "FlavorQuest",
+    "tagline": "Vĩnh Khánh mutfağını sesle keşfedin"
+  },
+  "metadata": {
+    "title": "FlavorQuest - Vĩnh Khánh Mutfağını Keşfedin",
+    "description": "Cần Thơ, Vĩnh Khánh yemek sokağının konum bazlı otomatik sesli turu. Çevrimdışı öncelikli PWA ve çok dilli destek.",
+    "keywords": [
+      "yemek turu",
+      "sesli rehber",
+      "Vĩnh Khánh",
+      "Cần Thơ",
+      "mutfak",
+      "PWA"
+    ]
+  },
+  "manifest": {
+    "name": "FlavorQuest - Otomatik Sesli Tur Deneyimi",
+    "shortName": "FlavorQuest",
+    "description": "Konuma dayalı otomatik sesli anlatımla Vĩnh Khánh yemek sokağını keşfedin. 18 dili destekler ve çevrimdışı çalışır.",
+    "shortcuts": {
+      "startTour": {
+        "name": "Turu Başlat",
+        "description": "Otomatik turu başlat"
+      },
+      "viewMap": {
+        "name": "Haritayı Gör",
+        "description": "Tur haritasını görüntüle"
+      }
+    }
+  },
+  "common": {
+    "loading": "Yükleniyor...",
+    "error": "Hata",
+    "retry": "Tekrar dene",
+    "cancel": "İptal",
+    "confirm": "Onayla",
+    "save": "Kaydet",
+    "close": "Kapat",
+    "back": "Geri",
+    "next": "İleri",
+    "done": "Tamam",
+    "yes": "Evet",
+    "no": "Hayır",
+    "allow": "İzin ver",
+    "deny": "Reddet",
+    "browse": "Keşfet",
+    "privacyPolicy": "Gizlilik Politikası"
+  },
+  "list": {
+    "searchPlaceholder": "Salyangoz, deniz ürünleri, bánh mì ara...",
+    "notFoundTitle": "Bulunamadı",
+    "notFoundDesc": "Başka anahtar kelimelerle dene",
+    "offlineBadge": "Çevrimdışı"
+  },
+  "categories": {
+    "all": "Tümü",
+    "snails": "Salyangoz",
+    "seafood": "Deniz ürünleri",
+    "grill": "Izgara",
+    "nearMe": "Yakınımda"
+  },
+  "tour": {
+    "startTour": "Turu Başlat",
+    "pauseTour": "Duraklat",
+    "resumeTour": "Devam",
+    "stopTour": "Turu Durdur",
+    "autoMode": "Otomatik Mod",
+    "manualMode": "Manuel Mod",
+    "auto": "Otomatik",
+    "manual": "Manuel",
+    "loadingPOIs": "Konumlar yükleniyor...",
+    "searchingPOIs": "Yakın yerler aranıyor...",
+    "nearbyPOIs": "Yakındaki Noktalar",
+    "currentLocation": "Mevcut Konum",
+    "distance": "Mesafe",
+    "nowPlaying": "Çalıyor: {name}",
+    "syncedEvents": "{count} etkinlik senkronize edildi",
+    "dataSaved": "Veri kaydedildi, çevrimdışı hazır",
+    "usingTTS": "Metinden konuşma kullanılıyor (çevrimdışı)",
+    "tooFast": "Çok hızlı gidiyorsunuz. Lütfen yürüyün.",
+    "locationDenied": "Konum reddedildi. Manuel moda geçiliyor.",
+    "httpsRequired": "Hata: GPS, HTTPS gerektirir. Lütfen localhost veya SSL kullanın.",
+    "gpsError": "GPS Hatası: {message}",
+    "noAudioForPOI": "Bu konum için ses yok",
+    "tapToResumeAudio": "Devam etmek için ekrana dokun",
+    "invalidSelectedTour": "Seçilen tur artık geçerli değil",
+    "stoppedOutsideSelectedTour": "Seçilen turun dışında olduğu için ses durduruldu"
+  },
+  "tourSelector": {
+    "title": "Tura göre dinle",
+    "subtitle": "Sadece bu güzergâhtaki POI'leri göstermek için tur seç",
+    "show": "Genişlet",
+    "hide": "Daralt",
+    "collapsedHint": "Tur seçmek veya değiştirmek için genişlet",
+    "allOption": "Tüm Konumlar",
+    "allDescription": "Tüm aktif POI'leri göster",
+    "clear": "Temizle",
+    "loading": "Turlar yükleniyor...",
+    "empty": "Mevcut tur yok.",
+    "poiCount": "{count} POI",
+    "duration": "{count} dakika",
+    "selectedSummary": "Seçilen turdan {count} POI görüntüleniyor",
+    "allSummary": "{count} aktif POI görüntüleniyor"
+  },
+  "audio": {
+    "play": "Oynat",
+    "pause": "Duraklat",
+    "stop": "Durdur",
+    "replay": "Tekrar Oynat",
+    "volume": "Ses",
+    "speed": "Oynatma Hızı",
+    "loading": "Ses yükleniyor...",
+    "error": "Ses oynatılamıyor",
+    "noAudio": "Ses yok",
+    "useTTS": "Metinden Konuşma"
+  },
+  "location": {
+    "requesting": "Konum isteniyor...",
+    "denied": "Konum izni reddedildi",
+    "unavailable": "Konum mevcut değil",
+    "timeout": "Zaman aşımı",
+    "enableLocation": "Konumu Aç",
+    "accuracy": "Doğruluk",
+    "lastUpdate": "Son Güncelleme"
+  },
+  "settings": {
+    "title": "Ayarlar",
+    "language": "Dil",
+    "volume": "Ses",
+    "autoMode": "Otomatik Oynatma",
+    "geofenceRadius": "Tetikleme Çapı",
+    "ttsEnabled": "Metinden Konuşma",
+    "ttsRate": "Konuşma Hızı",
+    "ttsPitch": "Konuşma Tonu",
+    "mapType": "Harita Türü",
+    "showVisitedPOIs": "Ziyaret edilen POI'leri göster",
+    "batteryOptimization": "Pil Optimizasyonu",
+    "geofenceClose": "Yakın (Hassas)",
+    "geofenceFar": "Uzak (Geniş)",
+    "tourExperience": "Tur Deneyimi",
+    "account": "Hesap",
+    "signOut": "Çıkış",
+    "signingOut": "Çıkış yapılıyor...",
+    "signOutConfirm": "Çıkış yapmak istiyor musunuz?",
+    "signOutFailed": "Çıkış başarısız. Tekrar deneyin.",
+    "deviceProfileTitle": "Cihaz Profili",
+    "deviceProfileDescription": "FlavorQuest, hareket, harita ve arka plan yüklemelerini cihazınıza göre ayarlar.",
+    "deviceProfileDetectedLabel": "Sistem tarafından algılandı",
+    "deviceProfileAppliedLabel": "Kullanılan",
+    "deviceProfileSystem": "Otomatik",
+    "deviceProfileLight": "Hafif",
+    "deviceProfileBalanced": "Dengeli",
+    "deviceProfileFull": "Tam",
+    "deviceProfileAutoDescription": "Uygulama cihazınıza göre hareket, harita detay ve arka planı dengeler.",
+    "deviceProfileLightDescription": "Pil ve kararlılığı artırmak için efekt ve arka plan yüklemeleri azaltılır.",
+    "deviceProfileBalancedDescription": "Çoğu cihazda akıcı deneyim ve makul kaynak kullanımı sağlar.",
+    "deviceProfileFullDescription": "Yeterli cihaz kaynağı varsa zengin hareket ve yoğun ön yükleme yapılır.",
+    "deviceProfileUnknown": "Bilinmiyor",
+    "deviceProfileMotionReduced": "Azaltılmış hareket",
+    "deviceProfileMotionStandard": "Standart hareket",
+    "deviceProfileBatteryHint": "Pil tasarrufu aktif profili daha muhafazakar yapar."
+  },
+  "history": {
+    "title": "Geçmiş",
+    "visited": "Ziyaret edildi",
+    "notVisited": "Ziyaret edilmedi",
+    "visitedAt": "Ziyaret zamanı",
+    "clear": "Geçmişi Temizle",
+    "empty": "Henüz geçmiş yok",
+    "justNow": "Az önce",
+    "minsAgo": "{mins} dakika önce",
+    "hoursAgo": "{hours} saat önce",
+    "today": "Bugün, {time}",
+    "yesterday": "Dün, {time}",
+    "listened": "Dinlendi"
+  },
+  "map": {
+    "title": "Harita",
+    "zoomIn": "Yakınlaştır",
+    "zoomOut": "Uzaklaştır",
+    "centerMap": "Konuma Odakla",
+    "fullscreen": "Tam ekran",
+    "layers": "Harita Katmanları",
+    "loadingMap": "Harita yükleniyor..."
+  },
+  "poi": {
+    "details": "Detaylar",
+    "signatureDish": "Özel Yemek",
+    "funFact": "İlginç Bilgi",
+    "estimatedHours": "Açılış Saatleri",
+    "directions": "Yol Tarifi",
+    "playAudio": "Ses Oynat",
+    "viewOnMap": "Haritada Gör",
+    "cuisine": "Mutfak",
+    "upNext": "Sonraki POI",
+    "district4": "4. Bölge, HCMC",
+    "transcript": "Metin",
+    "estimatedWalk": "3 dakikalık yürüyüş"
+  },
+  "offline": {
+    "status": "Çevrimdışı",
+    "ready": "Çevrimdışı kullanım hazır",
+    "syncing": "Senkronize ediliyor...",
+    "syncComplete": "Senkronize tamam",
+    "cacheSize": "Önbellek Boyutu",
+    "clearCache": "Önbelleği Temizle",
+    "usingCachedData": "Önbellek verisi kullanılıyor",
+    "limitedFeatures": "Bazı özellikler yok",
+    "uploading": "Veri yükleniyor",
+    "syncError": "Senkronizasyon hatası",
+    "retrySync": "Tekrar denemek için dokun",
+    "pendingSync": "Bekleyen senkronizasyon",
+    "pendingItems": "{count} öğe bekliyor",
+    "online": "Çevrimiçi",
+    "synced": "Senkronize edildi",
+    "offlineMode": "Çevrimdışı Mod",
+    "noConnection": "Bağlantı yok",
+    "statusLabel": "Durum",
+    "lastSync": "Son senkronizasyon",
+    "notSyncedYet": "Henüz senkronize edilmedi",
+    "syncNow": "Şimdi Senkronize Et",
+    "tapToSync": "Senkronize için dokun",
+    "downloadingAudio": "Çevrimdışı için ses indiriliyor",
+    "downloadingContent": "Çevrimdışı içerik indiriliyor",
+    "audioReady": "Ses çevrimdışı hazır",
+    "audioDownloaded": "Çevrimdışı ses indirildi",
+    "downloadError": "İndirme hatası",
+    "retry": "Tekrar dene",
+    "noAudioCache": "Önbellekte ses yok. İndirmek için bağlan.",
+    "updateCache": "Önbelleği Güncelle",
+    "downloadPromptTitle": "Çevrimdışı içerik indirilsin mi?",
+    "downloadPromptDesc": "Tüm ses ve görselleri çevrimdışı kullanım için indirmek ister misiniz?",
+    "downloadPromptNote": "Bu tercihi istediğiniz zaman Ayarlardan değiştirebilirsiniz.",
+    "downloadNow": "Şimdi İndir",
+    "downloadLater": "Daha Sonra",
+    "downloadStarted": "Çevrimdışı indirme başladı...",
+    "poisLabel": "ilgi noktaları",
+    "audioLabel": "Sesli anlatım",
+    "imageLabel": "Yer görselleri",
+    "successTitle": "Çevrimdışı Hazır",
+    "successMessage": "İçerik başarıyla indirildi."
+  },
+  "battery": {
+    "level": "Pil Seviyesi",
+    "charging": "Şarj oluyor",
+    "notCharging": "Şarj olmuyor",
+    "lowPowerMode": "Düşük Güç Modu",
+    "recommendation": "Öneri",
+    "warning": "Düşük pil! Bazı özellikler sınırlı olabilir."
+  },
+  "speed": {
+    "stationary": "Hareketsiz",
+    "walking": "Yürüyor",
+    "jogging": "Yavaş koşu",
+    "running": "Koşuyor",
+    "vehicle": "Araçta",
+    "tooFast": "Çok hızlı gidiyorsunuz! En iyi deneyim için yürüyün."
+  },
+  "errors": {
+    "generic": "Bir hata oluştu",
+    "network": "Ağ hatası",
+    "locationDenied": "Konum izni gerekiyor",
+    "audioPlayback": "Ses çalınamıyor. Tekrar deneyin.",
+    "storageQuota": "Depolama doldu. Veri silin.",
+    "unsupported": "Tarayıcınız desteklemiyor"
+  },
+  "welcome": {
+    "title": "FlavorQuest'e Hoş Geldiniz!",
+    "description": "Vĩnh Khánh yemek sokağını otomatik sesli anlatımla keşfedin",
+    "step1": "GPS'i etkinleştir",
+    "step2": "Vĩnh Khánh sokağına git",
+    "step3": "Yakındaki yemek noktalarında ses çalmaya başlar",
+    "getStarted": "Başla"
+  },
+  "splash": {
+    "subtitle": "Vĩnh Khánh Yemek Yolculuğunu Keşfedin",
+    "startTour": "Turu Başlat",
+    "browse": "Manuel Göz At",
+    "settings": "Ayarlar"
+  },
+  "login": {
+    "title": "FlavorQuest Giriş",
+    "subtitle": "İlerlemenizi kaydedin, deneyiminizi senkronize edin",
+    "prompt": "OTP almak için e-postanızı girin",
+    "signInWithGoogle": "Google ile giriş",
+    "customer": "Müşteri",
+    "owner": "Sahip",
+    "selectedType": "Seçilen hesap türü: {type}",
+    "ownerApprovalNote": "Sahip girişi için admin onayı gerekir. OTP doğrulandıktan sonra bekleme sayfası ve admin ile sohbet açılır.",
+    "emailLabel": "Giriş e-postası",
+    "emailPlaceholder": "you@example.com",
+    "otpLabel": "OTP kodu",
+    "otpPlaceholder": "123456",
+    "sendOtp": "OTP Gönder",
+    "sendingOtp": "Gönderiliyor...",
+    "resendOtp": "Tekrar Gönder",
+    "resendIn": "{seconds}s içinde tekrar gönder",
+    "verifyOtp": "Doğrula ve giriş yap",
+    "verifyingOtp": "Doğrulanıyor...",
+    "codeSent": "OTP e-posta ile gönderildi",
+    "codeSentTo": "OTP {email} adresine gönderildi",
+    "invalidEmail": "Geçerli e-posta girin",
+    "invalidOtp": "6 haneli OTP girin",
+    "sendOtpError": "OTP gönderilemedi. Tekrar deneyin.",
+    "verifyOtpError": "OTP doğrulama başarısız",
+    "adminPortalRequired": "Admin hesapları özel portal üzerinden giriş yapmalı",
+    "changeEmailHint": "Email düzenleyip kodu tekrar gönderebilirsiniz",
+    "or": "veya",
+    "backToHome": "Ana ekrana dön",
+    "error": "Giriş başarısız"
+  },
+  "pendingOwner": {
+    "eyebrow": "Sahip Onay Bekleme",
+    "titlePending": "Admin doğrulaması bekleniyor",
+    "titleRejected": "Sahip talebi için daha fazla iletişim gerekli",
+    "subtitlePending": "Bu hesap onay beklediği için müşteri veya sahip alanlarını kullanamaz. Güncellemeler ve admin isteğine yanıt için aşağıdaki sohbet alanı kullanılabilir.",
+    "subtitleRejected": "Admin talebi reddetti. Daha fazla bilgi ve doğrulama için sohbeti sürdürebilirsiniz.",
+    "statusLabel": "Durum",
+    "statusPending": "Beklemede",
+    "statusRejected": "Reddedildi",
+    "customerAreaLabel": "Navigasyon",
+    "customerCta": "Ana ekrana dön",
+    "customerHint": "Onaydan önce yalnızca durum takibi ve admin ile sohbet mümkündür.",
+    "steps": {
+      "request": {
+        "title": "Talep kaydedildi",
+        "body": "Admin ile doğrulama için sohbet başlığı açıldı."
+      },
+      "review": {
+        "title": "Admin sohbet ile doğrulama yapacak",
+        "body": "Onaydan önce admin ek bilgi isterse buradan yanıtlayabilirsiniz."
+      },
+      "reviewRejected": {
+        "body": "Önceki talep reddedildi. Sohbet ile detayları netleştirin."
+      },
+      "workspace": {
+        "title": "Sahip alanı onay sonrası açılır",
+        "body": "Onaylandıktan sonra sahip alanına giriş yapılır. POI atanmazsa alan boş kalır."
+      }
+    }
+  },
+  "menu": {
+    "title": "Yemek menüsü",
+    "empty": "Lokanta henüz menüyü güncellemedi.",
+    "addToCart": "Yemek ekle",
+    "quantity": "Adet",
+    "cart": "Sipariş bilgileri",
+    "placeOrder": "Sipariş gönder",
+    "placePickupOrder": "Mağazadan teslim al",
+    "placeDeliveryOrder": "Adrese teslim",
+    "pickup": "Mağazadan teslim alın",
+    "pickupDescription": "Müşteri siparişi mağazadan teslim alır ve teslimatta ödeme yapar.",
+    "delivery": "Adrese teslim",
+    "deliveryDescription": "Restoran, belirttiğiniz adrese siparişi kendisi teslim eder ve teslimatta ödemeyi yapar.",
+    "subtotal": "Geçici toplam: {amount}đ",
+    "pickupTime": "Teslim alma saati",
+    "pickupTimeFuture": "Gelecekteki bir teslim alma saati seçin",
+    "deliveryTimeFuture": "Gelecekteki bir teslimat saati seçin",
+    "customerName": "Alıcı adı",
+    "customerPhone": "Telefon numarası",
+    "deliveryAddress": "Teslimat adresi",
+    "deliveryContactRequired": "Teslimat için ad, telefon ve adres girin",
+    "note": "Not",
+    "success": "Sipariş başarıyla verildi.",
+    "pickupSuccess": "Mağazadan teslim alma siparişi başarıyla oluşturuldu.",
+    "deliverySuccess": "Teslimat siparişi başarıyla oluşturuldu."
+  },
+  "chatbot": {
+    "badge": "Akıllı asistan",
+    "title": "FlavorQuest Asistanı",
+    "subtitle": "Yemek önerileri, duraklar ve yolculuğunuz için hızlı cevaplar.",
+    "welcome": "Denemeniz gereken yemekleri önerebilirim, önce hangi durağa uğrayacağınızı söyleyebilir ve FlavorQuest'te sık sorulan soruları yanıtlayabilirim.",
+    "inputPlaceholder": "Denemeniz gereken yemekler, önce hangi durağa uğrayacağınızı veya uygulamayı nasıl kullanacağınızı sorun.",
+    "open": "Asistanı aç",
+    "close": "Asistanı kapat",
+    "openPage": "Asistan sayfasını aç",
+    "nav": "Asistan",
+    "pageTitle": "Yolculuk Asistanı",
+    "pageSubtitle": "Harita veya POI listesini kapatmadan hızlıca yemekler, uygun rotalar ve FlavorQuest kullanımı hakkında sorular sorabileceğiniz özel bir alan.",
+    "backToTour": "Tura geri dön",
+    "pageInfoTitle": "Burada ne sorabilirsiniz?",
+    "pageInfoBody": "Asistan, FlavorQuest'teki mevcut verilere dayanarak yemek önerileri, duraklar ve uygun rotalar önerir ve gezinirken sık sorulan soruları yanıtlar.",
+    "thinking": "Düşünüyorum...",
+    "error": "Asistan bağlanılamıyor. Lütfen daha sonra yeniden deneyin.",
+    "footer": "FlavorQuest'teki mevcut verilere dayanarak öneriler.",
+    "newChat": "Yeni sohbet",
+    "historyEmpty": "Hiç sohbetiniz yok.",
+    "loadingHistory": "Sohbet geçmişi yükleniyor...",
+    "suggestions": {
+      "food": "Bugün önce hangi yemekleri denemeliyim?",
+      "route": "İlk kez ziyaret ediyorsanız hangi tura başlamalı veya önce hangi duraklara uğramalıyım?",
+      "faq": "Bu uygulama çevrimdışı çalışır mı ve önceden yemek siparişi verebilir miyim?"
+    }
+  },
+  "support": {
+    "nav": "Mesajlaşma",
+    "openPage": "Mesajlaşma sayfasını aç",
+    "customer": {
+      "eyebrow": "Destek sohbeti",
+      "title": "Mağazaya veya admin'e mesaj yazın",
+      "subtitle": "Her mağazaya ayrı mesaj gönderebilir veya hesap ve deneyim konusunda yardıma ihtiyaç duyarsanız admin'e sorabilirsiniz.",
+      "emptyTitle": "Hiç mesaj yok.",
+      "emptyBody": "Başlamak için bir mağaza seçin veya admin ile sohbet başlatın."
+    },
+    "owner": {
+      "eyebrow": "Gelen Kutusu",
+      "title": "Müşteri ve admin ile mesajlar",
+      "subtitle": "Müşteri ile olan iletişimi mağaza başına takip edin ve admin ile çalışmak için ayrı bir kanal tutun.",
+      "emptyTitle": "Gelen Kutusu boş.",
+      "emptyBody": "Müşteri size mesaj attığında veya admin ile iletişim kurduğunuzda sohbet burada görünecek."
+    },
+    "admin": {
+      "eyebrow": "Destek mesajları",
+      "title": "Müşteri ve mağaza sahibi ile iletişim",
+      "subtitle": "Müşteri ve mağaza sahibinden gelen tüm destek talepleri burada toplanır ve hızlı yanıt vermeniz kolaylaşır.",
+      "emptyTitle": "Bekleme listesi boş.",
+      "emptyBody": "Müşteri veya mağaza sahibinden yeni destek talebi olduğunda sohbet burada görünecek."
+    },
+    "stats": {
+      "activeThreads": "Etkin konular",
+      "activeThreadsBody": "Her sohbetin ayrı bir sayfası vardır, izlemek daha kolaydır.",
+      "unreadThreads": "Yanıt bekleyen konular",
+      "unreadThreadsBody": "Yeni mesaj olduğunda alıcıya e-posta ile bildirim gider."
+    },
+    "launchpad": {
+      "title": "Yeni sohbet başlat",
+      "body": "Doğru kişiyi seçin. Önceden bir sohbet varsa, sistem o sohbeti yeniden açacaktır."
+    },
+    "inbox": {
+      "title": "Sohbet listesi",
+      "body": "Okunmamış mesajlar hızlı işlem için önce gösterilir."
+    },
+    "threadTypes": {
+      "customerOwner": "Müşteri / Sahib",
+      "customerAdmin": "Müşteri / Admin",
+      "ownerAdmin": "Sahibi / Admin"
+    },
+    "states": {
+      "creating": "Açılıyor...",
+      "waitingFirstMessage": "Bu sohbette henüz mesaj yok.",
+      "noThreadSelected": "Başlamak için bir sohbet seçin.",
+      "noThreadSelectedBody": "Sol sütunda hızlıca yeni bir sohbet açabilirsiniz.",
+      "noMessages": "Bu sohbet için mesaj yok.",
+      "noMessagesBody": "İlk mesaji gönderin."
+    },
+    "actions": {
+      "openThread": "Sohbeti aç",
+      "startThread": "Şimdi yaz",
+      "refresh": "Yenile",
+      "sending": "Gönderiliyor...",
+      "send": "Mesaj gönder"
+    },
+    "counterparts": {
+      "admin": "Admin ekibi",
+      "unknown": "Alıcı bilinmiyor",
+      "adminShort": "Admin",
+      "ownerShort": "Sahibi",
+      "customerShort": "Müşteri"
+    },
+    "thread": {
+      "title": "Sohbet",
+      "poiContext": "Görüşme şu satış noktası {name} ile ilişkilendirilmiş.",
+      "emailHint": "Yeni mesaj uygulamada ve e-posta ile bildirilir.",
+      "emailBadge": "E-posta bildirimi var"
+    },
+    "composer": {
+      "placeholder": "Mesajı girin...",
+      "hint": "Yeni mesaj burada görünecek. Alıcıya e-posta da gönderilecek."
+    },
+    "errors": {
+      "loadThreads": "Sohbet listesi yüklenemiyor.",
+      "loadMessages": "Sohbet mesajları yüklenemiyor.",
+      "createThread": "Yeni sohbet oluşturulamadı.",
+      "sendMessage": "Mesaj gönderilemedi."
+    }
+  },
+  "notifications": {
+    "title": "Bildirimler",
+    "markAll": "Tümünü okundu olarak işaretle",
+    "empty": "Yeni bildirim yok"
+  },
+  "owner": {
+    "title": "Mağaza sahibi Kontrol Paneli",
+    "subtitle": "POI, menü ve rezervasyonları yönetin",
+    "myPois": "Benim POI'lerim",
+    "orders": "Rezervasyonlar",
+    "menu": "Yemek Menüsü",
+    "noPoi": "Hiç POI atanmadı. Lütfen admin ile iletişime geçin."
+  },
+  "poiDetail": {
+    "notFound": "Konum bulunamadı",
+    "notFoundMessage": "Bu konum silinmiş olabilir veya mevcut değil.",
+    "playNarration": "Anlatıyı dinle",
+    "introduction": "Tanıtım",
+    "noDescription": "Bu konum için açıklama yok.",
+    "didYouKnow": "Biliyor muydunuz?",
+    "nowPlaying": "Çalıyor: {name}",
+    "errorPlaying": "Ses çalma hatası, sentezli ses kullanılıyor"
+  },
+  "permissions": {
+    "checking": "Erişim izni kontrol ediliyor...",
+    "locationTitle": "Yakındaki restoranda otomatik anlatım için konum izni verin",
+    "locationDesc": "Vĩnh Khánh Bulvarı üzerinde konumunuzu otomatik olarak tanıması en iyi deneyimi sağlar.",
+    "denyPrompt": "İzin vermek istemez misiniz?",
+    "switchToManual": "Manuel moda geçiş yap"
+  },
+  "units": {
+    "meters": "m",
+    "kilometers": "km",
+    "number": "Sayı"
+  },
+  "sort": {
+    "az": "A-Z"
+  }
+}

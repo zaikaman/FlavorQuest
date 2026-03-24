@@ -16,6 +16,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import type { POI, Language, Coordinates, LocalizedPOI } from '@/lib/types/index';
+import { SUPPORTED_LANGUAGE_CODES, getLocalizedFieldName } from '@/lib/constants';
 import { createClient } from '@/lib/supabase/client';
 import { savePOIs, loadPOIs, saveLastSync, loadLastSync } from '@/lib/services/storage';
 import { filterPOIsWithinRadius } from '@/lib/utils/distance';
@@ -49,23 +50,15 @@ const POI_SELECT_FIELDS = `
   lng,
   radius,
   name_vi,
-  name_en,
-  name_ja,
-  name_fr,
-  name_ko,
-  name_zh,
-  description_vi,
-  description_en,
-  description_ja,
-  description_fr,
-  description_ko,
-  description_zh,
-  audio_url_vi,
-  audio_url_en,
-  audio_url_ja,
-  audio_url_fr,
-  audio_url_ko,
-  audio_url_zh,
+  ${SUPPORTED_LANGUAGE_CODES.filter((language) => language !== 'vi')
+    .map((language) => getLocalizedFieldName('name', language))
+    .join(',\n  ')},
+  ${SUPPORTED_LANGUAGE_CODES.map((language) => getLocalizedFieldName('description', language)).join(
+    ',\n  '
+  )},
+  ${SUPPORTED_LANGUAGE_CODES.map((language) => getLocalizedFieldName('audio_url', language)).join(
+    ',\n  '
+  )},
   image_url,
   signature_dish,
   category_tags,

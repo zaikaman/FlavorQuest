@@ -1,0 +1,517 @@
+{
+  "app": {
+    "name": "FlavorQuest",
+    "tagline": "Explora la gastronomía de Vinh Khanh a través del audio"
+  },
+  "metadata": {
+    "title": "FlavorQuest - Explora la Calle Gastronómica Vinh Khanh",
+    "description": "Tour de audio automático basado en ubicación para descubrir la calle gastronómica Vinh Khanh, Can Tho. PWA offline-first con soporte multilingüe.",
+    "keywords": [
+      "tour gastronómico",
+      "guía de audio",
+      "Vinh Khanh",
+      "Can Tho",
+      "cocina",
+      "PWA"
+    ]
+  },
+  "manifest": {
+    "name": "FlavorQuest - Experiencia de Narración de Audio Automática",
+    "shortName": "FlavorQuest",
+    "description": "Explora la calle gastronómica Vinh Khanh con narración de audio automática según ubicación. Compatible con 18 idiomas y funciona sin conexión.",
+    "shortcuts": {
+      "startTour": {
+        "name": "Iniciar tour",
+        "description": "Iniciar tour automático"
+      },
+      "viewMap": {
+        "name": "Ver mapa",
+        "description": "Ver mapa del tour"
+      }
+    }
+  },
+  "common": {
+    "loading": "Cargando...",
+    "error": "Error",
+    "retry": "Reintentar",
+    "cancel": "Cancelar",
+    "confirm": "Confirmar",
+    "save": "Guardar",
+    "close": "Cerrar",
+    "back": "Atrás",
+    "next": "Siguiente",
+    "done": "Hecho",
+    "yes": "Sí",
+    "no": "No",
+    "allow": "Permitir",
+    "deny": "Denegar",
+    "browse": "Explorar",
+    "privacyPolicy": "Política de privacidad"
+  },
+  "list": {
+    "searchPlaceholder": "Buscar caracoles, mariscos, banh mi...",
+    "notFoundTitle": "No encontrado",
+    "notFoundDesc": "Prueba con palabras clave diferentes",
+    "offlineBadge": "Sin conexión"
+  },
+  "categories": {
+    "all": "Todos",
+    "snails": "Caracoles",
+    "seafood": "Mariscos",
+    "grill": "A la parrilla",
+    "nearMe": "Cerca de mí"
+  },
+  "tour": {
+    "startTour": "Iniciar Tour",
+    "pauseTour": "Pausar",
+    "resumeTour": "Reanudar",
+    "stopTour": "Detener Tour",
+    "autoMode": "Modo automático",
+    "manualMode": "Modo manual",
+    "auto": "Automático",
+    "manual": "Manual",
+    "loadingPOIs": "Cargando ubicaciones...",
+    "searchingPOIs": "Buscando puntos cercanos...",
+    "nearbyPOIs": "Puntos cercanos",
+    "currentLocation": "Ubicación actual",
+    "distance": "Distancia",
+    "nowPlaying": "Reproduciendo: {name}",
+    "syncedEvents": "{count} eventos sincronizados",
+    "dataSaved": "Datos guardados, listos para uso offline",
+    "usingTTS": "Usando texto a voz (offline)",
+    "tooFast": "Te mueves demasiado rápido. Por favor camina para escuchar la narración.",
+    "locationDenied": "Ubicación denegada. Cambiando a modo manual.",
+    "httpsRequired": "Error: GPS requiere HTTPS. Por favor usa localhost o instala SSL.",
+    "gpsError": "Error de GPS: {message}",
+    "noAudioForPOI": "No hay audio disponible para esta ubicación",
+    "tapToResumeAudio": "Toca la pantalla para continuar la narración",
+    "invalidSelectedTour": "El tour seleccionado ya no está disponible",
+    "stoppedOutsideSelectedTour": "Audio detenido porque este POI está fuera del tour seleccionado"
+  },
+  "tourSelector": {
+    "title": "Escuchar por tour",
+    "subtitle": "Elige un tour para mostrar solo los POIs de ese itinerario",
+    "show": "Expandir",
+    "hide": "Colapsar",
+    "collapsedHint": "Expande para elegir o cambiar tours rápidamente",
+    "allOption": "Todas las ubicaciones",
+    "allDescription": "Mostrar todos los POIs activos",
+    "clear": "Limpiar",
+    "loading": "Cargando tours...",
+    "empty": "No hay tours disponibles en este momento.",
+    "poiCount": "{count} POIs",
+    "duration": "{count} min",
+    "selectedSummary": "Mostrando {count} POIs del tour seleccionado",
+    "allSummary": "Mostrando {count} POIs activos"
+  },
+  "audio": {
+    "play": "Reproducir",
+    "pause": "Pausar",
+    "stop": "Detener",
+    "replay": "Repetir",
+    "volume": "Volumen",
+    "speed": "Velocidad de reproducción",
+    "loading": "Cargando audio...",
+    "error": "No se puede reproducir el audio",
+    "noAudio": "No hay audio disponible",
+    "useTTS": "Usar texto a voz"
+  },
+  "location": {
+    "requesting": "Solicitando ubicación...",
+    "denied": "Acceso a ubicación denegado",
+    "unavailable": "Ubicación no disponible",
+    "timeout": "Tiempo de espera agotado",
+    "enableLocation": "Activar ubicación",
+    "accuracy": "Precisión",
+    "lastUpdate": "Última actualización"
+  },
+  "settings": {
+    "title": "Configuraciones",
+    "language": "Idioma",
+    "volume": "Volumen",
+    "autoMode": "Reproducción automática",
+    "geofenceRadius": "Radio de activación",
+    "ttsEnabled": "Texto a voz",
+    "ttsRate": "Velocidad de habla",
+    "ttsPitch": "Tono de voz",
+    "mapType": "Tipo de mapa",
+    "showVisitedPOIs": "Mostrar puntos visitados",
+    "batteryOptimization": "Optimización de batería",
+    "geofenceClose": "Cerca (preciso)",
+    "geofenceFar": "Lejos (amplio)",
+    "tourExperience": "Experiencia del tour",
+    "account": "Cuenta",
+    "signOut": "Cerrar sesión",
+    "signingOut": "Cerrando sesión...",
+    "signOutConfirm": "¿Estás seguro que quieres cerrar sesión?",
+    "signOutFailed": "Error al cerrar sesión. Por favor inténtalo de nuevo.",
+    "deviceProfileTitle": "Perfil de dispositivo",
+    "deviceProfileDescription": "FlavorQuest adapta movimiento del mapa, visuales y carga en segundo plano según el dispositivo que uses.",
+    "deviceProfileDetectedLabel": "Sistema detectado",
+    "deviceProfileAppliedLabel": "Usando actualmente",
+    "deviceProfileSystem": "Automático",
+    "deviceProfileLight": "Ligero",
+    "deviceProfileBalanced": "Equilibrado",
+    "deviceProfileFull": "Completo",
+    "deviceProfileAutoDescription": "Permitir que la app ajuste automáticamente movimiento, detalle de mapa y carga en segundo plano para este dispositivo.",
+    "deviceProfileLightDescription": "Reducir efectos visuales y carga en segundo plano para favorecer duración de batería y estabilidad.",
+    "deviceProfileBalancedDescription": "Mantener la experiencia fluida para la mayoría de dispositivos sin exigir demasiados recursos.",
+    "deviceProfileFullDescription": "Priorizar movimiento más rico y precarga amplia cuando el dispositivo lo permite.",
+    "deviceProfileUnknown": "Desconocido",
+    "deviceProfileMotionReduced": "Movimiento reducido",
+    "deviceProfileMotionStandard": "Movimiento estándar",
+    "deviceProfileBatteryHint": "El ahorro de batería hace que el perfil activo sea un paso más conservador."
+  },
+  "history": {
+    "title": "Historial",
+    "visited": "Visitado",
+    "notVisited": "No visitado",
+    "visitedAt": "Visitado en",
+    "clear": "Borrar historial",
+    "empty": "Sin historial aún",
+    "justNow": "Justo ahora",
+    "minsAgo": "Hace {mins} minutos",
+    "hoursAgo": "Hace {hours} horas",
+    "today": "Hoy, {time}",
+    "yesterday": "Ayer, {time}",
+    "listened": "Escuchado"
+  },
+  "map": {
+    "title": "Mapa",
+    "zoomIn": "Acercar",
+    "zoomOut": "Alejar",
+    "centerMap": "Centrar en ubicación",
+    "fullscreen": "Pantalla completa",
+    "layers": "Capas del mapa",
+    "loadingMap": "Cargando mapa..."
+  },
+  "poi": {
+    "details": "Detalles",
+    "signatureDish": "Plato emblemático",
+    "funFact": "Dato curioso",
+    "estimatedHours": "Horario de apertura",
+    "directions": "Indicaciones",
+    "playAudio": "Reproducir audio",
+    "viewOnMap": "Ver en el mapa",
+    "cuisine": "Gastronomía",
+    "upNext": "A continuación",
+    "district4": "Distrito 4, HCMC",
+    "transcript": "Transcripción",
+    "estimatedWalk": "Caminata de 3 minutos"
+  },
+  "offline": {
+    "status": "Sin conexión",
+    "ready": "Listo para uso offline",
+    "syncing": "Sincronizando...",
+    "syncComplete": "Sincronizado",
+    "cacheSize": "Tamaño de caché",
+    "clearCache": "Borrar caché",
+    "usingCachedData": "Usando datos en caché",
+    "limitedFeatures": "Algunas funciones no disponibles",
+    "uploading": "Subiendo datos al servidor",
+    "syncError": "Error de sincronización",
+    "retrySync": "Toca para reintentar",
+    "pendingSync": "Sincronización pendiente",
+    "pendingItems": "{count} elementos pendientes",
+    "online": "En línea",
+    "synced": "Sincronizado",
+    "offlineMode": "Modo offline",
+    "noConnection": "Sin conexión",
+    "statusLabel": "Estado",
+    "lastSync": "Última sincronización",
+    "notSyncedYet": "Aún no sincronizado",
+    "syncNow": "Sincronizar ahora",
+    "tapToSync": "Toca para sincronizar",
+    "downloadingAudio": "Descargando audio para offline",
+    "downloadingContent": "Descargando contenido offline",
+    "audioReady": "Audio listo para offline",
+    "audioDownloaded": "Audio descargado para modo offline",
+    "downloadError": "Error de descarga",
+    "retry": "Reintentar",
+    "noAudioCache": "No hay audio en caché. Conéctate para descargar.",
+    "updateCache": "Actualizar caché",
+    "downloadPromptTitle": "¿Descargar contenido offline?",
+    "downloadPromptDesc": "¿Quieres descargar todo el audio e imágenes para uso sin conexión?",
+    "downloadPromptNote": "Puedes cambiar esta preferencia en Configuración en cualquier momento.",
+    "downloadNow": "Descargar ahora",
+    "downloadLater": "Después",
+    "downloadStarted": "Iniciando descarga de contenido offline...",
+    "poisLabel": "puntos de interés",
+    "audioLabel": "Narración de audio",
+    "imageLabel": "Imágenes de ubicación",
+    "successTitle": "Listo para offline",
+    "successMessage": "Contenido descargado exitosamente."
+  },
+  "battery": {
+    "level": "Nivel de batería",
+    "charging": "Cargando",
+    "notCharging": "Sin carga",
+    "lowPowerMode": "Modo de ahorro de energía",
+    "recommendation": "Recomendación",
+    "warning": "¡Batería baja! Algunas funciones pueden estar limitadas."
+  },
+  "speed": {
+    "stationary": "Detenido",
+    "walking": "Caminando",
+    "jogging": "Trotando",
+    "running": "Corriendo",
+    "vehicle": "En vehículo",
+    "tooFast": "¡Te estás moviendo demasiado rápido! Por favor camina para la mejor experiencia."
+  },
+  "errors": {
+    "generic": "Ocurrió un error",
+    "network": "Error de red",
+    "locationDenied": "Necesitas otorgar acceso a ubicación para usar esta función",
+    "audioPlayback": "No se puede reproducir audio. Por favor inténtalo de nuevo.",
+    "storageQuota": "Almacenamiento lleno. Por favor libera datos.",
+    "unsupported": "Tu navegador no soporta esta función"
+  },
+  "welcome": {
+    "title": "¡Bienvenido a FlavorQuest!",
+    "description": "Explora la calle gastronómica Vinh Khanh con narración de audio automática",
+    "step1": "Activa la ubicación GPS",
+    "step2": "Camina hasta la calle Vinh Khanh",
+    "step3": "La narración se reproduce automáticamente cerca de los puestos de comida",
+    "getStarted": "Comenzar"
+  },
+  "splash": {
+    "subtitle": "Explora el viaje culinario de Vinh Khanh",
+    "startTour": "Iniciar Tour",
+    "browse": "Explorar manualmente",
+    "settings": "Configuración"
+  },
+  "login": {
+    "title": "Iniciar sesión en FlavorQuest",
+    "subtitle": "Guarda tu progreso y sincroniza tu experiencia",
+    "prompt": "Ingresa tu email para recibir un código OTP de inicio de sesión",
+    "signInWithGoogle": "Iniciar sesión con Google",
+    "customer": "Cliente",
+    "owner": "Propietario",
+    "selectedType": "Tipo de cuenta seleccionada: {type}",
+    "ownerApprovalNote": "El inicio de sesión como propietario requiere aprobación previa de admin. Después de verificar OTP, irás a una página de revisión con chat directo al admin.",
+    "emailLabel": "Email de inicio de sesión",
+    "emailPlaceholder": "tu@example.com",
+    "otpLabel": "Código OTP",
+    "otpPlaceholder": "123456",
+    "sendOtp": "Enviar OTP",
+    "sendingOtp": "Enviando código...",
+    "resendOtp": "Reenviar código",
+    "resendIn": "Reenviar en {seconds}s",
+    "verifyOtp": "Verificar e iniciar sesión",
+    "verifyingOtp": "Verificando...",
+    "codeSent": "Tu OTP ha sido enviado a tu email.",
+    "codeSentTo": "OTP enviado a {email}",
+    "invalidEmail": "Por favor ingresa un email válido.",
+    "invalidOtp": "Por favor ingresa el código OTP de 6 dígitos.",
+    "sendOtpError": "No se puede enviar OTP. Por favor inténtalo de nuevo.",
+    "verifyOtpError": "Error al verificar OTP. Por favor inténtalo de nuevo.",
+    "adminPortalRequired": "Las cuentas de admin deben iniciar sesión en el portal dedicado.",
+    "changeEmailHint": "Puedes editar tu email y reenviar el código si es necesario.",
+    "or": "o",
+    "backToHome": "Volver a inicio",
+    "error": "Error al iniciar sesión. Por favor inténtalo de nuevo."
+  },
+  "pendingOwner": {
+    "eyebrow": "Mesa de aprobación de propietario",
+    "titlePending": "Tu cuenta está esperando verificación de admin antes de habilitar acceso de propietario",
+    "titleRejected": "Tu solicitud de propietario requiere más conversación con admin",
+    "subtitlePending": "Esta cuenta está en estado de revisión de propietario, por lo que no puede usar aún las áreas de cliente o propietario. El chat abajo es el principal medio para seguir actualizaciones y responder si admin necesita más verificación.",
+    "subtitleRejected": "Admin rechazó la solicitud actual. Puedes continuar la conversación abajo para brindar más contexto o detalles de verificación.",
+    "statusLabel": "Estado",
+    "statusPending": "Pendiente de aprobación",
+    "statusRejected": "Rechazado",
+    "customerAreaLabel": "Navegación",
+    "customerCta": "Volver a pantalla de bienvenida",
+    "customerHint": "Hasta que se apruebe, esta cuenta solo puede seguir el estado aquí y hablar con admin.",
+    "steps": {
+      "request": {
+        "title": "Tu solicitud ha sido registrada",
+        "body": "El sistema ya abrió un hilo de chat con admin para que puedas aportar más detalles de verificación si es necesario."
+      },
+      "review": {
+        "title": "Admin verificará vía chat",
+        "body": "Mantente atento a los mensajes aquí para responder rápido si admin pide más detalles antes de aprobar."
+      },
+      "reviewRejected": {
+        "body": "La solicitud anterior fue rechazada. Puedes seguir hablando en el chat abajo para aclarar más detalles."
+      },
+      "workspace": {
+        "title": "El espacio de propietario se habilitará tras la aprobación",
+        "body": "Una vez aprobado, entrarás al área de propietario. Si no se ha asignado ninguna tienda aún, el espacio de propietario permanecerá vacío hasta que admin asigne al menos un POI."
+      }
+    }
+  },
+  "menu": {
+    "title": "Menú de comidas",
+    "empty": "Este lugar aún no ha actualizado su menú.",
+    "addToCart": "Añadir",
+    "quantity": "Cantidad",
+    "cart": "Detalles del pedido",
+    "placeOrder": "Enviar pedido",
+    "placePickupOrder": "Pedido para recoger",
+    "placeDeliveryOrder": "Pedido para entrega",
+    "pickup": "Recoger",
+    "pickupDescription": "Recoge tu comida en el local y paga al llegar.",
+    "delivery": "Entrega",
+    "deliveryDescription": "El local entrega a tu dirección y pagas al recibir.",
+    "subtotal": "Subtotal: {amount}đ",
+    "pickupTime": "Hora de recogida",
+    "pickupTimeFuture": "Por favor elige una hora futura para recogida",
+    "deliveryTimeFuture": "Por favor elige una hora futura para entrega",
+    "customerName": "Nombre del cliente",
+    "customerPhone": "Número de teléfono",
+    "deliveryAddress": "Dirección de entrega",
+    "deliveryContactRequired": "Por favor proporciona nombre, teléfono y dirección de entrega",
+    "note": "Nota",
+    "success": "¡Pedido realizado correctamente!",
+    "pickupSuccess": "¡Pedido de recogida realizado correctamente!",
+    "deliverySuccess": "¡Pedido de entrega realizado correctamente!"
+  },
+  "chatbot": {
+    "badge": "Guía inteligente",
+    "title": "Asistente de FlavorQuest",
+    "subtitle": "Obtén ideas de platos, sugerencias de paradas y ayuda rápida durante tu viaje.",
+    "welcome": "Puedo sugerir platos, recomendar paradas y responder preguntas comunes de FlavorQuest aquí mismo.",
+    "inputPlaceholder": "Pregunta qué probar, dónde parar primero o cómo usar la app...",
+    "open": "Abrir asistente",
+    "close": "Cerrar asistente",
+    "openPage": "Abrir página del asistente",
+    "nav": "Asistente",
+    "pageTitle": "Asistente de viaje",
+    "pageSubtitle": "Un espacio dedicado para sugerencias de comida, ideas de rutas y ayuda con la app sin tapar el mapa o lista de POIs.",
+    "backToTour": "Volver al tour",
+    "pageInfoTitle": "¿Qué puedes preguntar aquí?",
+    "pageInfoBody": "El asistente usa datos actuales de FlavorQuest para recomendar platos, paradas, rutas adecuadas y responder preguntas frecuentes mientras exploras.",
+    "thinking": "Pensando...",
+    "error": "El asistente no está disponible ahora. Por favor inténtalo más tarde.",
+    "footer": "Las sugerencias se basan en datos actuales de FlavorQuest.",
+    "newChat": "Nuevo chat",
+    "historyEmpty": "Aún no tienes conversaciones.",
+    "loadingHistory": "Cargando historial de conversaciones...",
+    "suggestions": {
+      "food": "¿Qué platos debería probar primero hoy?",
+      "route": "Si es mi primera visita, ¿qué tour o parada debería iniciar?",
+      "faq": "¿Esta app soporta modo offline y pedidos anticipados?"
+    }
+  },
+  "support": {
+    "nav": "Mensajes",
+    "openPage": "Abrir mensajes",
+    "customer": {
+      "eyebrow": "Chat de soporte",
+      "title": "Enviar mensaje a un local o admin",
+      "subtitle": "Puedes enviar mensajes a cada local por separado, o pedir ayuda a admin para tu cuenta y experiencia.",
+      "emptyTitle": "Sin mensajes aún.",
+      "emptyBody": "Elige un local o abre el chat con admin para comenzar."
+    },
+    "owner": {
+      "eyebrow": "Bandeja de entrada",
+      "title": "Mensajes de clientes y admin",
+      "subtitle": "Sigue conversaciones de clientes por local y mantén un canal separado con admin.",
+      "emptyTitle": "Tu bandeja de entrada está vacía.",
+      "emptyBody": "Las conversaciones de clientes y admin aparecerán aquí."
+    },
+    "admin": {
+      "eyebrow": "Mensajes de soporte",
+      "title": "Hablar con clientes y propietarios",
+      "subtitle": "Las solicitudes de soporte de clientes y propietarios se recopilan aquí para responder rápidamente.",
+      "emptyTitle": "La cola está vacía.",
+      "emptyBody": "Nuevas solicitudes de soporte aparecerán aquí."
+    },
+    "stats": {
+      "activeThreads": "Hilos activos",
+      "activeThreadsBody": "Cada conversación tiene su propia página, más fácil de seguir.",
+      "unreadThreads": "Necesita respuesta",
+      "unreadThreadsBody": "Cuando llega un mensaje nuevo, el destinatario también recibe un email."
+    },
+    "launchpad": {
+      "title": "Abrir un nuevo hilo",
+      "body": "Elige a quién quieres enviar mensaje. Si ya existe una conversación, la reabriremos."
+    },
+    "inbox": {
+      "title": "Lista de conversaciones",
+      "body": "Los mensajes no leídos permanecen en la parte superior para manejarlos rápido."
+    },
+    "threadTypes": {
+      "customerOwner": "Cliente / Propietario",
+      "customerAdmin": "Cliente / Admin",
+      "ownerAdmin": "Propietario / Admin"
+    },
+    "states": {
+      "creating": "Abriendo...",
+      "waitingFirstMessage": "Aún no hay mensajes en este hilo.",
+      "noThreadSelected": "Elige una conversación para comenzar.",
+      "noThreadSelectedBody": "También puedes iniciar una nueva conversación desde la columna izquierda.",
+      "noMessages": "Este hilo no tiene mensajes aún.",
+      "noMessagesBody": "Envía el primer mensaje para comenzar."
+    },
+    "actions": {
+      "openThread": "Abrir conversación",
+      "startThread": "Enviar mensaje ahora",
+      "refresh": "Actualizar",
+      "sending": "Enviando...",
+      "send": "Enviar mensaje"
+    },
+    "counterparts": {
+      "admin": "Equipo admin",
+      "unknown": "Destinatario",
+      "adminShort": "Admin",
+      "ownerShort": "Propietario",
+      "customerShort": "Cliente"
+    },
+    "thread": {
+      "title": "Conversación",
+      "poiContext": "Esta conversación está vinculada a la ubicación {name}.",
+      "emailHint": "Los mensajes nuevos aparecen aquí y también generan una notificación por email.",
+      "emailBadge": "Notificaciones por email activadas"
+    },
+    "composer": {
+      "placeholder": "Escribe un mensaje...",
+      "hint": "Las respuestas aparecen aquí de inmediato y el destinatario también recibe un email."
+    },
+    "errors": {
+      "loadThreads": "No se pueden cargar las conversaciones.",
+      "loadMessages": "No se pueden cargar los mensajes para esta conversación.",
+      "createThread": "No se puede crear una nueva conversación.",
+      "sendMessage": "No se puede enviar el mensaje."
+    }
+  },
+  "notifications": {
+    "title": "Notificaciones",
+    "markAll": "Marcar todas como leídas",
+    "empty": "Sin notificaciones aún"
+  },
+  "owner": {
+    "title": "Panel de propietario",
+    "subtitle": "Gestiona tus POIs, menú y pedidos anticipados",
+    "myPois": "Mis POIs",
+    "orders": "Pedidos",
+    "menu": "Menú",
+    "noPoi": "Aún no tienes POI asignados. Contacta a admin."
+  },
+  "poiDetail": {
+    "notFound": "Ubicación no encontrada",
+    "notFoundMessage": "Esta ubicación puede haber sido eliminada o no existir.",
+    "playNarration": "Reproducir narración",
+    "introduction": "Introducción",
+    "noDescription": "No hay descripción disponible para esta ubicación.",
+    "didYouKnow": "¿Sabías que...?",
+    "nowPlaying": "Reproduciendo: {name}",
+    "errorPlaying": "Error de audio, usando texto a voz"
+  },
+  "permissions": {
+    "checking": "Comprobando permisos...",
+    "locationTitle": "Permitir ubicación para narración de audio automática cerca de puestos de comida",
+    "locationDesc": "La mejor experiencia es cuando la app detecta automáticamente tu ubicación en la calle Vinh Khanh.",
+    "denyPrompt": "¿No permitir?",
+    "switchToManual": "Cambiar a modo manual"
+  },
+  "units": {
+    "meters": "m",
+    "kilometers": "km",
+    "number": "Nº"
+  },
+  "sort": {
+    "az": "A-Z"
+  }
+}

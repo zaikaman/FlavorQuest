@@ -5,6 +5,14 @@
  * Based on data-model.md and database schema.
  */
 
+import {
+  DEFAULT_LANGUAGE,
+  FALLBACK_LANGUAGE,
+  isSupportedLanguageCode,
+  type SupportedLanguageCode,
+} from '@/lib/constants';
+import type { POICategoryTag } from '@/lib/constants/poiCategories';
+
 // ============================================
 // LANGUAGE TYPES
 // ============================================
@@ -12,7 +20,9 @@
 /**
  * Supported language codes
  */
-export type Language = 'vi' | 'en' | 'ja' | 'fr' | 'ko' | 'zh';
+export type Language = SupportedLanguageCode;
+export type SecondaryLanguage = Exclude<Language, 'vi'>;
+export type ExtendedLanguage = Exclude<Language, 'vi' | 'en'>;
 
 /**
  * Language configuration object
@@ -21,49 +31,39 @@ export type LanguageConfig = {
   code: Language;
   name: string;
   nativeName: string;
-  flag: string;
+  shortLabel: string;
+  translationName: string;
   ttsLang: string;
+  voice: string;
+  featured: boolean;
+  dir: 'ltr' | 'rtl';
 };
 
 // ============================================
 // POI (Point of Interest) TYPES
 // ============================================
 
+type POINameFields = {
+  name_vi: string;
+  name_en: string;
+} & Partial<Record<`name_${ExtendedLanguage}`, string | null>>;
+
+type POIDescriptionFields = Partial<Record<`description_${Language}`, string | null>>;
+type POIAudioFields = Partial<Record<`audio_url_${Language}`, string | null>>;
+type TourNameFields = {
+  name_vi: string;
+} & Partial<Record<`name_${SecondaryLanguage}`, string | null>>;
+type TourDescriptionFields = Partial<Record<`description_${Language}`, string | null>>;
+
 /**
  * POI database entity
  * Represents a food stall or point of interest on Vĩnh Khánh street
  */
-import type { POICategoryTag } from '@/lib/constants/poiCategories';
-
-export interface POI {
+export interface POI extends POINameFields, POIDescriptionFields, POIAudioFields {
   id: string;
   lat: number;
   lng: number;
   radius: number;
-
-  // Multi-language name fields
-  name_vi: string;
-  name_en: string;
-  name_ja?: string;
-  name_fr?: string;
-  name_ko?: string;
-  name_zh?: string;
-
-  // Multi-language description fields (used for TTS fallback)
-  description_vi?: string;
-  description_en?: string;
-  description_ja?: string;
-  description_fr?: string;
-  description_ko?: string;
-  description_zh?: string;
-
-  // Multi-language audio URLs
-  audio_url_vi?: string;
-  audio_url_en?: string;
-  audio_url_ja?: string;
-  audio_url_fr?: string;
-  audio_url_ko?: string;
-  audio_url_zh?: string;
 
   // Media & metadata
   image_url?: string;
@@ -108,31 +108,10 @@ export interface POIWithDistance extends LocalizedPOI {
 /**
  * POI create/update payload
  */
-export interface POIPayload {
+export interface POIPayload extends POINameFields, POIDescriptionFields, POIAudioFields {
   lat: number;
   lng: number;
   radius?: number;
-
-  name_vi: string;
-  name_en: string;
-  name_ja?: string;
-  name_fr?: string;
-  name_ko?: string;
-  name_zh?: string;
-
-  description_vi?: string;
-  description_en?: string;
-  description_ja?: string;
-  description_fr?: string;
-  description_ko?: string;
-  description_zh?: string;
-
-  audio_url_vi?: string;
-  audio_url_en?: string;
-  audio_url_ja?: string;
-  audio_url_fr?: string;
-  audio_url_ko?: string;
-  audio_url_zh?: string;
 
   image_url?: string;
   signature_dish?: string;
@@ -142,20 +121,8 @@ export interface POIPayload {
   owner_id?: string | null;
 }
 
-export interface Tour {
+export interface Tour extends TourNameFields, TourDescriptionFields {
   id: string;
-  name_vi: string;
-  name_en?: string | null;
-  name_ja?: string | null;
-  name_fr?: string | null;
-  name_ko?: string | null;
-  name_zh?: string | null;
-  description_vi?: string | null;
-  description_en?: string | null;
-  description_ja?: string | null;
-  description_fr?: string | null;
-  description_ko?: string | null;
-  description_zh?: string | null;
   cover_image_url?: string | null;
   estimated_duration_min?: number | null;
   poi_ids: string[];
@@ -176,19 +143,7 @@ export interface LocalizedTour {
   is_active: boolean;
 }
 
-export interface TourPayload {
-  name_vi: string;
-  name_en?: string | null;
-  name_ja?: string | null;
-  name_fr?: string | null;
-  name_ko?: string | null;
-  name_zh?: string | null;
-  description_vi?: string | null;
-  description_en?: string | null;
-  description_ja?: string | null;
-  description_fr?: string | null;
-  description_ko?: string | null;
-  description_zh?: string | null;
+export interface TourPayload extends TourNameFields, TourDescriptionFields {
   cover_image_url?: string | null;
   estimated_duration_min?: number | null;
   poi_ids: string[];
@@ -550,7 +505,7 @@ export interface EffectiveDevicePerformance {
  * Default user settings
  */
 export const DEFAULT_USER_SETTINGS: UserSettings = {
-  language: 'vi',
+  language: DEFAULT_LANGUAGE,
   volume: 0.8,
   autoPlayEnabled: true,
   geofenceRadius: 18,
@@ -810,7 +765,7 @@ export type MultiLanguageField<T, K extends string> = {
  * Check if value is a valid Language
  */
 export function isLanguage(value: unknown): value is Language {
-  return typeof value === 'string' && ['vi', 'en', 'ja', 'fr', 'ko', 'zh'].includes(value);
+  return isSupportedLanguageCode(value);
 }
 
 /**
@@ -852,7 +807,7 @@ export function getLocalizedField(
   obj: POI,
   fieldName: string,
   language: Language,
-  fallback: Language = 'en'
+  fallback: Language = FALLBACK_LANGUAGE
 ): string {
   const localizedKey = `${fieldName}_${language}` as keyof POI;
   const fallbackKey = `${fieldName}_${fallback}` as keyof POI;

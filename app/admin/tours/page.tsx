@@ -4,20 +4,14 @@ import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { ImageUploader } from '@/components/admin/ImageUploader';
 import { DashboardSkeleton } from '@/components/ui/Loading';
 import { useToast } from '@/components/ui/ToastProvider';
-import type { POI, Tour, TourPayload } from '@/lib/types/index';
+import { SUPPORTED_LANGUAGES } from '@/lib/constants';
+import type { Language, POI, Tour, TourPayload } from '@/lib/types/index';
 
-const TOUR_LANGUAGES = [
-  { code: 'vi', label: 'Tiếng Việt' },
-  { code: 'en', label: 'English' },
-  { code: 'ja', label: '日本語' },
-  { code: 'fr', label: 'Français' },
-  { code: 'ko', label: '한국어' },
-  { code: 'zh', label: '中文' },
-] as const;
+const TOUR_LANGUAGES = SUPPORTED_LANGUAGES;
 
 type TourLanguageCode = (typeof TOUR_LANGUAGES)[number]['code'];
-type LocalizedTourNameField = `name_${Exclude<TourLanguageCode, 'vi'>}`;
-type LocalizedTourDescriptionField = `description_${Exclude<TourLanguageCode, 'vi'>}`;
+type LocalizedTourNameField = `name_${Exclude<Language, 'vi'>}`;
+type LocalizedTourDescriptionField = `description_${Exclude<Language, 'vi'>}`;
 type TranslationUpdates = Partial<
   Record<LocalizedTourNameField | LocalizedTourDescriptionField, string>
 >;
@@ -26,19 +20,29 @@ type TourFormState = TourPayload & {
   is_active: boolean;
 };
 
+function createEmptyTourTranslations(): Record<`name_${Language}` | `description_${Language}`, string> {
+  return Object.fromEntries(
+    TOUR_LANGUAGES.flatMap((language) => [
+      [`name_${language.code}`, ''],
+      [`description_${language.code}`, ''],
+    ])
+  ) as Record<`name_${Language}` | `description_${Language}`, string>;
+}
+
+function getTourTranslations(tour: Tour): Record<`name_${Language}` | `description_${Language}`, string> {
+  return Object.fromEntries(
+    TOUR_LANGUAGES.flatMap((language) => [
+      [`name_${language.code}`, tour[`name_${language.code}` as keyof Tour] ?? ''],
+      [
+        `description_${language.code}`,
+        tour[`description_${language.code}` as keyof Tour] ?? '',
+      ],
+    ])
+  ) as Record<`name_${Language}` | `description_${Language}`, string>;
+}
+
 const EMPTY_FORM: TourFormState = {
-  name_vi: '',
-  name_en: '',
-  name_ja: '',
-  name_fr: '',
-  name_ko: '',
-  name_zh: '',
-  description_vi: '',
-  description_en: '',
-  description_ja: '',
-  description_fr: '',
-  description_ko: '',
-  description_zh: '',
+  ...createEmptyTourTranslations(),
   cover_image_url: '',
   estimated_duration_min: null,
   poi_ids: [],
@@ -47,18 +51,7 @@ const EMPTY_FORM: TourFormState = {
 
 function tourToFormState(tour: Tour): TourFormState {
   return {
-    name_vi: tour.name_vi,
-    name_en: tour.name_en ?? '',
-    name_ja: tour.name_ja ?? '',
-    name_fr: tour.name_fr ?? '',
-    name_ko: tour.name_ko ?? '',
-    name_zh: tour.name_zh ?? '',
-    description_vi: tour.description_vi ?? '',
-    description_en: tour.description_en ?? '',
-    description_ja: tour.description_ja ?? '',
-    description_fr: tour.description_fr ?? '',
-    description_ko: tour.description_ko ?? '',
-    description_zh: tour.description_zh ?? '',
+    ...getTourTranslations(tour),
     cover_image_url: tour.cover_image_url ?? '',
     estimated_duration_min: tour.estimated_duration_min ?? null,
     poi_ids: tour.poi_ids ?? [],
@@ -76,6 +69,7 @@ export default function AdminToursPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [isTranslating, setIsTranslating] = useState(false);
   const [poiSearchQuery, setPoiSearchQuery] = useState('');
+  const [activeLanguage, setActiveLanguage] = useState<Language>('vi');
 
   async function fetchTours() {
     const response = await fetch(`/api/tours?admin_view=true&t=${Date.now()}`, {
@@ -141,6 +135,7 @@ export default function AdminToursPage() {
     setFormData(EMPTY_FORM);
     setEditingTourId(null);
     setPoiSearchQuery('');
+    setActiveLanguage('vi');
   };
 
   const handleTogglePOI = (poiId: string) => {
@@ -185,6 +180,7 @@ export default function AdminToursPage() {
   const handleEditTour = (tour: Tour) => {
     setEditingTourId(tour.id);
     setFormData(tourToFormState(tour));
+    setActiveLanguage('vi');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -347,7 +343,7 @@ export default function AdminToursPage() {
     const vietnameseDescription = formData.description_vi?.trim() ?? '';
 
     if (!vietnameseName && !vietnameseDescription) {
-      toast.warning('Please enter a Vietnamese name or description before translating.');
+      toast.warning('Vui lòng nhập tên hoặc mô tả tiếng Việt trước khi dịch.');
       return;
     }
 
@@ -367,7 +363,7 @@ export default function AdminToursPage() {
 
       if (!response.ok) {
         const payload = await response.json().catch(() => null);
-        throw new Error(payload?.error || 'Auto-translate failed');
+        throw new Error(payload?.error || 'Dịch tự động thất bại');
       }
 
       const payload = (await response.json()) as {
@@ -393,10 +389,10 @@ export default function AdminToursPage() {
       });
 
       setFormData((prev) => ({ ...prev, ...updates }));
-      toast.success('Translations updated. Please review the content before saving.');
+      toast.success('Đã cập nhật bản dịch. Vui lòng kiểm tra lại trước khi lưu.');
     } catch (error) {
       console.error('[AdminTours] Translate failed:', error);
-      toast.error(error instanceof Error ? error.message : 'Auto-translate failed');
+      toast.error(error instanceof Error ? error.message : 'Dịch tự động thất bại');
     } finally {
       setIsTranslating(false);
     }
@@ -503,45 +499,91 @@ export default function AdminToursPage() {
               </div>
             </div>
 
-            {TOUR_LANGUAGES.map((language) => {
-              const nameKey = `name_${language.code}` as keyof TourFormState;
-              const descriptionKey = `description_${language.code}` as keyof TourFormState;
-
-              return (
-                <div
-                  key={language.code}
-                  className="space-y-3 rounded-xl border border-white/5 bg-black/15 p-4"
-                >
-                  <h3 className="font-semibold text-white">{language.label}</h3>
-                  <div>
-                    <label className="mb-1 block text-xs tracking-wide text-gray-400 uppercase">
-                      Tên tour {language.code === 'vi' ? '*' : ''}
-                    </label>
-                    <input
-                      value={(formData[nameKey] as string) ?? ''}
-                      onChange={(event) =>
-                        setFormData((prev) => ({ ...prev, [nameKey]: event.target.value }))
-                      }
-                      className="w-full rounded-lg border border-white/10 bg-black/20 px-3 py-2 text-sm text-white"
-                      placeholder={`Tên tour (${language.label})`}
-                    />
-                  </div>
-                  <div>
-                    <label className="mb-1 block text-xs tracking-wide text-gray-400 uppercase">
-                      Mô tả ngắn
-                    </label>
-                    <textarea
-                      value={(formData[descriptionKey] as string) ?? ''}
-                      onChange={(event) =>
-                        setFormData((prev) => ({ ...prev, [descriptionKey]: event.target.value }))
-                      }
-                      className="min-h-24 w-full rounded-lg border border-white/10 bg-black/20 px-3 py-2 text-sm text-white"
-                      placeholder={`Mô tả (${language.label})`}
-                    />
-                  </div>
+            {/* language editor */}
+            <div className="space-y-4 rounded-xl border border-white/5 bg-black/15 p-4 md:col-span-2">
+              <div className="flex flex-wrap items-start justify-between gap-4">
+                <div>
+                  <h3 className="font-semibold text-white">Nội dung đa ngôn ngữ</h3>
+                  <p className="mt-1 text-sm text-gray-400">
+                    Chọn một ngôn ngữ để nhập tên và mô tả. Nội dung thiếu sẽ dùng bản
+                    tiếng Việt.
+                  </p>
                 </div>
-              );
-            })}
+                <div className="grid max-h-64 grid-cols-1 gap-2 overflow-y-auto pr-1 sm:grid-cols-2 lg:grid-cols-3">
+                  {TOUR_LANGUAGES.map((language) => {
+                    const nameKey = `name_${language.code}` as keyof TourFormState;
+                    const hasName =
+                      typeof formData[nameKey] === 'string' &&
+                      String(formData[nameKey]).trim().length > 0;
+
+                    return (
+                      <button
+                        key={language.code}
+                        type="button"
+                        onClick={() => setActiveLanguage(language.code)}
+                        className={`rounded-xl border px-3 py-3 text-left transition-colors ${
+                          activeLanguage === language.code
+                            ? 'border-primary bg-primary/15 text-white'
+                            : 'border-white/10 bg-black/20 text-gray-200 hover:bg-white/5'
+                        }`}
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div>
+                            <p className="text-sm font-semibold">{language.nativeName}</p>
+                            <p className="mt-1 text-xs text-white/55">{language.name}</p>
+                          </div>
+                          <span
+                            className={`rounded-full px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] ${
+                              hasName ? 'bg-emerald-500/15 text-emerald-300' : 'bg-white/8 text-white/55'
+                            }`}
+                          >
+                            {language.shortLabel}
+                          </span>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {(() => {
+                const currentLanguage =
+                  TOUR_LANGUAGES.find((item) => item.code === activeLanguage) ?? TOUR_LANGUAGES[0]!;
+                const nameKey = `name_${currentLanguage.code}` as keyof TourFormState;
+                const descriptionKey = `description_${currentLanguage.code}` as keyof TourFormState;
+
+                return (
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div>
+                      <label className="mb-1 block text-xs tracking-wide text-gray-400 uppercase">
+                        Tên tour {currentLanguage.code === 'vi' ? '*' : ''}
+                      </label>
+                      <input
+                        value={(formData[nameKey] as string) ?? ''}
+                        onChange={(event) =>
+                          setFormData((prev) => ({ ...prev, [nameKey]: event.target.value }))
+                        }
+                        className="w-full rounded-lg border border-white/10 bg-black/20 px-3 py-2 text-sm text-white"
+                        placeholder={`Tên tour (${currentLanguage.nativeName})`}
+                      />
+                    </div>
+                    <div>
+                      <label className="mb-1 block text-xs tracking-wide text-gray-400 uppercase">
+                        Mô tả ngắn
+                      </label>
+                      <textarea
+                        value={(formData[descriptionKey] as string) ?? ''}
+                        onChange={(event) =>
+                          setFormData((prev) => ({ ...prev, [descriptionKey]: event.target.value }))
+                        }
+                        className="min-h-24 w-full rounded-lg border border-white/10 bg-black/20 px-3 py-2 text-sm text-white"
+                        placeholder={`Mô tả (${currentLanguage.nativeName})`}
+                      />
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
           </div>
 
           <div className="space-y-4">

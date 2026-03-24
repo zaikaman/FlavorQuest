@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useToast } from '@/components/ui/ToastProvider';
+import { LANGUAGE_CONFIG_MAP } from '@/lib/constants';
 
 interface TTSGeneratorProps {
     text: string;
@@ -67,15 +68,7 @@ export function TTSGenerator({
     };
 
     const getFullLanguageCode = (code: string) => {
-        switch (code) {
-            case 'vi': return 'vi-VN';
-            case 'en': return 'en-US';
-            case 'ja': return 'ja-JP';
-            case 'fr': return 'fr-FR';
-            case 'ko': return 'ko-KR';
-            case 'zh': return 'cmn-CN';
-            default: return 'en-US';
-        }
+        return LANGUAGE_CONFIG_MAP[code as keyof typeof LANGUAGE_CONFIG_MAP]?.ttsLang ?? 'en-US';
     };
 
     return (

@@ -1,0 +1,517 @@
+{
+  "app": {
+    "name": "FlavorQuest",
+    "tagline": "Откройте кухню Винь Кхань через аудио"
+  },
+  "metadata": {
+    "title": "FlavorQuest - Откройте кухню Винь Кхань",
+    "description": "Автоматический аудиотур по гастрономической улице Винь Кхань, Кантхо. PWA с приоритетом офлайн и поддержкой нескольких языков.",
+    "keywords": [
+      "гастрономический тур",
+      "аудиогид",
+      "Винь Кхань",
+      "Кантхо",
+      "кухня",
+      "PWA"
+    ]
+  },
+  "manifest": {
+    "name": "FlavorQuest - Автоматический аудиогид",
+    "shortName": "FlavorQuest",
+    "description": "Откройте гастрономическую улицу Винь Кхань с автоматическим аудиосопровождением по геолокации. Поддержка 18 языков, работает офлайн.",
+    "shortcuts": {
+      "startTour": {
+        "name": "Начать тур",
+        "description": "Начать автоматический тур"
+      },
+      "viewMap": {
+        "name": "Посмотреть карту",
+        "description": "Посмотреть карту точек интереса"
+      }
+    }
+  },
+  "common": {
+    "loading": "Загрузка...",
+    "error": "Ошибка",
+    "retry": "Повторить",
+    "cancel": "Отмена",
+    "confirm": "Подтвердить",
+    "save": "Сохранить",
+    "close": "Закрыть",
+    "back": "Назад",
+    "next": "Далее",
+    "done": "Готово",
+    "yes": "Да",
+    "no": "Нет",
+    "allow": "Разрешить",
+    "deny": "Отклонить",
+    "browse": "Просмотр",
+    "privacyPolicy": "Политика конфиденциальности"
+  },
+  "list": {
+    "searchPlaceholder": "Ищите улиток, морепродукты, бань ми...",
+    "notFoundTitle": "Не найдено",
+    "notFoundDesc": "Попробуйте поиск с другими ключевыми словами",
+    "offlineBadge": "Офлайн"
+  },
+  "categories": {
+    "all": "Все",
+    "snails": "Улитки",
+    "seafood": "Морепродукты",
+    "grill": "На гриле",
+    "nearMe": "Рядом"
+  },
+  "tour": {
+    "startTour": "Начать тур",
+    "pauseTour": "Пауза",
+    "resumeTour": "Продолжить",
+    "stopTour": "Остановить тур",
+    "autoMode": "Автоматический режим",
+    "manualMode": "Ручной режим",
+    "auto": "Авто",
+    "manual": "Вручную",
+    "loadingPOIs": "Загрузка точек интереса...",
+    "searchingPOIs": "Поиск ближайших точек...",
+    "nearbyPOIs": "Ближайшие точки",
+    "currentLocation": "Текущее местоположение",
+    "distance": "Расстояние",
+    "nowPlaying": "Сейчас играет: {name}",
+    "syncedEvents": "Синхронизировано {count} событий",
+    "dataSaved": "Данные сохранены, доступны офлайн",
+    "usingTTS": "Используется синтез речи (офлайн)",
+    "tooFast": "Вы движетесь слишком быстро. Пожалуйста, идите пешком для прослушивания.",
+    "locationDenied": "Доступ к геолокации отклонён. Переключаемся в ручной режим.",
+    "httpsRequired": "Ошибка: GPS требует HTTPS. Используйте localhost или установите SSL.",
+    "gpsError": "Ошибка GPS: {message}",
+    "noAudioForPOI": "Нет аудио для этой локации",
+    "tapToResumeAudio": "Нажмите на экран, чтобы продолжить аудио",
+    "invalidSelectedTour": "Выбранный тур недоступен",
+    "stoppedOutsideSelectedTour": "Аудио остановлено, так как точка вне выбранного тура"
+  },
+  "tourSelector": {
+    "title": "Слушать по туру",
+    "subtitle": "Выберите тур, чтобы показывались только его точки",
+    "show": "Развернуть",
+    "hide": "Свернуть",
+    "collapsedHint": "Разверните, чтобы выбрать или сменить тур",
+    "allOption": "Все точки",
+    "allDescription": "Показать все активные точки",
+    "clear": "Сброс",
+    "loading": "Загрузка туров...",
+    "empty": "Нет доступных туров.",
+    "poiCount": "{count} точек",
+    "duration": "{count} минут",
+    "selectedSummary": "Показ {count} точек из выбранного тура",
+    "allSummary": "Показ {count} активных точек"
+  },
+  "audio": {
+    "play": "Воспроизвести",
+    "pause": "Пауза",
+    "stop": "Стоп",
+    "replay": "Повтор",
+    "volume": "Громкость",
+    "speed": "Скорость",
+    "loading": "Загрузка аудио...",
+    "error": "Не удалось воспроизвести аудио",
+    "noAudio": "Аудио отсутствует",
+    "useTTS": "Использовать синтез речи"
+  },
+  "location": {
+    "requesting": "Запрос местоположения...",
+    "denied": "Доступ к геолокации отклонён",
+    "unavailable": "Местоположение недоступно",
+    "timeout": "Таймаут",
+    "enableLocation": "Включить геолокацию",
+    "accuracy": "Точность",
+    "lastUpdate": "Последнее обновление"
+  },
+  "settings": {
+    "title": "Настройки",
+    "language": "Язык",
+    "volume": "Громкость",
+    "autoMode": "Автовоспроизведение",
+    "geofenceRadius": "Радиус активации",
+    "ttsEnabled": "Синтез речи",
+    "ttsRate": "Скорость речи",
+    "ttsPitch": "Тон голоса",
+    "mapType": "Тип карты",
+    "showVisitedPOIs": "Показывать посещенные точки",
+    "batteryOptimization": "Оптимизация батареи",
+    "geofenceClose": "Близко (точно)",
+    "geofenceFar": "Далеко (широко)",
+    "tourExperience": "Опыт тура",
+    "account": "Аккаунт",
+    "signOut": "Выйти",
+    "signingOut": "Выход...",
+    "signOutConfirm": "Вы уверены, что хотите выйти?",
+    "signOutFailed": "Не удалось выйти. Повторите попытку.",
+    "deviceProfileTitle": "Профиль устройства",
+    "deviceProfileDescription": "FlavorQuest настраивает движения карты, детализацию и загрузку в фоне в зависимости от вашего устройства.",
+    "deviceProfileDetectedLabel": "Определено как",
+    "deviceProfileAppliedLabel": "Активный профиль",
+    "deviceProfileSystem": "Авто",
+    "deviceProfileLight": "Лёгкий",
+    "deviceProfileBalanced": "Сбалансированный",
+    "deviceProfileFull": "Полный",
+    "deviceProfileAutoDescription": "Автоматический баланс между движением карты, детализацией и фоновыми загрузками.",
+    "deviceProfileLightDescription": "Минимум эффектов и фоновых загрузок для экономии заряда и стабильности.",
+    "deviceProfileBalancedDescription": "Плавная работа для большинства устройств без перегрузок.",
+    "deviceProfileFullDescription": "Приоритет плавности и кеширования при достаточных ресурсах.",
+    "deviceProfileUnknown": "Неизвестно",
+    "deviceProfileMotionReduced": "Ограниченное движение",
+    "deviceProfileMotionStandard": "Стандартное движение",
+    "deviceProfileBatteryHint": "Режим энергосбережения делает профиль осторожнее."
+  },
+  "history": {
+    "title": "История",
+    "visited": "Посещено",
+    "notVisited": "Не посещено",
+    "visitedAt": "Посещено в",
+    "clear": "Очистить историю",
+    "empty": "История пуста",
+    "justNow": "Только что",
+    "minsAgo": "{mins} минут назад",
+    "hoursAgo": "{hours} часов назад",
+    "today": "Сегодня, {time}",
+    "yesterday": "Вчера, {time}",
+    "listened": "Прослушано"
+  },
+  "map": {
+    "title": "Карта",
+    "zoomIn": "Приблизить",
+    "zoomOut": "Отдалить",
+    "centerMap": "По центру",
+    "fullscreen": "На весь экран",
+    "layers": "Слои",
+    "loadingMap": "Загрузка карты..."
+  },
+  "poi": {
+    "details": "Подробности",
+    "signatureDish": "Фирменное блюдо",
+    "funFact": "Интересный факт",
+    "estimatedHours": "Часы работы",
+    "directions": "Маршрут",
+    "playAudio": "Прослушать аудио",
+    "viewOnMap": "Показать на карте",
+    "cuisine": "Кухня",
+    "upNext": "Следующий объект",
+    "district4": "Район 4, Хошимин",
+    "transcript": "Транскрипция",
+    "estimatedWalk": "3 минуты пешком"
+  },
+  "offline": {
+    "status": "Офлайн",
+    "ready": "Доступно офлайн",
+    "syncing": "Синхронизация...",
+    "syncComplete": "Синхронизировано",
+    "cacheSize": "Размер кэша",
+    "clearCache": "Очистить кэш",
+    "usingCachedData": "Используется кэш",
+    "limitedFeatures": "Часть функций недоступна",
+    "uploading": "Загрузка на сервер",
+    "syncError": "Ошибка синхронизации",
+    "retrySync": "Нажмите, чтобы повторить",
+    "pendingSync": "Ожидание синхронизации",
+    "pendingItems": "{count} элементов в очереди",
+    "online": "Онлайн",
+    "synced": "Синхронизировано",
+    "offlineMode": "Офлайн режим",
+    "noConnection": "Нет соединения",
+    "statusLabel": "Статус",
+    "lastSync": "Последняя синхронизация",
+    "notSyncedYet": "Не синхронизировано",
+    "syncNow": "Синхронизировать",
+    "tapToSync": "Нажмите для синхронизации",
+    "downloadingAudio": "Скачивание аудио офлайн",
+    "downloadingContent": "Скачивание офлайн контента",
+    "audioReady": "Аудио готово",
+    "audioDownloaded": "Аудио скачано для офлайн",
+    "downloadError": "Ошибка загрузки",
+    "retry": "Повторить",
+    "noAudioCache": "Аудио офлайн отсутствует. Подключитесь для загрузки.",
+    "updateCache": "Обновить кэш",
+    "downloadPromptTitle": "Скачать офлайн контент?",
+    "downloadPromptDesc": "Скачать аудио и изображения для работы без сети?",
+    "downloadPromptNote": "Это можно изменить в настройках в любое время.",
+    "downloadNow": "Скачать сейчас",
+    "downloadLater": "Позже",
+    "downloadStarted": "Начало загрузки офлайн контента...",
+    "poisLabel": "точки интереса",
+    "audioLabel": "Аудио",
+    "imageLabel": "Изображения",
+    "successTitle": "Готово",
+    "successMessage": "Контент успешно загружен."
+  },
+  "battery": {
+    "level": "Заряд",
+    "charging": "Зарядка",
+    "notCharging": "Не заряжается",
+    "lowPowerMode": "Энергосбережение",
+    "recommendation": "Рекомендация",
+    "warning": "Низкий заряд! Возможны ограничения."
+  },
+  "speed": {
+    "stationary": "Стою",
+    "walking": "Иду",
+    "jogging": "Бег трусцой",
+    "running": "Бегу",
+    "vehicle": "В транспорте",
+    "tooFast": "Вы движетесь слишком быстро. Идите пешком для лучшего опыта."
+  },
+  "errors": {
+    "generic": "Произошла ошибка",
+    "network": "Ошибка сети",
+    "locationDenied": "Нужен доступ к геолокации",
+    "audioPlayback": "Не удалось воспроизвести аудио",
+    "storageQuota": "Память заполнена. Очистите данные.",
+    "unsupported": "Браузер не поддерживает функцию"
+  },
+  "welcome": {
+    "title": "Добро пожаловать в FlavorQuest!",
+    "description": "Откройте гастрономическую улицу Винь Кхань с автоматическим аудиосопровождением",
+    "step1": "Включите GPS",
+    "step2": "Отправьтесь на улицу Винь Кхань",
+    "step3": "Аудио играет автоматически рядом с точками еды",
+    "getStarted": "Начать"
+  },
+  "splash": {
+    "subtitle": "Откройте гастрономическое путешествие по Винь Кхань",
+    "startTour": "Начать тур",
+    "browse": "Просмотр вручную",
+    "settings": "Настройки"
+  },
+  "login": {
+    "title": "Вход в FlavorQuest",
+    "subtitle": "Сохраняйте прогресс и синхронизируйте опыт",
+    "prompt": "Введите email для получения OTP",
+    "signInWithGoogle": "Войти с Google",
+    "customer": "Клиент",
+    "owner": "Владелец",
+    "selectedType": "Выбранный тип аккаунта: {type}",
+    "ownerApprovalNote": "Вход владельцев требует утверждения админом. После подтверждения OTP вы перейдете на экран чата с админом.",
+    "emailLabel": "Email",
+    "emailPlaceholder": "you@example.com",
+    "otpLabel": "Код OTP",
+    "otpPlaceholder": "123456",
+    "sendOtp": "Отправить код",
+    "sendingOtp": "Отправка...",
+    "resendOtp": "Отправить повторно",
+    "resendIn": "Отправить через {seconds}с",
+    "verifyOtp": "Проверить и войти",
+    "verifyingOtp": "Проверка...",
+    "codeSent": "Код отправлен на email.",
+    "codeSentTo": "Код отправлен на {email}",
+    "invalidEmail": "Введите корректный email.",
+    "invalidOtp": "Введите 6-значный код.",
+    "sendOtpError": "Ошибка отправки кода.",
+    "verifyOtpError": "Ошибка проверки кода.",
+    "adminPortalRequired": "Аккаунт админа требует входа через портал.",
+    "changeEmailHint": "Можно изменить email и отправить код заново.",
+    "or": "или",
+    "backToHome": "Назад",
+    "error": "Ошибка входа"
+  },
+  "pendingOwner": {
+    "eyebrow": "Зона ожидания владельцев",
+    "titlePending": "Аккаунт ожидает утверждения админом",
+    "titleRejected": "Запрос требует дополнительного обсуждения",
+    "subtitlePending": "Аккаунт в режиме ожидания, клиентская и владельческая зоны недоступны. Следите за чатом ниже для обновлений.",
+    "subtitleRejected": "Админ отклонил запрос. Можно продолжить переписку для уточнений.",
+    "statusLabel": "Статус",
+    "statusPending": "В ожидании",
+    "statusRejected": "Отклонено",
+    "customerAreaLabel": "Навигация",
+    "customerCta": "Назад к приветствию",
+    "customerHint": "До одобрения возможен только просмотр статуса и чат с админом.",
+    "steps": {
+      "request": {
+        "title": "Запрос принят",
+        "body": "Система открыла чат с админом для возможных уточнений."
+      },
+      "review": {
+        "title": "Админ проверит через чат",
+        "body": "Следите за сообщениями, чтобы быстро ответить."
+      },
+      "reviewRejected": {
+        "body": "Запрос отклонен. Можно продолжить разговор для уточнений."
+      },
+      "workspace": {
+        "title": "Зона владельца откроется после одобрения",
+        "body": "После одобрения войдете в зону владельца. Без назначенных точек она будет пустой."
+      }
+    }
+  },
+  "menu": {
+    "title": "Меню",
+    "empty": "Меню не обновлено.",
+    "addToCart": "Добавить",
+    "quantity": "Количество",
+    "cart": "Заказ",
+    "placeOrder": "Оформить заказ",
+    "placePickupOrder": "Заказ на самовывоз",
+    "placeDeliveryOrder": "Заказ на доставку",
+    "pickup": "Самовывоз",
+    "pickupDescription": "Заберите заказ в заведении, оплата при получении.",
+    "delivery": "Доставка",
+    "deliveryDescription": "Доставка по адресу, оплата при получении.",
+    "subtotal": "Итого: {amount}đ",
+    "pickupTime": "Время самовывоза",
+    "pickupTimeFuture": "Выберите будущую дату самовывоза",
+    "deliveryTimeFuture": "Выберите дату доставки",
+    "customerName": "Имя",
+    "customerPhone": "Телефон",
+    "deliveryAddress": "Адрес",
+    "deliveryContactRequired": "Введите имя, телефон и адрес",
+    "note": "Примечание",
+    "success": "Заказ оформлен",
+    "pickupSuccess": "Самовывоз оформлен",
+    "deliverySuccess": "Доставка оформлена"
+  },
+  "chatbot": {
+    "badge": "Умный помощник",
+    "title": "Помощник FlavorQuest",
+    "subtitle": "Советы по блюдам, остановкам и поддержка во время поездки.",
+    "welcome": "Я могу предложить блюда и остановки, а также ответить на частые вопросы.",
+    "inputPlaceholder": "Спросите о блюдах, маршруте или приложении...",
+    "open": "Открыть",
+    "close": "Закрыть",
+    "openPage": "Открыть страницу",
+    "nav": "Помощник",
+    "pageTitle": "Ассистент",
+    "pageSubtitle": "Отдельное окно для помощи без закрытия карты.",
+    "backToTour": "Назад к туру",
+    "pageInfoTitle": "Что спросить",
+    "pageInfoBody": "Использует данные FlavorQuest для советов и ответов.",
+    "thinking": "Думаю...",
+    "error": "Помощник недоступен.",
+    "footer": "Советы основаны на FlavorQuest.",
+    "newChat": "Новый чат",
+    "historyEmpty": "Нет диалогов",
+    "loadingHistory": "Загрузка истории...",
+    "suggestions": {
+      "food": "Что попробовать сегодня?",
+      "route": "С чего начать первый визит?",
+      "faq": "Есть ли офлайн и предзаказ?"
+    }
+  },
+  "support": {
+    "nav": "Сообщения",
+    "openPage": "Открыть сообщения",
+    "customer": {
+      "eyebrow": "Чат поддержки",
+      "title": "Написать заведению или админу",
+      "subtitle": "Можно писать заведению или админу.",
+      "emptyTitle": "Нет сообщений.",
+      "emptyBody": "Выберите чат."
+    },
+    "owner": {
+      "eyebrow": "Входящие",
+      "title": "Сообщения от клиентов и админа",
+      "subtitle": "Следите за сообщениями.",
+      "emptyTitle": "Нет писем.",
+      "emptyBody": "Диалоги будут здесь."
+    },
+    "admin": {
+      "eyebrow": "Поддержка",
+      "title": "Общение с клиентами и владельцами",
+      "subtitle": "Запросы собираются здесь.",
+      "emptyTitle": "Пусто.",
+      "emptyBody": "Новые запросы появятся здесь."
+    },
+    "stats": {
+      "activeThreads": "Активные",
+      "activeThreadsBody": "Каждый чат на отдельной странице.",
+      "unreadThreads": "Требуют ответа",
+      "unreadThreadsBody": "Получатель получает email."
+    },
+    "launchpad": {
+      "title": "Начать чат",
+      "body": "Выберите получателя."
+    },
+    "inbox": {
+      "title": "Список чатов",
+      "body": "Непрочитанные вверху."
+    },
+    "threadTypes": {
+      "customerOwner": "Клиент/Владелец",
+      "customerAdmin": "Клиент/Админ",
+      "ownerAdmin": "Владелец/Админ"
+    },
+    "states": {
+      "creating": "Создание...",
+      "waitingFirstMessage": "Нет сообщений.",
+      "noThreadSelected": "Выберите чат.",
+      "noThreadSelectedBody": "Можно также создать новый.",
+      "noMessages": "Сообщений нет.",
+      "noMessagesBody": "Напишите первое."
+    },
+    "actions": {
+      "openThread": "Открыть",
+      "startThread": "Начать",
+      "refresh": "Обновить",
+      "sending": "Отправка...",
+      "send": "Отправить"
+    },
+    "counterparts": {
+      "admin": "Команда админов",
+      "unknown": "Получатель",
+      "adminShort": "Админ",
+      "ownerShort": "Владелец",
+      "customerShort": "Клиент"
+    },
+    "thread": {
+      "title": "Чат",
+      "poiContext": "Чат связан с {name}",
+      "emailHint": "Новые сообщения также на email.",
+      "emailBadge": "Уведомления по email"
+    },
+    "composer": {
+      "placeholder": "Введите сообщение...",
+      "hint": "Ответы приходят сюда и на email."
+    },
+    "errors": {
+      "loadThreads": "Ошибка загрузки чатов.",
+      "loadMessages": "Ошибка загрузки сообщений.",
+      "createThread": "Ошибка создания чата.",
+      "sendMessage": "Ошибка отправки."
+    }
+  },
+  "notifications": {
+    "title": "Уведомления",
+    "markAll": "Отметить прочитанным",
+    "empty": "Нет уведомлений"
+  },
+  "owner": {
+    "title": "Панель владельца",
+    "subtitle": "Управляйте точками, меню и заказами",
+    "myPois": "Мои точки",
+    "orders": "Заказы",
+    "menu": "Меню",
+    "noPoi": "Нет назначенных точек. Свяжитесь с админом."
+  },
+  "poiDetail": {
+    "notFound": "Локация не найдена",
+    "notFoundMessage": "Локация удалена или отсутствует.",
+    "playNarration": "Воспроизвести",
+    "introduction": "Введение",
+    "noDescription": "Описание отсутствует",
+    "didYouKnow": "Знаете ли вы?",
+    "nowPlaying": "Сейчас играет: {name}",
+    "errorPlaying": "Ошибка аудио, используется TTS"
+  },
+  "permissions": {
+    "checking": "Проверка доступа...",
+    "locationTitle": "Разрешите геолокацию для аудио возле заведений",
+    "locationDesc": "Лучший опыт при автоматическом определении местоположения.",
+    "denyPrompt": "Отклонить?",
+    "switchToManual": "Переключиться вручную"
+  },
+  "units": {
+    "meters": "м",
+    "kilometers": "км",
+    "number": "№"
+  },
+  "sort": {
+    "az": "А-Я"
+  }
+}

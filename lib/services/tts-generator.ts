@@ -3,6 +3,8 @@
  * Generate audio files from text using Azure OpenAI gpt-4o-mini-tts
  */
 
+import { LANGUAGE_CONFIG_MAP } from '@/lib/constants';
+
 interface TTSRequest {
     text: string;
     languageCode: string; // Keep for compatibility, though OpenAI models are multilingual
@@ -69,15 +71,7 @@ function isValidOpenAIVoice(name?: string): boolean {
  * OpenAI voices are multilingual, so we map loosely to preferences or cycle them.
  */
 export function getRecommendedVoice(language: string): string {
-    switch (language) {
-        case 'vi': return 'alloy';
-        case 'en': return 'echo';
-        case 'ja': return 'shimmer';
-        case 'fr': return 'fable';
-        case 'ko': return 'nova';
-        case 'zh': return 'onyx';
-        default: return 'alloy';
-    }
+    return LANGUAGE_CONFIG_MAP[language as keyof typeof LANGUAGE_CONFIG_MAP]?.voice ?? 'alloy';
 }
 
 export function getGoogleLanguageCode(language: string): string {

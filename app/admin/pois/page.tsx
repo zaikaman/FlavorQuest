@@ -6,48 +6,32 @@ import { useEffect, useMemo, useState } from 'react';
 import { TableSkeleton } from '@/components/ui/Loading';
 import { useToast } from '@/components/ui/ToastProvider';
 import {
+  SUPPORTED_LANGUAGE_CODES,
+  SUPPORTED_LANGUAGES,
+  getLocalizedFieldName,
+} from '@/lib/constants';
+import {
   POI_CATEGORY_OPTIONS,
   type POICategoryTag,
 } from '@/lib/constants/poiCategories';
-import type { POI } from '@/lib/types/index';
+import type { Language, POI } from '@/lib/types/index';
 
 interface OwnerOption {
   id: string;
   email: string;
 }
 
-type AudioLanguage = 'vi' | 'en' | 'ja' | 'fr' | 'ko' | 'zh';
-type AudioFieldKey =
-  | 'audio_url_vi'
-  | 'audio_url_en'
-  | 'audio_url_ja'
-  | 'audio_url_fr'
-  | 'audio_url_ko'
-  | 'audio_url_zh';
+type AudioLanguage = Language;
 type AssignmentFilter = 'all' | 'assigned' | 'unassigned';
 type CoverageFilter = 'all' | 'ready' | 'missing-image' | 'missing-audio' | 'needs-attention';
 type SortOption = 'updated-desc' | 'updated-asc' | 'name-asc' | 'name-desc';
 
-const AUDIO_LANGUAGES: AudioLanguage[] = ['vi', 'en', 'ja', 'fr', 'ko', 'zh'];
+const AUDIO_LANGUAGES: AudioLanguage[] = [...SUPPORTED_LANGUAGE_CODES];
+const AUDIO_LANGUAGE_META = new Map(SUPPORTED_LANGUAGES.map((language) => [language.code, language]));
 const PAGE_SIZE = 10;
 
-function getAudioFieldKey(lang: AudioLanguage): AudioFieldKey {
-  switch (lang) {
-    case 'vi':
-      return 'audio_url_vi';
-    case 'en':
-      return 'audio_url_en';
-    case 'ja':
-      return 'audio_url_ja';
-    case 'fr':
-      return 'audio_url_fr';
-    case 'ko':
-      return 'audio_url_ko';
-    case 'zh':
-      return 'audio_url_zh';
-    default:
-      return 'audio_url_vi';
-  }
+function getAudioFieldKey(lang: AudioLanguage) {
+  return getLocalizedFieldName('audio_url', lang) as keyof POI;
 }
 
 function formatTimestamp(value?: string) {
@@ -436,7 +420,9 @@ export default function POIsPage() {
               Chưa hoàn chỉnh
             </span>
           </div>
-          <p className="mt-3 text-sm text-gray-400">Dựa trên đủ 6 ngôn ngữ audio để ưu tiên hoàn thiện nội dung.</p>
+          <p className="mt-3 text-sm text-gray-400">
+            Dựa trên đủ {AUDIO_LANGUAGES.length} ngôn ngữ audio để ưu tiên hoàn thiện nội dung.
+          </p>
         </article>
 
         <article className="rounded-[24px] border border-white/10 bg-[#2c1e16] p-5">
@@ -700,10 +686,11 @@ export default function POIsPage() {
                       </div>
                     </div>
                   </div>
-
                   <div className="space-y-3 rounded-[20px] border border-white/8 bg-black/15 p-4">
                     <div>
-                      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500">Chủ quán</p>
+                      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500">
+                        Chủ quán
+                      </p>
                       <p className="mt-2 truncate text-sm font-semibold text-white" title={ownerEmail}>
                         {ownerEmail}
                       </p>
@@ -724,7 +711,9 @@ export default function POIsPage() {
 
                   <div className="space-y-3 rounded-[20px] border border-white/8 bg-black/15 p-4">
                     <div>
-                      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500">Audio</p>
+                      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500">
+                        Audio
+                      </p>
                       <p className="mt-2 text-sm font-semibold text-white">
                         {completeAudioCount}/{AUDIO_LANGUAGES.length} ngôn ngữ
                       </p>
@@ -732,6 +721,7 @@ export default function POIsPage() {
                     <div className="flex flex-wrap gap-2">
                       {AUDIO_LANGUAGES.map((lang) => {
                         const available = Boolean(poi[getAudioFieldKey(lang)]);
+                        const languageMeta = AUDIO_LANGUAGE_META.get(lang);
 
                         return (
                           <span
@@ -741,15 +731,21 @@ export default function POIsPage() {
                                 ? 'bg-emerald-500/15 text-emerald-300'
                                 : 'bg-white/8 text-gray-400'
                             }`}
-                            title={available ? `${lang} đã có audio` : `${lang} chưa có audio`}
+                            title={languageMeta?.nativeName ?? lang}
                           >
-                            <span className={`h-1.5 w-1.5 rounded-full ${available ? 'bg-emerald-300' : 'bg-gray-500'}`} />
-                            {lang}
+                            <span
+                              className={`h-1.5 w-1.5 rounded-full ${
+                                available ? 'bg-emerald-300' : 'bg-gray-500'
+                              }`}
+                            />
+                            {languageMeta?.shortLabel ?? lang.toUpperCase()}
                           </span>
                         );
                       })}
                     </div>
-                    <p className="text-xs text-gray-500">Cập nhật lần cuối {formatTimestamp(poi.updated_at)}</p>
+                    <p className="text-xs text-gray-500">
+                      Cập nhật lần cuối {formatTimestamp(poi.updated_at)}
+                    </p>
                   </div>
 
                   <div className="flex flex-row gap-2 xl:flex-col">

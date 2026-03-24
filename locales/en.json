@@ -4,8 +4,8 @@
     "tagline": "Discover Vinh Khanh cuisine through audio"
   },
   "metadata": {
-    "title": "FlavorQuest - Discover Vinh Khanh Food Street",
-    "description": "Automatic location-based audio tour of Vinh Khanh food street, Can Tho. Offline-first PWA with multi-language support.",
+    "title": "FlavorQuest - Discover Vinh Khanh Cuisine",
+    "description": "Automatic guided audio tour to explore Vinh Khanh food street, Can Tho. Offline-first PWA with multi-language support.",
     "keywords": [
       "food tour",
       "audio guide",
@@ -18,7 +18,7 @@
   "manifest": {
     "name": "FlavorQuest - Automatic Audio Tour Experience",
     "shortName": "FlavorQuest",
-    "description": "Discover Vinh Khanh food street with location-based automatic audio narration. Supports 6 languages, works offline.",
+    "description": "Explore Vinh Khanh food street with location-based automatic audio narration. Supports 18 languages, works offline.",
     "shortcuts": {
       "startTour": {
         "name": "Start Tour",
@@ -26,7 +26,7 @@
       },
       "viewMap": {
         "name": "View Map",
-        "description": "View tour map"
+        "description": "View map of attractions"
       }
     }
   },
@@ -51,7 +51,7 @@
   "list": {
     "searchPlaceholder": "Search for snails, seafood, banh mi...",
     "notFoundTitle": "Not Found",
-    "notFoundDesc": "Try searching with different keywords",
+    "notFoundDesc": "Try searching with another keyword",
     "offlineBadge": "Offline"
   },
   "categories": {
@@ -66,41 +66,41 @@
     "pauseTour": "Pause",
     "resumeTour": "Resume",
     "stopTour": "Stop Tour",
-    "autoMode": "Auto Mode",
+    "autoMode": "Automatic Mode",
     "manualMode": "Manual Mode",
-    "auto": "Auto",
+    "auto": "Automatic",
     "manual": "Manual",
     "loadingPOIs": "Loading locations...",
-    "searchingPOIs": "Searching for nearby spots...",
+    "searchingPOIs": "Searching for nearby points...",
     "nearbyPOIs": "Nearby Points",
     "currentLocation": "Current Location",
     "distance": "Distance",
-    "nowPlaying": "Now Playing: {name}",
+    "nowPlaying": "Now playing: {name}",
     "syncedEvents": "Synced {count} events",
     "dataSaved": "Data saved, ready for offline",
     "usingTTS": "Using text-to-speech (offline)",
-    "tooFast": "Moving too fast. Please walk to listen to narration.",
+    "tooFast": "You are moving too fast. Please walk to hear the narration.",
     "locationDenied": "Location denied. Switching to manual mode.",
     "httpsRequired": "Error: GPS requires HTTPS. Please use localhost or install SSL.",
     "gpsError": "GPS Error: {message}",
-    "noAudioForPOI": "No audio available for this location",
-    "tapToResumeAudio": "Tap the screen to continue the narration",
+    "noAudioForPOI": "No audio for this location",
+    "tapToResumeAudio": "Tap the screen to continue narration",
     "invalidSelectedTour": "The selected tour is no longer available",
-    "stoppedOutsideSelectedTour": "Audio stopped because this POI is outside the selected tour"
+    "stoppedOutsideSelectedTour": "Audio stopped because the POI is outside the selected tour"
   },
   "tourSelector": {
     "title": "Listen by tour",
-    "subtitle": "Choose a tour to show only the POIs in that itinerary",
+    "subtitle": "Choose a tour to only show POIs from that route",
     "show": "Expand",
     "hide": "Collapse",
-    "collapsedHint": "Expand to quickly choose or switch tours",
+    "collapsedHint": "Expand to quickly select or change tours",
     "allOption": "All locations",
-    "allDescription": "Show every active POI",
+    "allDescription": "Show all active POIs",
     "clear": "Clear",
-    "loading": "Loading tours...",
-    "empty": "No tour is available right now.",
+    "loading": "Loading tour list...",
+    "empty": "There are currently no tours open.",
     "poiCount": "{count} POIs",
-    "duration": "{count} min",
+    "duration": "{count} minutes",
     "selectedSummary": "Showing {count} POIs from the selected tour",
     "allSummary": "Showing {count} active POIs"
   },
@@ -110,9 +110,9 @@
     "stop": "Stop",
     "replay": "Replay",
     "volume": "Volume",
-    "speed": "Playback Speed",
+    "speed": "Playback speed",
     "loading": "Loading audio...",
-    "error": "Cannot play audio",
+    "error": "Unable to play audio",
     "noAudio": "No audio available",
     "useTTS": "Use text-to-speech"
   },
@@ -120,57 +120,57 @@
     "requesting": "Requesting location...",
     "denied": "Location access denied",
     "unavailable": "Location unavailable",
-    "timeout": "Request timeout",
-    "enableLocation": "Enable Location",
+    "timeout": "Request timed out",
+    "enableLocation": "Enable location",
     "accuracy": "Accuracy",
-    "lastUpdate": "Last Updated"
+    "lastUpdate": "Last updated"
   },
   "settings": {
     "title": "Settings",
     "language": "Language",
     "volume": "Volume",
-    "autoMode": "Auto Play",
-    "geofenceRadius": "Trigger Radius",
-    "ttsEnabled": "Text-to-Speech",
-    "ttsRate": "Speech Rate",
-    "ttsPitch": "Speech Pitch",
-    "mapType": "Map Type",
-    "showVisitedPOIs": "Show Visited Points",
-    "batteryOptimization": "Battery Optimization",
-    "geofenceClose": "Close (Precise)",
-    "geofenceFar": "Far (Wide)",
-    "tourExperience": "Tour Experience",
+    "autoMode": "Auto play",
+    "geofenceRadius": "Trigger radius",
+    "ttsEnabled": "Text-to-speech",
+    "ttsRate": "Speech rate",
+    "ttsPitch": "Speech pitch",
+    "mapType": "Map type",
+    "showVisitedPOIs": "Show visited points",
+    "batteryOptimization": "Battery optimization",
+    "geofenceClose": "Close (precise)",
+    "geofenceFar": "Far (wide)",
+    "tourExperience": "Tour experience",
     "account": "Account",
     "signOut": "Sign out",
     "signingOut": "Signing out...",
     "signOutConfirm": "Are you sure you want to sign out?",
     "signOutFailed": "Sign out failed. Please try again.",
     "deviceProfileTitle": "Device profile",
-    "deviceProfileDescription": "FlavorQuest adapts map motion, visuals, and background loading to fit the device you're using.",
+    "deviceProfileDescription": "FlavorQuest automatically adjusts motion, map details, and background loading to suit your device.",
     "deviceProfileDetectedLabel": "System detected",
-    "deviceProfileAppliedLabel": "Currently using",
+    "deviceProfileAppliedLabel": "Currently applied",
     "deviceProfileSystem": "Auto",
     "deviceProfileLight": "Light",
     "deviceProfileBalanced": "Balanced",
     "deviceProfileFull": "Full",
-    "deviceProfileAutoDescription": "Let the app balance motion, map detail, and background loading for this device automatically.",
-    "deviceProfileLightDescription": "Reduce visual effects and background loading to favor battery life and stability.",
-    "deviceProfileBalancedDescription": "Keep the experience smooth for most devices without pushing resource use too far.",
-    "deviceProfileFullDescription": "Favor richer motion and wider preloading when the device has room to spare.",
+    "deviceProfileAutoDescription": "Let the app automatically balance motion, map detail, and background loading for your current device.",
+    "deviceProfileLightDescription": "Reduce effects and limit background loading to prioritize battery life and stability.",
+    "deviceProfileBalancedDescription": "Keep the experience smooth for most devices without heavy loading.",
+    "deviceProfileFullDescription": "Prioritize smooth motion and wider preloading when your device has spare capacity.",
     "deviceProfileUnknown": "Unknown",
     "deviceProfileMotionReduced": "Reduced motion",
     "deviceProfileMotionStandard": "Standard motion",
-    "deviceProfileBatteryHint": "Battery Saver is making the active profile one step more conservative."
+    "deviceProfileBatteryHint": "Battery saver mode is making the active profile one notch more conservative."
   },
   "history": {
     "title": "History",
     "visited": "Visited",
-    "notVisited": "Not Visited",
+    "notVisited": "Not visited",
     "visitedAt": "Visited at",
-    "clear": "Clear History",
+    "clear": "Clear history",
     "empty": "No history yet",
     "justNow": "Just now",
-    "minsAgo": "{mins} mins ago",
+    "minsAgo": "{mins} minutes ago",
     "hoursAgo": "{hours} hours ago",
     "today": "Today, {time}",
     "yesterday": "Yesterday, {time}",
@@ -178,104 +178,104 @@
   },
   "map": {
     "title": "Map",
-    "zoomIn": "Zoom In",
-    "zoomOut": "Zoom Out",
-    "centerMap": "Center on Location",
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out",
+    "centerMap": "Center to current location",
     "fullscreen": "Fullscreen",
-    "layers": "Map Layers",
+    "layers": "Map layers",
     "loadingMap": "Loading map..."
   },
   "poi": {
     "details": "Details",
-    "signatureDish": "Signature Dish",
-    "funFact": "Fun Fact",
-    "estimatedHours": "Opening Hours",
+    "signatureDish": "Signature dish",
+    "funFact": "Fun fact",
+    "estimatedHours": "Opening hours",
     "directions": "Directions",
-    "playAudio": "Play Audio",
-    "viewOnMap": "View on Map",
+    "playAudio": "Play narration",
+    "viewOnMap": "View on map",
     "cuisine": "Cuisine",
-    "upNext": "Up Next",
+    "upNext": "Next nearby POI",
     "district4": "District 4, HCMC",
-    "transcript": "Transcript",
-    "estimatedWalk": "3 min walk"
+    "transcript": "Narration transcript",
+    "estimatedWalk": "3-minute walk"
   },
   "offline": {
     "status": "Offline",
     "ready": "Ready for offline use",
     "syncing": "Syncing...",
     "syncComplete": "Synced",
-    "cacheSize": "Cache Size",
-    "clearCache": "Clear Cache",
-    "usingCachedData": "Using cached data",
+    "cacheSize": "Cache size",
+    "clearCache": "Clear cache",
+    "usingCachedData": "Using saved data",
     "limitedFeatures": "Some features unavailable",
     "uploading": "Uploading data to server",
-    "syncError": "Sync Error",
+    "syncError": "Sync error",
     "retrySync": "Tap to retry",
-    "pendingSync": "Pending Sync",
+    "pendingSync": "Pending sync",
     "pendingItems": "{count} items pending",
     "online": "Online",
     "synced": "Synced",
-    "offlineMode": "Offline Mode",
-    "noConnection": "No Connection",
+    "offlineMode": "Offline mode",
+    "noConnection": "No connection",
     "statusLabel": "Status",
-    "lastSync": "Last Sync",
+    "lastSync": "Last sync",
     "notSyncedYet": "Not synced yet",
-    "syncNow": "Sync Now",
+    "syncNow": "Sync now",
     "tapToSync": "Tap to sync",
-    "downloadingAudio": "Downloading audio for offline",
+    "downloadingAudio": "Downloading offline audio",
     "downloadingContent": "Downloading offline content",
-    "audioReady": "Audio ready offline",
+    "audioReady": "Audio ready for offline",
     "audioDownloaded": "Audio downloaded for offline mode",
     "downloadError": "Download error",
     "retry": "Retry",
-    "noAudioCache": "No audio cached. Connect to download.",
+    "noAudioCache": "No offline audio yet. Connect to download.",
     "updateCache": "Update cache",
     "downloadPromptTitle": "Download offline content?",
-    "downloadPromptDesc": "Would you like to download all audio and images for offline use?",
+    "downloadPromptDesc": "Do you want to download all audio and images for offline use?",
     "downloadPromptNote": "You can change this preference in Settings anytime.",
     "downloadNow": "Download now",
     "downloadLater": "Later",
-    "downloadStarted": "Starting offline content download...",
+    "downloadStarted": "Started downloading offline content...",
     "poisLabel": "points of interest",
     "audioLabel": "Audio narration",
     "imageLabel": "Location images",
-    "successTitle": "Ready for Offline",
+    "successTitle": "Ready for offline",
     "successMessage": "Content downloaded successfully."
   },
   "battery": {
-    "level": "Battery Level",
+    "level": "Battery level",
     "charging": "Charging",
-    "notCharging": "Not Charging",
-    "lowPowerMode": "Low Power Mode",
+    "notCharging": "Not charging",
+    "lowPowerMode": "Low power mode",
     "recommendation": "Recommendation",
     "warning": "Low battery! Some features may be limited."
   },
   "speed": {
     "stationary": "Stationary",
     "walking": "Walking",
-    "jogging": "Jogging",
+    "jogging": "Jogging lightly",
     "running": "Running",
-    "vehicle": "In Vehicle",
-    "tooFast": "You're moving too fast! Please walk for the best experience."
+    "vehicle": "In vehicle",
+    "tooFast": "You are moving too fast! Please walk for the best experience."
   },
   "errors": {
     "generic": "An error occurred",
-    "network": "Network error",
+    "network": "Network connection error",
     "locationDenied": "You need to grant location access to use this feature",
-    "audioPlayback": "Cannot play audio. Please try again.",
-    "storageQuota": "Storage is full. Please clear some data.",
-    "unsupported": "Your browser doesn't support this feature"
+    "audioPlayback": "Unable to play audio. Please try again.",
+    "storageQuota": "Storage is full. Please delete some data.",
+    "unsupported": "Your browser does not support this feature"
   },
   "welcome": {
     "title": "Welcome to FlavorQuest!",
     "description": "Discover Vinh Khanh food street with automatic audio narration",
-    "step1": "Enable GPS location",
-    "step2": "Walk to Vinh Khanh street",
-    "step3": "Audio narration plays automatically near food stalls",
-    "getStarted": "Get Started"
+    "step1": "Turn on GPS",
+    "step2": "Go to Vinh Khanh street",
+    "step3": "Narration automatically plays when near food spots",
+    "getStarted": "Get started"
   },
   "splash": {
-    "subtitle": "Discover Vinh Khanh Culinary Journey",
+    "subtitle": "Discover the Vinh Khanh Culinary Journey",
     "startTour": "Start Tour",
     "browse": "Browse manually",
     "settings": "Settings"
@@ -283,12 +283,12 @@
   "login": {
     "title": "FlavorQuest Login",
     "subtitle": "Save your progress and sync your experience",
-    "prompt": "Enter your email to receive a login OTP",
+    "prompt": "Enter your email to receive an OTP code for login",
     "signInWithGoogle": "Sign in with Google",
     "customer": "Customer",
     "owner": "Owner",
     "selectedType": "Selected account type: {type}",
-    "ownerApprovalNote": "Owner sign-in needs admin approval first. After OTP verification, you will be taken to a review page with direct chat to admin.",
+    "ownerApprovalNote": "Owner login requires admin approval first. After OTP verification, you will be taken to a pending approval page and can directly chat with admin.",
     "emailLabel": "Login email",
     "emailPlaceholder": "you@example.com",
     "otpLabel": "OTP code",
@@ -297,101 +297,101 @@
     "sendingOtp": "Sending code...",
     "resendOtp": "Resend code",
     "resendIn": "Resend in {seconds}s",
-    "verifyOtp": "Verify and sign in",
+    "verifyOtp": "Verify and login",
     "verifyingOtp": "Verifying...",
-    "codeSent": "Your OTP has been sent to your email.",
+    "codeSent": "OTP code has been sent to your email.",
     "codeSentTo": "OTP sent to {email}",
-    "invalidEmail": "Please enter a valid email address.",
-    "invalidOtp": "Please enter the 6-digit OTP code.",
+    "invalidEmail": "Please enter a valid email.",
+    "invalidOtp": "Please enter a 6-digit OTP code.",
     "sendOtpError": "Unable to send OTP. Please try again.",
     "verifyOtpError": "OTP verification failed. Please try again.",
-    "adminPortalRequired": "Admin accounts must sign in through the dedicated admin portal.",
-    "changeEmailHint": "You can edit your email and resend the code if needed.",
+    "adminPortalRequired": "Admin accounts must log in via the dedicated admin portal.",
+    "changeEmailHint": "You can edit your email and resend the code if entered incorrectly.",
     "or": "or",
-    "backToHome": "Back to Home",
-    "error": "Sign in failed. Please try again."
+    "backToHome": "Back to home",
+    "error": "Login failed. Please try again."
   },
   "pendingOwner": {
     "eyebrow": "Owner approval desk",
-    "titlePending": "Your account is waiting for admin verification before owner access opens",
-    "titleRejected": "Your owner request needs more discussion with admin",
-    "subtitlePending": "This account is in the owner-review state, so it cannot use the customer or owner areas yet. The chat below is the main place to track updates and reply if admin needs more verification.",
-    "subtitleRejected": "Admin rejected the current request. You can still continue the conversation below to provide more context or verification details.",
+    "titlePending": "Account is pending admin verification to unlock owner access",
+    "titleRejected": "Your owner request requires more discussion with admin",
+    "subtitlePending": "This account is in pending owner approval state and cannot use customer or owner areas yet. The chat thread below is the main place to track and respond if admin needs further verification.",
+    "subtitleRejected": "Admin has rejected the current request. You can still continue the conversation below to provide more context or verification info.",
     "statusLabel": "Status",
     "statusPending": "Pending approval",
     "statusRejected": "Rejected",
     "customerAreaLabel": "Navigation",
     "customerCta": "Back to welcome screen",
-    "customerHint": "Until approval happens, this account can only track status here and talk with admin.",
+    "customerHint": "While waiting for approval, this account can only track status and chat with admin.",
     "steps": {
       "request": {
         "title": "Your request has been recorded",
-        "body": "The system already opened a chat thread with admin so you can provide more verification details if needed."
+        "body": "The system has created a chat thread with admin so you can provide extra verification info if needed."
       },
       "review": {
-        "title": "Admin will verify through chat",
-        "body": "Keep an eye on the messages here so you can reply quickly if admin asks for more details before approving."
+        "title": "Admin will verify via chat",
+        "body": "Watch for messages here to respond quickly if admin needs more details before approval."
       },
       "reviewRejected": {
-        "body": "The previous request was rejected. You can keep talking in the chat below to clarify more details."
+        "body": "The previous request was rejected. You can continue chatting below to clarify further."
       },
       "workspace": {
-        "title": "The owner workspace opens after approval",
-        "body": "Once approved, you will enter the owner area. If no shop has been assigned yet, the owner workspace will stay empty until admin assigns at least one POI."
+        "title": "Owner workspace will open after approval",
+        "body": "Once approved, you will enter the owner area. If no shop is assigned yet, the owner screen will remain empty until admin assigns at least one POI."
       }
     }
   },
   "menu": {
-    "title": "Menu",
-    "empty": "This place has not updated its menu yet.",
-    "addToCart": "Add",
+    "title": "Food Menu",
+    "empty": "This shop has not updated its menu yet.",
+    "addToCart": "Add item",
     "quantity": "Quantity",
     "cart": "Order details",
     "placeOrder": "Submit order",
     "placePickupOrder": "Order for pickup",
     "placeDeliveryOrder": "Order for delivery",
-    "pickup": "Pickup",
-    "pickupDescription": "Pick up your food at the shop and pay when you arrive.",
-    "delivery": "Delivery",
-    "deliveryDescription": "The shop delivers to your address and you pay on delivery.",
+    "pickup": "Pickup at shop",
+    "pickupDescription": "You pick up food at the shop and pay upon receipt.",
+    "delivery": "Home delivery",
+    "deliveryDescription": "The shop delivers food to your provided address and you pay upon delivery.",
     "subtotal": "Subtotal: {amount}đ",
     "pickupTime": "Pickup time",
-    "pickupTimeFuture": "Please choose a pickup time in the future",
-    "deliveryTimeFuture": "Please choose a delivery time in the future",
-    "customerName": "Customer name",
+    "pickupTimeFuture": "Please select a future pickup time",
+    "deliveryTimeFuture": "Please select a future delivery time",
+    "customerName": "Recipient name",
     "customerPhone": "Phone number",
     "deliveryAddress": "Delivery address",
-    "deliveryContactRequired": "Please provide the recipient name, phone number, and delivery address",
+    "deliveryContactRequired": "Please enter the name, phone, and delivery address",
     "note": "Note",
-    "success": "Order placed successfully!",
-    "pickupSuccess": "Pickup order placed successfully!",
-    "deliverySuccess": "Delivery order placed successfully!"
+    "success": "Order placed successfully",
+    "pickupSuccess": "Pickup order placed successfully",
+    "deliverySuccess": "Delivery order placed successfully"
   },
   "chatbot": {
-    "badge": "Smart guide",
+    "badge": "Smart assistant",
     "title": "FlavorQuest Assistant",
-    "subtitle": "Get dish ideas, stop suggestions, and quick help during your trip.",
-    "welcome": "I can suggest dishes, recommend stops, and answer common FlavorQuest questions right here.",
-    "inputPlaceholder": "Ask what to try, where to stop first, or how to use the app...",
+    "subtitle": "Suggest dishes, stops, and answer questions for your trip.",
+    "welcome": "I can suggest dishes to try, places to stop, and answer common questions right here in FlavorQuest.",
+    "inputPlaceholder": "Ask what to try, where to go first, or how to use the app...",
     "open": "Open assistant",
     "close": "Close assistant",
     "openPage": "Open assistant page",
     "nav": "Assistant",
     "pageTitle": "Trip assistant",
-    "pageSubtitle": "A dedicated space for food suggestions, route ideas, and app help without covering the map or POI list.",
+    "pageSubtitle": "A dedicated place to ask about dishes, suitable tours, and how to use FlavorQuest without covering the map or POI list.",
     "backToTour": "Back to tour",
     "pageInfoTitle": "What can you ask here?",
-    "pageInfoBody": "The assistant uses the current FlavorQuest data to recommend dishes, stops, suitable routes, and answer common questions while you explore.",
+    "pageInfoBody": "The assistant uses current FlavorQuest data to suggest dishes, stops, and suitable routes, and answer common questions while you explore.",
     "thinking": "Thinking...",
-    "error": "The assistant is unavailable right now. Please try again later.",
-    "footer": "Suggestions are based on the current FlavorQuest data.",
+    "error": "Assistant is currently unavailable. Please try again later.",
+    "footer": "Suggestions are based on current FlavorQuest data.",
     "newChat": "New chat",
-    "historyEmpty": "You do not have any conversations yet.",
-    "loadingHistory": "Loading conversation history...",
+    "historyEmpty": "You have no conversations yet.",
+    "loadingHistory": "Loading chat history...",
     "suggestions": {
       "food": "What dishes should I try first today?",
-      "route": "If this is my first visit, which tour or stop should I start with?",
-      "faq": "Does this app support offline mode and pre-ordering?"
+      "route": "If this is my first time, which tour or stop should I start with?",
+      "faq": "Does this app work offline and allow pre-ordering?"
     }
   },
   "support": {
@@ -400,37 +400,37 @@
     "customer": {
       "eyebrow": "Support chat",
       "title": "Message a shop or admin",
-      "subtitle": "You can message each shop separately, or ask admin for help with your account and overall experience.",
+      "subtitle": "You can message each shop separately, or ask admin for account and experience support.",
       "emptyTitle": "No messages yet.",
-      "emptyBody": "Choose a shop or open the admin chat to get started."
+      "emptyBody": "Select a shop or open admin chat to start."
     },
     "owner": {
       "eyebrow": "Inbox",
       "title": "Messages from customers and admin",
-      "subtitle": "Follow customer conversations by shop and keep a separate channel open with admin.",
-      "emptyTitle": "Your inbox is empty.",
-      "emptyBody": "Customer and admin conversations will appear here."
+      "subtitle": "Track conversations with customers by shop and keep a separate channel with admin.",
+      "emptyTitle": "Inbox is empty.",
+      "emptyBody": "When customers message or you talk to admin, conversations will appear here."
     },
     "admin": {
       "eyebrow": "Support messages",
-      "title": "Talk with customers and owners",
-      "subtitle": "Customer and owner support requests are collected here so you can reply quickly.",
-      "emptyTitle": "The queue is empty.",
-      "emptyBody": "New support requests from customers or owners will appear here."
+      "title": "Chat with customers and owners",
+      "subtitle": "All support requests from customers and owners are listed here for quick replies.",
+      "emptyTitle": "Queue is empty.",
+      "emptyBody": "When a new support request comes from a customer or owner, the conversation will appear here."
     },
     "stats": {
       "activeThreads": "Active threads",
-      "activeThreadsBody": "Each conversation has its own page, so it is easier to follow.",
+      "activeThreadsBody": "Each conversation has its own page for easier tracking.",
       "unreadThreads": "Needs reply",
-      "unreadThreadsBody": "When a new message arrives, the recipient also gets an email."
+      "unreadThreadsBody": "When a new message arrives, the recipient will also be notified via email."
     },
     "launchpad": {
-      "title": "Open a new thread",
-      "body": "Choose who you want to message. If a conversation already exists, we will reopen it."
+      "title": "Open new thread",
+      "body": "Choose the right person to message. If a conversation exists, it will be reopened."
     },
     "inbox": {
       "title": "Conversation list",
-      "body": "Unread messages stay near the top so you can handle them quickly."
+      "body": "Unread messages are placed at the top for quicker handling."
     },
     "threadTypes": {
       "customerOwner": "Customer / Owner",
@@ -439,11 +439,11 @@
     },
     "states": {
       "creating": "Opening...",
-      "waitingFirstMessage": "There are no messages in this thread yet.",
-      "noThreadSelected": "Choose a conversation to begin.",
-      "noThreadSelectedBody": "You can also start a new conversation from the left column.",
-      "noMessages": "This thread does not have any messages yet.",
-      "noMessagesBody": "Send the first message to get started."
+      "waitingFirstMessage": "No messages in this thread yet.",
+      "noThreadSelected": "Select a conversation to start.",
+      "noThreadSelectedBody": "You can also quickly open a new conversation from the left column.",
+      "noMessages": "This thread has no messages yet.",
+      "noMessagesBody": "Send the first message to begin."
     },
     "actions": {
       "openThread": "Open conversation",
@@ -461,47 +461,47 @@
     },
     "thread": {
       "title": "Conversation",
-      "poiContext": "This conversation is tied to location {name}.",
-      "emailHint": "New messages show up here and also trigger an email notification.",
+      "poiContext": "This conversation is linked to location {name}.",
+      "emailHint": "New messages will be shown here and also sent via email.",
       "emailBadge": "Email notifications enabled"
     },
     "composer": {
-      "placeholder": "Type a message...",
-      "hint": "Replies appear here right away, and the recipient also gets an email."
+      "placeholder": "Enter a message...",
+      "hint": "Replies appear here immediately, and will also be sent by email to the recipient."
     },
     "errors": {
-      "loadThreads": "Unable to load conversations.",
-      "loadMessages": "Unable to load the messages for this conversation.",
-      "createThread": "Unable to create a new conversation.",
-      "sendMessage": "Unable to send the message."
+      "loadThreads": "Unable to load conversation list.",
+      "loadMessages": "Unable to load messages for this conversation.",
+      "createThread": "Unable to create new conversation.",
+      "sendMessage": "Unable to send message."
     }
   },
   "notifications": {
     "title": "Notifications",
-    "markAll": "Mark all as read",
-    "empty": "No notifications yet"
+    "markAll": "Mark as read",
+    "empty": "You have no new notifications"
   },
   "owner": {
     "title": "Owner Dashboard",
-    "subtitle": "Manage your POIs, menu, and pre-orders",
+    "subtitle": "Manage POIs, menu, and pre-orders",
     "myPois": "My POIs",
-    "orders": "Orders",
-    "menu": "Menu",
-    "noPoi": "You have not been assigned any POI yet. Please contact admin."
+    "orders": "Pre-orders",
+    "menu": "Food menu",
+    "noPoi": "You have not been assigned any POI. Please contact admin."
   },
   "poiDetail": {
-    "notFound": "Location Not Found",
-    "notFoundMessage": "This location may have been deleted or doesn't exist.",
-    "playNarration": "Play Narration",
+    "notFound": "Location not found",
+    "notFoundMessage": "This location may have been deleted or does not exist.",
+    "playNarration": "Play narration",
     "introduction": "Introduction",
-    "noDescription": "No description available for this location.",
-    "didYouKnow": "Did You Know?",
-    "nowPlaying": "Now Playing: {name}",
+    "noDescription": "No description for this location yet.",
+    "didYouKnow": "Did you know?",
+    "nowPlaying": "Now playing: {name}",
     "errorPlaying": "Audio error, using text-to-speech"
   },
   "permissions": {
     "checking": "Checking permissions...",
-    "locationTitle": "Enable location for automatic audio narration near food stalls",
+    "locationTitle": "Allow location to automatically play narration near eateries",
     "locationDesc": "Best experience when the app automatically detects your location on Vinh Khanh street.",
     "denyPrompt": "Don't allow?",
     "switchToManual": "Switch to manual mode"

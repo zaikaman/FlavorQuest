@@ -1,0 +1,517 @@
+{
+  "app": {
+    "name": "FlavorQuest",
+    "tagline": "Vĩnh Khánh-এর খাবারসংস্কৃতি শব্দে আবিষ্কার করুন"
+  },
+  "metadata": {
+    "title": "FlavorQuest - Vĩnh Khánhের খাবারের আবিষ্কার",
+    "description": "Vĩnh Khánh-র phố-খাদ্য অন্বেষণের স্বয়ংক্রিয় অডিও ন্যারেশন ট্যুর. বহু-ভাষা সমর্থিত offline-first PWA.",
+    "keywords": [
+      "food tour",
+      "audio guide",
+      "Vĩnh Khánh",
+      "Cần Thơ",
+      "ẩm thực",
+      "PWA"
+    ]
+  },
+  "manifest": {
+    "name": "FlavorQuest - স্বয়ংক্রিয় অডিও ন্যারেশন অনভিজ্ঞতা",
+    "shortName": "FlavorQuest",
+    "description": "Vĩnh Khánh-এর খাবারের শহরটি স্থান-ভিত্তিক স্বয়ংক্রিয় অডিও ন্যারেশন সহ অন্বেষণ করুন। ১৮টি ভাষা সমর্থিত, অফলাইনে কাজ করে।",
+    "shortcuts": {
+      "startTour": {
+        "name": "ট্যুর শুরু করুন",
+        "description": "স্বয়ংক্রিয় ট্যুর শুরু করুন"
+      },
+      "viewMap": {
+        "name": "মানচিত্র দেখুন",
+        "description": "দর্শনীয় স্থানগুলোর মানচিত্র দেখুন"
+      }
+    }
+  },
+  "common": {
+    "loading": "লোড হচ্ছে...",
+    "error": "ত্রুটি",
+    "retry": "পুনরায় চেষ্টা করুন",
+    "cancel": "বাতিল",
+    "confirm": "নিশ্চিত করুন",
+    "save": "সংরক্ষণ",
+    "close": "বন্ধ",
+    "back": "আগে ফিরে",
+    "next": "পরবর্তী",
+    "done": "সম্পন্ন",
+    "yes": "হ্যাঁ",
+    "no": "না",
+    "allow": "অনুমতি দিন",
+    "deny": "অস্বীকৃতি",
+    "browse": "ঘুরে দেখুন",
+    "privacyPolicy": "গোপনীয়তা নীতি"
+  },
+  "list": {
+    "searchPlaceholder": "খুঁজুন শামুক, সামুদ্রিক খাবার, পাউরুটি...",
+    "notFoundTitle": "মেলেনি",
+    "notFoundDesc": "অন্যান্য কীওয়ার্ড দিয়ে খোঁজ করুন",
+    "offlineBadge": "অফলাইন"
+  },
+  "categories": {
+    "all": "সব",
+    "snails": "শামুক",
+    "seafood": "সামুদ্রিক খাবার",
+    "grill": "গ্রিল",
+    "nearMe": "আমার কাছে"
+  },
+  "tour": {
+    "startTour": "ট্যুর শুরু",
+    "pauseTour": "বিরাম",
+    "resumeTour": "চালু রাখুন",
+    "stopTour": "ট্যুর বন্ধ করুন",
+    "autoMode": "স্বয়ংক্রিয় মোড",
+    "manualMode": "ম্যানুয়াল মোড",
+    "auto": "স্বয়ংক্রিয়",
+    "manual": "ম্যানুয়াল",
+    "loadingPOIs": "স্থানসমূহ লোড হচ্ছে...",
+    "searchingPOIs": "নিকটস্থ স্থান খোঁজা হচ্ছে...",
+    "nearbyPOIs": "নিকটস্থ স্থানসমূহ",
+    "currentLocation": "বর্তমান অবস্থান",
+    "distance": "দূরত্ব",
+    "nowPlaying": "চলছে: {name}",
+    "syncedEvents": "সিঙ্ক হয়েছে {count} ঘটনা",
+    "dataSaved": "ডেটা সংরক্ষণ করা হয়েছে, অফলাইনে প্রস্তুত",
+    "usingTTS": "স্বয়ংক্রিয কণ্ঠ (offline) ব্যবহার হচ্ছে",
+    "tooFast": "তাড়াহুড়া চলাচল করছেন। ন্যারেশন শোনার জন্য হাঁটা ঠিক করুন।",
+    "locationDenied": "অবস্থান অনুমতি বাতিল করা হয়েছে। ম্যানুয়াল মোডে যান।",
+    "httpsRequired": "ত্রুটি: GPS-এর জন্য HTTPS আবশ্যক। localhost ব্যবহার করুন বা SSL ইনস্টল করুন।",
+    "gpsError": "GPS ত্রুটি: {message}",
+    "noAudioForPOI": "এই স্থানটির জন্য অডিও নেই",
+    "tapToResumeAudio": "বিষয়বস্ত্র ন্যারেশন চালু রাখতে স্ক্রিনে টাচ করুন",
+    "invalidSelectedTour": "চিহ্নিত টুরটি আর উপলব্ধ নয়",
+    "stoppedOutsideSelectedTour": "POIটি নির্বাচিত টুর থেকে বাইরে ছিল, অডিও বন্ধ হয়েছে"
+  },
+  "tourSelector": {
+    "title": "ট্যুর অনুযায়ী শোনা",
+    "subtitle": "একটি ট্যুর বেছে নিন যাতে শুধুই ঐ পথের POI দেখায়",
+    "show": "বিস্তৃত",
+    "hide": "সংক্ষিপ্ত",
+    "collapsedHint": "নির্বাচন করতে বা টুর দ্রুত বদলাতে বিস্তৃত করুন",
+    "allOption": "সব স্থান",
+    "allDescription": "সক্রিয় সব POI প্রদর্শন করুন",
+    "clear": "বাছুর বাতিল করুন",
+    "loading": "ট্যুর তালিকা লোড হচ্ছে...",
+    "empty": "এখনো কোনো ট্যুর খোলা নয়।",
+    "poiCount": "{count} POI",
+    "duration": "{count} মিনিট",
+    "selectedSummary": "নির্বাচিত টور-এর {count} POI দেখানো হচ্ছে",
+    "allSummary": "সক্রিয় {count} POI দেখানো হচ্ছে"
+  },
+  "audio": {
+    "play": "চালান",
+    "pause": "স্থগিত",
+    "stop": "থামান",
+    "replay": "পুনরায় চালান",
+    "volume": "আওয়াজ-স্তর",
+    "speed": "চালানোর গতিবেগ",
+    "loading": "অডিও লোড হচ্ছে...",
+    "error": "আওডিও নস্টান",
+    "noAudio": "কোনও অডিও নেই",
+    "useTTS": "TTS ব্যবহার করুন"
+  },
+  "location": {
+    "requesting": "অবস্থান চাওয়া হচ্ছে...",
+    "denied": "অবস্থান এক্সেস বাতিল",
+    "unavailable": "অবস্থান উপলব্ধ নয়",
+    "timeout": "সময় শেষ",
+    "enableLocation": "অবস্থান সক্ষম করুন",
+    "accuracy": "সঠিকতা",
+    "lastUpdate": "সর্বশেষ আপডেট"
+  },
+  "settings": {
+    "title": "সেটিংস",
+    "language": "ভাষা",
+    "volume": "আওয়াজ-স্তর",
+    "autoMode": "স্বয়ংক্রিয় পাঠ",
+    "geofenceRadius": "আনয়-রেডিয়াস",
+    "ttsEnabled": "TTS সক্ষম",
+    "ttsRate": "পাঠের গতি",
+    "ttsPitch": "গলার স্বর উচ্চতা",
+    "mapType": "মানচিত্রের ধরণ",
+    "showVisitedPOIs": "পরিদর্শিত POI দেখান",
+    "batteryOptimization": "ব্যাটারি অপ্টিমাইজেশন",
+    "geofenceClose": "নিকট (সঠিক)",
+    "geofenceFar": "দূরে (বিস্তৃত)",
+    "tourExperience": "ট্যুর অভিজ্ঞতা",
+    "account": "অ্যাকাউণ্ট",
+    "signOut": "লগআউট",
+    "signingOut": "লগআউট হচ্ছে...",
+    "signOutConfirm": "আপনি কি নিশ্চিতভাবে লগআউট করতে চান?",
+    "signOutFailed": "লগআউট ব্যর্থ। অনুগ্রহ করে আবার চেষ্টা করুন।",
+    "deviceProfileTitle": "ডিভাইস প্রোফাইল",
+    "deviceProfileDescription": "FlavorQuest আপনার ডিভাইস অনুযায়ী মুভমেন্ট, মানচিত্র এবং পটভূমি লোড সামঞ্জস্য করে।",
+    "deviceProfileDetectedLabel": "সিস্টেম শনাক্ত করা হয়েছে",
+    "deviceProfileAppliedLabel": "প্রয়োগ হচ্ছে",
+    "deviceProfileSystem": "স্বয়ংক্রিয়",
+    "deviceProfileLight": "হালকা",
+    "deviceProfileBalanced": "সমঞ্জত",
+    "deviceProfileFull": "পূর্ণ",
+    "deviceProfileAutoDescription": "অ্যাপ্লিকেশনটি ডিভাইস অনুযায়ী গতিবিধি, ম্যাপ-উচ্চতা এবং লোড সামঞ্জস্য করে",
+    "deviceProfileLightDescription": " প্রভাব কমিয়ে ব্যাটারি-প্রাথমিকতা ও স্থিতিশীলতা বাড়ায়",
+    "deviceProfileBalancedDescription": "বহু ডিভাইসের জন্য মসৃণতা বজায় রাখে, বেশি লোড නො দিয়ে",
+    "deviceProfileFullDescription": "গতি মসৃণ রাখতে এবং ডিভাইসের অবশিষ্ট ক্ষমতা থাকলে বহিরাগমন লোড আগেই লোড করে",
+    "deviceProfileUnknown": "চিহ্নিত নয়",
+    "deviceProfileMotionReduced": "গতি কমিয়ে",
+    "deviceProfileMotionStandard": "গতি-স্ট্যান্ডার্ড",
+    "deviceProfileBatteryHint": "ব্যাটারি সাশ্রয় মোড বর্তমানে কার্যক্রম একটু বেশি সতর্ক করে"
+  },
+  "history": {
+    "title": "इतिहास",
+    "visited": "দর্শন করা হয়েছে",
+    "notVisited": "দর্শন করা হয়নি",
+    "visitedAt": "দর্শন সময়",
+    "clear": " history মুছে ফেলুন",
+    "empty": "এখনো কোনো ইতিহাস নেই",
+    "justNow": "ব刚",
+    "minsAgo": "{mins} মিনিট আগে",
+    "hoursAgo": "{hours} ঘণ্টা আগে",
+    "today": "আজ, {time}",
+    "yesterday": "গতকাল, {time}",
+    "listened": "শোনা হয়েছে"
+  },
+  "map": {
+    "title": "মানচিত্র",
+    "zoomIn": "জুম ইন",
+    "zoomOut": "জুম আউট",
+    "centerMap": "বর্তমান অবস্থানে কেন্দ্র করুন",
+    "fullscreen": "পূর্ণ পর্দা",
+    "layers": "মানচিত্র স্তর",
+    "loadingMap": "মানচিত্র লোড হচ্ছে..."
+  },
+  "poi": {
+    "details": "বিস্তারিত",
+    "signatureDish": "বিশিষ্ট পদ",
+    "funFact": "চমৎকার তথ্য",
+    "estimatedHours": "খোলার সময়",
+    "directions": "দিকনির্দেশ",
+    "playAudio": "ন্যারেশন শোনা",
+    "viewOnMap": "মানচিত্রে দেখা",
+    "cuisine": "খাদ্যসংস্কৃতি",
+    "upNext": "পরবর্তী POI",
+    "district4": "Quận 4, TP.HCM",
+    "transcript": "ন্যারেশন সামগ্রী",
+    "estimatedWalk": "৩ মিনিট হেঁটে"
+  },
+  "offline": {
+    "status": "অফলাইন",
+    "ready": "অফলাইনে ব্যবহারিত প্রস্তুত",
+    "syncing": "সমন্বয় হচ্ছে...",
+    "syncComplete": "সমন্বয় সম্পন্ন",
+    "cacheSize": "ক্যাশের আকার",
+    "clearCache": "ক্যাশ মুছে ফেলুন",
+    "usingCachedData": "সংরক্ষিত ডেটা ব্যবহার হচ্ছে",
+    "limitedFeatures": "কিছু বৈশিষ্ট্য উপলব্ধ নয়",
+    "uploading": "সার্ভারে ডেটা আপলোড হচ্ছে",
+    "syncError": "সমন্বয় ত্রুটি",
+    "retrySync": "পুনরায় চেষ্টা করুন",
+    "pendingSync": "সমন্বয়ের অপেক্ষায়",
+    "pendingItems": "{count} আইটেম অপেক্ষায়",
+    "online": "অনলাইন",
+    "synced": "সমন্বয় হয়েছে",
+    "offlineMode": "অফলাইন মোড",
+    "noConnection": "সংযোগ छैन",
+    "statusLabel": "স্থিতি",
+    "lastSync": "শেষ সমন্বয়",
+    "notSyncedYet": "এখনও সমন্বয় হয়নি",
+    "syncNow": "এই মুহূর্তে সমন্বয় করুন",
+    "tapToSync": "সমন্বয়ের জন্য স্পর্শ করুন",
+    "downloadingAudio": "অফলাইন অডিও ডাউনলোড হচ্ছে",
+    "downloadingContent": "অফলাইন কন্টেন্ট ডাউনলোড হচ্ছে",
+    "audioReady": "অডিও অফলাইন তৈরি",
+    "audioDownloaded": "অডিও অফলাইনের জন্য ডাউনলোড হয়েছে",
+    "downloadError": "ডাউনলোড ত্রুটি",
+    "retry": "পুনরায় চেষ্টা করুন",
+    "noAudioCache": "অফলাইন অডিও নেই। ডাউনলোড করতে নেটওয়ার্ক সংযোগ করুন.",
+    "updateCache": "ক্যাশ আপডেট করুন",
+    "downloadPromptTitle": "অফলাইনে সামগ্রী ডাউনলোড করবেন?",
+    "downloadPromptDesc": "নেটওয়ার্ক ছাড়া ব্যবহার করার জন্য सभी অডিও ও ছবিগুলো ডাউনলোড করতে চান?",
+    "downloadPromptNote": "আপনি Settings-এ যেকোন সময় এই বিকল্পটি পরিবর্তন করতে পারেন।",
+    "downloadNow": "এখন ডাউনলোড করুন",
+    "downloadLater": "পরে ডাউনলোড করুন",
+    "downloadStarted": "অফলাইনের সামগ্রী ডাউনলোড শুরু হচ্ছে...",
+    "poisLabel": "দর্শনীয় স্থান",
+    "audioLabel": "ন্যারেশন অডিও",
+    "imageLabel": "স্থান চিত্র",
+    "successTitle": "অফলাইনের জন্য প্রস্তুত",
+    "successMessage": "বিষয়বস্তু সফলভাবে ডাউনলোড হয়েছে."
+  },
+  "battery": {
+    "level": "ব্যাটারি স্তর",
+    "charging": "চার্জ হচ্ছে",
+    "notCharging": "চার্জ হচ্ছে না",
+    "lowPowerMode": "ব্যাটারি সাশ্রয় মোড",
+    "recommendation": "সিফারিশ",
+    "warning": "ব্যাটারি কম! কিছু কার্যক্ষমতা সীমিত হতে পারে."
+  },
+  "speed": {
+    "stationary": "স্থির",
+    "walking": "হেঁটে চলছে",
+    "jogging": "হালকা দৌড়",
+    "running": "দৌড়ছে",
+    "vehicle": "গাড়ি-চলাচল",
+    "tooFast": "আপনি খুব দ্রুত চলছে! সর্বোচ্চ অনভিজ্ঞতার জন্য হাঁটুন।"
+  },
+  "errors": {
+    "generic": "ত্রুটি ঘটেছে",
+    "network": "নেটওয়ার্ক সংযোগ ত্রুটি",
+    "locationDenied": "এই ফিচারটি ব্যবহার করতে অবস্থানের অনুমতি দিন",
+    "audioPlayback": "আওডিও বাজানো যাচ্ছে না। অনুগ্রহ করে পুনরায় চেষ্টা করুন।",
+    "storageQuota": "স্থান ফুল। কিছু ডেটা মুছে ফেলুন।",
+    "unsupported": "আপনার ব্রাউজার এই ফিচার সমর্থন করে না"
+  },
+  "welcome": {
+    "title": "FlavorQuest-এ স্বাগতম!",
+    "description": "Vĩnh Khánh-এর খাবারের অন্বেষণ স্বয়ংক্রিয় অডিও ন্যারেশন সহ",
+    "step1": "GPS নির্ধারণ সক্ষম করুন",
+    "step2": "Vĩnh Khánh বাজারে যান",
+    "step3": "খাবারের ন্যারেশন নিকটে চললে স্বয়ংক্রিয়ভাবে চলবে",
+    "getStarted": "শুরু করুন"
+  },
+  "splash": {
+    "subtitle": "Vĩnh Khánh-এর খাবারের যাত্রা অন্বেষণ",
+    "startTour": "ট্যুর শুরু করুন",
+    "browse": "ম্যানুয়াল ব্রাউজ করুন",
+    "settings": "সেটিংস"
+  },
+  "login": {
+    "title": "FlavorQuest-এ লগইন",
+    "subtitle": "আপনার অগ্রগতি সংরক্ষণ ও অভিজ্ঞতা সিঙ্ক করুন",
+    "prompt": "লগইনের জন্য ইমেইল লিখুন এবং OTP পান",
+    "signInWithGoogle": "Google-এর সাথে লগইন",
+    "customer": "গ্রাহক",
+    "owner": "দোকানের মালিক",
+    "selectedType": "চালু অ্যাকাউন্ট টাইপ: {type}",
+    "ownerApprovalNote": "মালিক লগইনের জন্য admin-verified আগে প্রয়োজন। OTP যাচাই হওয়ার পরে আপনি 승인-পেজে এবং admin-র সঙ্গে সরাসরি চ্যাটে এগোবেন।",
+    "emailLabel": "ইমেইল লগইন",
+    "emailPlaceholder": "ban@vidu.com",
+    "otpLabel": "OTP কোড",
+    "otpPlaceholder": "123456",
+    "sendOtp": "OTP পাঠান",
+    "sendingOtp": "OTP পাঠানো হচ্ছে...",
+    "resendOtp": "পুনরায় কোড পাঠান",
+    "resendIn": "পুনরায় পাঠাতে {seconds}s",
+    "verifyOtp": "যাচাই করে লগইন করুন",
+    "verifyingOtp": "যাচাই চলছে...",
+    "codeSent": "OTP আপনার ইমেইলে পাঠানো হয়েছে।",
+    "codeSentTo": "OTP পাঠানো হয়েছে {email}-এ",
+    "invalidEmail": "সঠিক ইমেইল দিন।",
+    "invalidOtp": "৬ সংখ্যার OTP দিন।",
+    "sendOtpError": "OTP পাঠানো যাচ্ছে না। অনুগ্রহ করে পুনরায় চেষ্টা করুন।",
+    "verifyOtpError": "OTP যাচাই ব্যর্থ। অনুগ্রহ করে আবার চেষ্টা করুন।",
+    "adminPortalRequired": "Admin Portal-এ লগইন করা Admin-প্রয়োজন।",
+    "changeEmailHint": "ভুল হলে ইমেইল ঠিক করে পুনরায় পাঠান।",
+    "or": "বা",
+    "backToHome": "হোমপেজে ফিরে যান",
+    "error": "লগইন ব্যর্থ। অনুগ্রহ করে পুনরায় চেষ্টা করুন."
+  },
+  "pendingOwner": {
+    "eyebrow": "Owner যাচাইয়ের অপেক্ষায়",
+    "titlePending": "অ্যাকাউন্ট admin যাচাইয়ের জন্য অপেক্ষায়",
+    "titleRejected": "Admin-এর সাথে আরও আলাপ দরকার",
+    "subtitlePending": "এই অ্যাকাউন্টটি owner অনুমোদনের জন্য অপেক্ষায়，所以 এখন গ্রাহক-সেকশন বা owner সক্ষম নয়। নীচে চ্যাট-চ্যানেল admin-এর সাথে যাচাই সম্পূর্ণ করার জন্য।",
+    "subtitleRejected": "Admin-এ অনুরোধটি বাতিল হয়েছে। admin-চেক করার জন্য নিচের চ্যাট-ফ্লোরে আরও তথ্য দিন।",
+    "statusLabel": "স্থিতি",
+    "statusPending": "আবেদন অনুমোদনের জন্য অপেক্ষায়",
+    "statusRejected": "বাতিল",
+    "customerAreaLabel": "নেভিগেশন",
+    "customerCta": "স্বাগতম-স্ক্রিনে ফিরে যান",
+    "customerHint": "আপনি এখনও অনুমোদিত নন, তাই এই অ্যাকাউন্টটি শুধু অবস্থা ট্র্যাক এবং admin-এর সাথে আলাপচালাতে স limited।",
+    "steps": {
+      "request": {
+        "title": "আবেদনটি নথিবদ্ধ",
+        "body": "আপনি যাচাই তথ্য যোগ করতে সিস্টেম admin-এর সাথে চ্যাট-থ্রেড খোলা রেখেছে।"
+      },
+      "review": {
+        "title": "Admin chat-এ যাচাই করবেন",
+        "body": "এখানে বার্তা মনিটর করুন এবং দ্রুত উত্তর দিন যদি admin আরও তথ্য চায়।"
+      },
+      "reviewRejected": {
+        "body": "আগের অনুরোধটি বাতিল হয়েছে। নিচে চ্যাট-খাঁচায় আরও তথ্য দিন।"
+      },
+      "workspace": {
+        "title": "অনুমোদনের পরে Workspace owner খোলা থাকবে",
+        "body": "আনুমোদন হলে owner-খোলা হবে। 아직 যদি দোকানantom না দেওয়া হয়, owner-খোলা না থাকবে।"
+      }
+    }
+  },
+  "menu": {
+    "title": "খাবারের মেনু",
+    "empty": "রেস্টুরেন্ট মেনু আপডেট করেনি।",
+    "addToCart": "আইটেম যোগ করুন",
+    "quantity": "পরিমাণ",
+    "cart": "অর্ডারের তথ্য",
+    "placeOrder": "আদেশ পাঠান",
+    "placePickupOrder": "রেস্টুরেন্ট থেকে নিন",
+    "placeDeliveryOrder": "ঘরে ডেলিভারি",
+    "pickup": "রেস্টুরেন্ট-এ নিন",
+    "pickupDescription": "গ্রাহক রেস্টুরেন্টে এসে খাবার নেন এবং গ্রহণের সময় পরিশোধ করবেন।",
+    "delivery": "ঘরে ডেলিভারি",
+    "deliveryDescription": "রেস্টুরেন্ট আপনার দেওয়া ঠিকানায় খাবার ডেলিভারি করবে এবং গ্রহণের সময় পরিশোধ করবেন।",
+    "subtotal": "মোট খরচ: {amount}đ",
+    "pickupTime": "খাবার নেবার সময়",
+    "pickupTimeFuture": "দয়ালু ভবিষ্যতে নেবার সময় বেছে নিন",
+    "deliveryTimeFuture": "ভবিষ্যতে ডেলিভারি সময় বেছে নিন",
+    "customerName": "প্রাপকের নাম",
+    "customerPhone": "ফোন নম্বর",
+    "deliveryAddress": "ডেলিভারি ঠিকানা",
+    "deliveryContactRequired": "নাম, ফোন নম্বর এবং ঠিকানা দিন",
+    "note": "গুরুত্বপূর্ণ নোট",
+    "success": "আর্ডার সফল",
+    "pickupSuccess": "রেস্টুরেন্ট-এ নিলে খাবার অর্ডার সফল",
+    "deliverySuccess": "ডেলিভারি অর্ডার সফল"
+  },
+  "chatbot": {
+    "badge": "বুদ্ধিমান সহকারী",
+    "title": "FlavorQuest সহকারী",
+    "subtitle": "খাবার পরামর্শ, থামার স্থান ও পর্যটন আপনার জন্য দ্রুত উত্তর দিন।",
+    "welcome": "আমি কোন পদ চেষ্টা করা উচিত, কোন জায়গা আগে দেখতে হবে এবং FlavorQuest-এ সাধারণ প্রশ্নগুলোর উত্তর দিতে পারি।",
+    "inputPlaceholder": "কোন পদ ট্রাই করতে ভালো হবে, আগে কোথায় যাব, বা অ্যাপটি কীভাবে ব্যবহার করবেন জিজ্ঞাসা করুন...",
+    "open": "সহকারী খুলুন",
+    "close": "সহকারী বন্ধ করুন",
+    "openPage": "সহকারী পাতাটি খুলুন",
+    "nav": "সহকারী",
+    "pageTitle": "যাত্রা সহকারী",
+    "pageSubtitle": "FlavorQuest-এ প্রশ্ন ও তথ্যের জন্য একটি আলাদা স্থান, যাতে maps বা POI লিস্ট থেকে ছেদ না হয়",
+    "backToTour": "ট্যুরে ফিরে যান",
+    "pageInfoTitle": "এখানে আপনি কী জানতে চান?",
+    "pageInfoBody": "সহকারী FlavorQuest-এর বর্তমান ডেটা ব্যবহার করে খাবার, স্থান ও ল্লেনডিন রুট প্রস্তাব করবে এবং সাধারণ প্রশ্নের উত্তর দেবে।",
+    "thinking": "চিন্তা করছি...",
+    "error": "সহকারী সংযোগ করতে পারিনি। পরে আবার চেষ্টা করুন.",
+    "footer": "FlavorQuest-এ বর্তমান ডেটা-ভিত্তিক পরামর্শ।",
+    "newChat": "নতুন চ্যাট",
+    "historyEmpty": "আপনার কোনো কথোপকথন নেই।",
+    "loadingHistory": "চ্যাট ইতিহাস লোড হচ্ছে...",
+    "suggestions": {
+      "food": "আজ আমি আগে কোন পদটি চেষ্টা করা উচিত?",
+      "route": "নতুন ভ্রমণে কোন টুর থেকে শুরু করা উচিত বা আগে কোথায় থামা উচিত?",
+      "faq": "এই অ্যাপ অফলাইনেও কাজ করে এবং আগে থেকে খাবার অর্ডার করা সম্ভব?"
+    }
+  },
+  "support": {
+    "nav": "বার্তা পাঠান",
+    "openPage": "বার্তা পাতাটি খুলুন",
+    "customer": {
+      "eyebrow": "সহায়তা চ্যাট",
+      "title": "চ্যান- quán বা admin-কে বার্তা দিন",
+      "subtitle": "আপনি নির্দিষ্ট কোন রেস্টুরেন্ট-এ বার্তা পাঠাতে পারেন, বা অ্যাকাউন্ট/অনভিজ্ঞতা-সংক্রান্ত সহায়তার জন্য admin-কে জিজ্ঞাসা করুন.",
+      "emptyTitle": "কোনো বার্তা নেই।",
+      "emptyBody": "একটি রেস্টুরেন্ট বেছে নিন বা admin-এর সাথে চ্যাট খুলে শুরু করুন."
+    },
+    "owner": {
+      "eyebrow": "মেসেজ বক্স",
+      "title": "গ্রাহক ও admin-র বার্তা",
+      "subtitle": "গ্রাহকদের সাথে পৃথক চ্যাট-চ্যানেল মাধ্যমে পরিচালনা করুন এবং admin-এর সাথে কাজ করার জন্য আলাদা চ্যানেল রাখুন.",
+      "emptyTitle": "চ্যাট বক্স খালি",
+      "emptyBody": "গ্রাহক বার্তা পাঠালেই বা admin-কে বার্তা পাঠালে এখানে আলোচনাটি প্রদর্শিত হবে."
+    },
+    "admin": {
+      "eyebrow": "সাপোর্ট বার্তা",
+      "title": "গ্রাহক ও মালিকের সাথে আলোচনা",
+      "subtitle": "গ্রাহকদের ও মালিকদের সাহায্যের অনুরোধ এখানে集中, যাতে আপনি দ্রুত প্রতিক্রিয়া দিতে পারেন.",
+      "emptyTitle": "বেড়া অপেক্ষা",
+      "emptyBody": "গ্রাহক বা মালিক থেকে নতুন অনুরোধ এলে কথোপকথন এখানে দেখা যাবে।"
+    },
+    "stats": {
+      "activeThreads": "চালু থ্রেড",
+      "activeThreadsBody": "প্রতিটি কথোপকথনের একটি আলাদা পৃষ্ঠা থাকে, ট্র্যাক করা সহজ।",
+      "unreadThreads": "উত্তরের প্রয়োজন",
+      "unreadThreadsBody": "নতুন বার্তা এলে প্রাপককে ইমেইলে জানানো হবে।"
+    },
+    "launchpad": {
+      "title": "নতুন থ্রেড খুলুন",
+      "body": "ঠিক ব্যক্তিকে বার্তা দিন। বিদ্যমান আলোচনার থাকলে সিস্টেমটি পুনরায় সেই থ্রেড খুলে দেবে।"
+    },
+    "inbox": {
+      "title": "চ্যাটের তালিকা",
+      "body": "অপঠিত বার্তা আগে দেখাবে যাতে দ্রুত কাজ করা যায়।"
+    },
+    "threadTypes": {
+      "customerOwner": "গ্রাহক / মালিক",
+      "customerAdmin": "গ্রাহক / Admin",
+      "ownerAdmin": "মালিক / Admin"
+    },
+    "states": {
+      "creating": "খোলা হচ্ছে...",
+      "waitingFirstMessage": "এই থ্রেডে এখনও কোনো বার্তা নেই।",
+      "noThreadSelected": "একটি কথোপকথন নির্বাচন করুন",
+      "noThreadSelectedBody": "বাম কলামে একটি নতুন কথোপকথনও খুলতে পারেন।",
+      "noMessages": "এই থ্রেডে কোনো বার্তা নেই",
+      "noMessagesBody": "প্রথম বার্তা পাঠিয়ে শুরু করুন।"
+    },
+    "actions": {
+      "openThread": "কথোপকথন খোলুন",
+      "startThread": "এখনই বার্তা দিন",
+      "refresh": "রিফ্রেশ করুন",
+      "sending": "বার্তা পাঠানো হচ্ছে...",
+      "send": "বার্তা পাঠান"
+    },
+    "counterparts": {
+      "admin": "Admin দল",
+      "unknown": "প্রাপক",
+      "adminShort": "Admin",
+      "ownerShort": "মালিক",
+      "customerShort": "গ্রাহক"
+    },
+    "thread": {
+      "title": "কথোপকথন",
+      "poiContext": "চালচিত্র {name}-র সাথে যুক্ত হচ্ছে",
+      "emailHint": "নতুন বার্তা অ্যাপে নোটিফাই হবে এবং ইমেইলে পাঠাবে",
+      "emailBadge": "ইমেইল নোটিফিকেশন আছে"
+    },
+    "composer": {
+      "placeholder": "বার্তা লিখুন...",
+      "hint": "নতুন বার্তা এখানেই দেখা হবে। প্রাপকেও ইমেইল পাঠাবে।"
+    },
+    "errors": {
+      "loadThreads": "চ্যাট থ্রেড তালিকা লোড করা যাচ্ছে না।",
+      "loadMessages": "চ্যাট থ্রেড বার্তা লোড করা যাচ্ছে না।",
+      "createThread": "নতুন কথোপকথন তৈরি করা যাচ্ছে না।",
+      "sendMessage": "বার্তা পাঠানো যাচ্ছে না।"
+    }
+  },
+  "notifications": {
+    "title": "বিজ্ঞপ্তি",
+    "markAll": "সবগুলো পড়া হিসেবে চিহ্নিত করুন",
+    "empty": "আপনার নতুন কোনো বিজ্ঞপ্তি নেই"
+  },
+  "owner": {
+    "title": "ব্লাঙ্ক বোর্ড অপারেটর",
+    "subtitle": "POI, মেনু ও অর্ডারের পরিচালনা",
+    "myPois": "আমার POI",
+    "orders": "অর্ডার",
+    "menu": "খাবারের মেনু",
+    "noPoi": "আপনি POI-এ নির্ধারিত নন। 관리자-কে জানান।"
+  },
+  "poiDetail": {
+    "notFound": "দেশীয় স্থান পাওয়া যায়নি",
+    "notFoundMessage": "এই স্থানটি মুছে গেছে বা আর বিদ্যমান নেই।",
+    "playNarration": "ন্যারেশন শোনা",
+    "introduction": "পরিচয়",
+    "noDescription": "এই জায়গার বর্ণনা এখনও নেই।",
+    "didYouKnow": "আপনি কি জানতেন?",
+    "nowPlaying": "চলছে: {name}",
+    "errorPlaying": "অডিও চালাতে সমস্যা, সাময়িকভাবে synthesized কণ্ঠ ব্যবহার করা হচ্ছে"
+  },
+  "permissions": {
+    "checking": "অনুগ্রহ করে অনুমতি যাচাই করা হচ্ছে...",
+    "locationTitle": "স্বয়ংক্রিয় ন্যারেশন-কে সমর্থন করার জন্য অবস্থান অনুমতি দিন",
+    "locationDesc": "Vĩnh Khánh-র পথে আপনার অবস্থান শনাক্ত করতে অ্যাপটি সবচেয়ে ভালো অভিজ্ঞতা দেয়",
+    "denyPrompt": "অনুমতি দেবেন না?",
+    "switchToManual": "ম্যানুয়াল মোডে স্যুইচ করুন"
+  },
+  "units": {
+    "meters": "m",
+    "kilometers": "km",
+    "number": "সংখ্যা"
+  },
+  "sort": {
+    "az": "A-Z"
+  }
+}
