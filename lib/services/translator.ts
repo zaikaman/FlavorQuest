@@ -27,10 +27,6 @@ function normalizeTranslationText(text: string) {
   return text.trim();
 }
 
-function estimateTranslationMaxTokens(text: string) {
-  return Math.min(8_192, Math.max(256, Math.ceil(text.length * 0.9)));
-}
-
 function getTranslationCacheKey(text: string, language: TranslationLanguage) {
   return `${language}:${createHash('sha256').update(text).digest('hex')}`;
 }
@@ -72,7 +68,6 @@ Return only the translated text with natural product copy. Do not add explanatio
       ],
       temperature: 0,
       top_p: 1,
-      max_tokens: estimateTranslationMaxTokens(normalizedText),
     })
     .then((data) => {
       const content = data.choices[0]?.message?.content?.trim();
