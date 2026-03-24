@@ -6,7 +6,7 @@ import { createHash } from 'node:crypto';
 import { generateTTSAudio, getRecommendedVoice } from '@/lib/services/tts-generator';
 import { runWithConcurrency } from '@/lib/utils/async';
 
-const TTS_BATCH_CONCURRENCY = 3;
+const TTS_BATCH_CONCURRENCY = 10;
 const TTS_BUCKET_NAME = 'audio';
 const ttsInFlightCache = new Map<
   string,
