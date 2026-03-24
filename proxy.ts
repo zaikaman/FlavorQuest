@@ -35,7 +35,7 @@ async function resolveProfile(request: NextRequest) {
       profile: {
         userId: null,
         role: null,
-        customerAccessGranted: false,
+        customerAccessGranted: true,
         ownerRequestStatus: null,
       } as RouteProfile,
     };
@@ -76,7 +76,7 @@ async function resolveProfile(request: NextRequest) {
       profile: {
         userId: null,
         role: null,
-        customerAccessGranted: false,
+        customerAccessGranted: true,
         ownerRequestStatus: null,
       } satisfies RouteProfile,
     };
@@ -109,7 +109,7 @@ async function resolveProfile(request: NextRequest) {
     profile: {
       userId: user.id,
       role,
-      customerAccessGranted: role === 'customer' ? (data?.customer_access_granted ?? false) : false,
+      customerAccessGranted: role === 'customer' ? true : false,
       ownerRequestStatus,
     } satisfies RouteProfile,
   };
@@ -136,7 +136,7 @@ export async function proxy(request: NextRequest) {
       if (profile.role === 'pending-owner') {
         return redirect(request, '/pending-owner');
       }
-      return redirect(request, profile.customerAccessGranted ? '/tour' : '/paywall');
+      return redirect(request, '/tour');
     }
 
     if (isAdminLoginPage) {
@@ -156,7 +156,7 @@ export async function proxy(request: NextRequest) {
         return redirect(request, '/pending-owner');
       }
 
-      return redirect(request, profile.customerAccessGranted ? '/tour' : '/paywall');
+      return redirect(request, '/tour');
     }
 
     return response;
@@ -195,10 +195,6 @@ export async function proxy(request: NextRequest) {
       return redirect(request, '/pending-owner');
     }
 
-    if (!profile.customerAccessGranted) {
-      return redirect(request, '/paywall');
-    }
-
     return response;
   }
 
@@ -219,20 +215,7 @@ export async function proxy(request: NextRequest) {
       return redirect(request, '/pending-owner');
     }
 
-    const isSuccessPage = pathname.startsWith('/paywall/success');
-
-    if (profile.customerAccessGranted) {
-      if (isSuccessPage) {
-        return response;
-      }
-      return redirect(request, '/tour');
-    }
-
-    if (isSuccessPage) {
-      return redirect(request, '/paywall');
-    }
-
-    return response;
+    return redirect(request, '/tour');
   }
 
   return response;

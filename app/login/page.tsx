@@ -18,7 +18,6 @@ export default function LoginPage() {
     isOwner,
     isPendingOwner,
     isRoleReady,
-    hasCustomerAccess,
     ownerRequestStatus,
     refreshUserRole,
   } = useAuth();
@@ -79,11 +78,10 @@ export default function LoginPage() {
         return;
       }
 
-      router.push(hasCustomerAccess ? '/tour' : '/paywall');
+      router.push('/tour');
     }
   }, [
     accountType,
-    hasCustomerAccess,
     isAdmin,
     isCompletingOwnerLogin,
     isLoading,
