@@ -41,7 +41,6 @@ import { Toast } from '@/components/ui/Toast';
 import { TourPageSkeleton } from '@/components/ui/Loading';
 import { NoiseFilter } from '@/lib/utils/noise-filter';
 import { SpeedCalculator } from '@/lib/utils/speed';
-import { isCooldownActive, setCooldown } from '@/lib/utils/cooldown';
 import { logAutoPlay, logManualPlay, logSkip, logTourEnd } from '@/lib/services/analytics';
 import { resolveDevicePerformance } from '@/lib/services/device-performance';
 import { saveVisit, loadSettings } from '@/lib/services/storage';
@@ -49,7 +48,11 @@ import { getLocalizedPOI } from '@/lib/utils/localization';
 import { findNearestPOI } from '@/lib/utils/distance';
 import type { Json } from '@/lib/types/database.types';
 import type { AppNotification, POI, Coordinates, UserSettings } from '@/lib/types/index';
-import { GEOFENCE_TRIGGER_RADIUS_M, MAX_WALKING_SPEED_KMH } from '@/lib/constants/index';
+import {
+  COOLDOWN_PERIOD_MS,
+  GEOFENCE_TRIGGER_RADIUS_M,
+  MAX_WALKING_SPEED_KMH,
+} from '@/lib/constants/index';
 
 export default function TourPage() {
   const router = useRouter();
@@ -86,6 +89,7 @@ export default function TourPage() {
   const noiseFilterRef = useRef<NoiseFilter>(new NoiseFilter({ windowSize: 5 })); // 5 samples moving average
   const speedCalculatorRef = useRef<SpeedCalculator>(new SpeedCalculator({ windowSize: 10 }));
   const pendingAutoPlayRef = useRef<Map<string, { distance: number }>>(new Map());
+  const autoPlayCooldownRef = useRef<Map<string, number>>(new Map());
   const [filteredPosition, setFilteredPosition] = useState<Coordinates | null>(null);
   const hasPreloadedRef = useRef(false);
   const devicePerformance = useMemo(
@@ -261,6 +265,7 @@ export default function TourPage() {
 
   useEffect(() => {
     hasPreloadedRef.current = false;
+    autoPlayCooldownRef.current.clear();
   }, [selectedTourId]);
 
   // Handle offline download acceptance
@@ -281,6 +286,19 @@ export default function TourPage() {
   // Calculate estimated size
   const estimatedSize = Math.round(activePOIs.length * 2.5); // ~2.5MB per POI (audio + image)
 
+  const isAutoPlayOnCooldown = useCallback((poiId: string) => {
+    const lastPlayedAt = autoPlayCooldownRef.current.get(poiId);
+    if (!lastPlayedAt) {
+      return false;
+    }
+
+    return Date.now() - lastPlayedAt < COOLDOWN_PERIOD_MS;
+  }, []);
+
+  const markAutoPlayCooldown = useCallback((poiId: string, timestamp: number = Date.now()) => {
+    autoPlayCooldownRef.current.set(poiId, timestamp);
+  }, []);
+
   const finalizeAutoPlay = useCallback(
     async (item: AudioQueueItem) => {
       const pendingEvent = pendingAutoPlayRef.current.get(item.poi.id);
@@ -296,7 +314,7 @@ export default function TourPage() {
       const playbackLanguage = item.language ?? language;
       const poiName = item.title || getLocalizedPOI(item.poi, playbackLanguage).name;
 
-      await setCooldown(item.poi.id);
+      markAutoPlayCooldown(item.poi.id);
       setVisitedPOIs((prev) => new Set([...prev, item.poi.id]));
       await logAutoPlay(item.poi.id, playbackLanguage, undefined, {
         distance: pendingEvent.distance,
@@ -322,7 +340,7 @@ export default function TourPage() {
 
       showToastMessage(t('tour.nowPlaying', { name: poiName }));
     },
-    [language, selectedTourMetadata, showToastMessage, t]
+    [language, markAutoPlayCooldown, selectedTourMetadata, showToastMessage, t]
   );
 
   // Handle TTS fallback
@@ -421,7 +439,7 @@ export default function TourPage() {
     }
 
     // Check cooldown
-    const onCooldown = await isCooldownActive(poi.id);
+    const onCooldown = isAutoPlayOnCooldown(poi.id);
     if (onCooldown) {
       console.log(`POI ${poi.id} is on cooldown, skipping auto-play`);
       return;
@@ -783,6 +801,7 @@ export default function TourPage() {
   useEffect(() => {
     return () => {
       pendingAutoPlayRef.current.clear();
+      autoPlayCooldownRef.current.clear();
     };
   }, []);
 
