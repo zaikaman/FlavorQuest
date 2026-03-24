@@ -123,6 +123,17 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
     optionsRef.current = opts;
   }, [opts]);
 
+  const ensureAudioElement = useCallback(() => {
+    const audio = audioRef.current ?? getSharedAudioElement();
+
+    if (!audio) {
+      return null;
+    }
+
+    audioRef.current = audio;
+    return audio;
+  }, []);
+
   const detachInteractionRetryListeners = useCallback(() => {
     if (typeof window === 'undefined' || !interactionRetryHandlerRef.current) {
       return;
@@ -226,7 +237,8 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
   }, [playWithTTS]);
 
   const unlockAudio = useCallback(async () => {
-    if (isUnlockedRef.current || !audioRef.current) return;
+    const audio = ensureAudioElement();
+    if (isUnlockedRef.current || !audio) return;
 
     const didPrime = await primeSharedAudioElement();
     isUnlockedRef.current = didPrime || isSharedAudioPrimed();
@@ -235,7 +247,7 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
       isUnlocked: isUnlockedRef.current,
       sharedPrimed: isSharedAudioPrimed(),
     });
-  }, []);
+  }, [ensureAudioElement]);
 
   const registerInteractionRetry = useCallback((item: AudioQueueItem) => {
     if (typeof window === 'undefined') {
@@ -271,7 +283,8 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
   }, [detachInteractionRetryListeners, unlockAudio]);
 
   const safePause = useCallback(async () => {
-    if (!audioRef.current) return;
+    const audio = ensureAudioElement();
+    if (!audio) return;
 
     if (typeof speechSynthesis !== 'undefined') {
       speechSynthesis.cancel();
@@ -287,13 +300,12 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
       playPromiseRef.current = null;
     }
 
-    audioRef.current.pause();
-  }, []);
+    audio.pause();
+  }, [ensureAudioElement]);
 
   const play = useCallback(async (item?: AudioQueueItem) => {
-    if (!audioRef.current) return;
-
-    const audio = audioRef.current;
+    const audio = ensureAudioElement();
+    if (!audio) return;
     let targetItem = item;
 
     if (playPromiseRef.current) {
@@ -385,7 +397,7 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
       playPromiseRef.current = audio.play();
       await playPromiseRef.current;
       playPromiseRef.current = null;
-      setState(prev => ({ ...prev, isLoading: false }));
+      setState(prev => ({ ...prev, isPlaying: true, isPaused: false, isLoading: false }));
     } catch (error) {
       playPromiseRef.current = null;
       if ((error as Error).name === 'AbortError') {
@@ -427,7 +439,7 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
       }));
       console.error('[useAudioPlayer] play failed:', error);
     }
-  }, [registerInteractionRetry, unlockAudio]);
+  }, [ensureAudioElement, registerInteractionRetry, unlockAudio]);
 
   useEffect(() => {
     playRef.current = play;
@@ -496,12 +508,13 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
   }, [opts.language, play, safePause]);
 
   const stop = useCallback(async () => {
-    if (!audioRef.current) return;
+    const audio = ensureAudioElement();
+    if (!audio) return;
     pendingInteractionItemRef.current = null;
     detachInteractionRetryListeners();
     setInteractionRequiredItem(null);
     await safePause();
-    audioRef.current.currentTime = 0;
+    audio.currentTime = 0;
     setState(prev => ({
       ...prev,
       currentItem: null,
@@ -513,26 +526,29 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
       duration: 0,
       error: null,
     }));
-  }, [detachInteractionRetryListeners, safePause]);
+  }, [detachInteractionRetryListeners, ensureAudioElement, safePause]);
 
   const seek = useCallback((time: number) => {
-    if (!audioRef.current) return;
-    audioRef.current.currentTime = Math.max(0, Math.min(time, audioRef.current.duration));
-  }, []);
+    const audio = ensureAudioElement();
+    if (!audio) return;
+    audio.currentTime = Math.max(0, Math.min(time, audio.duration));
+  }, [ensureAudioElement]);
 
   const setVolume = useCallback((volume: number) => {
-    if (!audioRef.current) return;
+    const audio = ensureAudioElement();
+    if (!audio) return;
     const clampedVolume = Math.max(0, Math.min(1, volume));
-    audioRef.current.volume = clampedVolume;
+    audio.volume = clampedVolume;
     setState(prev => ({ ...prev, volume: clampedVolume }));
-  }, []);
+  }, [ensureAudioElement]);
 
   const setPlaybackRate = useCallback((playbackRate: number) => {
-    if (!audioRef.current) return;
+    const audio = ensureAudioElement();
+    if (!audio) return;
     const clampedRate = Math.max(0.5, Math.min(2, playbackRate));
-    audioRef.current.playbackRate = clampedRate;
+    audio.playbackRate = clampedRate;
     setState(prev => ({ ...prev, playbackRate: clampedRate }));
-  }, []);
+  }, [ensureAudioElement]);
 
   const toggleRepeat = useCallback(() => {
     setState(prev => ({ ...prev, isRepeatEnabled: !prev.isRepeatEnabled }));
