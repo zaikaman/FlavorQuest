@@ -273,6 +273,138 @@ export function POIForm({
     }
   };
 
+  const handleAutoTranslateFast = async () => {
+    const vietnameseName = typeof formData.name_vi === 'string' ? formData.name_vi.trim() : '';
+    const vietnameseDescription =
+      typeof formData.description_vi === 'string' ? formData.description_vi.trim() : '';
+
+    if (!vietnameseName && !vietnameseDescription) {
+      toast.warning('Please enter a Vietnamese name or description before translating.');
+      return;
+    }
+
+    setTranslating(true);
+    try {
+      const res = await fetch('/api/translate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          texts: {
+            ...(vietnameseName ? { name: vietnameseName } : {}),
+            ...(vietnameseDescription ? { description: vietnameseDescription } : {}),
+          },
+        }),
+      });
+
+      if (!res.ok) {
+        const payload = (await res.json().catch(() => null)) as { error?: string } | null;
+        throw new Error(payload?.error || 'Auto-translate failed');
+      }
+
+      const payload = (await res.json()) as {
+        translations?: Record<string, Partial<Record<(typeof LANGUAGES)[number]['code'], string>>>;
+      };
+      const updates: TranslationUpdates = {};
+
+      LANGUAGES.forEach((lang) => {
+        if (lang.code === 'vi') {
+          return;
+        }
+
+        const translatedName = payload.translations?.name?.[lang.code];
+        if (translatedName) {
+          updates[`name_${lang.code}` as LocalizedNameField] = translatedName;
+        }
+
+        const translatedDescription = payload.translations?.description?.[lang.code];
+        if (translatedDescription) {
+          updates[`description_${lang.code}` as LocalizedDescriptionField] = translatedDescription;
+        }
+      });
+
+      setFormData((prev) => ({ ...prev, ...updates }));
+      toast.success('Translations updated. Please review the content before saving.');
+    } catch (error) {
+      console.error('Translate error:', error);
+      toast.error('Auto-translate failed');
+    } finally {
+      setTranslating(false);
+    }
+  };
+
+  const handleGenerateAllAudioFast = async () => {
+    if (
+      !confirm(
+        'Generate audio for every language now? Longer descriptions can still take a few minutes.'
+      )
+    )
+      return;
+
+    setGenAllLoading(true);
+    try {
+      const items = LANGUAGES.map((lang) => {
+        const text = formData[`description_${lang.code}` as keyof POI];
+        if (typeof text !== 'string' || text.trim().length === 0) {
+          return null;
+        }
+
+        return {
+          text,
+          languageCode: lang.code,
+          poiId: formData.id,
+          fieldName: `audio_url_${lang.code}`,
+        };
+      }).filter((item): item is NonNullable<typeof item> => item !== null);
+
+      if (items.length === 0) {
+        toast.warning('There is no description content to turn into audio yet.');
+        return;
+      }
+
+      const res = await fetch('/api/tts/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ items }),
+      });
+
+      if (!res.ok) {
+        const payload = (await res.json().catch(() => null)) as { error?: string } | null;
+        throw new Error(payload?.error || 'Bulk audio generation failed');
+      }
+
+      const payload = (await res.json()) as {
+        items?: Array<{ fieldName?: string; url: string }>;
+        errors?: Array<{ fieldName?: string; languageCode?: string; error: string }>;
+      };
+      const updates: TranslationUpdates = {};
+
+      payload.items?.forEach((item) => {
+        if (item.fieldName) {
+          updates[item.fieldName as LocalizedAudioField] = item.url;
+        }
+      });
+
+      setFormData((prev) => ({ ...prev, ...updates }));
+
+      if (payload.errors && payload.errors.length > 0) {
+        console.error('Generate all audio partial errors:', payload.errors);
+        toast.warning(
+          `Generated ${payload.items?.length ?? 0} audio files, with ${payload.errors.length} languages still needing retry.`
+        );
+      } else {
+        toast.success('Finished generating audio for all available languages.');
+      }
+    } catch (error) {
+      console.error('Generate all audio error:', error);
+      toast.error('Bulk audio generation failed');
+    } finally {
+      setGenAllLoading(false);
+    }
+  };
+
+  void handleAutoTranslate;
+  void handleGenerateAllAudio;
+
   return (
     <form
       onSubmit={handleSubmit}
@@ -399,7 +531,7 @@ export function POIForm({
             <div className="flex gap-2">
               <button
                 type="button"
-                onClick={handleAutoTranslate}
+                onClick={handleAutoTranslateFast}
                 disabled={translating}
                 className="flex items-center gap-2 rounded-lg bg-blue-600/20 px-3 py-1.5 text-sm font-medium text-blue-400 transition-colors hover:bg-blue-600/30 disabled:opacity-50"
               >
@@ -431,7 +563,7 @@ export function POIForm({
               </button>
               <button
                 type="button"
-                onClick={handleGenerateAllAudio}
+                onClick={handleGenerateAllAudioFast}
                 disabled={genAllLoading}
                 className="flex items-center gap-2 rounded-lg bg-purple-600/20 px-3 py-1.5 text-sm font-medium text-purple-400 transition-colors hover:bg-purple-600/30 disabled:opacity-50"
               >

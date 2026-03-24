@@ -3,7 +3,9 @@
  * Translate text using OpenAI-compatible API
  */
 
+import { createHash } from 'node:crypto';
 import { createOpenAIClient, getOpenAIModel } from '@/lib/services/openai-client';
+import { runWithConcurrency } from '@/lib/utils/async';
 
 interface TranslationResponse {
   en: string;
@@ -14,15 +16,49 @@ interface TranslationResponse {
   [key: string]: string;
 }
 
-export async function translateText(text: string): Promise<TranslationResponse> {
-  const client = createOpenAIClient();
-  const model = getOpenAIModel();
+type TranslationLanguage = 'en' | 'ja' | 'fr' | 'ko' | 'zh';
 
-  const systemPrompt = `You are a professional translator. Translate the following Vietnamese text into English (en), Japanese (ja), French (fr), Korean (ko), and Chinese Simplified (zh).
-    Return ONLY a valid JSON object with keys: en, ja, fr, ko, zh. Do not add any markdown formatting or extra text.`;
+const TARGET_LANGUAGES: readonly TranslationLanguage[] = ['en', 'ja', 'fr', 'ko', 'zh'];
+const MAX_TRANSLATION_CONCURRENCY = 5;
+const translationValueCache = new Map<string, string>();
+const translationInFlightCache = new Map<string, Promise<string>>();
 
-  try {
-    const data = await client.chat.completions.create({
+function normalizeTranslationText(text: string) {
+  return text.trim();
+}
+
+function estimateTranslationMaxTokens(text: string) {
+  return Math.min(8_192, Math.max(256, Math.ceil(text.length * 0.9)));
+}
+
+function getTranslationCacheKey(text: string, language: TranslationLanguage) {
+  return `${language}:${createHash('sha256').update(text).digest('hex')}`;
+}
+
+async function translateIntoLanguage(
+  client: ReturnType<typeof createOpenAIClient>,
+  model: string,
+  text: string,
+  language: TranslationLanguage
+) {
+  const normalizedText = normalizeTranslationText(text);
+  const cacheKey = getTranslationCacheKey(normalizedText, language);
+  const cachedValue = translationValueCache.get(cacheKey);
+
+  if (cachedValue) {
+    return cachedValue;
+  }
+
+  const inFlightValue = translationInFlightCache.get(cacheKey);
+  if (inFlightValue) {
+    return inFlightValue;
+  }
+
+  const systemPrompt = `You are a professional translator. Translate the user's Vietnamese text into ${getLanguageName(language)}.
+Return only the translated text with natural product copy. Do not add explanations, quotes, markdown, or labels.`;
+
+  const request = client.chat.completions
+    .create({
       model,
       messages: [
         {
@@ -31,23 +67,90 @@ export async function translateText(text: string): Promise<TranslationResponse> 
         },
         {
           role: 'user',
-          content: text,
+          content: normalizedText,
         },
       ],
-      temperature: 0.1,
+      temperature: 0,
       top_p: 1,
-      max_tokens: 100000,
+      max_tokens: estimateTranslationMaxTokens(normalizedText),
+    })
+    .then((data) => {
+      const content = data.choices[0]?.message?.content?.trim();
+
+      if (!content) {
+        throw new Error(`No content received from translation API for ${language}`);
+      }
+
+      translationValueCache.set(cacheKey, content);
+      return content;
+    })
+    .finally(() => {
+      translationInFlightCache.delete(cacheKey);
     });
 
-    const content = data.choices[0]?.message?.content;
+  translationInFlightCache.set(cacheKey, request);
 
-    if (!content) {
-      throw new Error('No content received from translation API');
+  return request;
+}
+
+function getLanguageName(language: TranslationLanguage) {
+  switch (language) {
+    case 'en':
+      return 'English';
+    case 'ja':
+      return 'Japanese';
+    case 'fr':
+      return 'French';
+    case 'ko':
+      return 'Korean';
+    case 'zh':
+      return 'Simplified Chinese';
+    default:
+      return language;
+  }
+}
+
+export async function translateText(text: string): Promise<TranslationResponse> {
+  const translationsByField = await translateTexts({ default: text });
+  return translationsByField.default!;
+}
+
+export async function translateTexts(
+  texts: Record<string, string>
+): Promise<Record<string, TranslationResponse>> {
+  const client = createOpenAIClient();
+  const model = getOpenAIModel();
+  const textEntries = Object.entries(texts)
+    .map(([key, value]) => [key, normalizeTranslationText(value)] as const)
+    .filter(([, value]) => value.length > 0);
+
+  try {
+    const taskFactories = textEntries.flatMap(([fieldKey, value]) =>
+      TARGET_LANGUAGES.map((language) => async () => ({
+        fieldKey,
+        language,
+        value: await translateIntoLanguage(client, model, value, language),
+      }))
+    );
+
+    const translatedEntries = await runWithConcurrency(taskFactories, MAX_TRANSLATION_CONCURRENCY);
+    const result: Record<string, TranslationResponse> = {};
+
+    for (const [fieldKey] of textEntries) {
+      result[fieldKey] = {
+        en: '',
+        ja: '',
+        fr: '',
+        ko: '',
+        zh: '',
+      };
     }
 
-    const jsonStr = content.replace(/```json\n?|\n?```/g, '').trim();
+    for (const entry of translatedEntries) {
+      result[entry.fieldKey]![entry.language] = entry.value;
+    }
 
-    return JSON.parse(jsonStr);
+    return result;
   } catch (error) {
     console.error('Translation error:', error);
     throw error;

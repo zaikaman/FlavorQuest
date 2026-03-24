@@ -15,10 +15,12 @@ const TOUR_LANGUAGES = [
   { code: 'zh', label: '中文' },
 ] as const;
 
-type TourLanguageCode = typeof TOUR_LANGUAGES[number]['code'];
+type TourLanguageCode = (typeof TOUR_LANGUAGES)[number]['code'];
 type LocalizedTourNameField = `name_${Exclude<TourLanguageCode, 'vi'>}`;
 type LocalizedTourDescriptionField = `description_${Exclude<TourLanguageCode, 'vi'>}`;
-type TranslationUpdates = Partial<Record<LocalizedTourNameField | LocalizedTourDescriptionField, string>>;
+type TranslationUpdates = Partial<
+  Record<LocalizedTourNameField | LocalizedTourDescriptionField, string>
+>;
 
 type TourFormState = TourPayload & {
   is_active: boolean;
@@ -109,31 +111,29 @@ export default function AdminToursPage() {
 
   useEffect(() => {
     Promise.all([fetchTours(), fetchPOIs()])
-      .catch(error => {
+      .catch((error) => {
         console.error('[AdminTours] Load data failed:', error);
       })
       .finally(() => setIsLoading(false));
   }, []);
 
-  const poiMap = useMemo(
-    () => new Map(pois.map(poi => [poi.id, poi])),
-    [pois]
-  );
+  const poiMap = useMemo(() => new Map(pois.map((poi) => [poi.id, poi])), [pois]);
 
   const selectedPOIs = useMemo(
-    () => formData.poi_ids.map(poiId => poiMap.get(poiId)).filter((poi): poi is POI => Boolean(poi)),
+    () =>
+      formData.poi_ids.map((poiId) => poiMap.get(poiId)).filter((poi): poi is POI => Boolean(poi)),
     [formData.poi_ids, poiMap]
   );
 
   const filteredPOIs = useMemo(() => {
     const normalizedQuery = poiSearchQuery.trim().toLowerCase();
 
-    return pois.filter(poi => {
+    return pois.filter((poi) => {
       if (!normalizedQuery) return true;
 
       return [poi.name_vi, poi.name_en, poi.signature_dish]
         .filter((value): value is string => typeof value === 'string' && value.length > 0)
-        .some(value => value.toLowerCase().includes(normalizedQuery));
+        .some((value) => value.toLowerCase().includes(normalizedQuery));
     });
   }, [poiSearchQuery, pois]);
 
@@ -144,11 +144,11 @@ export default function AdminToursPage() {
   };
 
   const handleTogglePOI = (poiId: string) => {
-    setFormData(prev => {
+    setFormData((prev) => {
       if (prev.poi_ids.includes(poiId)) {
         return {
           ...prev,
-          poi_ids: prev.poi_ids.filter(id => id !== poiId),
+          poi_ids: prev.poi_ids.filter((id) => id !== poiId),
         };
       }
 
@@ -160,7 +160,7 @@ export default function AdminToursPage() {
   };
 
   const handleMovePOI = (poiId: string, direction: 'up' | 'down') => {
-    setFormData(prev => {
+    setFormData((prev) => {
       const currentIndex = prev.poi_ids.indexOf(poiId);
       if (currentIndex === -1) return prev;
 
@@ -301,9 +301,11 @@ export default function AdminToursPage() {
         }
 
         const translations = (await response.json()) as Partial<Record<TourLanguageCode, string>>;
-        TOUR_LANGUAGES.forEach(language => {
+        TOUR_LANGUAGES.forEach((language) => {
           if (language.code !== 'vi' && translations[language.code]) {
-            updates[`name_${language.code}` as LocalizedTourNameField] = translations[language.code] as string;
+            updates[`name_${language.code}` as LocalizedTourNameField] = translations[
+              language.code
+            ] as string;
           }
         });
       }
@@ -321,14 +323,16 @@ export default function AdminToursPage() {
         }
 
         const translations = (await response.json()) as Partial<Record<TourLanguageCode, string>>;
-        TOUR_LANGUAGES.forEach(language => {
+        TOUR_LANGUAGES.forEach((language) => {
           if (language.code !== 'vi' && translations[language.code]) {
-            updates[`description_${language.code}` as LocalizedTourDescriptionField] = translations[language.code] as string;
+            updates[`description_${language.code}` as LocalizedTourDescriptionField] = translations[
+              language.code
+            ] as string;
           }
         });
       }
 
-      setFormData(prev => ({ ...prev, ...updates }));
+      setFormData((prev) => ({ ...prev, ...updates }));
       toast.success('Dịch tự động thành công. Vui lòng kiểm tra lại nội dung.');
     } catch (error) {
       console.error('[AdminTours] Translate failed:', error);
@@ -338,39 +342,108 @@ export default function AdminToursPage() {
     }
   };
 
+  const handleAutoTranslateFast = async () => {
+    const vietnameseName = formData.name_vi.trim();
+    const vietnameseDescription = formData.description_vi?.trim() ?? '';
+
+    if (!vietnameseName && !vietnameseDescription) {
+      toast.warning('Please enter a Vietnamese name or description before translating.');
+      return;
+    }
+
+    setIsTranslating(true);
+
+    try {
+      const response = await fetch('/api/translate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          texts: {
+            ...(vietnameseName ? { name: vietnameseName } : {}),
+            ...(vietnameseDescription ? { description: vietnameseDescription } : {}),
+          },
+        }),
+      });
+
+      if (!response.ok) {
+        const payload = await response.json().catch(() => null);
+        throw new Error(payload?.error || 'Auto-translate failed');
+      }
+
+      const payload = (await response.json()) as {
+        translations?: Record<string, Partial<Record<TourLanguageCode, string>>>;
+      };
+      const updates: TranslationUpdates = {};
+
+      TOUR_LANGUAGES.forEach((language) => {
+        if (language.code === 'vi') {
+          return;
+        }
+
+        const translatedName = payload.translations?.name?.[language.code];
+        if (translatedName) {
+          updates[`name_${language.code}` as LocalizedTourNameField] = translatedName;
+        }
+
+        const translatedDescription = payload.translations?.description?.[language.code];
+        if (translatedDescription) {
+          updates[`description_${language.code}` as LocalizedTourDescriptionField] =
+            translatedDescription;
+        }
+      });
+
+      setFormData((prev) => ({ ...prev, ...updates }));
+      toast.success('Translations updated. Please review the content before saving.');
+    } catch (error) {
+      console.error('[AdminTours] Translate failed:', error);
+      toast.error(error instanceof Error ? error.message : 'Auto-translate failed');
+    } finally {
+      setIsTranslating(false);
+    }
+  };
+
+  void handleAutoTranslate;
+
   if (isLoading) {
-    return (
-      <DashboardSkeleton stats={4} />
-    );
+    return <DashboardSkeleton stats={4} />;
   }
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between gap-4 flex-wrap">
+      <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-white">Quản lý tour</h1>
-          <p className="text-gray-400">Quản trị viên có thể tạo tour và sắp xếp thứ tự POI cho khách hàng</p>
+          <p className="text-gray-400">
+            Quản trị viên có thể tạo tour và sắp xếp thứ tự POI cho khách hàng
+          </p>
         </div>
         <button
           onClick={resetForm}
-          className="px-4 py-2 rounded-xl border border-white/10 bg-white/5 text-white hover:bg-white/10 transition-colors"
+          className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-white transition-colors hover:bg-white/10"
         >
           Tạo tour mới
         </button>
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-[1.2fr_0.8fr] gap-6">
-        <form onSubmit={handleSubmit} className="space-y-6 rounded-2xl border border-white/10 bg-[#2c1e16] p-6">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1.2fr_0.8fr]">
+        <form
+          onSubmit={handleSubmit}
+          className="space-y-6 rounded-2xl border border-white/10 bg-[#2c1e16] p-6"
+        >
           <div className="flex items-center justify-between gap-4">
             <div>
-              <h2 className="text-lg font-bold text-white">{editingTourId ? 'Chỉnh sửa tour' : 'Tạo tour mới'}</h2>
-              <p className="text-sm text-gray-400">Tên tour có thể nhập nhiều ngôn ngữ, nội dung thiếu sẽ fallback về tiếng Việt</p>
+              <h2 className="text-lg font-bold text-white">
+                {editingTourId ? 'Chỉnh sửa tour' : 'Tạo tour mới'}
+              </h2>
+              <p className="text-sm text-gray-400">
+                Tên tour có thể nhập nhiều ngôn ngữ, nội dung thiếu sẽ fallback về tiếng Việt
+              </p>
             </div>
             <button
               type="button"
-              onClick={handleAutoTranslate}
+              onClick={handleAutoTranslateFast}
               disabled={isTranslating}
-              className="ml-auto px-4 py-2 rounded-xl border border-primary/30 bg-primary/10 text-primary hover:bg-primary/20 transition-colors disabled:opacity-50"
+              className="border-primary/30 bg-primary/10 text-primary hover:bg-primary/20 ml-auto rounded-xl border px-4 py-2 transition-colors disabled:opacity-50"
             >
               {isTranslating ? 'Đang dịch...' : 'Dịch tự động (AI)'}
             </button>
@@ -378,37 +451,51 @@ export default function AdminToursPage() {
               <input
                 type="checkbox"
                 checked={formData.is_active}
-                onChange={event => setFormData(prev => ({ ...prev, is_active: event.target.checked }))}
+                onChange={(event) =>
+                  setFormData((prev) => ({ ...prev, is_active: event.target.checked }))
+                }
                 className="size-4 rounded border-white/20 bg-black/20"
               />
               Hiển thị cho khách hàng
             </label>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="rounded-xl border border-white/5 bg-black/15 p-4 space-y-3 md:col-span-2">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div className="space-y-3 rounded-xl border border-white/5 bg-black/15 p-4 md:col-span-2">
               <h3 className="font-semibold text-white">Thông tin hiển thị tour</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div>
-                  <label className="block text-xs uppercase tracking-wide text-gray-400 mb-1">Ảnh bìa tour</label>
+                  <label className="mb-1 block text-xs tracking-wide text-gray-400 uppercase">
+                    Ảnh bìa tour
+                  </label>
                   <ImageUploader
                     currentImageUrl={formData.cover_image_url}
-                    onImageUploaded={(url) => setFormData(prev => ({ ...prev, cover_image_url: url }))}
+                    onImageUploaded={(url) =>
+                      setFormData((prev) => ({ ...prev, cover_image_url: url }))
+                    }
                     folder="tours"
                   />
-                  <p className="mt-2 text-xs text-gray-500 break-all">{formData.cover_image_url || 'Chưa có ảnh bìa nào được tải lên.'}</p>
+                  <p className="mt-2 text-xs break-all text-gray-500">
+                    {formData.cover_image_url || 'Chưa có ảnh bìa nào được tải lên.'}
+                  </p>
                 </div>
                 <div>
-                  <label className="block text-xs uppercase tracking-wide text-gray-400 mb-1">Thời lượng dự kiến (phút)</label>
+                  <label className="mb-1 block text-xs tracking-wide text-gray-400 uppercase">
+                    Thời lượng dự kiến (phút)
+                  </label>
                   <input
                     type="number"
                     min={1}
                     max={1440}
                     value={formData.estimated_duration_min ?? ''}
-                    onChange={event => setFormData(prev => ({
-                      ...prev,
-                      estimated_duration_min: event.target.value ? Number(event.target.value) : null,
-                    }))}
+                    onChange={(event) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        estimated_duration_min: event.target.value
+                          ? Number(event.target.value)
+                          : null,
+                      }))
+                    }
                     className="w-full rounded-lg border border-white/10 bg-black/20 px-3 py-2 text-sm text-white"
                     placeholder="90"
                   />
@@ -416,30 +503,39 @@ export default function AdminToursPage() {
               </div>
             </div>
 
-            {TOUR_LANGUAGES.map(language => {
+            {TOUR_LANGUAGES.map((language) => {
               const nameKey = `name_${language.code}` as keyof TourFormState;
               const descriptionKey = `description_${language.code}` as keyof TourFormState;
 
               return (
-                <div key={language.code} className="rounded-xl border border-white/5 bg-black/15 p-4 space-y-3">
+                <div
+                  key={language.code}
+                  className="space-y-3 rounded-xl border border-white/5 bg-black/15 p-4"
+                >
                   <h3 className="font-semibold text-white">{language.label}</h3>
                   <div>
-                    <label className="block text-xs uppercase tracking-wide text-gray-400 mb-1">
+                    <label className="mb-1 block text-xs tracking-wide text-gray-400 uppercase">
                       Tên tour {language.code === 'vi' ? '*' : ''}
                     </label>
                     <input
                       value={(formData[nameKey] as string) ?? ''}
-                      onChange={event => setFormData(prev => ({ ...prev, [nameKey]: event.target.value }))}
+                      onChange={(event) =>
+                        setFormData((prev) => ({ ...prev, [nameKey]: event.target.value }))
+                      }
                       className="w-full rounded-lg border border-white/10 bg-black/20 px-3 py-2 text-sm text-white"
                       placeholder={`Tên tour (${language.label})`}
                     />
                   </div>
                   <div>
-                    <label className="block text-xs uppercase tracking-wide text-gray-400 mb-1">Mô tả ngắn</label>
+                    <label className="mb-1 block text-xs tracking-wide text-gray-400 uppercase">
+                      Mô tả ngắn
+                    </label>
                     <textarea
                       value={(formData[descriptionKey] as string) ?? ''}
-                      onChange={event => setFormData(prev => ({ ...prev, [descriptionKey]: event.target.value }))}
-                      className="w-full min-h-24 rounded-lg border border-white/10 bg-black/20 px-3 py-2 text-sm text-white"
+                      onChange={(event) =>
+                        setFormData((prev) => ({ ...prev, [descriptionKey]: event.target.value }))
+                      }
+                      className="min-h-24 w-full rounded-lg border border-white/10 bg-black/20 px-3 py-2 text-sm text-white"
                       placeholder={`Mô tả (${language.label})`}
                     />
                   </div>
@@ -449,32 +545,41 @@ export default function AdminToursPage() {
           </div>
 
           <div className="space-y-4">
-            <div className="flex items-center justify-between gap-4 flex-wrap">
+            <div className="flex flex-wrap items-center justify-between gap-4">
               <div>
                 <h3 className="font-semibold text-white">POI thuộc tour</h3>
-                <p className="text-sm text-gray-400">Thứ tự trong danh sách cũng là thứ tự hiển thị cho khách hàng</p>
+                <p className="text-sm text-gray-400">
+                  Thứ tự trong danh sách cũng là thứ tự hiển thị cho khách hàng
+                </p>
               </div>
               <input
                 value={poiSearchQuery}
-                onChange={event => setPoiSearchQuery(event.target.value)}
+                onChange={(event) => setPoiSearchQuery(event.target.value)}
                 placeholder="Tìm POI theo tên hoặc món đặc trưng"
-                className="w-full sm:w-80 rounded-lg border border-white/10 bg-black/20 px-3 py-2 text-sm text-white"
+                className="w-full rounded-lg border border-white/10 bg-black/20 px-3 py-2 text-sm text-white sm:w-80"
               />
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-[0.9fr_1.1fr] gap-4">
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-[0.9fr_1.1fr]">
               <div className="rounded-xl border border-white/5 bg-black/15 p-4">
-                <div className="flex items-center justify-between mb-3">
+                <div className="mb-3 flex items-center justify-between">
                   <h4 className="font-semibold text-white">Đã chọn ({selectedPOIs.length})</h4>
                 </div>
 
-                <div className="space-y-2 max-h-[380px] overflow-y-auto pr-1">
+                <div className="max-h-[380px] space-y-2 overflow-y-auto pr-1">
                   {selectedPOIs.map((poi, index) => (
-                    <div key={poi.id} className="rounded-xl border border-primary/20 bg-primary/10 p-3">
+                    <div
+                      key={poi.id}
+                      className="border-primary/20 bg-primary/10 rounded-xl border p-3"
+                    >
                       <div className="flex items-start justify-between gap-3">
                         <div>
-                          <p className="text-sm font-semibold text-white">{index + 1}. {poi.name_vi}</p>
-                          <p className="text-xs text-gray-300">{poi.signature_dish || 'Chưa có món đặc trưng'}</p>
+                          <p className="text-sm font-semibold text-white">
+                            {index + 1}. {poi.name_vi}
+                          </p>
+                          <p className="text-xs text-gray-300">
+                            {poi.signature_dish || 'Chưa có món đặc trưng'}
+                          </p>
                         </div>
                         <div className="flex items-center gap-1">
                           <button
@@ -514,10 +619,10 @@ export default function AdminToursPage() {
               </div>
 
               <div className="rounded-xl border border-white/5 bg-black/15 p-4">
-                <h4 className="font-semibold text-white mb-3">Danh sách POI khả dụng</h4>
+                <h4 className="mb-3 font-semibold text-white">Danh sách POI khả dụng</h4>
 
-                <div className="space-y-2 max-h-[380px] overflow-y-auto pr-1">
-                  {filteredPOIs.map(poi => {
+                <div className="max-h-[380px] space-y-2 overflow-y-auto pr-1">
+                  {filteredPOIs.map((poi) => {
                     const isSelected = formData.poi_ids.includes(poi.id);
 
                     return (
@@ -534,10 +639,16 @@ export default function AdminToursPage() {
                         <div className="flex items-start justify-between gap-3">
                           <div>
                             <p className="text-sm font-semibold text-white">{poi.name_vi}</p>
-                            <p className="text-xs text-gray-300">{poi.name_en || 'Chưa có tên tiếng Anh'}</p>
-                            <p className="text-xs text-gray-400 mt-1">{poi.signature_dish || 'Chưa có món đặc trưng'}</p>
+                            <p className="text-xs text-gray-300">
+                              {poi.name_en || 'Chưa có tên tiếng Anh'}
+                            </p>
+                            <p className="mt-1 text-xs text-gray-400">
+                              {poi.signature_dish || 'Chưa có món đặc trưng'}
+                            </p>
                           </div>
-                          <span className={`rounded-full px-2 py-1 text-[11px] font-semibold ${isSelected ? 'bg-primary/20 text-primary' : 'bg-white/10 text-gray-300'}`}>
+                          <span
+                            className={`rounded-full px-2 py-1 text-[11px] font-semibold ${isSelected ? 'bg-primary/20 text-primary' : 'bg-white/10 text-gray-300'}`}
+                          >
                             {isSelected ? 'Đã chọn' : 'Thêm'}
                           </span>
                         </div>
@@ -559,7 +670,7 @@ export default function AdminToursPage() {
             <button
               type="submit"
               disabled={isSaving}
-              className="px-5 py-3 rounded-xl bg-primary text-white font-bold hover:bg-orange-600 transition-colors disabled:opacity-50"
+              className="bg-primary rounded-xl px-5 py-3 font-bold text-white transition-colors hover:bg-orange-600 disabled:opacity-50"
             >
               {isSaving ? 'Đang lưu...' : editingTourId ? 'Lưu thay đổi' : 'Tạo tour'}
             </button>
@@ -567,7 +678,7 @@ export default function AdminToursPage() {
               <button
                 type="button"
                 onClick={resetForm}
-                className="px-5 py-3 rounded-xl border border-white/10 bg-white/5 text-white hover:bg-white/10 transition-colors"
+                className="rounded-xl border border-white/10 bg-white/5 px-5 py-3 text-white transition-colors hover:bg-white/10"
               >
                 Hủy chỉnh sửa
               </button>
@@ -578,27 +689,34 @@ export default function AdminToursPage() {
         <div className="space-y-4 rounded-2xl border border-white/10 bg-[#2c1e16] p-6">
           <div>
             <h2 className="text-lg font-bold text-white">Danh sách tour hiện có</h2>
-            <p className="text-sm text-gray-400">Bật/tắt tour hoặc chỉnh sửa nhanh cấu hình hiện tại</p>
+            <p className="text-sm text-gray-400">
+              Bật/tắt tour hoặc chỉnh sửa nhanh cấu hình hiện tại
+            </p>
           </div>
 
-          <div className="space-y-3 max-h-[920px] overflow-y-auto pr-1">
-            {tours.map(tour => (
+          <div className="max-h-[920px] space-y-3 overflow-y-auto pr-1">
+            {tours.map((tour) => (
               <div key={tour.id} className="rounded-2xl border border-white/10 bg-black/20 p-4">
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <div className="flex items-center gap-2 flex-wrap">
+                    <div className="flex flex-wrap items-center gap-2">
                       <h3 className="font-semibold text-white">{tour.name_vi}</h3>
-                      <span className={`rounded-full px-2 py-1 text-[11px] font-semibold ${tour.is_active ? 'bg-emerald-500/15 text-emerald-300' : 'bg-white/10 text-gray-300'}`}>
+                      <span
+                        className={`rounded-full px-2 py-1 text-[11px] font-semibold ${tour.is_active ? 'bg-emerald-500/15 text-emerald-300' : 'bg-white/10 text-gray-300'}`}
+                      >
                         {tour.is_active ? 'Đang mở' : 'Đang ẩn'}
                       </span>
-                      {typeof tour.estimated_duration_min === 'number' && tour.estimated_duration_min > 0 && (
-                        <span className="rounded-full bg-white/10 px-2 py-1 text-[11px] font-semibold text-white/80">
-                          {tour.estimated_duration_min} phút
-                        </span>
-                      )}
+                      {typeof tour.estimated_duration_min === 'number' &&
+                        tour.estimated_duration_min > 0 && (
+                          <span className="rounded-full bg-white/10 px-2 py-1 text-[11px] font-semibold text-white/80">
+                            {tour.estimated_duration_min} phút
+                          </span>
+                        )}
                     </div>
                     {tour.description_vi && (
-                      <p className="mt-2 text-sm text-gray-300 line-clamp-2">{tour.description_vi}</p>
+                      <p className="mt-2 line-clamp-2 text-sm text-gray-300">
+                        {tour.description_vi}
+                      </p>
                     )}
                   </div>
                   <div className="flex items-center gap-2">
@@ -631,12 +749,15 @@ export default function AdminToursPage() {
 
                 <div className="mt-3 flex flex-wrap gap-2">
                   {tour.cover_image_url && (
-                    <span className="rounded-full bg-primary/10 px-3 py-1 text-xs text-primary">
+                    <span className="bg-primary/10 text-primary rounded-full px-3 py-1 text-xs">
                       Có ảnh bìa
                     </span>
                   )}
-                  {tour.poi_ids.slice(0, 4).map(poiId => (
-                    <span key={poiId} className="rounded-full bg-white/5 px-3 py-1 text-xs text-gray-300">
+                  {tour.poi_ids.slice(0, 4).map((poiId) => (
+                    <span
+                      key={poiId}
+                      className="rounded-full bg-white/5 px-3 py-1 text-xs text-gray-300"
+                    >
                       {poiMap.get(poiId)?.name_vi || poiId}
                     </span>
                   ))}
