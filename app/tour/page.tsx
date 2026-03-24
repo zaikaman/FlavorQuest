@@ -343,7 +343,27 @@ export default function TourPage() {
     onTTSFallback: handleTTSFallback,
   });
 
-  const { enqueue } = audioPlayer;
+  const { enqueue, unlockAudio, resumeBlockedPlayback } = audioPlayer;
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    const primeAudioPlayback = () => {
+      void unlockAudio();
+    };
+
+    window.addEventListener('pointerdown', primeAudioPlayback, { capture: true, once: true });
+    window.addEventListener('touchstart', primeAudioPlayback, { capture: true, once: true });
+    window.addEventListener('keydown', primeAudioPlayback, { capture: true, once: true });
+
+    return () => {
+      window.removeEventListener('pointerdown', primeAudioPlayback, true);
+      window.removeEventListener('touchstart', primeAudioPlayback, true);
+      window.removeEventListener('keydown', primeAudioPlayback, true);
+    };
+  }, [unlockAudio]);
 
   // Preload all narration audio in the background as soon as the current dataset is ready.
   useEffect(() => {
@@ -1091,8 +1111,12 @@ export default function TourPage() {
 
             {/* Autoplay needs interaction after refresh/browser block */}
             {blockedAutoPlayItem && !showPlayerModal && (
-              <div className="absolute right-0 bottom-0 left-0 z-40 px-4 pb-20 pointer-events-none">
-                <div className="bg-[rgba(45,36,30,0.82)] border border-primary/30 shadow-lg backdrop-blur-md rounded-xl p-4">
+              <div className="absolute right-0 bottom-0 left-0 z-40 px-4 pb-20">
+                <button
+                  type="button"
+                  onClick={() => void resumeBlockedPlayback()}
+                  className="bg-[rgba(45,36,30,0.82)] border border-primary/30 shadow-lg backdrop-blur-md rounded-xl p-4 w-full text-left"
+                >
                   <div className="flex items-center gap-3">
                     <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/20 text-primary">
                       <span className="material-symbols-outlined text-[22px]">touch_app</span>
@@ -1106,7 +1130,7 @@ export default function TourPage() {
                       </p>
                     </div>
                   </div>
-                </div>
+                </button>
               </div>
             )}
 

@@ -13,6 +13,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { AUDIO_LOAD_TIMEOUT_MS } from '@/lib/constants';
 import type { POI, Language } from '@/lib/types/index';
 import { getLocalizedPOI } from '@/lib/utils/localization';
 import {
@@ -67,6 +68,12 @@ const DEFAULT_OPTIONS: UseAudioPlayerOptions = {
   enableTTSFallback: true,
   language: 'vi',
 };
+
+function createAudioPlayTimeoutError(): Error {
+  const error = new Error('Audio play timed out');
+  error.name = 'AudioPlayTimeoutError';
+  return error;
+}
 
 export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
   const opts = useMemo(
@@ -303,6 +310,31 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
     audio.pause();
   }, [ensureAudioElement]);
 
+  const attemptPlay = useCallback(async (audio: HTMLAudioElement) => {
+    const rawPlayPromise = audio.play();
+
+    if (!rawPlayPromise) {
+      return;
+    }
+
+    let timeoutId: number | null = null;
+    const playAttempt = Promise.race([
+      rawPlayPromise,
+      new Promise<never>((_, reject) => {
+        timeoutId = window.setTimeout(() => {
+          reject(createAudioPlayTimeoutError());
+        }, AUDIO_LOAD_TIMEOUT_MS);
+      }),
+    ]).finally(() => {
+      if (timeoutId !== null) {
+        window.clearTimeout(timeoutId);
+      }
+    });
+
+    playPromiseRef.current = playAttempt;
+    await playAttempt;
+  }, []);
+
   const play = useCallback(async (item?: AudioQueueItem) => {
     const audio = ensureAudioElement();
     if (!audio) return;
@@ -394,9 +426,9 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
     });
 
     try {
-      playPromiseRef.current = audio.play();
-      await playPromiseRef.current;
+      await attemptPlay(audio);
       playPromiseRef.current = null;
+      isUnlockedRef.current = true;
       setState(prev => ({ ...prev, isPlaying: true, isPaused: false, isLoading: false }));
     } catch (error) {
       playPromiseRef.current = null;
@@ -432,6 +464,56 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
         return;
       }
 
+      if ((error as Error).name === 'AudioPlayTimeoutError') {
+        const blockedItem = targetItem ?? currentItemRef.current;
+
+        console.warn('[useAudioPlayer] play attempt timed out:', {
+          poiId: blockedItem?.poi.id ?? null,
+          title: blockedItem?.title ?? null,
+          isUnlocked: isUnlockedRef.current,
+          sharedPrimed: isSharedAudioPrimed(),
+          readyState: audio.readyState,
+          networkState: audio.networkState,
+          currentSrc: audio.currentSrc || audio.src,
+        });
+
+        audio.pause();
+        audio.currentTime = 0;
+
+        if (blockedItem && !isUnlockedRef.current) {
+          registerInteractionRetry(blockedItem);
+          setInteractionRequiredItem(blockedItem);
+          setState(prev => ({
+            ...prev,
+            currentItem: null,
+            isPlaying: false,
+            isPaused: false,
+            isLoading: false,
+            currentTime: 0,
+            duration: 0,
+            error: null,
+          }));
+          return;
+        }
+
+        if (blockedItem && optionsRef.current.enableTTSFallback) {
+          playWithTTSRef.current(blockedItem);
+          return;
+        }
+
+        const timeoutMessage = 'Audio load timed out';
+        setState(prev => ({
+          ...prev,
+          isPlaying: false,
+          isLoading: false,
+          error: timeoutMessage,
+        }));
+        if (blockedItem) {
+          optionsRef.current.onError?.(timeoutMessage, blockedItem);
+        }
+        return;
+      }
+
       setState(prev => ({
         ...prev,
         error: error instanceof Error ? error.message : 'Failed to play audio',
@@ -439,7 +521,7 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
       }));
       console.error('[useAudioPlayer] play failed:', error);
     }
-  }, [ensureAudioElement, registerInteractionRetry, unlockAudio]);
+  }, [attemptPlay, ensureAudioElement, registerInteractionRetry, unlockAudio]);
 
   useEffect(() => {
     playRef.current = play;
@@ -722,12 +804,14 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
       if (isSharedAudioPriming()) {
         return;
       }
+      isUnlockedRef.current = true;
       setState(prev => ({ ...prev, isPlaying: true, isPaused: false, isLoading: false }));
     };
     const onPlaying = () => {
       if (isSharedAudioPriming()) {
         return;
       }
+      isUnlockedRef.current = true;
       setState(prev => ({ ...prev, isPlaying: true, isPaused: false, isLoading: false }));
       console.info('[useAudioPlayer] audio started', {
         poiId: currentItemRef.current?.poi.id ?? null,
