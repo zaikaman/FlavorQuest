@@ -23,7 +23,7 @@
  * - flavorquest-tiles-v1: Map tiles
  */
 
-const CACHE_VERSION = 'v5';
+const CACHE_VERSION = 'v6';
 const NAVIGATION_TIMEOUT_MS = 3500;
 const CACHE_NAMES = {
   static: `flavorquest-static-${CACHE_VERSION}`,
@@ -374,11 +374,38 @@ async function networkOnly(request) {
 }
 
 async function handleAudioRequest(request, cacheName, timeoutMs = 5000) {
-  if (request.headers.has('range')) {
-    return handleAudioRangeRequest(request, cacheName, timeoutMs);
+  try {
+    const networkResponse = await fetchWithTimeout(request, timeoutMs);
+
+    if (networkResponse.ok && !request.headers.has('range')) {
+      const cache = await caches.open(cacheName);
+      const cacheKey = request.url.includes('?') ? request.url.split('?')[0] : request;
+      cache.put(cacheKey, networkResponse.clone()).catch((error) => {
+        console.error('[SW] Failed to cache network audio response:', error);
+      });
+    }
+
+    return networkResponse;
+  } catch (error) {
+    console.warn('[SW] Network audio request failed, falling back to cache:', request.url, error);
   }
 
-  return cacheFirstWithTimeout(request, cacheName, timeoutMs);
+  if (request.headers.has('range')) {
+    return handleAudioRangeRequest(request, cacheName);
+  }
+
+  const cache = await caches.open(cacheName);
+  const cached = await getCachedAudioResponse(cache, request);
+  if (cached) {
+    console.log('[SW] Serving full audio from cache fallback:', request.url);
+    return cached;
+  }
+
+  return new Response('Không thể tải âm thanh. Vui lòng thử lại khi kết nối ổn định hơn.', {
+    status: 503,
+    statusText: 'Service Unavailable',
+    headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+  });
 }
 
 async function getCachedAudioResponse(cache, request) {
@@ -392,7 +419,7 @@ async function getCachedAudioResponse(cache, request) {
   return cached;
 }
 
-async function handleAudioRangeRequest(request, cacheName, timeoutMs = 5000) {
+async function handleAudioRangeRequest(request, cacheName) {
   const cache = await caches.open(cacheName);
   const cached = await getCachedAudioResponse(cache, request);
   const rangeHeader = request.headers.get('range');
@@ -404,7 +431,7 @@ async function handleAudioRangeRequest(request, cacheName, timeoutMs = 5000) {
       const matches = /bytes=(\d+)-(\d+)?/.exec(rangeHeader);
 
       if (!matches) {
-        return fetch(request);
+        return cached;
       }
 
       const start = Number(matches[1]);
@@ -445,22 +472,16 @@ async function handleAudioRangeRequest(request, cacheName, timeoutMs = 5000) {
     }
   }
 
-  try {
-    console.log('[SW] Fetching audio range from network:', request.url, rangeHeader);
-    return await fetchWithTimeout(request, timeoutMs);
-  } catch (error) {
-    console.error('[SW] Audio range fetch failed:', error);
-
-    if (cached) {
-      return cached;
-    }
-
-    return new Response('Không thể tải âm thanh. Vui lòng thử lại khi mạng ổn định hơn.', {
-      status: 503,
-      statusText: 'Service Unavailable',
-      headers: { 'Content-Type': 'text/plain; charset=utf-8' },
-    });
+  if (cached) {
+    console.log('[SW] Returning cached full audio as last fallback for range request:', request.url);
+    return cached;
   }
+
+  return new Response('Không thể tải âm thanh. Vui lòng thử lại khi mạng ổn định hơn.', {
+    status: 503,
+    statusText: 'Service Unavailable',
+    headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+  });
 }
 
 /**
