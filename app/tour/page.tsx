@@ -42,10 +42,11 @@ import { TourPageSkeleton } from '@/components/ui/Loading';
 import { NoiseFilter } from '@/lib/utils/noise-filter';
 import { SpeedCalculator } from '@/lib/utils/speed';
 import { logAutoPlay, logManualPlay, logSkip, logTourEnd } from '@/lib/services/analytics';
+import { warmAudioUrls } from '@/lib/services/audio-session';
 import { resolveDevicePerformance } from '@/lib/services/device-performance';
 import { saveVisit, loadSettings } from '@/lib/services/storage';
 import { getLocalizedPOI } from '@/lib/utils/localization';
-import { findNearestPOI } from '@/lib/utils/distance';
+import { calculateDistance, findNearestPOI } from '@/lib/utils/distance';
 import type { Json } from '@/lib/types/database.types';
 import type { AppNotification, POI, Coordinates, UserSettings } from '@/lib/types/index';
 import {
@@ -53,6 +54,11 @@ import {
   GEOFENCE_TRIGGER_RADIUS_M,
   MAX_WALKING_SPEED_KMH,
 } from '@/lib/constants/index';
+
+type NavigatorConnection = {
+  saveData?: boolean;
+  effectiveType?: string;
+};
 
 export default function TourPage() {
   const router = useRouter();
@@ -726,6 +732,10 @@ export default function TourPage() {
       const localizedPOI = getLocalizedPOI(poi, language);
       const audioUrl = localizedPOI.audio_url;
 
+      if (audioPlayer.currentItem?.poi.id === poi.id && audioPlayer.isLoading) {
+        return;
+      }
+
       // Nếu bấm lại đúng POI đang phát: toggle pause/resume
       if (audioPlayer.currentItem?.poi.id === poi.id) {
         // Nếu đã đổi ngôn ngữ, phát lại source theo ngôn ngữ mới thay vì resume source cũ
@@ -874,6 +884,9 @@ export default function TourPage() {
 
   // Get next POI
   const nextPOI = nearbyPOIs.find((p) => p.id !== audioPlayer.currentItem?.poi.id);
+  const audioLoadingPOIId = audioPlayer.isLoading
+    ? (audioPlayer.currentItem?.poi.id ?? null)
+    : null;
   const blockedAutoPlayItem = audioPlayer.interactionRequiredItem;
   const blockedAutoPlayPOIName = useMemo(() => {
     if (!blockedAutoPlayItem) {
@@ -882,6 +895,62 @@ export default function TourPage() {
 
     return getLocalizedPOI(blockedAutoPlayItem.poi, language).name;
   }, [blockedAutoPlayItem, language]);
+
+  const warmupCandidates = useMemo(() => {
+    const rankedPOIs = [...activePOIs];
+
+    if (filteredPosition) {
+      rankedPOIs.sort((left, right) => {
+        const leftDistance = calculateDistance(filteredPosition, { lat: left.lat, lng: left.lng });
+        const rightDistance = calculateDistance(filteredPosition, { lat: right.lat, lng: right.lng });
+        return leftDistance - rightDistance;
+      });
+    } else {
+      rankedPOIs.sort((left, right) => (left.priority || 99) - (right.priority || 99));
+    }
+
+    const selected: POI[] = [];
+    const seen = new Set<string>();
+
+    const addCandidate = (poi: POI | null | undefined) => {
+      if (!poi || seen.has(poi.id)) {
+        return;
+      }
+
+      seen.add(poi.id);
+      selected.push(poi);
+    };
+
+    addCandidate(selectedPOI);
+    addCandidate(audioPlayer.currentItem?.poi);
+    addCandidate(nextPOI);
+    rankedPOIs.slice(0, 3).forEach(addCandidate);
+
+    return selected;
+  }, [activePOIs, audioPlayer.currentItem, filteredPosition, nextPOI, selectedPOI]);
+
+  useEffect(() => {
+    if (warmupCandidates.length === 0) {
+      return;
+    }
+
+    const connection = (navigator as Navigator & { connection?: NavigatorConnection }).connection;
+    if (connection?.saveData || connection?.effectiveType === 'slow-2g' || connection?.effectiveType === '2g') {
+      return;
+    }
+
+    const timer = window.setTimeout(() => {
+      const urls = warmupCandidates
+        .map((poi) => getLocalizedPOI(poi, language).audio_url)
+        .filter((url): url is string => Boolean(url));
+
+      warmAudioUrls(urls);
+    }, 150);
+
+    return () => {
+      window.clearTimeout(timer);
+    };
+  }, [language, warmupCandidates]);
 
   useEffect(() => {
     if (!blockedAutoPlayItem) {
@@ -1034,6 +1103,7 @@ export default function TourPage() {
                 onPlayPOI={handlePlayPOI}
                 playingPOIId={audioPlayer.currentItem?.poi.id}
                 isAudioPlaying={audioPlayer.isPlaying}
+                isAudioLoading={audioPlayer.isLoading}
                 preferredZoom={devicePerformance.profile.mapDefaultZoom}
                 enableFlyAnimation={devicePerformance.profile.mapFlyAnimation}
                 showAccuracyRing={devicePerformance.profile.showAccuracyRing}
@@ -1049,6 +1119,7 @@ export default function TourPage() {
                 onPlayPOI={handlePlayPOI}
                 onViewPOI={handleViewPOI}
                 playingPOIId={audioPlayer.currentItem?.poi.id}
+                audioLoadingPOIId={audioLoadingPOIId}
                 isOfflineReady={isOfflineReady || offlineSyncReady}
                 isLoading={poisLoading}
               />
@@ -1091,6 +1162,7 @@ export default function TourPage() {
                     nearbyPOIs.find((p) => p.id === audioPlayer.currentItem?.poi.id)?.distance
                   }
                   isPlaying={audioPlayer.isPlaying}
+                  isLoading={audioPlayer.isLoading}
                   currentTime={audioPlayer.currentTime}
                   duration={audioPlayer.duration}
                   onExpand={() => setShowPlayerModal(true)}
@@ -1108,12 +1180,13 @@ export default function TourPage() {
             isPlaying={audioPlayer.isPlaying}
             isPaused={audioPlayer.isPaused}
             currentTime={audioPlayer.currentTime}
-            duration={audioPlayer.duration}
-            volume={audioPlayer.volume}
-            playbackRate={audioPlayer.playbackRate}
-            isRepeatEnabled={audioPlayer.isRepeatEnabled}
-            nextPOI={nextPOI}
-            onPlay={audioPlayer.play}
+              duration={audioPlayer.duration}
+              volume={audioPlayer.volume}
+              playbackRate={audioPlayer.playbackRate}
+              isRepeatEnabled={audioPlayer.isRepeatEnabled}
+              isLoading={audioPlayer.isLoading}
+              nextPOI={nextPOI}
+              onPlay={audioPlayer.play}
             onPause={audioPlayer.pause}
             onSeek={audioPlayer.seek}
             onVolumeChange={audioPlayer.setVolume}

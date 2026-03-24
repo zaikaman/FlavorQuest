@@ -17,6 +17,7 @@ export interface AudioPlayerProps {
   currentPOI: POI | null;
   isPlaying: boolean;
   isPaused: boolean;
+  isLoading?: boolean;
   currentTime: number;
   duration: number;
   volume: number;
@@ -45,6 +46,7 @@ function formatTime(seconds: number): string {
 export function AudioPlayer({
   currentPOI,
   isPlaying,
+  isLoading = false,
   currentTime,
   duration,
   volume,
@@ -180,10 +182,11 @@ export function AudioPlayer({
               </button>
               <button
                 onClick={isPlaying ? onPause : onPlay}
+                disabled={isLoading}
                 className="size-16 rounded-full bg-primary text-white flex items-center justify-center shadow-[0_4px_20px_rgba(242,108,13,0.4)] hover:scale-105 active:scale-95 transition-all"
               >
-                <span className="material-symbols-outlined text-4xl fill-1">
-                  {isPlaying ? 'pause' : 'play_arrow'}
+                <span className={`material-symbols-outlined text-4xl fill-1 ${isLoading ? 'animate-spin' : ''}`}>
+                  {isLoading ? 'sync' : isPlaying ? 'pause' : 'play_arrow'}
                 </span>
               </button>
               <button

@@ -30,6 +30,7 @@ interface InteractiveMapProps {
   onPlayPOI: (poi: POI) => void;
   playingPOIId?: string | null;
   isAudioPlaying?: boolean;
+  isAudioLoading?: boolean;
   preferredZoom?: number;
   enableFlyAnimation?: boolean;
   showAccuracyRing?: boolean;
@@ -47,6 +48,7 @@ export function InteractiveMap({
   onPlayPOI,
   playingPOIId,
   isAudioPlaying = false,
+  isAudioLoading = false,
   preferredZoom = 16,
   enableFlyAnimation = true,
   showAccuracyRing = true,
@@ -287,6 +289,9 @@ export function InteractiveMap({
   const isSelectedPOIPlaying = Boolean(
     selectedPOI && playingPOIId === selectedPOI.id && isAudioPlaying
   );
+  const isSelectedPOILoading = Boolean(
+    selectedPOI && playingPOIId === selectedPOI.id && isAudioLoading
+  );
 
   return (
     <div className="relative h-full w-full overflow-hidden">
@@ -343,6 +348,7 @@ export function InteractiveMap({
             poi={selectedPOI}
             distance={getDistanceToPOI(selectedPOI)}
             isPlaying={isSelectedPOIPlaying}
+            isLoading={isSelectedPOILoading}
             onPlay={() => onPlayPOI(selectedPOI)}
             onClose={() => onSelectPOI(null)}
             onViewDetail={() => onViewPOI(selectedPOI)}

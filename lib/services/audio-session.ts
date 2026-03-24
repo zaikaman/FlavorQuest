@@ -6,6 +6,26 @@ const SILENT_AUDIO_DATA_URI =
 let sharedAudioElement: HTMLAudioElement | null = null;
 let sharedAudioPrimed = false;
 let sharedAudioPriming = false;
+const warmedAudioUrls = new Map<string, number>();
+const warmingAudioUrls = new Map<string, Promise<void>>();
+const WARM_AUDIO_TTL_MS = 5 * 60 * 1000;
+
+function normalizeAudioUrl(url: string): string {
+  try {
+    return new URL(url, window.location.href).href;
+  } catch {
+    return url;
+  }
+}
+
+function findAudioPreloadLink(normalizedUrl: string): HTMLLinkElement | null {
+  if (typeof document === 'undefined') {
+    return null;
+  }
+
+  const links = document.head.querySelectorAll<HTMLLinkElement>('link[data-flavorquest-audio-preload]');
+  return Array.from(links).find((link) => link.href === normalizedUrl) ?? null;
+}
 
 function ensureSharedAudioElement(): HTMLAudioElement | null {
   if (typeof document === 'undefined') {
@@ -22,6 +42,8 @@ function ensureSharedAudioElement(): HTMLAudioElement | null {
 
   const audio = document.createElement('audio');
   audio.preload = 'auto';
+  audio.crossOrigin = 'anonymous';
+  audio.setAttribute('playsinline', 'true');
   audio.style.display = 'none';
   audio.setAttribute('data-flavorquest-shared-audio', 'true');
   document.body.appendChild(audio);
@@ -88,4 +110,72 @@ export async function primeSharedAudioElement(): Promise<boolean> {
     audio.muted = previousMuted;
     sharedAudioPriming = false;
   }
+}
+
+export function warmAudioUrl(url: string | null | undefined): Promise<void> {
+  if (typeof document === 'undefined' || !url) {
+    return Promise.resolve();
+  }
+
+  const normalizedUrl = normalizeAudioUrl(url);
+  const warmedAt = warmedAudioUrls.get(normalizedUrl);
+
+  if (warmedAt && Date.now() - warmedAt < WARM_AUDIO_TTL_MS) {
+    return Promise.resolve();
+  }
+
+  const inFlight = warmingAudioUrls.get(normalizedUrl);
+  if (inFlight) {
+    return inFlight;
+  }
+
+  const promise = new Promise<void>((resolve) => {
+    const existingLink = findAudioPreloadLink(normalizedUrl);
+    if (existingLink) {
+      warmedAudioUrls.set(normalizedUrl, Date.now());
+      resolve();
+      return;
+    }
+
+    const head = document.head;
+    if (!head) {
+      resolve();
+      return;
+    }
+
+    const preloadLink = document.createElement('link');
+    preloadLink.rel = 'preload';
+    preloadLink.as = 'audio';
+    preloadLink.href = normalizedUrl;
+    preloadLink.crossOrigin = 'anonymous';
+    preloadLink.setAttribute('data-flavorquest-audio-preload', 'true');
+
+    let resolved = false;
+    const finish = () => {
+      if (resolved) {
+        return;
+      }
+
+      resolved = true;
+      warmedAudioUrls.set(normalizedUrl, Date.now());
+      resolve();
+    };
+
+    preloadLink.addEventListener('load', finish, { once: true });
+    preloadLink.addEventListener('error', finish, { once: true });
+    window.setTimeout(finish, 1500);
+
+    head.appendChild(preloadLink);
+  }).finally(() => {
+    warmingAudioUrls.delete(normalizedUrl);
+  });
+
+  warmingAudioUrls.set(normalizedUrl, promise);
+  return promise;
+}
+
+export function warmAudioUrls(urls: Array<string | null | undefined>): void {
+  urls.forEach((url) => {
+    void warmAudioUrl(url);
+  });
 }

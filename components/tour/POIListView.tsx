@@ -21,6 +21,7 @@ interface POIListViewProps {
   onPlayPOI: (poi: POI) => void;
   onViewPOI: (poi: POI) => void;
   playingPOIId?: string | null;
+  audioLoadingPOIId?: string | null;
   isOfflineReady?: boolean;
   isLoading?: boolean;
 }
@@ -41,6 +42,7 @@ export function POIListView({
   onPlayPOI,
   onViewPOI,
   playingPOIId,
+  audioLoadingPOIId,
   isOfflineReady = false,
   isLoading = false,
 }: POIListViewProps) {
@@ -199,6 +201,7 @@ export function POIListView({
             {sortedPOIs.map((poi) => {
               const localized = getLocalizedPOI(poi, language);
               const isPlaying = playingPOIId === poi.id;
+              const isAudioLoading = audioLoadingPOIId === poi.id;
               const distance = formatDistance(poi);
 
               return (
@@ -240,14 +243,16 @@ export function POIListView({
                     {/* Play Button */}
                     <button
                       onClick={() => onPlayPOI(poi)}
+                      disabled={isAudioLoading}
                       className={`absolute -top-6 right-4 flex h-12 w-12 items-center justify-center rounded-full text-white shadow-lg transition-all active:scale-95 ${isPlaying ? 'bg-green-500' : 'bg-primary hover:bg-primary/90'
                         }`}
+                      aria-label={isAudioLoading ? t('audio.loading') : isPlaying ? t('audio.pause') : t('audio.play')}
                     >
                       <span
-                        className="material-symbols-outlined text-2xl"
+                        className={`material-symbols-outlined text-2xl ${isAudioLoading ? 'animate-spin' : ''}`}
                         style={{ fontVariationSettings: "'FILL' 1" }}
                       >
-                        {isPlaying ? 'pause' : 'play_arrow'}
+                        {isAudioLoading ? 'sync' : isPlaying ? 'pause' : 'play_arrow'}
                       </span>
                     </button>
 

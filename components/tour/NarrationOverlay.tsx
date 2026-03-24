@@ -15,6 +15,7 @@ export interface NarrationOverlayProps {
   currentPOI: POI;
   distance?: number;
   isPlaying: boolean;
+  isLoading?: boolean;
   currentTime: number;
   duration: number;
   onExpand?: () => void;
@@ -31,6 +32,7 @@ export function NarrationOverlay({
   currentPOI,
   distance,
   isPlaying,
+  isLoading = false,
   currentTime,
   duration,
   onExpand,
@@ -49,22 +51,22 @@ export function NarrationOverlay({
       <div className="bg-[rgba(45,36,30,0.7)] backdrop-blur-md border border-white/5 rounded-xl p-3 flex items-center gap-3 shadow-lg transform transition-all hover:scale-[1.02]">
         {/* POI Indicator Icon */}
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-seafood-green/20 text-seafood-green">
-          <span className="material-symbols-outlined text-[20px]">
-            {isPlaying ? 'graphic_eq' : 'location_on'}
+          <span className={`material-symbols-outlined text-[20px] ${isLoading ? 'animate-spin' : ''}`}>
+            {isLoading ? 'sync' : isPlaying ? 'graphic_eq' : 'location_on'}
           </span>
         </div>
 
         {/* Content */}
         <div className="flex flex-col min-w-0 flex-1">
           <span className="text-[10px] font-bold uppercase tracking-wider text-seafood-green">
-            {isPlaying ? t('audio.play') : t('tour.nearbyPOIs')}
+            {isLoading ? t('audio.loading') : isPlaying ? t('audio.play') : t('tour.nearbyPOIs')}
           </span>
           <span className="truncate text-sm font-semibold text-white">
             {localizedPOI.name}
           </span>
 
           {/* Progress Bar */}
-          {isPlaying && duration > 0 && (
+          {isPlaying && !isLoading && duration > 0 && (
             <div className="mt-1 flex items-center gap-2">
               <div className="flex-1 h-1 bg-white/10 rounded-full overflow-hidden">
                 <div
@@ -87,10 +89,10 @@ export function NarrationOverlay({
         )}
 
         {/* Play/Pause Indicator */}
-        {isPlaying && (
+        {(isPlaying || isLoading) && (
           <div className="flex size-8 items-center justify-center">
-            <span className="material-symbols-outlined text-primary animate-pulse">
-              graphic_eq
+            <span className={`material-symbols-outlined text-primary ${isLoading ? 'animate-spin' : 'animate-pulse'}`}>
+              {isLoading ? 'sync' : 'graphic_eq'}
             </span>
           </div>
         )}

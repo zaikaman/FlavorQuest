@@ -110,6 +110,10 @@ export default function POIDetailPage() {
   // Phát audio
   const handlePlay = async () => {
     if (!poi) return;
+
+    if (audioPlayer.currentItem?.poi.id === poi.id && audioPlayer.isLoading) {
+      return;
+    }
     
     const localized = getLocalizedPOI(poi, language);
 
@@ -346,6 +350,10 @@ export default function POIDetailPage() {
                 </button>
                 <button
                   onClick={async () => {
+                    if (audioPlayer.isLoading) {
+                      return;
+                    }
+
                     if (audioPlayer.currentItem?.language !== language) {
                       if (!localized.audio_url) {
                         showToastMsg(t('poiDetail.errorPlaying'));
@@ -368,10 +376,14 @@ export default function POIDetailPage() {
                       await audioPlayer.play();
                     }
                   }}
+                  disabled={audioPlayer.isLoading}
                   className="size-14 rounded-full bg-primary flex items-center justify-center shadow-lg shadow-primary/30"
                 >
-                  <span className="material-symbols-outlined text-3xl" style={{ fontVariationSettings: "'FILL' 1" }}>
-                    {audioPlayer.isPlaying ? 'pause' : 'play_arrow'}
+                  <span
+                    className={`material-symbols-outlined text-3xl ${audioPlayer.isLoading ? 'animate-spin' : ''}`}
+                    style={{ fontVariationSettings: "'FILL' 1" }}
+                  >
+                    {audioPlayer.isLoading ? 'sync' : audioPlayer.isPlaying ? 'pause' : 'play_arrow'}
                   </span>
                 </button>
                 <button
@@ -385,9 +397,15 @@ export default function POIDetailPage() {
           ) : (
             <button
               onClick={handlePlay}
+              disabled={audioPlayer.isLoading}
               className="w-full flex items-center justify-center gap-3 py-3 bg-primary rounded-lg font-bold"
             >
-              <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>play_arrow</span>
+              <span
+                className={`material-symbols-outlined ${audioPlayer.isLoading ? 'animate-spin' : ''}`}
+                style={{ fontVariationSettings: "'FILL' 1" }}
+              >
+                {audioPlayer.isLoading ? 'sync' : 'play_arrow'}
+              </span>
               {t('poiDetail.playNarration')}
             </button>
           )}

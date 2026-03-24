@@ -20,6 +20,7 @@ import {
   isSharedAudioPriming,
   isSharedAudioPrimed,
   primeSharedAudioElement,
+  warmAudioUrl,
 } from '@/lib/services/audio-session';
 
 export interface AudioQueueItem {
@@ -104,6 +105,7 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
   const pendingInteractionItemRef = useRef<AudioQueueItem | null>(null);
   const interactionRetryHandlerRef = useRef<(() => void) | null>(null);
   const playRef = useRef<(item?: AudioQueueItem) => Promise<void>>(async () => {});
+  const isSwitchingSourceRef = useRef(false);
 
   useEffect(() => {
     currentItemRef.current = state.currentItem;
@@ -326,6 +328,11 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
     setInteractionRequiredItem(null);
 
     if (targetItem) {
+      if (!targetItem.audioUrl) {
+        playWithTTSRef.current(targetItem);
+        return;
+      }
+
       console.log('[useAudioPlayer] play requested:', {
         poiId: targetItem.poi.id,
         title: targetItem.title,
@@ -334,6 +341,14 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
       });
 
       const requestId = ++playRequestIdRef.current;
+      const currentSrc = audio.currentSrc || audio.src;
+      const currentNormalizedUrl = currentSrc
+        ? new URL(currentSrc, window.location.href).href
+        : '';
+      const targetNormalizedUrl = new URL(targetItem.audioUrl, window.location.href).href;
+      const isSourceChanged = currentNormalizedUrl !== targetNormalizedUrl;
+
+      void warmAudioUrl(targetItem.audioUrl);
 
       setState(prev => ({
         ...prev,
@@ -341,48 +356,18 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
         isLoading: true,
         error: null,
         isTTSFallback: false,
-        currentTime: 0,
-        duration: 0,
+        isPaused: false,
+        currentTime: isSourceChanged ? 0 : prev.currentTime,
+        duration: isSourceChanged ? 0 : prev.duration,
       }));
 
-      audio.pause();
-      audio.src = '';
-      audio.load();
-      audio.src = targetItem.audioUrl;
-      audio.load();
-
-      try {
-        await new Promise<void>((resolve, reject) => {
-          const handleCanPlay = () => {
-            cleanup();
-            resolve();
-          };
-          const handleError = () => {
-            cleanup();
-            reject(new Error('Failed to load audio'));
-          };
-          const cleanup = () => {
-            audio.removeEventListener('canplay', handleCanPlay);
-            audio.removeEventListener('error', handleError);
-          };
-
-          if (playRequestIdRef.current !== requestId) {
-            resolve();
-            return;
-          }
-
-          if (audio.readyState >= 3) {
-            resolve();
-            return;
-          }
-
-          audio.addEventListener('canplay', handleCanPlay, { once: true });
-          audio.addEventListener('error', handleError, { once: true });
-        });
-      } finally {
-        if (playRequestIdRef.current === requestId) {
-          setState(prev => ({ ...prev, isLoading: false }));
-        }
+      if (isSourceChanged) {
+        isSwitchingSourceRef.current = true;
+        audio.pause();
+        audio.currentTime = 0;
+        audio.src = targetItem.audioUrl;
+        audio.load();
+        isSwitchingSourceRef.current = false;
       }
 
       if (playRequestIdRef.current !== requestId) {
@@ -400,6 +385,7 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
       playPromiseRef.current = audio.play();
       await playPromiseRef.current;
       playPromiseRef.current = null;
+      setState(prev => ({ ...prev, isLoading: false }));
     } catch (error) {
       playPromiseRef.current = null;
       if ((error as Error).name === 'AbortError') {
@@ -654,13 +640,31 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
       if (isSharedAudioPriming()) {
         return;
       }
-      setState(prev => ({ ...prev, duration: audio.duration, isLoading: false }));
+      setState(prev => ({ ...prev, duration: audio.duration }));
     };
     const onTimeUpdate = () => {
       if (isSharedAudioPriming()) {
         return;
       }
       setState(prev => ({ ...prev, currentTime: audio.currentTime }));
+    };
+    const onLoadStart = () => {
+      if (isSharedAudioPriming()) {
+        return;
+      }
+      setState(prev => ({ ...prev, isLoading: true, error: null }));
+    };
+    const onCanPlay = () => {
+      if (isSharedAudioPriming()) {
+        return;
+      }
+      setState(prev => ({ ...prev, isLoading: false }));
+    };
+    const onWaiting = () => {
+      if (isSharedAudioPriming()) {
+        return;
+      }
+      setState(prev => ({ ...prev, isLoading: true }));
     };
     const onEnded = () => {
       if (isSharedAudioPriming()) {
@@ -702,7 +706,13 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
       if (isSharedAudioPriming()) {
         return;
       }
-      setState(prev => ({ ...prev, isPlaying: true, isPaused: false }));
+      setState(prev => ({ ...prev, isPlaying: true, isPaused: false, isLoading: false }));
+    };
+    const onPlaying = () => {
+      if (isSharedAudioPriming()) {
+        return;
+      }
+      setState(prev => ({ ...prev, isPlaying: true, isPaused: false, isLoading: false }));
       console.info('[useAudioPlayer] audio started', {
         poiId: currentItemRef.current?.poi.id ?? null,
         currentSrc: audio.currentSrc,
@@ -712,30 +722,38 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
       }
     };
     const onPause = () => {
-      if (isSharedAudioPriming()) {
+      if (isSharedAudioPriming() || isSwitchingSourceRef.current) {
         return;
       }
-      setState(prev => ({ ...prev, isPlaying: false, isPaused: true }));
+      setState(prev => ({ ...prev, isPlaying: false, isPaused: true, isLoading: false }));
       if (currentItemRef.current) {
         optionsRef.current.onPause?.(currentItemRef.current);
       }
     };
 
+    audio.addEventListener('loadstart', onLoadStart);
+    audio.addEventListener('canplay', onCanPlay);
     audio.addEventListener('loadedmetadata', onLoadedMetadata);
     audio.addEventListener('timeupdate', onTimeUpdate);
+    audio.addEventListener('waiting', onWaiting);
     audio.addEventListener('ended', onEnded);
     audio.addEventListener('error', onError);
     audio.addEventListener('play', onPlay);
+    audio.addEventListener('playing', onPlaying);
     audio.addEventListener('pause', onPause);
 
     return () => {
       pendingInteractionItemRef.current = null;
       detachInteractionRetryListeners();
+      audio.removeEventListener('loadstart', onLoadStart);
+      audio.removeEventListener('canplay', onCanPlay);
       audio.removeEventListener('loadedmetadata', onLoadedMetadata);
       audio.removeEventListener('timeupdate', onTimeUpdate);
+      audio.removeEventListener('waiting', onWaiting);
       audio.removeEventListener('ended', onEnded);
       audio.removeEventListener('error', onError);
       audio.removeEventListener('play', onPlay);
+      audio.removeEventListener('playing', onPlaying);
       audio.removeEventListener('pause', onPause);
       audio.pause();
       if (audioRef.current === audio) {

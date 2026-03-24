@@ -15,6 +15,7 @@ interface POIDetailCardProps {
   poi: POI;
   distance?: number | null;
   isPlaying?: boolean;
+  isLoading?: boolean;
   onPlay: () => void;
   onClose: () => void;
   onViewDetail?: () => void;
@@ -24,6 +25,7 @@ export function POIDetailCard({
   poi,
   distance,
   isPlaying = false,
+  isLoading = false,
   onPlay,
   onClose,
   onViewDetail,
@@ -98,13 +100,14 @@ export function POIDetailCard({
       <button
         onClick={onPlay}
         className="group flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary text-white shadow-lg shadow-primary/30 transition-all active:scale-95 hover:bg-primary/90"
-        aria-label={isPlaying ? t('audio.pause') : t('audio.play')}
+        aria-label={isLoading ? t('audio.loading') : isPlaying ? t('audio.pause') : t('audio.play')}
+        disabled={isLoading}
       >
         <span
-          className="material-symbols-outlined text-[28px] ml-0.5 group-hover:scale-110 transition-transform"
+          className={`material-symbols-outlined text-[28px] transition-transform ${isLoading ? 'animate-spin' : 'ml-0.5 group-hover:scale-110'}`}
           style={{ fontVariationSettings: "'FILL' 1" }}
         >
-          {isPlaying ? 'pause' : 'play_arrow'}
+          {isLoading ? 'sync' : isPlaying ? 'pause' : 'play_arrow'}
         </span>
       </button>
     </div>
