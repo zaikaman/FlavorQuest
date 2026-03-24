@@ -69,7 +69,6 @@ CREATE TABLE public.pois (
   lat double precision NOT NULL,
   lng double precision NOT NULL,
   radius integer NOT NULL DEFAULT 20 CHECK (radius >= 1 AND radius <= 100),
-  priority integer NOT NULL DEFAULT 5 CHECK (priority >= 1 AND priority <= 10),
   name_vi text NOT NULL,
   name_en text NOT NULL,
   name_ja text,

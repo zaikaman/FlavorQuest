@@ -75,7 +75,6 @@
     "nearbyPOIs": "Points à proximité",
     "currentLocation": "Position actuelle",
     "distance": "Distance",
-    "priority": "Priorité",
     "nowPlaying": "En cours : {name}",
     "syncedEvents": "{count} événements synchronisés",
     "dataSaved": "Données enregistrées, prêt hors ligne",

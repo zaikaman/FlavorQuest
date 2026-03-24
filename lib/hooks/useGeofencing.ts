@@ -74,10 +74,15 @@ function sortTriggeredEntries(a: WorkerPOIEntry, b: WorkerPOIEntry): number {
     return a.distance - b.distance;
   }
 
-  const priorityA = a.poi.priority ?? 0;
-  const priorityB = b.poi.priority ?? 0;
-  if (priorityA !== priorityB) {
-    return priorityB - priorityA;
+  const radiusA = a.poi.radius ?? 0;
+  const radiusB = b.poi.radius ?? 0;
+  if (radiusA !== radiusB) {
+    return radiusA - radiusB;
+  }
+
+  const nameComparison = a.poi.name_vi.localeCompare(b.poi.name_vi, 'vi');
+  if (nameComparison !== 0) {
+    return nameComparison;
   }
 
   return a.poi.id.localeCompare(b.poi.id);

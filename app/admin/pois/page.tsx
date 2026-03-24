@@ -26,7 +26,7 @@ type AudioFieldKey =
   | 'audio_url_zh';
 type AssignmentFilter = 'all' | 'assigned' | 'unassigned';
 type CoverageFilter = 'all' | 'ready' | 'missing-image' | 'missing-audio' | 'needs-attention';
-type SortOption = 'priority-desc' | 'priority-asc' | 'updated-desc' | 'name-asc';
+type SortOption = 'updated-desc' | 'updated-asc' | 'name-asc' | 'name-desc';
 
 const AUDIO_LANGUAGES: AudioLanguage[] = ['vi', 'en', 'ja', 'fr', 'ko', 'zh'];
 const PAGE_SIZE = 10;
@@ -87,7 +87,7 @@ export default function POIsPage() {
   const [assignmentFilter, setAssignmentFilter] = useState<AssignmentFilter>('all');
   const [selectedOwnerId, setSelectedOwnerId] = useState('all');
   const [coverageFilter, setCoverageFilter] = useState<CoverageFilter>('all');
-  const [sortBy, setSortBy] = useState<SortOption>('priority-desc');
+  const [sortBy, setSortBy] = useState<SortOption>('updated-desc');
   const [currentPage, setCurrentPage] = useState(1);
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(true);
 
@@ -194,7 +194,7 @@ export default function POIsPage() {
     setAssignmentFilter('all');
     setSelectedOwnerId('all');
     setCoverageFilter('all');
-    setSortBy('priority-desc');
+    setSortBy('updated-desc');
     setCurrentPage(1);
   };
 
@@ -273,15 +273,16 @@ export default function POIsPage() {
       })
       .sort((left, right) => {
         switch (sortBy) {
-          case 'priority-asc':
-            return left.priority - right.priority || left.name_vi.localeCompare(right.name_vi, 'vi');
+          case 'updated-asc':
+            return compareDateDesc(right.updated_at, left.updated_at) || left.name_vi.localeCompare(right.name_vi, 'vi');
           case 'updated-desc':
             return compareDateDesc(left.updated_at, right.updated_at) || left.name_vi.localeCompare(right.name_vi, 'vi');
+          case 'name-desc':
+            return right.name_vi.localeCompare(left.name_vi, 'vi');
           case 'name-asc':
             return left.name_vi.localeCompare(right.name_vi, 'vi');
-          case 'priority-desc':
           default:
-            return right.priority - left.priority || left.name_vi.localeCompare(right.name_vi, 'vi');
+            return compareDateDesc(left.updated_at, right.updated_at) || left.name_vi.localeCompare(right.name_vi, 'vi');
         }
       });
   }, [assignmentFilter, coverageFilter, ownerEmailMap, pois, searchQuery, selectedCategories, selectedOwnerId, sortBy]);
@@ -583,10 +584,10 @@ export default function POIsPage() {
                   onChange={(event) => setSortBy(event.target.value as SortOption)}
                   className="min-h-11 w-full rounded-xl border border-white/10 bg-[#17110d] px-3 text-sm text-white outline-none focus:border-primary/40"
                 >
-                  <option value="priority-desc">Ưu tiên cao đến thấp</option>
-                  <option value="priority-asc">Ưu tiên thấp đến cao</option>
                   <option value="updated-desc">Cập nhật gần nhất</option>
+                  <option value="updated-asc">Cập nhật lần đầu</option>
                   <option value="name-asc">Tên A-Z</option>
+                  <option value="name-desc">Tên Z-A</option>
                 </select>
               </div>
             </div>
@@ -651,9 +652,6 @@ export default function POIsPage() {
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-center gap-2">
                         <h3 className="text-lg font-bold text-white">{poi.name_vi}</h3>
-                        <span className="rounded-full bg-white/10 px-2.5 py-1 text-[11px] font-semibold text-gray-200">
-                          Ưu tiên {poi.priority}
-                        </span>
                         {missingImage && (
                           <span className="rounded-full bg-amber-500/15 px-2.5 py-1 text-[11px] font-semibold text-amber-300">
                             Thiếu ảnh

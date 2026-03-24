@@ -72,7 +72,6 @@ export async function PUT(
         if (profile.role !== 'admin') {
             delete body.lat;
             delete body.lng;
-            delete body.priority;
             delete body.radius;
             delete body.deleted_at;
             delete body.owner_id;

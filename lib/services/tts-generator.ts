@@ -31,7 +31,7 @@ export async function generateTTSAudio({ text, languageCode, name }: TTSRequest)
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'api-key': apiKey, // Azure uses 'api-key' header or Bearer token. User sample used "Authorization: Bearer". I'll stick to Bearer as per user sample.
+            'api-key': apiKey, 
             'Authorization': `Bearer ${apiKey}`
         },
         body: JSON.stringify({

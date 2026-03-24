@@ -40,7 +40,6 @@ export interface POI {
   lat: number;
   lng: number;
   radius: number;
-  priority: number;
 
   // Multi-language name fields
   name_vi: string;
@@ -89,7 +88,6 @@ export interface LocalizedPOI {
   lat: number;
   lng: number;
   radius: number;
-  priority: number;
   name: string;
   description: string;
   audio_url: string;
@@ -114,7 +112,6 @@ export interface POIPayload {
   lat: number;
   lng: number;
   radius?: number;
-  priority?: number;
 
   name_vi: string;
   name_en: string;
@@ -388,7 +385,6 @@ export interface AudioQueueItem {
   url: string;
   title: string;
   description?: string;
-  priority: number;
 }
 
 /**
@@ -879,7 +875,6 @@ export function getLocalizedPOI(poi: POI, language: Language): LocalizedPOI {
     lat: poi.lat,
     lng: poi.lng,
     radius: poi.radius,
-    priority: poi.priority,
     name: getLocalizedField(poi, 'name', language),
     description: getLocalizedField(poi, 'description', language),
     audio_url: getLocalizedField(poi, 'audio_url', language),

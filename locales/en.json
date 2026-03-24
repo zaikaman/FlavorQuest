@@ -75,7 +75,6 @@
     "nearbyPOIs": "Nearby Points",
     "currentLocation": "Current Location",
     "distance": "Distance",
-    "priority": "Priority",
     "nowPlaying": "Now Playing: {name}",
     "syncedEvents": "Synced {count} events",
     "dataSaved": "Data saved, ready for offline",

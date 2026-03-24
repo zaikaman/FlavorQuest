@@ -275,21 +275,6 @@ export const BOTTOM_NAV_HEIGHT_PX = 64;
 export const FAB_SIZE_PX = 56;
 
 // ============================================
-// POI PRIORITY LEVELS
-// ============================================
-
-/**
- * POI priority levels
- * Higher priority POIs sẽ được phát trước nếu nhiều POI cùng trigger
- */
-export const POI_PRIORITY = {
-  LOW: 1,
-  MEDIUM: 2,
-  HIGH: 3,
-  CRITICAL: 4,
-} as const;
-
-// ============================================
 // APP METADATA
 // ============================================
 

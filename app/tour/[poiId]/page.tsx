@@ -309,13 +309,6 @@ export default function POIDetailPage() {
       <div className="flex-1 px-4 -mt-16 relative z-10">
         {/* Title & Meta */}
         <div className="mb-4">
-          <div className="flex items-center gap-2 mb-1">
-            {poi.priority && poi.priority <= 3 && (
-              <span className="px-2 py-0.5 bg-primary/20 text-primary text-xs font-bold rounded">
-                #{poi.priority}
-              </span>
-            )}
-          </div>
           <h1 className="text-2xl font-bold mb-2">{localized.name}</h1>
           {poi.signature_dish && (
             <p className="text-primary text-sm font-medium">🍴 {poi.signature_dish}</p>

@@ -37,7 +37,6 @@ export interface Database {
           lat: number;
           lng: number;
           radius: number;
-          priority: number;
           name_vi: string;
           name_en: string | null;
           name_ja: string | null;
@@ -71,7 +70,6 @@ export interface Database {
           lat: number;
           lng: number;
           radius?: number;
-          priority?: number;
           name_vi: string;
           name_en?: string | null;
           name_ja?: string | null;
@@ -105,7 +103,6 @@ export interface Database {
           lat?: number;
           lng?: number;
           radius?: number;
-          priority?: number;
           name_vi?: string;
           name_en?: string | null;
           name_ja?: string | null;

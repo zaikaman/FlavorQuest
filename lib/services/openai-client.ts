@@ -1,7 +1,7 @@
 import OpenAI from 'openai';
 
 export function getOpenAIModel() {
-  return process.env.OPENAI_MODEL || 'gemini-3-flash preview';
+  return process.env.OPENAI_MODEL || 'gpt-5-nano';
 }
 
 export function createOpenAIClient() {

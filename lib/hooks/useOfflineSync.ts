@@ -223,7 +223,7 @@ export function useOfflineSync(options: UseOfflineSyncOptions = {}): UseOfflineS
       .from('pois')
       .select('*')
       .is('deleted_at', null)
-      .order('priority', { ascending: false });
+      .order('name_vi', { ascending: true });
 
     if (error) {
       throw new Error(`Failed to fetch POIs: ${error.message}`);

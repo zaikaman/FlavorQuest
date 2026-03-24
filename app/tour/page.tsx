@@ -883,7 +883,7 @@ export default function TourPage() {
         return leftDistance - rightDistance;
       });
     } else {
-      rankedPOIs.sort((left, right) => (left.priority || 99) - (right.priority || 99));
+      rankedPOIs.sort((left, right) => left.name_vi.localeCompare(right.name_vi, 'vi'));
     }
 
     const selected: POI[] = [];

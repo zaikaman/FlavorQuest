@@ -62,7 +62,6 @@ export function POIForm({
   const [formData, setFormData] = useState<Partial<POI>>({
     lat: 10.759,
     lng: 106.705,
-    priority: 1,
     radius: 20,
     name_vi: '',
     description_vi: '',
@@ -477,25 +476,14 @@ export function POIForm({
             onChange={handleLocationChange}
           />
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="mb-1 block text-sm font-medium text-gray-400">Bán kính (m)</label>
-              <input
-                type="number"
-                value={formData.radius}
-                onChange={(e) => handleChange('radius', parseInt(e.target.value))}
-                className="w-full rounded-lg border border-white/10 bg-black/20 p-2.5 text-white"
-              />
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-medium text-gray-400">Độ ưu tiên</label>
-              <input
-                type="number"
-                value={formData.priority}
-                onChange={(e) => handleChange('priority', parseInt(e.target.value))}
-                className="w-full rounded-lg border border-white/10 bg-black/20 p-2.5 text-white"
-              />
-            </div>
+          <div>
+            <label className="mb-1 block text-sm font-medium text-gray-400">Bán kính (m)</label>
+            <input
+              type="number"
+              value={formData.radius}
+              onChange={(e) => handleChange('radius', parseInt(e.target.value))}
+              className="w-full rounded-lg border border-white/10 bg-black/20 p-2.5 text-white"
+            />
           </div>
           <div>
             <label className="mb-2 block text-sm font-medium text-gray-400">

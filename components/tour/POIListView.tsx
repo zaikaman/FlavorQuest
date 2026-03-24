@@ -26,7 +26,7 @@ interface POIListViewProps {
   isLoading?: boolean;
 }
 
-type SortOption = 'distance' | 'priority' | 'name';
+type SortOption = 'distance' | 'name';
 
 const NEAR_ME_RADIUS_METERS = 3000;
 
@@ -107,12 +107,12 @@ export function POIListView({
     filtered.sort((a, b) => {
       switch (sortBy) {
         case 'distance':
-          if (!userLocation) return 0;
+          if (!userLocation) {
+            return getLocalizedPOI(a, language).name.localeCompare(getLocalizedPOI(b, language).name);
+          }
           const distA = calculateDistance(userLocation, { lat: a.lat, lng: a.lng });
           const distB = calculateDistance(userLocation, { lat: b.lat, lng: b.lng });
           return distA - distB;
-        case 'priority':
-          return (a.priority || 99) - (b.priority || 99);
         case 'name':
           return getLocalizedPOI(a, language).name.localeCompare(getLocalizedPOI(b, language).name);
         default:
@@ -136,12 +136,12 @@ export function POIListView({
         <div className="flex items-center justify-between mb-3">
           <h1 className="text-xl font-bold text-white">{t('splash.subtitle')}</h1>
           <button
-            onClick={() => setSortBy(sortBy === 'distance' ? 'priority' : sortBy === 'priority' ? 'name' : 'distance')}
+            onClick={() => setSortBy(sortBy === 'distance' ? 'name' : 'distance')}
             className="flex items-center gap-1.5 text-primary"
           >
             <span className="material-symbols-outlined text-lg">sort</span>
             <span className="text-sm font-bold uppercase">
-              {sortBy === 'distance' ? t('tour.distance') : sortBy === 'priority' ? t('tour.priority') : t('sort.az')}
+              {sortBy === 'distance' ? t('tour.distance') : t('sort.az')}
             </span>
           </button>
         </div>
@@ -260,13 +260,8 @@ export function POIListView({
                       className="pr-12 cursor-pointer"
                       onClick={() => onViewPOI(poi)}
                     >
-                      <div className="flex items-center gap-2 mb-1">
-                        <h3 className="text-lg font-bold text-white truncate">{localized.name}</h3>
-                        {poi.priority && poi.priority <= 3 && (
-                          <span className="px-1.5 py-0.5 bg-primary/20 text-primary text-[10px] font-bold rounded">
-                            #{poi.priority}
-                          </span>
-                        )}
+                      <div className="mb-1 flex items-center gap-2">
+                        <h3 className="truncate text-lg font-bold text-white">{localized.name}</h3>
                       </div>
                       <div className="flex items-center gap-2 text-sm text-[#cba990]">
                         {distance && <span className="text-primary font-bold">{distance}</span>}

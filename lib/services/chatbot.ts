@@ -44,7 +44,6 @@ interface POIRow {
   category_tags: string[] | null;
   estimated_hours: string | null;
   fun_fact: string | null;
-  priority: number;
 }
 
 interface TourRow {
@@ -249,10 +248,10 @@ async function buildCustomerContext(
     adminClient
       .from('pois')
       .select(
-        'id, name_vi, name_en, name_ja, name_fr, name_ko, name_zh, description_vi, description_en, description_ja, description_fr, description_ko, description_zh, signature_dish, category_tags, estimated_hours, fun_fact, priority'
+        'id, name_vi, name_en, name_ja, name_fr, name_ko, name_zh, description_vi, description_en, description_ja, description_fr, description_ko, description_zh, signature_dish, category_tags, estimated_hours, fun_fact'
       )
       .is('deleted_at', null)
-      .order('priority', { ascending: false })
+      .order('name_vi', { ascending: true })
       .limit(16),
     adminClient
       .from('tours')
@@ -378,7 +377,7 @@ async function buildOwnerContext(
     .select('id, name_vi, signature_dish')
     .eq('owner_id', profile.id)
     .is('deleted_at', null)
-    .order('priority', { ascending: false });
+    .order('name_vi', { ascending: true });
 
   const poiRows = (pois ?? []) as Array<{
     id: string;

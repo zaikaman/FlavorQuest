@@ -314,7 +314,7 @@ export async function GET(request: NextRequest) {
         .select(
           'id, name_vi, image_url, audio_url_vi, audio_url_en, audio_url_ja, audio_url_fr, audio_url_ko, audio_url_zh, name_en, name_ja, name_fr, name_ko, name_zh, owner_id, deleted_at'
         )
-        .order('priority', { ascending: false }),
+        .order('name_vi', { ascending: true }),
       adminClient
         .from('users')
         .select('id, role, created_at'),

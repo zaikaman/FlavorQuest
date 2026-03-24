@@ -75,7 +75,6 @@
     "nearbyPOIs": "Điểm gần đây",
     "currentLocation": "Vị trí hiện tại",
     "distance": "Khoảng cách",
-    "priority": "Ưu tiên",
     "nowPlaying": "Đang phát: {name}",
     "syncedEvents": "Đã đồng bộ {count} sự kiện",
     "dataSaved": "Dữ liệu đã được lưu, sẵn sàng ngoại tuyến",

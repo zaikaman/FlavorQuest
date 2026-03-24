@@ -6,7 +6,7 @@
  * Features:
  * - Preload audio files trong bán kính gần
  * - Progress tracking
- * - Priority-based preloading
+ * - Distance-aware preloading
  * - Service Worker integration
  * - Bandwidth-aware preloading
  */
@@ -273,9 +273,6 @@ export class AudioPreloader {
         const nearbyResults = filterPOIsWithinRadius(currentPosition, pois, preloadRadius);
         poisToPreload = nearbyResults.map((item) => item.poi);
       }
-
-      // Sort by priority
-      poisToPreload.sort((a, b) => b.priority - a.priority);
 
       // Collect audio URLs
       const audioUrls: string[] = [];

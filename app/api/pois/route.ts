@@ -8,7 +8,6 @@ const PUBLIC_POI_SELECT = `
     lat,
     lng,
     radius,
-    priority,
     name_vi,
     name_en,
     name_ja,
@@ -74,7 +73,6 @@ function buildPOIInsertPayload(rawBody: Record<string, unknown>) {
     const lat = normalizeFiniteNumber(rawBody.lat);
     const lng = normalizeFiniteNumber(rawBody.lng);
     const radius = normalizeFiniteNumber(rawBody.radius);
-    const priority = normalizeFiniteNumber(rawBody.priority);
 
     const payload = {
         lat,
@@ -104,7 +102,6 @@ function buildPOIInsertPayload(rawBody: Record<string, unknown>) {
         owner_id: normalizeOptionalText(rawBody.owner_id),
         category_tags: normalizePOICategoryTags(rawBody.category_tags),
         ...(radius !== null ? { radius } : {}),
-        ...(priority !== null ? { priority } : {}),
     };
 
     return payload;
@@ -130,7 +127,7 @@ export async function GET(request: NextRequest) {
     let query = supabase
         .from('pois')
         .select(selectFields)
-        .order('priority', { ascending: false });
+        .order('name_vi', { ascending: true });
 
     if (ownerOnly) {
         query = query.eq('owner_id', profile!.id);

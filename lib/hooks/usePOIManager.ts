@@ -48,7 +48,6 @@ const POI_SELECT_FIELDS = `
   lat,
   lng,
   radius,
-  priority,
   name_vi,
   name_en,
   name_ja,
@@ -119,7 +118,7 @@ export function usePOIManager(options: UsePOIManagerOptions = {}) {
         .from('pois')
         .select(POI_SELECT_FIELDS)
         .is('deleted_at', null)
-        .order('priority', { ascending: false });
+        .order('name_vi', { ascending: true });
 
       if (error) {
         throw new Error(`Failed to fetch POIs: ${error.message}`);

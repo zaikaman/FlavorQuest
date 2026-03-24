@@ -68,11 +68,6 @@ export function POIDetailCard({
           <h3 className="truncate text-base font-bold leading-tight text-white">
             {localized.name}
           </h3>
-          {poi.priority && poi.priority <= 3 && (
-            <span className="flex h-5 items-center rounded bg-primary/20 px-1.5 text-[10px] font-bold uppercase text-primary">
-              #{poi.priority}
-            </span>
-          )}
         </div>
         <p className="mt-0.5 truncate text-xs font-normal leading-relaxed text-[#cba990]">
           {t('poi.cuisine')}

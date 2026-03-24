@@ -93,7 +93,6 @@
     "nearbyPOIs": "근처 장소",
     "currentLocation": "현재 위치",
     "distance": "거리",
-    "priority": "우선순위",
     "nowPlaying": "재생 중: {name}",
     "syncedEvents": "{count}개의 이벤트 동기화 완료",
     "dataSaved": "데이터 저장됨, 오프라인 준비 완료",
