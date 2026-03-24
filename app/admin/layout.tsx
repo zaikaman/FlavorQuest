@@ -34,7 +34,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     isPendingOwner,
     isLoading,
     isRoleReady,
-    hasCustomerAccess,
     refreshUserRole,
   } = useAuth();
   const refreshedUserIdRef = useRef<string | null>(null);
@@ -105,8 +104,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       return;
     }
 
-    router.replace(hasCustomerAccess ? '/tour' : '/paywall');
-  }, [hasCustomerAccess, isAdmin, isAdminLoginPage, isLoading, isOwner, isPendingOwner, isRoleReady, router, user]);
+    router.replace('/tour');
+  }, [isAdmin, isAdminLoginPage, isLoading, isOwner, isPendingOwner, isRoleReady, router, user]);
 
   if (isLoading || (user && !isRoleReady)) {
     return <LoadingScreen />;

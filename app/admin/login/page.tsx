@@ -8,7 +8,7 @@ import { requestEmailOtp, verifyEmailOtp } from '@/lib/services/auth';
 
 export default function AdminLoginPage() {
   const router = useRouter();
-  const { user, isLoading, isAdmin, isOwner, isRoleReady, hasCustomerAccess, refreshUserRole } = useAuth();
+  const { user, isLoading, isAdmin, isOwner, isRoleReady, refreshUserRole } = useAuth();
   const [email, setEmail] = useState('');
   const [otp, setOtp] = useState('');
   const [lastSentEmail, setLastSentEmail] = useState('');
@@ -33,9 +33,9 @@ export default function AdminLoginPage() {
         return;
       }
 
-      router.replace(hasCustomerAccess ? '/tour' : '/paywall');
+      router.replace('/tour');
     }
-  }, [hasCustomerAccess, isAdmin, isLoading, isOwner, isRoleReady, router, user]);
+  }, [isAdmin, isLoading, isOwner, isRoleReady, router, user]);
 
   useEffect(() => {
     if (cooldown <= 0) {

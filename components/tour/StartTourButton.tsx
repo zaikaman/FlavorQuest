@@ -34,7 +34,6 @@ export function StartTourButton({ onStart, className = '', disabled = false, isA
     isPendingOwner,
     user,
     userRole,
-    hasCustomerAccess,
     isLoading: authLoading,
     isRoleReady,
   } =
@@ -76,7 +75,7 @@ export function StartTourButton({ onStart, className = '', disabled = false, isA
         return '/pending-owner';
       }
 
-      return profile.customerAccessGranted ? '/tour' : '/paywall';
+      return '/tour';
     } catch (error) {
       console.warn('[StartTourButton] fallback to local auth snapshot:', error);
       if (!user) {
@@ -87,9 +86,7 @@ export function StartTourButton({ onStart, className = '', disabled = false, isA
         ? '/owner'
         : isPendingOwner
           ? '/pending-owner'
-          : hasCustomerAccess
-            ? '/tour'
-            : '/paywall';
+          : '/tour';
     }
   };
 
@@ -105,7 +102,6 @@ export function StartTourButton({ onStart, className = '', disabled = false, isA
         authUser: user?.email ?? null,
         userRole,
         isOwner,
-        hasCustomerAccess,
         authLoading,
         isRoleReady,
       });

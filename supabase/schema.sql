@@ -218,7 +218,7 @@ CREATE TABLE public.users (
   role character varying NOT NULL DEFAULT 'customer'::character varying CHECK (role::text = ANY (ARRAY['customer'::character varying, 'pending-owner'::character varying, 'owner'::character varying, 'admin'::character varying]::text[])),
   created_at timestamp with time zone NOT NULL DEFAULT now(),
   updated_at timestamp with time zone NOT NULL DEFAULT now(),
-  customer_access_granted boolean NOT NULL DEFAULT false,
+  customer_access_granted boolean NOT NULL DEFAULT true,
   customer_access_granted_at timestamp with time zone,
   customer_access_payment_order_code bigint,
   customer_access_payment_link_id text,
