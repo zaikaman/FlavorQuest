@@ -13,6 +13,7 @@ interface POIFormProps {
   initialData?: Partial<POI>;
   isNew?: boolean;
   allowOwnerAssignment?: boolean;
+  poiId?: string;
 }
 
 interface OwnerOption {
@@ -48,7 +49,12 @@ const LANGUAGES = [
   { code: 'zh', label: 'Tiếng Trung (中文)' },
 ];
 
-export function POIForm({ initialData, isNew = false, allowOwnerAssignment = true }: POIFormProps) {
+export function POIForm({
+  initialData,
+  isNew = false,
+  allowOwnerAssignment = true,
+  poiId,
+}: POIFormProps) {
   const router = useRouter();
   const toast = useToast();
   const [loading, setLoading] = useState(false);
@@ -117,7 +123,13 @@ export function POIForm({ initialData, isNew = false, allowOwnerAssignment = tru
     setLoading(true);
 
     try {
-      const url = isNew ? '/api/pois' : `/api/pois/${formData.id}`;
+      const targetPoiId = poiId ?? formData.id;
+
+      if (!isNew && !targetPoiId) {
+        throw new Error('Không tìm thấy mã địa điểm để cập nhật');
+      }
+
+      const url = isNew ? '/api/pois' : `/api/pois/${targetPoiId}`;
       const method = isNew ? 'POST' : 'PUT';
       const payload = {
         ...formData,
@@ -130,6 +142,11 @@ export function POIForm({ initialData, isNew = false, allowOwnerAssignment = tru
               : '',
       };
 
+      delete payload.id;
+      delete payload.created_at;
+      delete payload.updated_at;
+      delete payload.deleted_at;
+
       const res = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
@@ -138,10 +155,8 @@ export function POIForm({ initialData, isNew = false, allowOwnerAssignment = tru
 
       if (!res.ok) {
         const errorBody = (await res.json().catch(() => null)) as { error?: string } | null;
-        throw new Error(errorBody?.error || 'LÆ°u tháº¥t báº¡i');
+        throw new Error(errorBody?.error || 'Lưu thất bại');
       }
-
-      if (!res.ok) throw new Error('Lưu thất bại');
 
       toast.success('Lưu địa điểm thành công');
       router.push('/admin/pois');

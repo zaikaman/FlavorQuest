@@ -27,7 +27,7 @@ export default async function EditPOIPage({
                 <p className="text-gray-400">Cập nhật thông tin cho {poi.name_vi}</p>
             </div>
 
-            <POIForm initialData={poi} />
+            <POIForm initialData={poi} poiId={id} />
         </div>
     );
 }
