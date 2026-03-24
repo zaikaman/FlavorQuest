@@ -12,6 +12,7 @@ import { getLocalizedPOI } from '@/lib/utils/localization';
 import { useTranslations } from '@/lib/hooks/useTranslations';
 import { useLanguage } from '@/lib/contexts/LanguageContext';
 import { POIDetailCard } from '@/components/tour/POIDetailCard';
+import { calculateDistance } from '@/lib/utils/distance';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -272,18 +273,7 @@ export function InteractiveMap({
   // Tính khoảng cách đến POI
   const getDistanceToPOI = (poi: POI): number | null => {
     if (!userLocation) return null;
-    const R = 6371e3; // meters
-    const φ1 = userLocation.lat * Math.PI / 180;
-    const φ2 = poi.lat * Math.PI / 180;
-    const Δφ = (poi.lat - userLocation.lat) * Math.PI / 180;
-    const Δλ = (poi.lng - userLocation.lng) * Math.PI / 180;
-
-    const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
-      Math.cos(φ1) * Math.cos(φ2) *
-      Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-
-    return Math.round(R * c);
+    return calculateDistance(userLocation, { lat: poi.lat, lng: poi.lng });
   };
 
   const isSelectedPOIPlaying = Boolean(

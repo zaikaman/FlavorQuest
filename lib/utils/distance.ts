@@ -219,20 +219,45 @@ export function getCompassDirection(bearing: number): string {
  * 
  * @param meters - Distance in meters
  * @param locale - Locale for number formatting (default: 'vi-VN')
- * @returns Formatted string (e.g., "150 m", "1.5 km")
+ * @returns Formatted string (e.g., "<20m", "150m", "1.5km")
  * 
  * @example
  * ```ts
- * console.log(formatDistance(150)); // "150 m"
- * console.log(formatDistance(1500)); // "1.5 km"
- * console.log(formatDistance(12345)); // "12.3 km"
+ * console.log(formatDistance(13)); // "<20m"
+ * console.log(formatDistance(150)); // "150m"
+ * console.log(formatDistance(12345)); // "12.3km"
  * ```
  */
 export function formatDistance(meters: number, locale: string = 'vi-VN'): string {
-  if (meters < 1000) {
-    return `${Math.round(meters)} m`;
+  if (!Number.isFinite(meters) || meters < 0) {
+    return '';
   }
 
-  const kilometers = meters / 1000;
-  return `${kilometers.toLocaleString(locale, { maximumFractionDigits: 1 })} km`;
+  if (meters < 20) {
+    return '<20m';
+  }
+
+  let roundedMeters: number;
+
+  if (meters < 100) {
+    roundedMeters = Math.round(meters / 10) * 10;
+  } else if (meters < 500) {
+    roundedMeters = Math.round(meters / 25) * 25;
+  } else if (meters < 1000) {
+    roundedMeters = Math.round(meters / 50) * 50;
+  } else {
+    roundedMeters = Math.round(meters / 100) * 100;
+  }
+
+  if (roundedMeters < 1000) {
+    return `${roundedMeters}m`;
+  }
+
+  const kilometers = roundedMeters / 1000;
+  const shouldShowDecimal = kilometers < 10 && !Number.isInteger(kilometers);
+
+  return `${kilometers.toLocaleString(locale, {
+    minimumFractionDigits: shouldShowDecimal ? 1 : 0,
+    maximumFractionDigits: 1,
+  })}km`;
 }

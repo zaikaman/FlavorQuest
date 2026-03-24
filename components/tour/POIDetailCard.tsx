@@ -1,13 +1,9 @@
-/**
- * POIDetailCard Component  
- * T092 - Card hiển thị chi tiết POI
- */
-
 'use client';
 
 import Image from 'next/image';
 import { useLanguage } from '@/lib/contexts/LanguageContext';
 import { useTranslations } from '@/lib/hooks/useTranslations';
+import { formatDistance } from '@/lib/utils/distance';
 import { getLocalizedPOI } from '@/lib/utils/localization';
 import type { POI } from '@/lib/types/index';
 
@@ -33,27 +29,20 @@ export function POIDetailCard({
   const { language } = useLanguage();
   const { t } = useTranslations();
   const localized = getLocalizedPOI(poi, language);
-
-  const formatDistance = (meters: number | null | undefined): string => {
-    if (meters == null) return '';
-    if (meters < 1000) return `${Math.round(meters)}${t('units.meters')}`;
-    return `${(meters / 1000).toFixed(1)}${t('units.kilometers')}`;
-  };
+  const distanceLabel = distance == null ? '' : formatDistance(distance, language);
 
   return (
-    <div className="relative flex items-center gap-4 rounded-xl bg-[#2a1e16]/95 backdrop-blur-xl border border-white/5 p-3 shadow-2xl">
-      {/* Close Button */}
+    <div className="relative flex items-center gap-4 rounded-xl border border-white/5 bg-[#2a1e16]/95 p-3 shadow-2xl backdrop-blur-xl">
       <button
         onClick={onClose}
-        className="absolute -top-2 -right-2 flex h-7 w-7 items-center justify-center rounded-full bg-[#493222] text-white shadow border border-white/10 hover:bg-[#5a4030] transition-colors active:scale-95"
+        className="absolute -top-2 -right-2 flex h-7 w-7 items-center justify-center rounded-full border border-white/10 bg-[#493222] text-white shadow transition-colors hover:bg-[#5a4030] active:scale-95"
         aria-label={t('common.close')}
       >
         <span className="material-symbols-outlined text-[16px]">close</span>
       </button>
 
-      {/* POI Image */}
       <div
-        className="h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-gray-700 relative shadow-inner cursor-pointer"
+        className="relative h-16 w-16 shrink-0 cursor-pointer overflow-hidden rounded-lg bg-gray-700 shadow-inner"
         onClick={onViewDetail}
       >
         {poi.image_url ? (
@@ -66,40 +55,39 @@ export function POIDetailCard({
           />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center bg-[#3a2d25]">
-            <span className="material-symbols-outlined text-primary text-2xl">restaurant</span>
+            <span className="material-symbols-outlined text-2xl text-primary">restaurant</span>
           </div>
         )}
       </div>
 
-      {/* POI Content */}
       <div
-        className="flex flex-1 flex-col justify-center min-w-0 cursor-pointer"
+        className="min-w-0 flex flex-1 cursor-pointer flex-col justify-center"
         onClick={onViewDetail}
       >
         <div className="flex items-center gap-2">
-          <h3 className="text-white text-base font-bold leading-tight truncate">
+          <h3 className="truncate text-base font-bold leading-tight text-white">
             {localized.name}
           </h3>
           {poi.priority && poi.priority <= 3 && (
-            <span className="flex h-5 items-center rounded bg-primary/20 px-1.5 text-[10px] font-bold text-primary uppercase">
+            <span className="flex h-5 items-center rounded bg-primary/20 px-1.5 text-[10px] font-bold uppercase text-primary">
               #{poi.priority}
             </span>
           )}
         </div>
-        <p className="text-[#cba990] text-xs font-normal leading-relaxed truncate mt-0.5">
-          {t('poi.cuisine')} {distance != null && `• ${formatDistance(distance)}`}
+        <p className="mt-0.5 truncate text-xs font-normal leading-relaxed text-[#cba990]">
+          {t('poi.cuisine')}
+          {distanceLabel ? ` | ${distanceLabel}` : ''}
         </p>
         {poi.signature_dish && (
-          <p className="text-[10px] text-[#8d7b6f] truncate mt-1">
-            🍴 {poi.signature_dish}
+          <p className="mt-1 truncate text-[10px] text-[#8d7b6f]">
+            {poi.signature_dish}
           </p>
         )}
       </div>
 
-      {/* Play Button */}
       <button
         onClick={onPlay}
-        className="group flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary text-white shadow-lg shadow-primary/30 transition-all active:scale-95 hover:bg-primary/90"
+        className="group flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary text-white shadow-lg shadow-primary/30 transition-all hover:bg-primary/90 active:scale-95"
         aria-label={isLoading ? t('audio.loading') : isPlaying ? t('audio.pause') : t('audio.play')}
         disabled={isLoading}
       >

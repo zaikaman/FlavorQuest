@@ -6,9 +6,11 @@
 
 'use client';
 
+import { useEffect, useState } from 'react';
 import type { POI } from '@/lib/types/index';
 import { useLanguage } from '@/lib/contexts/LanguageContext';
 import { useTranslations } from '@/lib/hooks/useTranslations';
+import { formatDistance } from '@/lib/utils/distance';
 import { getLocalizedPOI } from '@/lib/utils/localization';
 
 export interface NarrationOverlayProps {
@@ -41,6 +43,28 @@ export function NarrationOverlay({
   const { t } = useTranslations();
   const localizedPOI = getLocalizedPOI(currentPOI, language);
   const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
+  const nextDistanceLabel = distance == null ? '' : formatDistance(distance, language);
+  const [stableDistanceLabel, setStableDistanceLabel] = useState(nextDistanceLabel);
+
+  useEffect(() => {
+    if (!nextDistanceLabel) {
+      setStableDistanceLabel('');
+      return;
+    }
+
+    if (!stableDistanceLabel || stableDistanceLabel === nextDistanceLabel) {
+      setStableDistanceLabel(nextDistanceLabel);
+      return;
+    }
+
+    const timer = window.setTimeout(() => {
+      setStableDistanceLabel(nextDistanceLabel);
+    }, 900);
+
+    return () => {
+      window.clearTimeout(timer);
+    };
+  }, [nextDistanceLabel, stableDistanceLabel]);
 
   return (
     <div
@@ -82,9 +106,9 @@ export function NarrationOverlay({
         </div>
 
         {/* Distance Badge */}
-        {distance !== undefined && (
-          <div className="text-xs font-medium text-white/60 bg-white/10 px-2 py-1 rounded">
-            {distance}{t('units.meters')}
+        {stableDistanceLabel && (
+          <div className="min-w-[4.5rem] rounded-full bg-white/10 px-2.5 py-1 text-center text-xs font-semibold tabular-nums text-white/70">
+            {stableDistanceLabel}
           </div>
         )}
 

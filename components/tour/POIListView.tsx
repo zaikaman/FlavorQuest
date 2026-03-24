@@ -10,7 +10,7 @@ import { useState, useMemo } from 'react';
 import { useLanguage } from '@/lib/contexts/LanguageContext';
 import { useTranslations } from '@/lib/hooks/useTranslations';
 import { getLocalizedPOI } from '@/lib/utils/localization';
-import { calculateDistance } from '@/lib/utils/distance';
+import { calculateDistance, formatDistance } from '@/lib/utils/distance';
 import { CardSkeleton, Skeleton } from '@/components/ui/Loading';
 import { type POICategoryTag } from '@/lib/constants/poiCategories';
 import type { POI, Coordinates } from '@/lib/types/index';
@@ -123,11 +123,10 @@ export function POIListView({
     return filtered;
   }, [filterCategory, pois, searchQuery, sortBy, userLocation, language]);
 
-  const formatDistance = (poi: POI): string => {
+  const getDistanceLabel = (poi: POI): string => {
     if (!userLocation) return '';
     const meters = calculateDistance(userLocation, { lat: poi.lat, lng: poi.lng });
-    if (meters < 1000) return `${Math.round(meters)}${t('units.meters')}`;
-    return `${(meters / 1000).toFixed(1)}${t('units.kilometers')}`;
+    return formatDistance(meters, language);
   };
 
   return (
@@ -202,7 +201,7 @@ export function POIListView({
               const localized = getLocalizedPOI(poi, language);
               const isPlaying = playingPOIId === poi.id;
               const isAudioLoading = audioLoadingPOIId === poi.id;
-              const distance = formatDistance(poi);
+              const distance = getDistanceLabel(poi);
 
               return (
                 <div
