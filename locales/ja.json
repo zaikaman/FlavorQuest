@@ -104,6 +104,7 @@
     "httpsRequired": "エラー: GPSにはHTTPSが必要です。localhostまたはSSLを使用してください。",
     "gpsError": "GPSエラー: {message}",
     "noAudioForPOI": "この場所の音声はありません",
+    "tapToResumeAudio": "画面をタップして案内を再開してください",
     "invalidSelectedTour": "選択したツアーは現在利用できません",
     "stoppedOutsideSelectedTour": "選択中のツアーに含まれていないため音声を停止しました"
   },

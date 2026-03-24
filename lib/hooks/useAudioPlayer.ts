@@ -87,6 +87,7 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
     error: null,
     isTTSFallback: false,
   });
+  const [interactionRequiredItem, setInteractionRequiredItem] = useState<AudioQueueItem | null>(null);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const playPromiseRef = useRef<Promise<void> | null>(null);
@@ -249,6 +250,7 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
       const nextItem = pendingInteractionItemRef.current;
       pendingInteractionItemRef.current = null;
       detachInteractionRetryListeners();
+      setInteractionRequiredItem(null);
 
       if (!nextItem) {
         return;
@@ -320,6 +322,8 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
     if (!isUnlockedRef.current) {
       await unlockAudio();
     }
+
+    setInteractionRequiredItem(null);
 
     if (targetItem) {
       console.log('[useAudioPlayer] play requested:', {
@@ -415,11 +419,16 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
           registerInteractionRetry(blockedItem);
         }
 
+        setInteractionRequiredItem(blockedItem ?? null);
+
         setState(prev => ({
           ...prev,
+          currentItem: null,
           isPlaying: false,
-          isPaused: true,
+          isPaused: false,
           isLoading: false,
+          currentTime: 0,
+          duration: 0,
           error: null,
         }));
         return;
@@ -442,6 +451,7 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
     if (clearQueue) {
       setState(prev => ({ ...prev, queue: [] }));
     }
+    setInteractionRequiredItem(null);
     await safePause();
     await play(item);
   }, [play, safePause]);
@@ -503,6 +513,7 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
     if (!audioRef.current) return;
     pendingInteractionItemRef.current = null;
     detachInteractionRetryListeners();
+    setInteractionRequiredItem(null);
     await safePause();
     audioRef.current.currentTime = 0;
     setState(prev => ({
@@ -755,6 +766,16 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
     setState(prev => ({ ...prev, queue: [] }));
   }, []);
 
+  const resumeBlockedPlayback = useCallback(async () => {
+    const nextItem = pendingInteractionItemRef.current ?? interactionRequiredItem;
+    if (!nextItem) {
+      return;
+    }
+
+    setInteractionRequiredItem(null);
+    await play(nextItem);
+  }, [interactionRequiredItem, play]);
+
   return {
     ...state,
     play,
@@ -772,6 +793,8 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
     playNext,
     unlockAudio,
     playWithTTS,
+    interactionRequiredItem,
+    resumeBlockedPlayback,
     isTTSFallback: state.isTTSFallback,
   };
 }

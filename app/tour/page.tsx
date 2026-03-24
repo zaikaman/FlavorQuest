@@ -879,6 +879,22 @@ export default function TourPage() {
 
   // Get next POI
   const nextPOI = nearbyPOIs.find((p) => p.id !== audioPlayer.currentItem?.poi.id);
+  const blockedAutoPlayItem = audioPlayer.interactionRequiredItem;
+  const blockedAutoPlayPOIName = useMemo(() => {
+    if (!blockedAutoPlayItem) {
+      return '';
+    }
+
+    return getLocalizedPOI(blockedAutoPlayItem.poi, language).name;
+  }, [blockedAutoPlayItem, language]);
+
+  useEffect(() => {
+    if (!blockedAutoPlayItem) {
+      return;
+    }
+
+    showToastMessage(t('tour.tapToResumeAudio'));
+  }, [blockedAutoPlayItem, showToastMessage, t]);
 
   useEffect(() => {
     if (!user) return;
@@ -1099,8 +1115,29 @@ export default function TourPage() {
               </div>
             )}
 
+            {/* Autoplay needs interaction after refresh/browser block */}
+            {blockedAutoPlayItem && !showPlayerModal && (
+              <div className="absolute right-0 bottom-0 left-0 z-40 px-4 pb-20 pointer-events-none">
+                <div className="bg-[rgba(45,36,30,0.82)] border border-primary/30 shadow-lg backdrop-blur-md rounded-xl p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/20 text-primary">
+                      <span className="material-symbols-outlined text-[22px]">touch_app</span>
+                    </div>
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-semibold text-white">
+                        {blockedAutoPlayPOIName}
+                      </p>
+                      <p className="text-xs leading-relaxed text-white/75">
+                        {t('tour.tapToResumeAudio')}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Narration Overlay (Mini Player) */}
-            {audioPlayer.currentItem && !showPlayerModal && (
+            {audioPlayer.currentItem && !showPlayerModal && !blockedAutoPlayItem && (
               <div className="absolute right-0 bottom-0 left-0 z-40 px-4 pb-20">
                 <NarrationOverlay
                   currentPOI={audioPlayer.currentItem.poi}

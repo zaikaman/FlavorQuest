@@ -86,6 +86,7 @@
     "httpsRequired": "Lỗi: GPS yêu cầu HTTPS. Vui lòng dùng localhost hoặc cài đặt SSL.",
     "gpsError": "Lỗi GPS: {message}",
     "noAudioForPOI": "Không có audio cho địa điểm này",
+    "tapToResumeAudio": "Chạm vào màn hình để tiếp tục thuyết minh",
     "invalidSelectedTour": "Tour đã chọn không còn khả dụng",
     "stoppedOutsideSelectedTour": "Đã dừng audio vì POI không thuộc tour đang chọn"
   },

@@ -104,6 +104,7 @@
     "httpsRequired": "错误：GPS 需要 HTTPS。请使用 localhost 或安装 SSL。",
     "gpsError": "GPS 错误：{message}",
     "noAudioForPOI": "此位置没有音频",
+    "tapToResumeAudio": "轻触屏幕以继续语音讲解",
     "invalidSelectedTour": "所选导览已不可用",
     "stoppedOutsideSelectedTour": "该 POI 不在当前所选导览中，音频已停止"
   },

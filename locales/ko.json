@@ -104,6 +104,7 @@
     "httpsRequired": "오류: GPS에는 HTTPS가 필요합니다. localhost 또는 SSL을 사용하세요.",
     "gpsError": "GPS 오류: {message}",
     "noAudioForPOI": "이 장소의 오디오가 없습니다",
+    "tapToResumeAudio": "화면을 탭해 안내를 계속 들으세요",
     "invalidSelectedTour": "선택한 투어를 더 이상 사용할 수 없습니다",
     "stoppedOutsideSelectedTour": "선택한 투어에 없는 POI라서 오디오를 중지했습니다"
   },

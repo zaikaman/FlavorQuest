@@ -53,15 +53,24 @@ export async function primeSharedAudioElement(): Promise<boolean> {
   }
 
   sharedAudioPriming = true;
-  try {
-    const previousMuted = audio.muted;
-    const previousSrc = audio.currentSrc || audio.src;
-    const previousCurrentTime = audio.currentTime;
+  const previousMuted = audio.muted;
+  const previousSrc = audio.currentSrc || audio.src;
+  const previousCurrentTime = audio.currentTime;
 
+  try {
     audio.muted = true;
     audio.src = SILENT_AUDIO_DATA_URI;
     audio.load();
     await audio.play();
+    audio.pause();
+    audio.currentTime = 0;
+    sharedAudioPrimed = true;
+    console.info('[audio-session] shared audio primed');
+    return true;
+  } catch (error) {
+    console.warn('[audio-session] failed to prime shared audio:', error);
+    return false;
+  } finally {
     audio.pause();
     audio.currentTime = 0;
 
@@ -77,13 +86,6 @@ export async function primeSharedAudioElement(): Promise<boolean> {
     }
 
     audio.muted = previousMuted;
-    sharedAudioPrimed = true;
-    console.info('[audio-session] shared audio primed');
-    return true;
-  } catch (error) {
-    console.warn('[audio-session] failed to prime shared audio:', error);
-    return false;
-  } finally {
     sharedAudioPriming = false;
   }
 }

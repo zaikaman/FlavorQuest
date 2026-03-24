@@ -86,6 +86,7 @@
     "httpsRequired": "Error: GPS requires HTTPS. Please use localhost or install SSL.",
     "gpsError": "GPS Error: {message}",
     "noAudioForPOI": "No audio available for this location",
+    "tapToResumeAudio": "Tap the screen to continue the narration",
     "invalidSelectedTour": "The selected tour is no longer available",
     "stoppedOutsideSelectedTour": "Audio stopped because this POI is outside the selected tour"
   },
