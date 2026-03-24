@@ -17,6 +17,7 @@ import type { POI, Language } from '@/lib/types/index';
 import { getLocalizedPOI } from '@/lib/utils/localization';
 import {
   getSharedAudioElement,
+  isSharedAudioPriming,
   isSharedAudioPrimed,
   primeSharedAudioElement,
 } from '@/lib/services/audio-session';
@@ -316,6 +317,10 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
       }
     }
 
+    if (!isUnlockedRef.current) {
+      await unlockAudio();
+    }
+
     if (targetItem) {
       console.log('[useAudioPlayer] play requested:', {
         poiId: targetItem.poi.id,
@@ -379,10 +384,6 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
       if (playRequestIdRef.current !== requestId) {
         return;
       }
-    }
-
-    if (!isUnlockedRef.current) {
-      await unlockAudio();
     }
 
     console.info('[useAudioPlayer] play attempt', {
@@ -639,12 +640,21 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
     audioRef.current = audio;
 
     const onLoadedMetadata = () => {
+      if (isSharedAudioPriming()) {
+        return;
+      }
       setState(prev => ({ ...prev, duration: audio.duration, isLoading: false }));
     };
     const onTimeUpdate = () => {
+      if (isSharedAudioPriming()) {
+        return;
+      }
       setState(prev => ({ ...prev, currentTime: audio.currentTime }));
     };
     const onEnded = () => {
+      if (isSharedAudioPriming()) {
+        return;
+      }
       const currentItem = currentItemRef.current;
       if (currentItem && isRepeatEnabledRef.current) {
         void audio.play().catch(error => {
@@ -660,6 +670,9 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
       playNextRef.current();
     };
     const onError = (event: Event) => {
+      if (isSharedAudioPriming()) {
+        return;
+      }
       const error = (event.target as HTMLAudioElement).error;
       const errorMessage = error?.message || 'Unknown audio error';
       const currentItem = currentItemRef.current;
@@ -675,6 +688,9 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
       }
     };
     const onPlay = () => {
+      if (isSharedAudioPriming()) {
+        return;
+      }
       setState(prev => ({ ...prev, isPlaying: true, isPaused: false }));
       console.info('[useAudioPlayer] audio started', {
         poiId: currentItemRef.current?.poi.id ?? null,
@@ -685,6 +701,9 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
       }
     };
     const onPause = () => {
+      if (isSharedAudioPriming()) {
+        return;
+      }
       setState(prev => ({ ...prev, isPlaying: false, isPaused: true }));
       if (currentItemRef.current) {
         optionsRef.current.onPause?.(currentItemRef.current);

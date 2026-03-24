@@ -5,6 +5,7 @@ const SILENT_AUDIO_DATA_URI =
 
 let sharedAudioElement: HTMLAudioElement | null = null;
 let sharedAudioPrimed = false;
+let sharedAudioPriming = false;
 
 function ensureSharedAudioElement(): HTMLAudioElement | null {
   if (typeof document === 'undefined') {
@@ -36,6 +37,10 @@ export function isSharedAudioPrimed(): boolean {
   return sharedAudioPrimed;
 }
 
+export function isSharedAudioPriming(): boolean {
+  return sharedAudioPriming;
+}
+
 export async function primeSharedAudioElement(): Promise<boolean> {
   const audio = ensureSharedAudioElement();
 
@@ -43,6 +48,11 @@ export async function primeSharedAudioElement(): Promise<boolean> {
     return false;
   }
 
+  if (sharedAudioPriming) {
+    return sharedAudioPrimed;
+  }
+
+  sharedAudioPriming = true;
   try {
     const previousMuted = audio.muted;
     const previousSrc = audio.currentSrc || audio.src;
@@ -73,5 +83,7 @@ export async function primeSharedAudioElement(): Promise<boolean> {
   } catch (error) {
     console.warn('[audio-session] failed to prime shared audio:', error);
     return false;
+  } finally {
+    sharedAudioPriming = false;
   }
 }

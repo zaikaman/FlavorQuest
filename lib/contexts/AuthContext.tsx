@@ -13,6 +13,7 @@ import type { OwnerRequestStatus } from '@/lib/types';
 
 type AppUserRole = 'customer' | 'pending-owner' | 'owner' | 'admin';
 const ROLE_FETCH_TIMEOUT_MS = 5000;
+const AUTH_INIT_TIMEOUT_MS = 4000;
 const AUTH_SNAPSHOT_KEY = 'flavorquest-auth-snapshot';
 
 interface MeResponse {
@@ -116,13 +117,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setIsRoleReady(roleReady);
   }, []);
 
-  const withTimeout = useCallback(async <T,>(promise: Promise<T>, label: string): Promise<T> => {
+  const withTimeout = useCallback(async <T,>(
+    promise: Promise<T>,
+    timeoutMs: number,
+    label: string
+  ): Promise<T> => {
     return await Promise.race([
       promise,
       new Promise<T>((_, reject) => {
         window.setTimeout(() => {
-          reject(new Error(`${label} timed out after ${ROLE_FETCH_TIMEOUT_MS}ms`));
-        }, ROLE_FETCH_TIMEOUT_MS);
+          reject(new Error(`${label} timed out after ${timeoutMs}ms`));
+        }, timeoutMs);
       }),
     ]);
   }, []);
@@ -136,6 +141,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           Pragma: 'no-cache',
         },
       }),
+      ROLE_FETCH_TIMEOUT_MS,
       'fetch user role via /api/users/me'
     );
 
@@ -238,16 +244,36 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const supabase = supabaseRef.current;
     console.log('[AuthContext] init');
     let isMounted = true;
-
-    // Get initial session
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
+    const initTimeoutId = window.setTimeout(() => {
       if (!isMounted) {
         return;
       }
 
-      console.log('[AuthContext] initial session:', session?.user?.email ?? null);
-      await syncAuthState('INITIAL_SESSION', session?.user ?? null);
-    });
+      console.warn('[AuthContext] auth init timed out, falling back to non-blocking state');
+      setIsLoading(false);
+      resetRoleState(true);
+    }, AUTH_INIT_TIMEOUT_MS);
+
+    // Get initial session
+    withTimeout(supabase.auth.getSession(), AUTH_INIT_TIMEOUT_MS, 'supabase.auth.getSession')
+      .then(async ({ data: { session } }) => {
+        if (!isMounted) {
+          return;
+        }
+
+        window.clearTimeout(initTimeoutId);
+        console.log('[AuthContext] initial session:', session?.user?.email ?? null);
+        await syncAuthState('INITIAL_SESSION', session?.user ?? null);
+      })
+      .catch((error) => {
+        if (!isMounted) {
+          return;
+        }
+
+        window.clearTimeout(initTimeoutId);
+        console.warn('[AuthContext] initial session failed:', error);
+        void syncAuthState('INITIAL_SESSION', null);
+      });
 
     // Listen for auth changes
     const {
@@ -263,9 +289,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     return () => {
       isMounted = false;
+      window.clearTimeout(initTimeoutId);
       subscription.unsubscribe();
     };
-  }, [syncAuthState]);
+  }, [resetRoleState, syncAuthState, withTimeout]);
 
   useEffect(() => {
     const supabase = supabaseRef.current;

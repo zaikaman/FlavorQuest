@@ -25,7 +25,34 @@ export interface StartTourButtonProps {
   isAuthenticated: boolean;
 }
 
-export function StartTourButton({ onStart, className = '', disabled = false, isAuthenticated }: StartTourButtonProps) {
+const AUTH_DESTINATION_TIMEOUT_MS = 3000;
+const START_ACTION_TIMEOUT_MS = 1500;
+
+async function withTimeout<T>(promise: Promise<T>, timeoutMs: number, label: string): Promise<T> {
+  let timeoutId: number | null = null;
+
+  try {
+    return await Promise.race([
+      promise,
+      new Promise<T>((_, reject) => {
+        timeoutId = window.setTimeout(() => {
+          reject(new Error(`${label} timed out after ${timeoutMs}ms`));
+        }, timeoutMs);
+      }),
+    ]);
+  } finally {
+    if (timeoutId) {
+      window.clearTimeout(timeoutId);
+    }
+  }
+}
+
+export function StartTourButton({
+  onStart,
+  className = '',
+  disabled = false,
+  isAuthenticated,
+}: StartTourButtonProps) {
   const router = useRouter();
   const { language } = useLanguage();
   const { t } = useTranslations();
@@ -41,6 +68,11 @@ export function StartTourButton({ onStart, className = '', disabled = false, isA
   const [isLoading, setIsLoading] = useState(false);
 
   const resolveAuthenticatedDestination = async (): Promise<string | null> => {
+    const controller = new AbortController();
+    const timeoutId = window.setTimeout(() => {
+      controller.abort(new Error('Timed out while fetching /api/users/me'));
+    }, AUTH_DESTINATION_TIMEOUT_MS);
+
     try {
       const response = await fetch(`/api/users/me?t=${Date.now()}`, {
         cache: 'no-store',
@@ -48,6 +80,7 @@ export function StartTourButton({ onStart, className = '', disabled = false, isA
           'Cache-Control': 'no-cache, no-store, must-revalidate',
           Pragma: 'no-cache',
         },
+        signal: controller.signal,
       });
 
       if (!response.ok) {
@@ -86,6 +119,8 @@ export function StartTourButton({ onStart, className = '', disabled = false, isA
         : isPendingOwner
           ? '/pending-owner'
           : '/tour';
+    } finally {
+      window.clearTimeout(timeoutId);
     }
   };
 
@@ -108,12 +143,15 @@ export function StartTourButton({ onStart, className = '', disabled = false, isA
       // Đảm bảo language đã được lưu vào IndexedDB
       // Thêm delay nhỏ để tránh race condition với setLanguage
       await new Promise(resolve => setTimeout(resolve, 150));
-      await primeSharedAudioElement();
+      await Promise.allSettled([
+        withTimeout(
+          primeSharedAudioElement(),
+          START_ACTION_TIMEOUT_MS,
+          'primeSharedAudioElement'
+        ),
+        withTimeout(logTourStart(language), START_ACTION_TIMEOUT_MS, 'logTourStart'),
+      ]);
 
-      // Log analytics
-      await logTourStart(language);
-
-      // Call optional callback
       if (onStart) {
         onStart();
       }
@@ -125,8 +163,8 @@ export function StartTourButton({ onStart, className = '', disabled = false, isA
         console.log('[StartTourButton] push:', destination);
         router.push(destination);
       } else {
-        console.log('[StartTourButton] push: /login');
-        router.push('/login');
+        console.log('[StartTourButton] push: /login?type=customer');
+        router.push('/login?type=customer');
       }
     } catch (error) {
       console.error('Failed to start tour:', error);

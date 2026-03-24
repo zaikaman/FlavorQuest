@@ -23,7 +23,8 @@
  * - flavorquest-tiles-v1: Map tiles
  */
 
-const CACHE_VERSION = 'v4';
+const CACHE_VERSION = 'v5';
+const NAVIGATION_TIMEOUT_MS = 3500;
 const CACHE_NAMES = {
   static: `flavorquest-static-${CACHE_VERSION}`,
   dynamic: `flavorquest-dynamic-${CACHE_VERSION}`,
@@ -275,19 +276,11 @@ async function handleNavigationRequest(request) {
   const cleanPath = requestUrl.pathname || '/';
   const cleanRequest = new Request(`${self.location.origin}${cleanPath}`, { method: 'GET' });
 
-  const cachedPage =
-    (await cache.match(request, { ignoreSearch: true })) ||
-    (await cache.match(cleanRequest, { ignoreSearch: true }));
-
-  if (cachedPage) {
-    return cachedPage;
-  }
-
   try {
-    const response = await fetch(request);
+    const response = await fetchWithTimeout(request, NAVIGATION_TIMEOUT_MS);
 
     if (response.ok && response.type === 'basic') {
-      cache.put(cleanRequest, response.clone());
+      await cache.put(cleanRequest, response.clone());
     }
 
     return response;
@@ -295,6 +288,7 @@ async function handleNavigationRequest(request) {
     console.error('[SW] Navigation fetch failed:', error);
 
     const offlineFallbacks = [
+      request,
       cleanRequest,
       new Request(`${self.location.origin}/tour`),
       new Request(`${self.location.origin}/`),
@@ -307,6 +301,17 @@ async function handleNavigationRequest(request) {
     }
 
     return Response.error();
+  }
+}
+
+async function fetchWithTimeout(request, timeoutMs) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    return await fetch(request, { signal: controller.signal });
+  } finally {
+    clearTimeout(timeoutId);
   }
 }
 
