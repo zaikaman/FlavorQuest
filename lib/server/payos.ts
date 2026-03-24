@@ -55,7 +55,7 @@ export function createCustomerAccessOrderCode() {
 }
 
 export function getPaywallUrl(origin: string) {
-  return `${origin}/paywall`;
+  return `${origin}/tour`;
 }
 
 export function normalizePaymentStatus(status: string | null | undefined): AccessPaymentStatus {

@@ -118,7 +118,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const resetRoleState = useCallback((roleReady: boolean) => {
     setUserRole(null);
     setIsAdmin(false);
-    setHasCustomerAccess(false);
+    setHasCustomerAccess(true);
     setCustomerAccessGrantedAt(null);
     setOwnerRequestStatus(null);
     setOwnerRequestedAt(null);
@@ -174,7 +174,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.log('role api result:', me.role, me.customerAccessGranted);
         setUserRole(me.role);
         setIsAdmin(me.role === 'admin');
-        setHasCustomerAccess(me.role === 'customer' ? Boolean(me.customerAccessGranted) : false);
+        setHasCustomerAccess(me.role === 'customer' ? true : false);
         setCustomerAccessGrantedAt(me.customerAccessGrantedAt ?? null);
         setOwnerRequestStatus(me.ownerRequestStatus ?? null);
         setOwnerRequestedAt(me.ownerRequestedAt ?? null);
@@ -182,7 +182,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         saveAuthSnapshot({
           userId: currentUser.id,
           role: me.role,
-          hasCustomerAccess: me.role === 'customer' ? Boolean(me.customerAccessGranted) : false,
+          hasCustomerAccess: me.role === 'customer' ? true : false,
           customerAccessGrantedAt: me.customerAccessGrantedAt ?? null,
           ownerRequestStatus: me.ownerRequestStatus ?? null,
           ownerRequestedAt: me.ownerRequestedAt ?? null,
@@ -207,7 +207,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           console.error('[AuthContext] checkUserRole failed, fallback to customer:', error);
           setUserRole('customer');
           setIsAdmin(false);
-          setHasCustomerAccess(false);
+          setHasCustomerAccess(true);
           setCustomerAccessGrantedAt(null);
           setOwnerRequestStatus(null);
           setOwnerRequestedAt(null);
