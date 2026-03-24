@@ -78,7 +78,6 @@
     "priority": "Priorité",
     "nowPlaying": "En cours : {name}",
     "syncedEvents": "{count} événements synchronisés",
-    "offlineReady": "Prêt pour une utilisation hors ligne",
     "dataSaved": "Données enregistrées, prêt hors ligne",
     "usingTTS": "Utilisation de la synthèse vocale (hors ligne)",
     "tooFast": "Vous vous déplacez trop vite. Veuillez marcher pour écouter le guide.",

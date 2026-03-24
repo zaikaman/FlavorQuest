@@ -96,7 +96,6 @@
     "priority": "우선순위",
     "nowPlaying": "재생 중: {name}",
     "syncedEvents": "{count}개의 이벤트 동기화 완료",
-    "offlineReady": "오프라인 사용 가능",
     "dataSaved": "데이터 저장됨, 오프라인 준비 완료",
     "usingTTS": "음성 합성 사용 중 (오프라인)",
     "tooFast": "너무 빠르게 이동 중입니다. 오디오 가이드를 듣기 위해 걸어주세요.",

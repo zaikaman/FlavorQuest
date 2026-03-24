@@ -78,7 +78,6 @@
     "priority": "Priority",
     "nowPlaying": "Now Playing: {name}",
     "syncedEvents": "Synced {count} events",
-    "offlineReady": "Ready for offline use",
     "dataSaved": "Data saved, ready for offline",
     "usingTTS": "Using text-to-speech (offline)",
     "tooFast": "Moving too fast. Please walk to listen to narration.",

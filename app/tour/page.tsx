@@ -141,10 +141,6 @@ export default function TourPage() {
     [showToastMessage, t]
   );
 
-  const handleOfflineReady = useCallback(() => {
-    showToastMessage(t('tour.offlineReady'));
-  }, [showToastMessage, t]);
-
   const handlePOIOfflineReady = useCallback(() => {
     setIsOfflineReady(true);
   }, []);
@@ -153,7 +149,6 @@ export default function TourPage() {
   const { isOfflineReady: offlineSyncReady } = useOfflineSync({
     autoSync: true,
     onSyncSuccess: handleOfflineSyncSuccess,
-    onOfflineReady: handleOfflineReady,
   });
 
   // POI Management với offline support
@@ -990,55 +985,6 @@ export default function TourPage() {
 
           {/* Offline Status */}
           <div className="pointer-events-auto flex items-center gap-2">
-            {user && (
-              <button
-                onClick={() => {
-                  const params = new URLSearchParams();
-
-                  if (selectedTourId) {
-                    params.set('tour', selectedTourId);
-                  }
-
-                  if (selectedPOI?.id) {
-                    params.set('poi', selectedPOI.id);
-                  }
-
-                  params.set('tab', 'chat');
-
-                  const nextUrl = params.toString() ? `/tour/chat?${params.toString()}` : '/tour/chat';
-                  router.push(nextUrl);
-                }}
-                className="relative flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-black/40 text-white shadow-lg backdrop-blur-md transition-colors hover:bg-black/60"
-                aria-label={t('support.openPage')}
-              >
-                <span className="material-symbols-outlined text-xl">forum</span>
-              </button>
-            )}
-            <button
-              onClick={() => {
-                const params = new URLSearchParams();
-
-                if (selectedTourId) {
-                  params.set('tour', selectedTourId);
-                }
-
-                if (selectedPOI?.id) {
-                  params.set('poi', selectedPOI.id);
-                }
-
-                params.set('tab', activeTab);
-
-                const nextUrl = params.toString()
-                  ? `/tour/assistant?${params.toString()}`
-                  : '/tour/assistant';
-
-                router.push(nextUrl);
-              }}
-              className="relative flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-black/40 text-white shadow-lg backdrop-blur-md transition-colors hover:bg-black/60"
-              aria-label={t('chatbot.openPage')}
-            >
-              <span className="material-symbols-outlined text-xl">psychology_alt</span>
-            </button>
             {user && (
               <button
                 onClick={() => setShowNotifications(true)}

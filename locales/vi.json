@@ -78,7 +78,6 @@
     "priority": "Ưu tiên",
     "nowPlaying": "Đang phát: {name}",
     "syncedEvents": "Đã đồng bộ {count} sự kiện",
-    "offlineReady": "Sẵn sàng sử dụng ngoại tuyến",
     "dataSaved": "Dữ liệu đã được lưu, sẵn sàng ngoại tuyến",
     "usingTTS": "Đang sử dụng giọng đọc tổng hợp (offline)",
     "tooFast": "Di chuyển quá nhanh. Vui lòng đi bộ để nghe thuyết minh.",
