@@ -146,9 +146,9 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Next.js assets should fail silently and use the browser cache when possible.
+  // Next.js assets should prefer the network so installed PWAs do not keep stale bundles.
   if (isNextAsset(url)) {
-    event.respondWith(cacheFirst(request, CACHE_NAMES.static));
+    event.respondWith(networkFirst(request, CACHE_NAMES.static));
     return;
   }
 

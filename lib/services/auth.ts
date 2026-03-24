@@ -5,6 +5,10 @@
 import { createClient } from '@/lib/supabase/client';
 import type { User } from '@supabase/supabase-js';
 
+const OTP_REQUEST_TIMEOUT_MS = 10000;
+const OTP_VERIFY_TIMEOUT_MS = 15000;
+const OTP_COMPLETE_TIMEOUT_MS = 10000;
+
 export type AccountType = 'customer' | 'owner' | 'admin';
 
 interface RequestEmailOtpOptions {
@@ -22,17 +26,73 @@ interface VerifyEmailOtpResult {
   redirectTo: string | null;
 }
 
+async function promiseWithTimeout<T>(
+  promise: Promise<T>,
+  timeoutMs: number,
+  label: string
+): Promise<T> {
+  let timeoutId: number | null = null;
+
+  try {
+    return await Promise.race([
+      promise,
+      new Promise<T>((_, reject) => {
+        timeoutId = window.setTimeout(() => {
+          reject(new Error(`${label} timed out after ${timeoutMs}ms`));
+        }, timeoutMs);
+      }),
+    ]);
+  } finally {
+    if (timeoutId) {
+      window.clearTimeout(timeoutId);
+    }
+  }
+}
+
+async function fetchWithTimeout(
+  input: RequestInfo | URL,
+  init: RequestInit,
+  timeoutMs: number,
+  label: string
+): Promise<Response> {
+  const controller = new AbortController();
+  const timeoutId = window.setTimeout(() => {
+    controller.abort(new Error(`${label} timed out after ${timeoutMs}ms`));
+  }, timeoutMs);
+
+  try {
+    return await fetch(input, { ...init, signal: controller.signal });
+  } finally {
+    window.clearTimeout(timeoutId);
+  }
+}
+
 async function prepareEmailOtp(email: string, accountType: AccountType) {
-  const response = await fetch('/api/auth/email-otp/prepare', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      email,
-      accountType,
-    }),
-  });
+  let response: Response;
+
+  try {
+    response = await fetchWithTimeout(
+      '/api/auth/email-otp/prepare',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email,
+          accountType,
+        }),
+      },
+      OTP_REQUEST_TIMEOUT_MS,
+      'prepareEmailOtp'
+    );
+  } catch (error) {
+    console.error('Prepare email OTP error:', error);
+    return {
+      error: new Error(''),
+      errorCode: null,
+    };
+  }
 
   const result = (await response.json().catch(() => null)) as {
     error?: string;
@@ -65,12 +125,25 @@ export async function requestEmailOtp(
     return prepared;
   }
 
-  const { error } = await supabase.auth.signInWithOtp({
-    email: normalizedEmail,
-    options: {
-      shouldCreateUser: accountType !== 'admin',
-    },
-  });
+  let error: Error | null = null;
+
+  try {
+    const result = await promiseWithTimeout(
+      supabase.auth.signInWithOtp({
+        email: normalizedEmail,
+        options: {
+          shouldCreateUser: accountType !== 'admin',
+        },
+      }),
+      OTP_REQUEST_TIMEOUT_MS,
+      'signInWithOtp'
+    );
+
+    error = result.error;
+  } catch (requestError) {
+    console.error('Email OTP request error:', requestError);
+    return { error: new Error(''), errorCode: null };
+  }
 
   if (error) {
     console.error('Email OTP request error:', error);
@@ -89,14 +162,26 @@ export async function verifyEmailOtp(
   const normalizedEmail = email.trim().toLowerCase();
   const normalizedToken = token.trim();
 
-  const {
-    data: { session },
-    error,
-  } = await supabase.auth.verifyOtp({
-    email: normalizedEmail,
-    token: normalizedToken,
-    type: 'email',
-  });
+  let session: Awaited<ReturnType<typeof supabase.auth.verifyOtp>>['data']['session'] = null;
+  let error: Error | null = null;
+
+  try {
+    const result = await promiseWithTimeout(
+      supabase.auth.verifyOtp({
+        email: normalizedEmail,
+        token: normalizedToken,
+        type: 'email',
+      }),
+      OTP_VERIFY_TIMEOUT_MS,
+      'verifyOtp'
+    );
+
+    session = result.data.session;
+    error = result.error;
+  } catch (verifyError) {
+    console.error('Email OTP verification error:', verifyError);
+    return { error: new Error(''), errorCode: null, redirectTo: null };
+  }
 
   if (error) {
     console.error('Email OTP verification error:', error);
@@ -111,14 +196,40 @@ export async function verifyEmailOtp(
     };
   }
 
-  const response = await fetch('/api/auth/email-otp/complete', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${session.access_token}`,
-    },
-    body: JSON.stringify({ accountType }),
-  });
+  let response: Response;
+
+  try {
+    response = await fetchWithTimeout(
+      '/api/auth/email-otp/complete',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ accountType }),
+      },
+      OTP_COMPLETE_TIMEOUT_MS,
+      'completeEmailOtp'
+    );
+  } catch (completeError) {
+    console.error('Complete email OTP error:', completeError);
+
+    if (accountType === 'customer') {
+      return {
+        error: null,
+        errorCode: null,
+        redirectTo: '/tour',
+      };
+    }
+
+    await supabase.auth.signOut();
+    return {
+      error: new Error(''),
+      errorCode: null,
+      redirectTo: null,
+    };
+  }
 
   const result = (await response.json().catch(() => null)) as {
     error?: string;

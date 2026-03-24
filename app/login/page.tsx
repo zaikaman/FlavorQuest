@@ -114,25 +114,30 @@ export default function LoginPage() {
     setIsSendingOtp(true);
     setFeedback(null);
 
-    const { error: requestError, errorCode } = await requestEmailOtp(normalizedEmail, {
-      accountType,
-    });
+    try {
+      const { error: requestError, errorCode } = await requestEmailOtp(normalizedEmail, {
+        accountType,
+      });
 
-    setIsSendingOtp(false);
+      if (requestError) {
+        const message =
+          errorCode === 'ADMIN_PORTAL_REQUIRED'
+            ? t('login.adminPortalRequired')
+            : requestError.message || t('login.sendOtpError');
+        setFeedback({ type: 'error', message });
+        return;
+      }
 
-    if (requestError) {
-      const message =
-        errorCode === 'ADMIN_PORTAL_REQUIRED'
-          ? t('login.adminPortalRequired')
-          : requestError.message || t('login.sendOtpError');
-      setFeedback({ type: 'error', message });
-      return;
+      setLastSentEmail(normalizedEmail);
+      setIsOtpSent(true);
+      setCooldown(60);
+      setFeedback({ type: 'success', message: t('login.codeSentTo', { email: normalizedEmail }) });
+    } catch (error) {
+      console.error('[LoginPage] requestEmailOtp failed:', error);
+      setFeedback({ type: 'error', message: t('login.sendOtpError') });
+    } finally {
+      setIsSendingOtp(false);
     }
-
-    setLastSentEmail(normalizedEmail);
-    setIsOtpSent(true);
-    setCooldown(60);
-    setFeedback({ type: 'success', message: t('login.codeSentTo', { email: normalizedEmail }) });
   };
 
   const handleVerifyOtp = async () => {
@@ -151,32 +156,39 @@ export default function LoginPage() {
       setIsCompletingOwnerLogin(true);
     }
     setFeedback(null);
-    await primeSharedAudioElement();
 
-    const {
-      error: verifyError,
-      errorCode,
-      redirectTo,
-    } = await verifyEmailOtp(normalizedEmail, otp, accountType);
+    try {
+      await primeSharedAudioElement();
 
-    setIsVerifyingOtp(false);
+      const {
+        error: verifyError,
+        errorCode,
+        redirectTo,
+      } = await verifyEmailOtp(normalizedEmail, otp, accountType);
 
-    if (verifyError) {
+      if (verifyError) {
+        setIsCompletingOwnerLogin(false);
+        const message =
+          errorCode === 'ADMIN_PORTAL_REQUIRED'
+            ? t('login.adminPortalRequired')
+            : verifyError.message || t('login.verifyOtpError');
+        setFeedback({ type: 'error', message });
+        return;
+      }
+
+      const destination = redirectTo ?? (accountType === 'owner' ? '/pending-owner' : '/tour');
+      router.push(destination);
+      router.refresh();
+      refreshUserRole().catch((refreshError) => {
+        console.warn('[LoginPage] refreshUserRole failed after OTP verify:', refreshError);
+      });
+    } catch (error) {
+      console.error('[LoginPage] verifyEmailOtp failed:', error);
       setIsCompletingOwnerLogin(false);
-      const message =
-        errorCode === 'ADMIN_PORTAL_REQUIRED'
-          ? t('login.adminPortalRequired')
-          : verifyError.message || t('login.verifyOtpError');
-      setFeedback({ type: 'error', message });
-      return;
+      setFeedback({ type: 'error', message: t('login.verifyOtpError') });
+    } finally {
+      setIsVerifyingOtp(false);
     }
-
-    const destination = redirectTo ?? (accountType === 'owner' ? '/pending-owner' : '/tour');
-    router.push(destination);
-    router.refresh();
-    refreshUserRole().catch((refreshError) => {
-      console.warn('[LoginPage] refreshUserRole failed after OTP verify:', refreshError);
-    });
   };
 
   if (isLoading) {
