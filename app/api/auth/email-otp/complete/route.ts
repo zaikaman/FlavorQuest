@@ -157,14 +157,12 @@ export async function POST(request: NextRequest) {
 
   const { data: profile } = await adminClient
     .from('users')
-    .select('customer_access_granted, owner_request_status')
+    .select('owner_request_status')
     .eq('id', currentUser.id)
     .maybeSingle();
 
-  const redirectTo = profile?.customer_access_granted ? '/tour' : '/paywall';
-
   return NextResponse.json({
-    redirectTo,
+    redirectTo: '/tour',
     role: 'customer',
     ownerRequestStatus: profile?.owner_request_status ?? null,
   });

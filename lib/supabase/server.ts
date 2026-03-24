@@ -291,9 +291,7 @@ export async function getCurrentUserProfile(
     id: authProfile.id,
     email: authProfile.email,
     role,
-    customerAccessGranted: role === 'customer'
-      ? (authProfile.profile?.customer_access_granted ?? false)
-      : false,
+    customerAccessGranted: role === 'customer' ? true : false,
     customerAccessGrantedAt: authProfile.profile?.customer_access_granted_at ?? null,
     ownerRequestStatus: normalizeOwnerRequestStatus(authProfile.profile?.owner_request_status),
     ownerRequestedAt: authProfile.profile?.owner_requested_at ?? null,
