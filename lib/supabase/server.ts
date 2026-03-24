@@ -20,8 +20,6 @@ export interface CurrentUserProfile {
   id: string;
   email: string | null;
   role: AppUserRole;
-  customerAccessGranted: boolean;
-  customerAccessGrantedAt: string | null;
   ownerRequestStatus: OwnerRequestStatus | null;
   ownerRequestedAt: string | null;
   ownerReviewedAt: string | null;
@@ -29,8 +27,6 @@ export interface CurrentUserProfile {
 
 interface UserProfileRow {
   role: string | null;
-  customer_access_granted: boolean | null;
-  customer_access_granted_at: string | null;
   owner_request_status: string | null;
   owner_requested_at: string | null;
   owner_reviewed_at: string | null;
@@ -238,9 +234,7 @@ async function getCurrentAuthProfile(
 
   const { data } = await client
     .from('users')
-    .select(
-      'role, customer_access_granted, customer_access_granted_at, owner_request_status, owner_requested_at, owner_reviewed_at'
-    )
+    .select('role, owner_request_status, owner_requested_at, owner_reviewed_at')
     .eq('id', user.id)
     .maybeSingle<UserProfileRow>();
 
@@ -291,8 +285,6 @@ export async function getCurrentUserProfile(
     id: authProfile.id,
     email: authProfile.email,
     role,
-    customerAccessGranted: role === 'customer' ? true : false,
-    customerAccessGrantedAt: authProfile.profile?.customer_access_granted_at ?? null,
     ownerRequestStatus: normalizeOwnerRequestStatus(authProfile.profile?.owner_request_status),
     ownerRequestedAt: authProfile.profile?.owner_requested_at ?? null,
     ownerReviewedAt: authProfile.profile?.owner_reviewed_at ?? null,

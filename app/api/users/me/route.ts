@@ -20,8 +20,6 @@ export async function GET() {
       id: profile.id,
       email: profile.email,
       role: profile.role,
-      customerAccessGranted: profile.customerAccessGranted,
-      customerAccessGrantedAt: profile.customerAccessGrantedAt,
       ownerRequestStatus: profile.ownerRequestStatus,
       ownerRequestedAt: profile.ownerRequestedAt,
       ownerReviewedAt: profile.ownerReviewedAt,

@@ -11,7 +11,6 @@ flowchart LR
   admin["Admin"] --> app
 
   app --> supabase["Supabase Auth + Postgres + Storage + Realtime"]
-  app --> payos["PayOS"]
   app --> ai["OpenAI-compatible API"]
   app --> tts["Azure OpenAI TTS"]
   app --> smtp["SMTP Mail Server"]
@@ -22,7 +21,6 @@ flowchart LR
 ```mermaid
 flowchart TB
   subgraph Frontend["Next.js App Router"]
-    landing["Landing + Login + Paywall"]
     customer["Tour Workspace"]
     owner["Owner Workspace"]
     admin["Admin Workspace"]
@@ -42,7 +40,6 @@ flowchart TB
   customer --> pwa
 
   api --> supabase["Supabase"]
-  api --> payos["PayOS"]
   api --> llm["OpenAI-compatible API"]
   api --> azure["Azure OpenAI TTS"]
   api --> mail["SMTP"]
@@ -57,8 +54,6 @@ stateDiagram-v2
   Guest --> PendingOwner: OTP owner và chờ duyệt
   Guest --> Admin: Đăng nhập cổng admin
 
-  LoggedInCustomer --> Paywall: Chưa mở khóa
-  Paywall --> TourAccess: Thanh toán thành công
   LoggedInCustomer --> TourAccess: Đã có quyền truy cập
 
   PendingOwner --> OwnerAccess: Admin duyệt
@@ -78,22 +73,16 @@ sequenceDiagram
   participant UI as FlavorQuest UI
   participant Auth as Supabase Auth
   participant API as Payment API
-  participant PayOS as PayOS
   participant DB as Supabase DB
 
   User->>UI: Nhập email và nhận OTP
   UI->>Auth: Gửi yêu cầu xác thực OTP
   Auth-->>UI: Phiên đăng nhập hợp lệ
-  UI->>DB: Kiểm tra users.customer_access_granted
   DB-->>UI: Chưa có quyền truy cập
   User->>UI: Chọn mở khóa nội dung
   UI->>API: POST create customer access payment
-  API->>PayOS: Tạo link thanh toán
-  PayOS-->>API: Trả checkout_url và order_code
   API->>DB: Lưu giao dịch PENDING
   API-->>UI: Trả link thanh toán
-  User->>PayOS: Thanh toán
-  PayOS-->>API: Webhook cập nhật trạng thái
   API->>DB: Cập nhật payment = PAID và user access = true
   UI->>API: Poll trạng thái thanh toán
   API->>DB: Đọc payment + user access
@@ -123,7 +112,6 @@ flowchart TD
 
 ```mermaid
 erDiagram
-  USERS ||--o{ CUSTOMER_ACCESS_PAYMENTS : makes
   USERS ||--o{ POIS : manages
   USERS ||--o{ PREORDER_ORDERS : places
   USERS ||--o{ SUPPORT_THREADS : opens
@@ -148,7 +136,6 @@ erDiagram
     uuid id PK
     text email
     text role
-    boolean customer_access_granted
     text owner_request_status
   }
   POIS {
@@ -185,7 +172,6 @@ erDiagram
     uuid dish_id FK
     int quantity
   }
-  CUSTOMER_ACCESS_PAYMENTS {
     uuid id PK
     uuid user_id FK
     bigint order_code
@@ -231,3 +217,4 @@ erDiagram
 ```
 
 Ghi chú: bảng `tours` tham chiếu POI theo `poi_ids` dạng mảng UUID, nên quan hệ với `pois` là quan hệ logic ở tầng ứng dụng thay vì khóa ngoại trực tiếp trong schema hiện tại.
+

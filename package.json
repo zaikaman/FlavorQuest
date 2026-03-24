@@ -10,7 +10,6 @@
     "format": "prettier --write ."
   },
   "dependencies": {
-    "@payos/node": "^2.0.5",
     "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.91.1",
     "@types/nodemailer": "^7.0.11",

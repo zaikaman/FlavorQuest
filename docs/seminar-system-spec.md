@@ -6,8 +6,6 @@ Tài liệu này mô tả kiến trúc hệ thống, các module chính, mô hì
 
 ## 2. Kiến trúc tổng thể
 
-FlavorQuest được xây dựng theo mô hình web application hiện đại trên nền Next.js App Router. Ứng dụng dùng Supabase làm nền tảng xác thực, cơ sở dữ liệu và realtime; PayOS cho thanh toán; các dịch vụ AI tương thích OpenAI cho dịch và chatbot; Azure OpenAI cho tổng hợp giọng nói; SMTP cho email nghiệp vụ.
-
 ### 2.1. Các lớp chính
 
 | Lớp | Thành phần chính | Vai trò |
@@ -16,7 +14,6 @@ FlavorQuest được xây dựng theo mô hình web application hiện đại tr
 | Application | `lib/hooks/`, `lib/contexts/`, `lib/services/` | Điều phối trạng thái, nghiệp vụ phía ứng dụng, tích hợp dịch vụ |
 | Data Access | `lib/supabase/`, `lib/server/` | Truy cập Supabase phía client và server |
 | Persistence | Supabase Postgres, Storage, IndexedDB | Lưu dữ liệu hệ thống, media và cache cục bộ |
-| Integration | PayOS, OpenAI-compatible API, Azure OpenAI, SMTP | Thanh toán, AI, TTS, email |
 
 ### 2.2. Đặc điểm triển khai
 
@@ -33,7 +30,6 @@ FlavorQuest được xây dựng theo mô hình web application hiện đại tr
 | --- | --- | --- |
 | Landing | `/` | Màn hình chào, chọn ngôn ngữ, dẫn vào đăng nhập hoặc tour |
 | Login | `/login` | Xác thực email OTP cho khách và owner |
-| Paywall | `/paywall` | Tạo giao dịch mở khóa quyền truy cập khách |
 | Tour | `/tour`, `/tour/[poiId]`, `/tour/assistant`, `/tour/chat` | Trải nghiệm khách hàng |
 | Owner | `/owner`, `/owner/chat` | Quản trị nội dung quán và xử lý đơn |
 | Pending Owner | `/pending-owner` | Trạng thái chờ admin duyệt |
@@ -65,8 +61,6 @@ FlavorQuest được xây dựng theo mô hình web application hiện đại tr
 
 `proxy.ts` là lớp kiểm soát truy cập quan trọng nhất ở tầng route. Hệ thống xác định hồ sơ truy cập từ bảng `users`, sau đó điều hướng theo quy tắc:
 
-- Khách chưa đăng nhập không được vào `/tour`, `/owner`, `/admin`, `/paywall`.
-- Khách đã đăng nhập nhưng chưa mở khóa bị chuyển về `/paywall` khi cố vào `/tour`.
 - Pending owner chỉ ở được trong `/pending-owner`.
 - Owner không được vào cổng admin.
 - Admin vào cổng riêng `/admin` và bị chặn khỏi luồng khách thông thường.
@@ -85,7 +79,6 @@ Thiết kế này giúp đồng bộ hành vi giữa UI, business flow và phân
 | `dishes` | Thực đơn của từng POI |
 | `preorder_orders` | Đơn đặt trước của khách |
 | `preorder_order_items` | Chi tiết món trong đơn |
-| `customer_access_payments` | Giao dịch mở khóa quyền truy cập |
 | `notifications` | Thông báo theo người dùng |
 | `support_threads` | Thread hỗ trợ theo cặp vai trò |
 | `support_messages` | Tin nhắn trong thread hỗ trợ |
@@ -99,7 +92,6 @@ Thiết kế này giúp đồng bộ hành vi giữa UI, business flow và phân
 - `pois` dùng các trường `name_*`, `description_*`, `audio_url_*` để hỗ trợ sáu ngôn ngữ.
 - `tours` lưu tập `poi_ids` dưới dạng mảng UUID, phù hợp với tuyến tour nhỏ và dễ quản trị.
 - `users` chứa cả vai trò hệ thống lẫn trạng thái mở khóa khách hàng và owner request.
-- `customer_access_payments` lưu thông tin từ PayOS để phục vụ đối soát.
 - `analytics_logs` được thiết kế theo hướng giảm độ nhạy dữ liệu vị trí bằng cách log tọa độ làm tròn.
 
 ## 6. API nội bộ
@@ -126,10 +118,6 @@ Thiết kế này giúp đồng bộ hành vi giữa UI, business flow và phân
 
 | API | Vai trò |
 | --- | --- |
-| `/api/payments/customer-access/create` | Tạo giao dịch mở khóa |
-| `/api/payments/customer-access/status` | Đồng bộ trạng thái thanh toán |
-| `/api/payments/customer-access/history` | Lịch sử giao dịch |
-| `/api/payments/customer-access/webhook` | Nhận webhook từ PayOS |
 
 ### 6.4. Nhóm AI và hỗ trợ
 
@@ -163,8 +151,6 @@ Thiết kế này giúp đồng bộ hành vi giữa UI, business flow và phân
 - Storage: lưu audio và hình ảnh.
 - Realtime: cập nhật dashboard và trạng thái chat khi cần.
 
-### 7.2. PayOS
-
 - Tạo link thanh toán mở khóa quyền truy cập.
 - Nhận webhook để đồng bộ trạng thái giao dịch.
 - Lưu `order_code`, `payment_link_id`, `status`, `raw_payment_data` để đối soát.
@@ -188,8 +174,6 @@ Thiết kế này giúp đồng bộ hành vi giữa UI, business flow và phân
 ## 9. Quy tắc nghiệp vụ tiêu biểu
 
 ### 9.1. Truy cập tour
-
-- Người dùng chỉ vào được `/tour` khi đã đăng nhập và `customer_access_granted = true`.
 
 ### 9.2. Owner workflow
 
@@ -217,7 +201,6 @@ Thiết kế này giúp đồng bộ hành vi giữa UI, business flow và phân
 ## 11. Ràng buộc kỹ thuật
 
 - Yêu cầu Node.js 20 trở lên trong môi trường phát triển.
-- Cần cấu hình đầy đủ biến môi trường cho Supabase, PayOS, SMTP, AI và TTS.
 - Geolocation cần ngữ cảnh an toàn như `localhost` hoặc HTTPS.
 - Chất lượng trải nghiệm audio phụ thuộc vào media và kết nối mạng thực tế.
 
@@ -226,3 +209,4 @@ Thiết kế này giúp đồng bộ hành vi giữa UI, business flow và phân
 - Dùng [PRD](./seminar-prd.md) cho phần giới thiệu bài toán, mục tiêu và phạm vi.
 - Dùng [Bộ sơ đồ Mermaid](./seminar-diagrams.md) cho phần phân tích thiết kế.
 - Dùng tài liệu này cho phần kiến trúc, đặc tả hệ thống và mô hình dữ liệu.
+

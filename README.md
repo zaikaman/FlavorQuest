@@ -25,7 +25,6 @@
 FlavorQuest đang được tổ chức thành bốn lớp trải nghiệm chính:
 
 - Khách hàng đi tour bằng bản đồ, danh sách hoặc trợ lý AI, có thể nghe audio tự động theo vị trí, xem lịch sử, tải nội dung offline và nhận thông báo.
-- Khách hàng chỉ vào được khu tour sau khi xác thực OTP và mở khóa quyền truy cập qua PayOS.
 - Chủ quán có dashboard riêng để theo dõi POI được gán, quản lý món, xử lý đơn đặt trước và đọc thông báo.
 - Admin có trung tâm điều hành để quản trị POI, tour, người dùng, yêu cầu lên owner, thanh toán, phân tích và hỗ trợ vận hành.
 
@@ -45,7 +44,6 @@ FlavorQuest đang được tổ chức thành bốn lớp trải nghiệm chính
 - Trải nghiệm audio nghiêm túc: hàng đợi phát, mini player, phát thủ công hoặc tự động, fallback sang TTS khi thiếu file âm thanh.
 - PWA đúng nghĩa: service worker, preload audio và hình ảnh, cache nhiều tầng, đồng bộ analytics nền.
 - Đa ngôn ngữ ở mức dữ liệu: POI, tour, mô tả và audio được tổ chức cho `vi`, `en`, `ja`, `fr`, `ko`, `zh`.
-- Mô hình kinh doanh rõ ràng: paywall mở khóa nội dung khách hàng, chủ quán quản lý món và đơn, admin quan sát toàn hệ thống.
 - AI không đứng ngoài sản phẩm: trợ lý theo ngữ cảnh khách, owner và admin đều được cấp ngữ cảnh dữ liệu khác nhau trước khi trả lời.
 
 ## Bề mặt tính năng
@@ -54,7 +52,6 @@ FlavorQuest đang được tổ chức thành bốn lớp trải nghiệm chính
 
 - Trang chào với chọn ngôn ngữ, phong cách splash screen và cài PWA trên di động.
 - Đăng nhập bằng email OTP qua Supabase.
-- Paywall mở khóa tài khoản khách với PayOS.
 - Tour chính tại `/tour` với:
   - Bản đồ Leaflet.
   - Danh sách POI.
@@ -81,7 +78,6 @@ FlavorQuest đang được tổ chức thành bốn lớp trải nghiệm chính
   - `/admin/analytics`
   - `/admin/chat`
   - `/admin/owner-requests`
-  - `/admin/payments`
   - `/admin/pois`
   - `/admin/tours`
   - `/admin/users`
@@ -106,7 +102,6 @@ flowchart LR
   B --> D["Supabase Postgres + RLS"]
   B --> E["Supabase Storage"]
   B --> F["Service Worker + IndexedDB"]
-  B --> G["PayOS"]
   B --> H["OpenAI-compatible API"]
   B --> I["Azure OpenAI TTS"]
   B --> J["SMTP"]
@@ -128,7 +123,6 @@ flowchart LR
 
 | Vai trò | Cách vào hệ thống | Khu vực chính | Ràng buộc |
 | --- | --- | --- | --- |
-| Khách hàng | Email OTP | `/paywall`, `/tour`, `/tour/assistant`, `/tour/chat` | Phải mở khóa quyền truy cập trước khi vào `/tour` |
 | Pending owner | Email OTP loại owner | `/pending-owner` | Chờ admin duyệt |
 | Owner | Email OTP + đã duyệt | `/owner`, `/owner/chat` | Chỉ thấy dữ liệu POI được gán |
 | Admin | Đăng nhập admin | `/admin/*` | Tách riêng khỏi cổng khách và owner |
@@ -144,7 +138,6 @@ Schema Supabase hiện thể hiện rất rõ tham vọng của sản phẩm. C�
 - `tours`: tập hợp nhiều POI thành một hành trình.
 - `dishes`: món ăn theo từng POI.
 - `preorder_orders` và `preorder_order_items`: đơn đặt trước và chi tiết món.
-- `customer_access_payments`: lịch sử giao dịch mở khóa tài khoản.
 - `notifications`: thông báo theo người dùng.
 - `support_threads`, `support_messages`, `support_thread_reads`: hộp thư hỗ trợ.
 - `analytics_logs`: nhật ký phân tích hành vi.
@@ -159,7 +152,6 @@ Seed hiện có 12 POI cho khu phố Vĩnh Khánh, đủ để dựng và trình
 | Giao diện | Next.js 16, React 19, Tailwind CSS 4 |
 | Bản đồ | Leaflet, React Leaflet |
 | Xác thực và dữ liệu | Supabase SSR, Supabase Auth, Postgres, Storage, Realtime |
-| Thanh toán | PayOS |
 | AI | OpenAI SDK với `OPENAI_BASE_URL` tùy biến |
 | TTS | Azure OpenAI TTS |
 | Email | Nodemailer |
@@ -186,7 +178,6 @@ Nhìn từ `app/api`, dự án đã có một bề mặt API tương đối dày
 - Node.js 20 trở lên.
 - npm.
 - Một project Supabase đã bật Auth, Database và Storage.
-- Tài khoản PayOS nếu muốn kiểm thử paywall.
 - SMTP nếu muốn gửi mail.
 - Dịch vụ AI tương thích OpenAI và khóa Azure nếu muốn dùng dịch và TTS.
 
@@ -211,12 +202,10 @@ Copy-Item .env.local.example .env.local
 | Cờ tính năng | `NEXT_PUBLIC_ENABLE_OFFLINE_MODE`, `NEXT_PUBLIC_ENABLE_TTS_FALLBACK`, `NEXT_PUBLIC_ENABLE_ANALYTICS` |
 | AI | `OPENAI_API_KEY`, `OPENAI_BASE_URL`, `OPENAI_MODEL`, `AZURE_API_KEY` |
 | Email | `MAIL_FROM_ADDRESS`, `MAIL_FROM_NAME`, `MAIL_HOST`, `MAIL_PORT`, `MAIL_USERNAME`, `MAIL_PASSWORD`, `MAIL_ENCRYPTION` |
-| PayOS | `PAYOS_CLIENT_ID`, `PAYOS_API_KEY`, `PAYOS_CHECKSUM_KEY` |
 
 Lưu ý:
 
 - `OPENAI_BASE_URL` cho thấy dự án đang hỗ trợ endpoint tương thích OpenAI chứ không khóa cứng vào một nhà cung cấp duy nhất.
-- Local `http://localhost` vẫn được tính đến trong paywall, còn khi thử geolocation trên thiết bị thật nên dùng HTTPS.
 - Geolocation ngoài `localhost` trên HTTP sẽ bị trình duyệt chặn.
 
 ### Dựng cơ sở dữ liệu
@@ -243,7 +232,6 @@ Mặc định ứng dụng chạy tại `http://localhost:3000`.
 
 1. Mở trang chủ, chọn ngôn ngữ và cài PWA trên điện thoại.
 2. Đăng nhập email OTP ở vai trò khách hàng.
-3. Thực hiện mở khóa bằng paywall.
 4. Vào `/tour`, chọn hành trình và thử chuyển giữa map, list, assistant, chat.
 5. Kiểm tra offline prompt và preload audio.
 6. Đăng nhập owner để xem quản lý món và đơn đặt trước.
@@ -257,7 +245,6 @@ app/
   api/                  API route cho auth, dữ liệu, AI, payment, support
   login/                Đăng nhập OTP
   owner/                Khu vực chủ quán
-  paywall/              Mở khóa tài khoản khách
   tour/                 Trải nghiệm tour của khách
 components/
   admin/                Thành phần dashboard quản trị
@@ -269,7 +256,6 @@ components/
 lib/
   contexts/             Auth, app state, language
   hooks/                Hook nghiệp vụ
-  server/               Tích hợp phía server như PayOS, support
   services/             Analytics, audio, chatbot, mailer, PWA, translator, TTS
   supabase/             Client SSR và admin
   utils/                Distance, speed, cooldown, localization
@@ -283,7 +269,6 @@ tests/                  Khung thư mục test, hiện chưa có ca kiểm thử 
 
 - `public/sw.js` triển khai cache riêng cho app shell, audio, hình ảnh, tile bản đồ và dữ liệu động.
 - `lib/services/chatbot.ts` xây prompt khác nhau cho khách, owner và admin, đồng thời bơm thêm ngữ cảnh thật từ dữ liệu hệ thống trước khi gọi mô hình.
-- `lib/server/payos.ts` đang đặt giá mở khóa khách hàng là `20.000 VND`.
 - `app/layout.tsx` dùng `Be Vietnam Pro` làm phông chữ chính, đồng thời cấu hình metadata và manifest khá đầy đủ cho PWA.
 - `next.config.ts` đã bật security headers, tối ưu ảnh và `optimizePackageImports` cho `leaflet` và `react-leaflet`.
 
@@ -299,7 +284,6 @@ tests/                  Khung thư mục test, hiện chưa có ca kiểm thử 
 
 - Thư mục `tests/` mới là khung sẵn, chưa có test case tự động thực thi.
 - Một vài nội dung trong repo còn dấu hiệu mã hóa ký tự chưa sạch hoàn toàn, nhất là ở tài liệu cũ và một số chuỗi tiếng Việt.
-- Việc vận hành trọn vẹn cần phụ thuộc đúng cấu hình Supabase, PayOS, SMTP và dịch vụ AI.
 
 ## Tài liệu tham khảo trong repo
 
@@ -312,3 +296,4 @@ tests/                  Khung thư mục test, hiện chưa có ca kiểm thử 
 ## Kết
 
 FlavorQuest là một codebase có cá tính rất rõ: nó đứng ở giao điểm của du lịch vi mô, ẩm thực đường phố, bản đồ, audio, thanh toán và AI hỗ trợ vận hành. Nếu bạn đang tìm một dự án vừa có chất sản phẩm, vừa có nhiều bề mặt kỹ thuật đáng khai thác, đây là một nền tảng rất giàu tiềm năng để tiếp tục mở rộng.
+

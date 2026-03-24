@@ -271,10 +271,6 @@ export interface Database {
           updated_at: string;
           email: string;
           role: 'customer' | 'owner' | 'admin';
-          customer_access_granted: boolean;
-          customer_access_granted_at: string | null;
-          customer_access_payment_order_code: number | null;
-          customer_access_payment_link_id: string | null;
         };
         Insert: {
           id: string;
@@ -282,10 +278,6 @@ export interface Database {
           updated_at?: string;
           email: string;
           role?: 'customer' | 'owner' | 'admin';
-          customer_access_granted?: boolean;
-          customer_access_granted_at?: string | null;
-          customer_access_payment_order_code?: number | null;
-          customer_access_payment_link_id?: string | null;
         };
         Update: {
           id?: string;
@@ -293,10 +285,6 @@ export interface Database {
           updated_at?: string;
           email?: string;
           role?: 'customer' | 'owner' | 'admin';
-          customer_access_granted?: boolean;
-          customer_access_granted_at?: string | null;
-          customer_access_payment_order_code?: number | null;
-          customer_access_payment_link_id?: string | null;
         };
         Relationships: [
           {
@@ -588,67 +576,6 @@ export interface Database {
             foreignKeyName: 'chat_messages_conversation_id_fkey';
             columns: ['conversation_id'];
             referencedRelation: 'chat_conversations';
-            referencedColumns: ['id'];
-          }
-        ];
-      };
-      customer_access_payments: {
-        Row: {
-          id: string;
-          user_id: string;
-          order_code: number;
-          payment_link_id: string | null;
-          amount: number;
-          status: 'PENDING' | 'PROCESSING' | 'PAID' | 'CANCELLED' | 'EXPIRED' | 'FAILED' | 'UNDERPAID';
-          checkout_url: string | null;
-          qr_code: string | null;
-          description: string;
-          return_query: Json | null;
-          raw_payment_data: Json | null;
-          webhook_payload: Json | null;
-          paid_at: string | null;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id?: string;
-          user_id: string;
-          order_code: number;
-          payment_link_id?: string | null;
-          amount: number;
-          status?: 'PENDING' | 'PROCESSING' | 'PAID' | 'CANCELLED' | 'EXPIRED' | 'FAILED' | 'UNDERPAID';
-          checkout_url?: string | null;
-          qr_code?: string | null;
-          description: string;
-          return_query?: Json | null;
-          raw_payment_data?: Json | null;
-          webhook_payload?: Json | null;
-          paid_at?: string | null;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: {
-          id?: string;
-          user_id?: string;
-          order_code?: number;
-          payment_link_id?: string | null;
-          amount?: number;
-          status?: 'PENDING' | 'PROCESSING' | 'PAID' | 'CANCELLED' | 'EXPIRED' | 'FAILED' | 'UNDERPAID';
-          checkout_url?: string | null;
-          qr_code?: string | null;
-          description?: string;
-          return_query?: Json | null;
-          raw_payment_data?: Json | null;
-          webhook_payload?: Json | null;
-          paid_at?: string | null;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Relationships: [
-          {
-            foreignKeyName: 'customer_access_payments_user_id_fkey';
-            columns: ['user_id'];
-            referencedRelation: 'users';
             referencedColumns: ['id'];
           }
         ];

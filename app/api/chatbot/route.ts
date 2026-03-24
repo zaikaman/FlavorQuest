@@ -270,13 +270,6 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  if (profile.role === 'customer' && !profile.customerAccessGranted) {
-    return NextResponse.json(
-      { error: 'Customer access is not active' },
-      { status: 403, headers: NO_STORE_HEADERS }
-    );
-  }
-
   try {
     const workspaceRole = normalizeWorkspaceRole(
       request.nextUrl.searchParams.get('role'),
@@ -317,13 +310,6 @@ export async function POST(request: NextRequest) {
   if (profile.role === 'pending-owner') {
     return NextResponse.json(
       { error: 'Pending owner accounts cannot access chatbot workspace' },
-      { status: 403, headers: NO_STORE_HEADERS }
-    );
-  }
-
-  if (profile.role === 'customer' && !profile.customerAccessGranted) {
-    return NextResponse.json(
-      { error: 'Customer access is not active' },
       { status: 403, headers: NO_STORE_HEADERS }
     );
   }

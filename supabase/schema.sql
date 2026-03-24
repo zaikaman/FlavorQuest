@@ -37,25 +37,6 @@ CREATE TABLE public.chat_messages (
   CONSTRAINT chat_messages_pkey PRIMARY KEY (id),
   CONSTRAINT chat_messages_conversation_id_fkey FOREIGN KEY (conversation_id) REFERENCES public.chat_conversations(id)
 );
-CREATE TABLE public.customer_access_payments (
-  id uuid NOT NULL DEFAULT uuid_generate_v4(),
-  user_id uuid NOT NULL,
-  order_code bigint NOT NULL UNIQUE,
-  payment_link_id text UNIQUE,
-  amount integer NOT NULL CHECK (amount > 0),
-  status character varying NOT NULL DEFAULT 'PENDING'::character varying CHECK (status::text = ANY (ARRAY['PENDING'::character varying, 'PROCESSING'::character varying, 'PAID'::character varying, 'CANCELLED'::character varying, 'EXPIRED'::character varying, 'FAILED'::character varying, 'UNDERPAID'::character varying]::text[])),
-  checkout_url text,
-  qr_code text,
-  description text NOT NULL,
-  return_query jsonb,
-  raw_payment_data jsonb,
-  webhook_payload jsonb,
-  paid_at timestamp with time zone,
-  created_at timestamp with time zone NOT NULL DEFAULT now(),
-  updated_at timestamp with time zone NOT NULL DEFAULT now(),
-  CONSTRAINT customer_access_payments_pkey PRIMARY KEY (id),
-  CONSTRAINT customer_access_payments_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id)
-);
 CREATE TABLE public.dishes (
   id uuid NOT NULL DEFAULT uuid_generate_v4(),
   poi_id uuid NOT NULL,
@@ -218,10 +199,6 @@ CREATE TABLE public.users (
   role character varying NOT NULL DEFAULT 'customer'::character varying CHECK (role::text = ANY (ARRAY['customer'::character varying, 'pending-owner'::character varying, 'owner'::character varying, 'admin'::character varying]::text[])),
   created_at timestamp with time zone NOT NULL DEFAULT now(),
   updated_at timestamp with time zone NOT NULL DEFAULT now(),
-  customer_access_granted boolean NOT NULL DEFAULT true,
-  customer_access_granted_at timestamp with time zone,
-  customer_access_payment_order_code bigint,
-  customer_access_payment_link_id text,
   owner_request_status character varying CHECK (owner_request_status::text = ANY (ARRAY['pending'::character varying, 'approved'::character varying, 'rejected'::character varying]::text[])),
   owner_requested_at timestamp with time zone,
   owner_reviewed_at timestamp with time zone,

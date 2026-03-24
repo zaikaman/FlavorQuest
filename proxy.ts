@@ -7,7 +7,6 @@ type OwnerRequestStatus = 'pending' | 'approved' | 'rejected';
 interface RouteProfile {
   userId: string | null;
   role: RouteRole | null;
-  customerAccessGranted: boolean;
   ownerRequestStatus: OwnerRequestStatus | null;
 }
 
@@ -35,7 +34,6 @@ async function resolveProfile(request: NextRequest) {
       profile: {
         userId: null,
         role: null,
-        customerAccessGranted: true,
         ownerRequestStatus: null,
       } as RouteProfile,
     };
@@ -76,7 +74,6 @@ async function resolveProfile(request: NextRequest) {
       profile: {
         userId: null,
         role: null,
-        customerAccessGranted: true,
         ownerRequestStatus: null,
       } satisfies RouteProfile,
     };
@@ -84,7 +81,7 @@ async function resolveProfile(request: NextRequest) {
 
   const { data } = await supabase
     .from('users')
-    .select('role, customer_access_granted, owner_request_status')
+    .select('role, owner_request_status')
     .eq('id', user.id)
     .maybeSingle();
 
@@ -109,7 +106,6 @@ async function resolveProfile(request: NextRequest) {
     profile: {
       userId: user.id,
       role,
-      customerAccessGranted: role === 'customer' ? true : false,
       ownerRequestStatus,
     } satisfies RouteProfile,
   };
@@ -198,29 +194,9 @@ export async function proxy(request: NextRequest) {
     return response;
   }
 
-  if (pathname.startsWith('/paywall')) {
-    if (!profile.userId) {
-      return redirect(request, '/login', { type: 'customer' });
-    }
-
-    if (profile.role === 'admin') {
-      return redirect(request, '/admin');
-    }
-
-    if (profile.role === 'owner') {
-      return redirect(request, '/owner');
-    }
-
-    if (profile.role === 'pending-owner') {
-      return redirect(request, '/pending-owner');
-    }
-
-    return redirect(request, '/tour');
-  }
-
   return response;
 }
 
 export const config = {
-  matcher: ['/tour/:path*', '/paywall/:path*', '/owner/:path*', '/admin/:path*', '/pending-owner'],
+  matcher: ['/tour/:path*', '/owner/:path*', '/admin/:path*', '/pending-owner'],
 };

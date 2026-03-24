@@ -19,8 +19,6 @@ interface MeResponse {
   id: string;
   email: string | null;
   role: AppUserRole;
-  customerAccessGranted?: boolean;
-  customerAccessGrantedAt?: string | null;
   ownerRequestStatus?: OwnerRequestStatus | null;
   ownerRequestedAt?: string | null;
   ownerReviewedAt?: string | null;
@@ -29,8 +27,6 @@ interface MeResponse {
 interface AuthSnapshot {
   userId: string;
   role: AppUserRole;
-  hasCustomerAccess: boolean;
-  customerAccessGrantedAt: string | null;
   ownerRequestStatus: OwnerRequestStatus | null;
   ownerRequestedAt: string | null;
   ownerReviewedAt: string | null;
@@ -44,8 +40,6 @@ interface AuthContextType {
   isOwner: boolean;
   isCustomer: boolean;
   isPendingOwner: boolean;
-  hasCustomerAccess: boolean;
-  customerAccessGrantedAt: string | null;
   ownerRequestStatus: OwnerRequestStatus | null;
   ownerRequestedAt: string | null;
   ownerReviewedAt: string | null;
@@ -107,8 +101,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [userRole, setUserRole] = useState<AppUserRole | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [hasCustomerAccess, setHasCustomerAccess] = useState(false);
-  const [customerAccessGrantedAt, setCustomerAccessGrantedAt] = useState<string | null>(null);
   const [ownerRequestStatus, setOwnerRequestStatus] = useState<OwnerRequestStatus | null>(null);
   const [ownerRequestedAt, setOwnerRequestedAt] = useState<string | null>(null);
   const [ownerReviewedAt, setOwnerReviewedAt] = useState<string | null>(null);
@@ -118,8 +110,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const resetRoleState = useCallback((roleReady: boolean) => {
     setUserRole(null);
     setIsAdmin(false);
-    setHasCustomerAccess(true);
-    setCustomerAccessGrantedAt(null);
     setOwnerRequestStatus(null);
     setOwnerRequestedAt(null);
     setOwnerReviewedAt(null);
@@ -171,19 +161,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       try {
         const me = await fetchRoleFromApi();
-        console.log('role api result:', me.role, me.customerAccessGranted);
+        console.log('role api result:', me.role);
         setUserRole(me.role);
         setIsAdmin(me.role === 'admin');
-        setHasCustomerAccess(me.role === 'customer' ? true : false);
-        setCustomerAccessGrantedAt(me.customerAccessGrantedAt ?? null);
         setOwnerRequestStatus(me.ownerRequestStatus ?? null);
         setOwnerRequestedAt(me.ownerRequestedAt ?? null);
         setOwnerReviewedAt(me.ownerReviewedAt ?? null);
         saveAuthSnapshot({
           userId: currentUser.id,
           role: me.role,
-          hasCustomerAccess: me.role === 'customer' ? true : false,
-          customerAccessGrantedAt: me.customerAccessGrantedAt ?? null,
           ownerRequestStatus: me.ownerRequestStatus ?? null,
           ownerRequestedAt: me.ownerRequestedAt ?? null,
           ownerReviewedAt: me.ownerReviewedAt ?? null,
@@ -198,8 +184,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           console.warn('[AuthContext] checkUserRole failed, using cached auth snapshot:', error);
           setUserRole(cachedSnapshot.role);
           setIsAdmin(cachedSnapshot.role === 'admin');
-          setHasCustomerAccess(cachedSnapshot.hasCustomerAccess);
-          setCustomerAccessGrantedAt(cachedSnapshot.customerAccessGrantedAt);
           setOwnerRequestStatus(cachedSnapshot.ownerRequestStatus);
           setOwnerRequestedAt(cachedSnapshot.ownerRequestedAt);
           setOwnerReviewedAt(cachedSnapshot.ownerReviewedAt);
@@ -207,8 +191,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           console.error('[AuthContext] checkUserRole failed, fallback to customer:', error);
           setUserRole('customer');
           setIsAdmin(false);
-          setHasCustomerAccess(true);
-          setCustomerAccessGrantedAt(null);
           setOwnerRequestStatus(null);
           setOwnerRequestedAt(null);
           setOwnerReviewedAt(null);
@@ -358,8 +340,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         isOwner: userRole === 'owner',
         isCustomer: userRole === 'customer',
         isPendingOwner: userRole === 'pending-owner',
-        hasCustomerAccess,
-        customerAccessGrantedAt,
         ownerRequestStatus,
         ownerRequestedAt,
         ownerReviewedAt,

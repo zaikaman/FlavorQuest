@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
 
   const { data: existingProfile, error: existingProfileError } = await adminClient
     .from('users')
-    .select('role, customer_access_granted, owner_request_status')
+    .select('role, owner_request_status')
     .eq('id', currentUser.id)
     .maybeSingle();
 

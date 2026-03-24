@@ -107,10 +107,7 @@ interface AudienceSummary {
   customers: number;
   owners: number;
   admins: number;
-  unlocked_customers: number;
-  access_rate: number;
   new_users_in_period: number;
-  new_unlocks_in_period: number;
 }
 
 interface TimelinePoint {
@@ -119,24 +116,6 @@ interface TimelinePoint {
 
 interface UserTimelinePoint extends TimelinePoint {
   new_users: number;
-  new_unlocks: number;
-}
-
-interface PaymentSummary {
-  total: number;
-  paid: number;
-  pending: number;
-  cancelled: number;
-  failed: number;
-  total_revenue: number;
-  revenue_in_period: number;
-  average_paid_order: number;
-}
-
-interface PaymentTimelinePoint extends TimelinePoint {
-  paid_count: number;
-  pending_count: number;
-  paid_revenue: number;
 }
 
 interface ContentSummary {
@@ -197,8 +176,6 @@ interface AnalyticsSummaryResponse {
   journey: JourneySummary;
   audience: AudienceSummary;
   userTimeline: UserTimelinePoint[];
-  payments: PaymentSummary;
-  paymentTimeline: PaymentTimelinePoint[];
   content: ContentSummary;
   contentGaps: ContentGapItem[];
   pois: {
@@ -217,10 +194,6 @@ const EMPTY_HEATMAP: HeatmapSummary = {
 
 function formatNumber(value: number) {
   return new Intl.NumberFormat('vi-VN').format(value);
-}
-
-function formatCurrency(value: number) {
-  return `${new Intl.NumberFormat('vi-VN').format(value)} VND`;
 }
 
 function formatPercent(value: number) {
@@ -290,23 +263,26 @@ function MiniTimeline<T extends TimelinePoint>({
   title,
   subtitle,
   primaryLabel,
-  secondaryLabel,
   primaryValue,
-  secondaryValue,
   primaryTone,
+  secondaryLabel,
+  secondaryValue,
   secondaryTone,
 }: {
   items: T[];
   title: string;
   subtitle: string;
   primaryLabel: string;
-  secondaryLabel: string;
   primaryValue: (item: T) => number;
-  secondaryValue: (item: T) => number;
   primaryTone: string;
-  secondaryTone: string;
+  secondaryLabel?: string;
+  secondaryValue?: (item: T) => number;
+  secondaryTone?: string;
 }) {
-  const maxValue = getTimelineMax(items, (item) => Math.max(primaryValue(item), secondaryValue(item)));
+  const hasSecondary = Boolean(secondaryLabel && secondaryValue && secondaryTone);
+  const maxValue = getTimelineMax(items, (item) =>
+    Math.max(primaryValue(item), hasSecondary && secondaryValue ? secondaryValue(item) : 0)
+  );
 
   return (
     <div className="rounded-[26px] border border-white/10 bg-[#2c1e16] p-6">
@@ -320,10 +296,12 @@ function MiniTimeline<T extends TimelinePoint>({
             <span className={`h-2.5 w-2.5 rounded-full ${primaryTone}`} />
             {primaryLabel}
           </span>
-          <span className="flex items-center gap-2">
-            <span className={`h-2.5 w-2.5 rounded-full ${secondaryTone}`} />
-            {secondaryLabel}
-          </span>
+          {hasSecondary && (
+            <span className="flex items-center gap-2">
+              <span className={`h-2.5 w-2.5 rounded-full ${secondaryTone}`} />
+              {secondaryLabel}
+            </span>
+          )}
         </div>
       </div>
 
@@ -338,19 +316,21 @@ function MiniTimeline<T extends TimelinePoint>({
             <div key={item.date} className="group flex min-w-0 flex-col items-center gap-3">
               <div className="flex h-36 w-full items-end justify-center gap-1">
                 <div
-                  className={`w-1/2 rounded-t-md ${primaryTone}`}
+                  className={`${hasSecondary ? 'w-1/2' : 'w-full'} rounded-t-md ${primaryTone}`}
                   style={{
                     height: `${(primaryValue(item) / maxValue) * 100}%`,
                     minHeight: primaryValue(item) > 0 ? 6 : 0,
                   }}
                 />
-                <div
-                  className={`w-1/2 rounded-t-md ${secondaryTone}`}
-                  style={{
-                    height: `${(secondaryValue(item) / maxValue) * 100}%`,
-                    minHeight: secondaryValue(item) > 0 ? 6 : 0,
-                  }}
-                />
+                {hasSecondary && secondaryValue && secondaryTone ? (
+                  <div
+                    className={`w-1/2 rounded-t-md ${secondaryTone}`}
+                    style={{
+                      height: `${(secondaryValue(item) / maxValue) * 100}%`,
+                      minHeight: secondaryValue(item) > 0 ? 6 : 0,
+                    }}
+                  />
+                ) : null}
               </div>
               <span className="w-full truncate text-center text-[10px] text-gray-500">
                 {formatShortDate(item.date)}
@@ -531,11 +511,6 @@ export default function AnalyticsCommandCenter() {
       .on('postgres_changes', { event: '*', schema: 'public', table: 'tours' }, refreshAnalytics)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'pois' }, refreshAnalytics)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'users' }, refreshAnalytics)
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'customer_access_payments' },
-        refreshAnalytics
-      )
       .subscribe();
 
     return () => {
@@ -555,7 +530,6 @@ export default function AnalyticsCommandCenter() {
   const sessionSegments = data?.sessionSegments ?? EMPTY_ARRAY;
   const availableTours = data?.availableTours ?? EMPTY_ARRAY;
   const userTimeline = data?.userTimeline ?? EMPTY_ARRAY;
-  const paymentTimeline = data?.paymentTimeline ?? EMPTY_ARRAY;
   const contentGaps = data?.contentGaps ?? EMPTY_ARRAY;
   const poiLeaders = data?.pois.leaders ?? EMPTY_ARRAY;
   const poiOpportunities = data?.pois.opportunities ?? EMPTY_ARRAY;
@@ -583,20 +557,7 @@ export default function AnalyticsCommandCenter() {
     customers: 0,
     owners: 0,
     admins: 0,
-    unlocked_customers: 0,
-    access_rate: 0,
     new_users_in_period: 0,
-    new_unlocks_in_period: 0,
-  };
-  const payments = data?.payments ?? {
-    total: 0,
-    paid: 0,
-    pending: 0,
-    cancelled: 0,
-    failed: 0,
-    total_revenue: 0,
-    revenue_in_period: 0,
-    average_paid_order: 0,
   };
   const content = data?.content ?? {
     total_pois: 0,
@@ -694,16 +655,16 @@ export default function AnalyticsCommandCenter() {
       border: 'border-emerald-400/20',
     },
     {
-      label: 'Doanh thu trong kỳ',
-      value: formatCurrency(payments.revenue_in_period),
-      note: `${formatNumber(payments.paid)} giao dịch trả tiền thành công`,
+      label: 'Người dùng mới',
+      value: formatNumber(audience.new_users_in_period),
+      note: `${formatNumber(audience.total_users)} tài khoản hiện có`,
       accent: 'text-amber-200',
       border: 'border-amber-400/20',
     },
     {
-      label: 'Mở khóa khách hàng',
-      value: formatPercent(audience.access_rate),
-      note: `${formatNumber(audience.unlocked_customers)} / ${formatNumber(audience.customers)} khách hàng`,
+      label: 'Khách hàng',
+      value: formatNumber(audience.customers),
+      note: `${formatNumber(audience.owners)} owner và ${formatNumber(audience.admins)} admin`,
       accent: 'text-violet-200',
       border: 'border-violet-400/20',
     },
@@ -775,8 +736,7 @@ export default function AnalyticsCommandCenter() {
             </h1>
             <p className="mt-4 max-w-3xl text-sm leading-7 text-gray-300">
               Ở đây bạn có thể nhìn cùng lúc hành vi nghe, chất lượng nội dung, hiệu suất tour,
-              POI, người dùng, thanh toán và nhịp tăng trưởng, thay vì phải ghép nhiều màn hình
-              rời rạc với nhau.
+              POI, người dùng và nhịp tăng trưởng, thay vì phải ghép nhiều màn hình rời rạc với nhau.
             </p>
 
             <div className="mt-6 flex flex-col gap-3 lg:flex-row lg:flex-wrap lg:items-center">
@@ -1032,7 +992,7 @@ export default function AnalyticsCommandCenter() {
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="text-primary text-sm font-semibold">Người dùng</p>
-                <h2 className="mt-1 text-xl font-black text-white">Tình hình tài khoản và mở khóa</h2>
+                <h2 className="mt-1 text-xl font-black text-white">Tình hình tài khoản</h2>
               </div>
               <span className="rounded-full border border-white/10 bg-black/15 px-3 py-1 text-xs font-semibold text-gray-300">
                 {formatNumber(audience.total_users)} tài khoản
@@ -1044,7 +1004,7 @@ export default function AnalyticsCommandCenter() {
                 {
                   label: 'Khách hàng',
                   value: audience.customers,
-                  note: `${formatNumber(audience.unlocked_customers)} đã mở khóa`,
+                  note: 'Nhóm trải nghiệm tour và nội dung dành cho khách',
                   accent: 'text-white',
                 },
                 {
@@ -1062,7 +1022,7 @@ export default function AnalyticsCommandCenter() {
                 {
                   label: 'Khách mới trong kỳ',
                   value: audience.new_users_in_period,
-                  note: `${formatNumber(audience.new_unlocks_in_period)} lượt mở khóa mới`,
+                  note: 'Số tài khoản mới xuất hiện trong giai đoạn đang xem',
                   accent: 'text-emerald-300',
                 },
               ].map((item) => (
@@ -1073,71 +1033,6 @@ export default function AnalyticsCommandCenter() {
                 </div>
               ))}
             </div>
-
-            <div className="mt-6 space-y-4">
-              {[
-                {
-                  label: 'Tỷ lệ mở khóa khách hàng',
-                  value: audience.access_rate,
-                  note: `${formatNumber(audience.unlocked_customers)} trên ${formatNumber(audience.customers)} khách hàng`,
-                },
-                {
-                  label: 'Tỷ lệ thanh toán thành công',
-                  value: payments.total ? Math.round((payments.paid / payments.total) * 100) : 0,
-                  note: `${formatNumber(payments.paid)} giao dịch thành công trên ${formatNumber(payments.total)} giao dịch`,
-                },
-              ].map((metric) => (
-                <div key={metric.label}>
-                  <div className="flex items-center justify-between gap-3 text-sm">
-                    <span className="font-semibold text-white">{metric.label}</span>
-                    <span className="font-semibold text-gray-300">{formatPercent(metric.value)}</span>
-                  </div>
-                  <div className="mt-2 h-2 overflow-hidden rounded-full bg-white/5">
-                    <div
-                      className="bg-gradient-to-r from-emerald-300 to-lime-300 h-full rounded-full"
-                      style={{ width: `${Math.max(metric.value, metric.value > 0 ? 4 : 0)}%` }}
-                    />
-                  </div>
-                  <p className="mt-2 text-xs text-gray-400">{metric.note}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="rounded-[30px] border border-white/10 bg-[#2c1e16] p-6">
-            <p className="text-primary text-sm font-semibold">Thanh toán</p>
-            <h2 className="mt-1 text-xl font-black text-white">Tình hình doanh thu và giao dịch</h2>
-
-            <div className="mt-5 grid gap-3 sm:grid-cols-2">
-              {[
-                {
-                  label: 'Doanh thu toàn bộ',
-                  value: formatCurrency(payments.total_revenue),
-                  note: `${formatCurrency(payments.average_paid_order)} giá trị đơn trả tiền trung bình`,
-                },
-                {
-                  label: 'Doanh thu trong kỳ',
-                  value: formatCurrency(payments.revenue_in_period),
-                  note: `${formatNumber(payments.pending)} giao dịch đang chờ xử lý`,
-                },
-                {
-                  label: 'Thanh toán thất bại',
-                  value: formatNumber(payments.failed),
-                  note: `${formatNumber(payments.cancelled)} giao dịch hủy hoặc hết hạn`,
-                },
-                {
-                  label: 'Tổng giao dịch',
-                  value: formatNumber(payments.total),
-                  note: `${formatNumber(payments.paid)} giao dịch đã hoàn tất`,
-                },
-              ].map((card) => (
-                <div key={card.label} className="rounded-2xl border border-white/10 bg-black/15 p-4">
-                  <p className="text-[11px] uppercase tracking-[0.22em] text-gray-500">{card.label}</p>
-                  <p className="mt-3 text-xl font-black text-white">{card.value}</p>
-                  <p className="mt-2 text-sm leading-6 text-gray-400">{card.note}</p>
-                </div>
-              ))}
-            </div>
           </div>
         </div>
 
@@ -1145,25 +1040,10 @@ export default function AnalyticsCommandCenter() {
           <MiniTimeline
             items={userTimeline}
             title="Tăng trưởng người dùng"
-            subtitle="Nhìn cùng lúc tài khoản mới và lượt mở khóa mới để hiểu tốc độ tăng trưởng thực sự."
+            subtitle="Theo dõi nhịp tăng tài khoản mới trong từng giai đoạn để so sánh với hoạt động tour."
             primaryLabel="Tài khoản mới"
-            secondaryLabel="Mở khóa"
             primaryValue={(item) => item.new_users}
-            secondaryValue={(item) => item.new_unlocks}
             primaryTone="bg-sky-300/70"
-            secondaryTone="bg-emerald-300/70"
-          />
-
-          <MiniTimeline
-            items={paymentTimeline}
-            title="Dòng thanh toán"
-            subtitle="So sánh đơn đã trả tiền và đơn đang chờ để biết cổng khóa nội dung đang thu tiền tốt tới đâu."
-            primaryLabel="Đơn trả tiền"
-            secondaryLabel="Đơn chờ"
-            primaryValue={(item) => item.paid_count}
-            secondaryValue={(item) => item.pending_count}
-            primaryTone="bg-primary/70"
-            secondaryTone="bg-amber-300/70"
           />
         </div>
       </section>

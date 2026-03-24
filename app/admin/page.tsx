@@ -37,35 +37,15 @@ interface AnalyticsSummaryResponse {
   tours: DashboardTourAnalytics[];
 }
 
-interface PaymentHistoryResponse {
-  stats: {
-    total: number;
-    paid: number;
-    pending: number;
-    cancelled: number;
-    totalRevenue: number;
-  };
-  payments: Array<{
-    user_id: string;
-    customer_access_granted: boolean;
-  }>;
-}
-
 interface DashboardSnapshot {
   analytics: AnalyticsSummaryResponse;
-  payments: PaymentHistoryResponse;
   pois: POI[];
   tours: Tour[];
   userCount: number;
-  accessGrantedCount: number;
 }
 
 function formatNumber(value: number) {
   return new Intl.NumberFormat('vi-VN').format(value);
-}
-
-function formatCurrency(value: number) {
-  return `${new Intl.NumberFormat('vi-VN').format(value)} VND`;
 }
 
 function formatDateTime(value: string) {
@@ -75,11 +55,6 @@ function formatDateTime(value: string) {
     hour: '2-digit',
     minute: '2-digit',
   });
-}
-
-function formatRatio(value: number, total: number) {
-  if (!total) return '0%';
-  return `${Math.round((value / total) * 100)}%`;
 }
 
 export default function AdminDashboard() {
@@ -99,29 +74,18 @@ export default function AdminDashboard() {
 
       const [
         analyticsResponse,
-        paymentsResponse,
         poisResponse,
         toursResponse,
         userCountResult,
-        accessGrantedResult,
       ] = await Promise.all([
         fetch('/api/analytics/summary?period=7days'),
-        fetch('/api/payments/customer-access/history?status=ALL', { cache: 'no-store' }),
         fetch('/api/pois?include_deleted=true', { cache: 'no-store' }),
         fetch('/api/tours?admin_view=true', { cache: 'no-store' }),
         supabase.from('users').select('*', { count: 'exact', head: true }),
-        supabase
-          .from('users')
-          .select('*', { count: 'exact', head: true })
-          .eq('customer_access_granted', true),
       ]);
 
       if (!analyticsResponse.ok) {
         throw new Error('Không thể tải bảng phân tích tổng quan');
-      }
-
-      if (!paymentsResponse.ok) {
-        throw new Error('Không thể tải dữ liệu cổng thanh toán');
       }
 
       if (!poisResponse.ok) {
@@ -136,13 +100,8 @@ export default function AdminDashboard() {
         throw userCountResult.error;
       }
 
-      if (accessGrantedResult.error) {
-        throw accessGrantedResult.error;
-      }
-
-      const [analytics, payments, pois, tours] = await Promise.all([
+      const [analytics, pois, tours] = await Promise.all([
         analyticsResponse.json() as Promise<AnalyticsSummaryResponse>,
-        paymentsResponse.json() as Promise<PaymentHistoryResponse>,
         poisResponse.json() as Promise<POI[]>,
         toursResponse.json() as Promise<Tour[]>,
       ]);
@@ -150,11 +109,9 @@ export default function AdminDashboard() {
       if (requestId === latestRequestRef.current) {
         setSnapshot({
           analytics,
-          payments,
           pois,
           tours,
           userCount: userCountResult.count ?? 0,
-          accessGrantedCount: accessGrantedResult.count ?? 0,
         });
       }
     } catch (error) {
@@ -190,11 +147,6 @@ export default function AdminDashboard() {
         refreshDashboard
       )
       .on('postgres_changes', { event: '*', schema: 'public', table: 'users' }, refreshDashboard)
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'customer_access_payments' },
-        refreshDashboard
-      )
       .subscribe();
     channels.push(dataChannel);
 
@@ -321,12 +273,6 @@ export default function AdminDashboard() {
         href: '/admin/analytics',
         accent: 'text-primary',
       },
-      {
-        label: 'Kiểm tra cổng khóa nội dung',
-        description: 'Theo dõi giao dịch, trạng thái mở khóa và doanh thu.',
-        href: '/admin/payments',
-        accent: 'text-sky-300',
-      },
     ];
 
     return {
@@ -395,9 +341,9 @@ export default function AdminDashboard() {
       glow: 'from-violet-500/15',
     },
     {
-      label: 'Khách đã mở khóa',
-      value: formatNumber(snapshot.accessGrantedCount),
-      note: `${formatRatio(snapshot.accessGrantedCount, snapshot.userCount)} trên tổng ${formatNumber(snapshot.userCount)} tài khoản`,
+      label: 'Tài khoản đã đăng ký',
+      value: formatNumber(snapshot.userCount),
+      note: 'Tổng số tài khoản hiện có trong hệ thống',
       accent: 'text-emerald-300',
       border: 'border-emerald-400/20',
       glow: 'from-emerald-500/15',
@@ -409,14 +355,6 @@ export default function AdminDashboard() {
       accent: 'text-lime-300',
       border: 'border-lime-400/20',
       glow: 'from-lime-500/15',
-    },
-    {
-      label: 'Doanh thu cổng thanh toán',
-      value: formatCurrency(snapshot.payments.stats.totalRevenue),
-      note: `${formatNumber(snapshot.payments.stats.paid)} giao dịch thành công, ${formatNumber(snapshot.payments.stats.pending)} giao dịch chờ`,
-      accent: 'text-rose-200',
-      border: 'border-rose-400/20',
-      glow: 'from-rose-500/15',
     },
   ];
 
@@ -491,18 +429,12 @@ export default function AdminDashboard() {
               </div>
 
               <div className="grid w-full gap-3 sm:max-w-xl sm:grid-cols-2">
-                {[
+                {[ 
                   {
                     label: 'Lượt bắt đầu tour',
                     value: formatNumber(snapshot.analytics.overview.total_tours),
                     note: 'bắt đầu hành trình',
                     accent: 'text-primary',
-                  },
-                  {
-                    label: 'Thanh toán cổng khóa nội dung',
-                    value: formatNumber(snapshot.payments.stats.paid),
-                    note: 'giao dịch thành công',
-                    accent: 'text-emerald-300',
                   },
                 ].map((item) => (
                   <div

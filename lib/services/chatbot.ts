@@ -342,7 +342,6 @@ async function buildCustomerContext(
 
   return `
 Vai trò hiện tại: customer
-Tài khoản đã được cấp quyền customer: ${profile.customerAccessGranted ? 'có' : 'không'}
 Trang đang mở: ${pageContext?.pathname || '/tour'}
 Tab đang mở: ${pageContext?.activeTab || 'map'}
 Tour đang chọn: ${selectedTour ? pickLocalizedValue(selectedTour, 'name', language) : 'chưa chọn'}
@@ -497,22 +496,16 @@ async function buildAdminContext(pageContext: ChatbotPageContext | undefined) {
   const [
     { count: userCount },
     { count: ownerCount },
-    { count: customerAccessCount },
     { count: poiCount },
     { count: hiddenPoiCount },
     { count: tourCount },
     { count: activeTourCount },
     { count: orderCount },
     { count: pendingOrderCount },
-    { data: recentPayments },
     { data: recentTours },
   ] = await Promise.all([
     adminClient.from('users').select('*', { count: 'exact', head: true }),
     adminClient.from('users').select('*', { count: 'exact', head: true }).eq('role', 'owner'),
-    adminClient
-      .from('users')
-      .select('*', { count: 'exact', head: true })
-      .eq('customer_access_granted', true),
     adminClient.from('pois').select('*', { count: 'exact', head: true }).is('deleted_at', null),
     adminClient
       .from('pois')
@@ -530,27 +523,12 @@ async function buildAdminContext(pageContext: ChatbotPageContext | undefined) {
       .select('*', { count: 'exact', head: true })
       .in('status', ['pending', 'confirmed', 'preparing']),
     adminClient
-      .from('customer_access_payments')
-      .select('order_code, amount, status, paid_at, created_at')
-      .order('created_at', { ascending: false })
-      .limit(6),
-    adminClient
       .from('tours')
       .select('name_vi, estimated_duration_min, poi_ids, is_active')
       .is('deleted_at', null)
       .order('updated_at', { ascending: false })
       .limit(6),
   ]);
-
-  const paymentSummary =
-    (recentPayments ?? []).length > 0
-      ? (recentPayments ?? [])
-          .map(
-            (payment) =>
-              `- Đơn thanh toán ${payment.order_code}: ${payment.status}, ${formatCurrency(Number(payment.amount))}, cập nhật ${formatDateTime(payment.paid_at || payment.created_at)}`
-          )
-          .join('\n')
-      : '- Chưa có lịch sử thanh toán gần đây.';
 
   const tourSummary =
     (recentTours ?? []).length > 0
@@ -567,16 +545,12 @@ Vai trò hiện tại: admin
 Trang đang mở: ${pageContext?.pathname || '/admin'}
 Tổng người dùng: ${userCount ?? 0}
 Số owner: ${ownerCount ?? 0}
-Số tài khoản customer đã mở khóa: ${customerAccessCount ?? 0}
 Số POI đang hoạt động: ${poiCount ?? 0}
 Số POI đã ẩn/xóa mềm: ${hiddenPoiCount ?? 0}
 Số tour hiện có: ${tourCount ?? 0}
 Số tour đang mở: ${activeTourCount ?? 0}
 Tổng số đơn đặt trước: ${orderCount ?? 0}
 Số đơn cần xử lý: ${pendingOrderCount ?? 0}
-
-Thanh toán customer access gần đây:
-${paymentSummary}
 
 Tour cập nhật gần đây:
 ${tourSummary}

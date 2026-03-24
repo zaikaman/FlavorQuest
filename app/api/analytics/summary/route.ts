@@ -53,16 +53,6 @@ interface UserRow {
   id: string;
   role: string | null;
   created_at: string;
-  customer_access_granted: boolean;
-  customer_access_granted_at: string | null;
-}
-
-interface PaymentRow {
-  id: string;
-  amount: number;
-  status: 'PENDING' | 'PROCESSING' | 'PAID' | 'CANCELLED' | 'EXPIRED' | 'FAILED' | 'UNDERPAID';
-  paid_at: string | null;
-  created_at: string;
 }
 
 interface TourStatsAccumulator {
@@ -313,7 +303,7 @@ export async function GET(request: NextRequest) {
 
     const adminClient = createAdminClient();
 
-    const [toursResult, poisResult, usersResult, paymentsResult, analyticsLogs] = await Promise.all([
+    const [toursResult, poisResult, usersResult, analyticsLogs] = await Promise.all([
       adminClient
         .from('tours')
         .select('id, name_vi, cover_image_url, estimated_duration_min, poi_ids, is_active')
@@ -327,11 +317,7 @@ export async function GET(request: NextRequest) {
         .order('priority', { ascending: false }),
       adminClient
         .from('users')
-        .select('id, role, created_at, customer_access_granted, customer_access_granted_at'),
-      adminClient
-        .from('customer_access_payments')
-        .select('id, amount, status, paid_at, created_at')
-        .order('created_at', { ascending: false }),
+        .select('id, role, created_at'),
       fetchAnalyticsLogsInRange(adminClient, startDate.toISOString(), now.toISOString()),
     ]);
 
@@ -347,24 +333,15 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: usersResult.error.message }, { status: 500 });
     }
 
-    if (paymentsResult.error) {
-      return NextResponse.json({ error: paymentsResult.error.message }, { status: 500 });
-    }
-
     const tourRows = (toursResult.data ?? []) as TourRow[];
     const poiRows = (poisResult.data ?? []) as PoiRow[];
     const userRows = (usersResult.data ?? []) as UserRow[];
-    const paymentRows = (paymentsResult.data ?? []) as PaymentRow[];
 
     const dailyMap = new Map<
       string,
       { date: string; total_tours: number; total_plays: number; sessions: Set<string> }
     >();
-    const userTimelineMap = new Map<string, { date: string; new_users: number; new_unlocks: number }>();
-    const paymentTimelineMap = new Map<
-      string,
-      { date: string; paid_count: number; pending_count: number; paid_revenue: number }
-    >();
+    const userTimelineMap = new Map<string, { date: string; new_users: number }>();
     const hourlyMap = new Map<
       number,
       { hour: number; total_tours: number; total_plays: number; sessions: Set<string> }
@@ -859,7 +836,6 @@ export async function GET(request: NextRequest) {
 
     const activePois = poiRows.filter((poi) => !poi.deleted_at);
     const totalCustomers = userRows.filter((user) => normalizeRole(user.role) === 'customer').length;
-    const unlockedCustomers = userRows.filter((user) => user.customer_access_granted).length;
 
     const poisWithFullLanguageNames = activePois.filter((poi) =>
       [poi.name_en, poi.name_ja, poi.name_fr, poi.name_ko, poi.name_zh].every(
@@ -939,15 +915,9 @@ export async function GET(request: NextRequest) {
       customers: totalCustomers,
       owners: userRows.filter((user) => normalizeRole(user.role) === 'owner').length,
       admins: userRows.filter((user) => normalizeRole(user.role) === 'admin').length,
-      unlocked_customers: unlockedCustomers,
-      access_rate: totalCustomers ? Math.round((unlockedCustomers / totalCustomers) * 100) : 0,
       new_users_in_period: userRows.filter(
         (user) => new Date(user.created_at).getTime() >= startDate.getTime()
       ).length,
-      new_unlocks_in_period: userRows.filter((user) => {
-        if (!user.customer_access_granted_at) return false;
-        return new Date(user.customer_access_granted_at).getTime() >= startDate.getTime();
-      }).length,
     };
 
     for (const user of userRows) {
@@ -957,92 +927,15 @@ export async function GET(request: NextRequest) {
         const item = incrementDateMap(userTimelineMap, dateKey, () => ({
           date: dateKey,
           new_users: 0,
-          new_unlocks: 0,
         }));
         item.new_users += 1;
-      }
-
-      if (user.customer_access_granted_at) {
-        const grantedAt = new Date(user.customer_access_granted_at);
-        if (grantedAt.getTime() >= startDate.getTime()) {
-          const dateKey = getReportDateKey(user.customer_access_granted_at);
-          const item = incrementDateMap(userTimelineMap, dateKey, () => ({
-            date: dateKey,
-            new_users: 0,
-            new_unlocks: 0,
-          }));
-          item.new_unlocks += 1;
-        }
-      }
-    }
-
-    const payments = {
-      total: paymentRows.length,
-      paid: paymentRows.filter((payment) => payment.status === 'PAID').length,
-      pending: paymentRows.filter((payment) =>
-        ['PENDING', 'PROCESSING', 'UNDERPAID'].includes(payment.status)
-      ).length,
-      cancelled: paymentRows.filter((payment) =>
-        ['CANCELLED', 'EXPIRED'].includes(payment.status)
-      ).length,
-      failed: paymentRows.filter((payment) => payment.status === 'FAILED').length,
-      total_revenue: paymentRows
-        .filter((payment) => payment.status === 'PAID')
-        .reduce((sum, payment) => sum + payment.amount, 0),
-      revenue_in_period: paymentRows
-        .filter((payment) => payment.status === 'PAID' && payment.paid_at)
-        .filter((payment) => new Date(payment.paid_at as string).getTime() >= startDate.getTime())
-        .reduce((sum, payment) => sum + payment.amount, 0),
-      average_paid_order: 0,
-    };
-
-    payments.average_paid_order = payments.paid
-      ? Math.round(payments.total_revenue / payments.paid)
-      : 0;
-
-    for (const payment of paymentRows) {
-      const effectiveDate = payment.paid_at ?? payment.created_at;
-      const currentDate = new Date(effectiveDate);
-      if (currentDate.getTime() < startDate.getTime()) {
-        continue;
-      }
-
-      const dateKey = getReportDateKey(effectiveDate);
-      const item = incrementDateMap(paymentTimelineMap, dateKey, () => ({
-        date: dateKey,
-        paid_count: 0,
-        pending_count: 0,
-        paid_revenue: 0,
-      }));
-
-      if (payment.status === 'PAID') {
-        item.paid_count += 1;
-        item.paid_revenue += payment.amount;
-      }
-
-      if (['PENDING', 'PROCESSING', 'UNDERPAID'].includes(payment.status)) {
-        item.pending_count += 1;
       }
     }
 
     const userTimeline = finalizeTimeline(userTimelineMap, reportStartDate, reportEndDate, period, (date) => ({
       date,
       new_users: 0,
-      new_unlocks: 0,
     }));
-
-    const paymentTimeline = finalizeTimeline(
-      paymentTimelineMap,
-      reportStartDate,
-      reportEndDate,
-      period,
-      (date) => ({
-        date,
-        paid_count: 0,
-        pending_count: 0,
-        paid_revenue: 0,
-      })
-    );
 
     const journey = {
       total_manual_plays: totalManualPlays,
@@ -1086,8 +979,6 @@ export async function GET(request: NextRequest) {
       journey,
       audience,
       userTimeline,
-      payments,
-      paymentTimeline,
       content,
       contentGaps,
       pois: {

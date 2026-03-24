@@ -75,7 +75,6 @@ FlavorQuest khai thác đồng thời ba nhu cầu:
 
 - Đăng nhập email OTP.
 - Phân quyền khách hàng, pending owner, owner, admin.
-- Paywall mở khóa quyền truy cập khu tour.
 - Trải nghiệm tour với bản đồ, danh sách POI, chi tiết POI, lịch sử nghe và trạng thái offline.
 - Trợ lý AI theo ngữ cảnh không gian làm việc.
 - Hệ thống chat hỗ trợ giữa khách, owner và admin.
@@ -95,7 +94,6 @@ FlavorQuest khai thác đồng thời ba nhu cầu:
 
 - Tour số theo vị trí thực tế thay vì danh sách địa điểm tĩnh.
 - Nội dung âm thanh và bản đồ nằm trong cùng một luồng trải nghiệm.
-- Mô hình kinh doanh rõ ràng nhờ mở khóa nội dung qua PayOS.
 - Khả năng phục vụ đồng thời ba vai trò khách hàng, owner và admin trên cùng một nền tảng.
 - Dữ liệu hành vi và hỗ trợ khách hàng được tập trung về một hệ thống.
 
@@ -105,7 +103,6 @@ FlavorQuest khai thác đồng thời ba nhu cầu:
 
 1. Mở landing page và chọn ngôn ngữ.
 2. Đăng nhập bằng email OTP.
-3. Nếu chưa có quyền truy cập, vào paywall để tạo giao dịch PayOS.
 4. Sau khi thanh toán thành công, truy cập khu tour.
 5. Xem bản đồ, chọn POI hoặc để hệ thống gợi ý theo ngữ cảnh.
 6. Nghe nội dung thuyết minh, xem chi tiết món và thông tin quán.
@@ -135,8 +132,6 @@ FlavorQuest khai thác đồng thời ba nhu cầu:
 - Hệ thống phải tách cổng admin khỏi luồng đăng nhập thường.
 - Hệ thống phải điều hướng tự động theo vai trò và trạng thái truy cập.
 - Hệ thống phải chặn truy cập trái phép vào các khu vực `/tour`, `/owner`, `/admin`.
-
-### 9.2. Paywall và thanh toán
 
 - Hệ thống phải cho phép tạo giao dịch mở khóa quyền truy cập khách hàng.
 - Hệ thống phải kiểm tra trạng thái thanh toán và cập nhật quyền truy cập khi thanh toán thành công.
@@ -208,7 +203,6 @@ FlavorQuest khai thác đồng thời ba nhu cầu:
 
 - Khu vực thí điểm là phố ẩm thực Vĩnh Khánh, Quận 4, TP.HCM.
 - Người dùng chính truy cập bằng điện thoại thông minh.
-- Mở khóa nội dung khách hàng phụ thuộc vào PayOS.
 - Một phần tính năng AI và TTS phụ thuộc vào dịch vụ ngoài thông qua API tương thích OpenAI và Azure OpenAI.
 - Dữ liệu không gian và nội dung POI được quản trị tập trung qua admin.
 
@@ -230,3 +224,4 @@ FlavorQuest khai thác đồng thời ba nhu cầu:
 
 - [Đặc tả hệ thống](./seminar-system-spec.md)
 - [Bộ sơ đồ Mermaid](./seminar-diagrams.md)
+

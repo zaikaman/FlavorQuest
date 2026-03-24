@@ -12,8 +12,6 @@ type UserOwnerRequestRow = {
   id: string;
   email: string;
   role: UserRole | null;
-  customer_access_granted: boolean | null;
-  customer_access_granted_at: string | null;
   owner_request_status: OwnerRequestStatus | null;
   owner_requested_at: string | null;
   owner_reviewed_at: string | null;
@@ -70,7 +68,7 @@ export async function ensureOwnerRequestForUser(user: { id: string; email: strin
   const { data: existingProfile, error: profileError } = await adminClient
     .from('users')
     .select(
-      'id, email, role, customer_access_granted, customer_access_granted_at, owner_request_status, owner_requested_at, owner_reviewed_at'
+      'id, email, role, owner_request_status, owner_requested_at, owner_reviewed_at'
     )
     .eq('id', user.id)
     .maybeSingle<UserOwnerRequestRow>();
@@ -127,8 +125,6 @@ export async function ensureOwnerRequestForUser(user: { id: string; email: strin
     id: user.id,
     email: user.email,
     role: 'pending-owner',
-    customerAccessGranted: existingProfile?.customer_access_granted ?? false,
-    customerAccessGrantedAt: existingProfile?.customer_access_granted_at ?? null,
     ownerRequestStatus: 'pending',
     ownerRequestedAt: needsPendingUpdate ? now : (existingProfile?.owner_requested_at ?? null),
     ownerReviewedAt: null,

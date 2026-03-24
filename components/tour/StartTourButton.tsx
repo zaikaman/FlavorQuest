@@ -60,7 +60,6 @@ export function StartTourButton({ onStart, className = '', disabled = false, isA
 
       const profile = (await response.json()) as {
         role?: 'customer' | 'pending-owner' | 'owner' | 'admin';
-        customerAccessGranted?: boolean;
       };
 
       if (profile.role === 'admin') {

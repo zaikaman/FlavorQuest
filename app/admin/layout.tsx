@@ -48,7 +48,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { href: '/admin/users', label: 'Người dùng' },
     { href: '/admin/tours', label: 'Hành trình' },
     { href: '/admin/analytics', label: 'Phân tích' },
-    { href: '/admin/payments', label: 'Thanh toán' },
   ];
 
   useEffect(() => {
