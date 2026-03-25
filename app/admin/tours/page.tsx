@@ -9,7 +9,6 @@ import { runWithConcurrencySettled } from '@/lib/utils/async';
 import type { Language, POI, Tour, TourPayload } from '@/lib/types/index';
 
 const TOUR_LANGUAGES = SUPPORTED_LANGUAGES;
-const TOUR_TRANSLATION_CONCURRENCY = 4;
 
 type TourLanguageCode = (typeof TOUR_LANGUAGES)[number]['code'];
 type LocalizedTourNameField = `name_${Exclude<Language, 'vi'>}`;
@@ -453,7 +452,7 @@ export default function AdminToursPage() {
             translations: payload?.translations ?? {},
           };
         }),
-        TOUR_TRANSLATION_CONCURRENCY,
+        targetLanguages.length,
         (result) => {
           completedCount += 1;
           setTranslationProgress({ completed: completedCount, total: targetLanguages.length });

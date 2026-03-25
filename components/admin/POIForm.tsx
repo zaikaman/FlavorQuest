@@ -32,8 +32,6 @@ type TranslationUpdates = Partial<
 >;
 
 const LANGUAGES = SUPPORTED_LANGUAGES;
-const TRANSLATION_CONCURRENCY = 4;
-const TTS_CONCURRENCY = 3;
 
 export function POIForm({
   initialData,
@@ -443,7 +441,7 @@ export function POIForm({
             translations: payload?.translations ?? {},
           };
         }),
-        TRANSLATION_CONCURRENCY,
+        targetLanguages.length,
         (result) => {
           completedCount += 1;
           setTranslationProgress({ completed: completedCount, total: targetLanguages.length });
@@ -544,7 +542,7 @@ export function POIForm({
             url: payload.url,
           };
         }),
-        TTS_CONCURRENCY,
+        items.length,
         (result) => {
           completedCount += 1;
           setTtsProgress({ completed: completedCount, total: items.length });
