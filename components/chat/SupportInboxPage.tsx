@@ -10,6 +10,7 @@ import {
   type KeyboardEvent,
 } from 'react';
 import type { RealtimeChannel } from '@supabase/supabase-js';
+import { FormattedChatMessage } from '@/components/chat/FormattedChatMessage';
 import { createClient } from '@/lib/supabase/client';
 import { Send, ArrowLeft } from 'lucide-react';
 import { useAuth } from '@/lib/contexts/AuthContext';
@@ -1013,9 +1014,10 @@ export function SupportInboxPage({
                             {formatThreadTimestamp(message.created_at, language)}
                           </span>
                         </div>
-                        <p className="mt-2 text-sm leading-6 whitespace-pre-wrap">
-                          {message.content}
-                        </p>
+                        <FormattedChatMessage
+                          content={message.content}
+                          className="mt-2 text-sm leading-6 whitespace-pre-wrap"
+                        />
                       </div>
                     </div>
                   );

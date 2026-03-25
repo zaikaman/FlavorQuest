@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { FormattedChatMessage } from '@/components/chat/FormattedChatMessage';
 import { useTranslations } from '@/lib/hooks/useTranslations';
 import type { Language } from '@/lib/types';
 
@@ -535,7 +536,7 @@ export function RoleChatbot({
                       : `${theme.userBubble} ml-auto`
                   }`}
                 >
-                  <p className="whitespace-pre-wrap">{message.content}</p>
+                  <FormattedChatMessage content={message.content} />
                 </div>
               );
             })}
