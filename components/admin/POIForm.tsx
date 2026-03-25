@@ -220,15 +220,35 @@ export function POIForm({
     if (!confirm('Bạn có chắc muốn tạo audio cho tất cả ngôn ngữ? Việc này có thể mất vài phút.'))
       return;
 
+    const languagesWithExistingAudio = LANGUAGES.filter((lang) => {
+      const text = formData[`description_${lang.code}` as keyof POI];
+      const audioUrl = formData[`audio_url_${lang.code}` as keyof POI];
+      return (
+        typeof text === 'string' &&
+        text.trim().length > 0 &&
+        typeof audioUrl === 'string' &&
+        audioUrl.trim().length > 0
+      );
+    }).length;
+
+    if (languagesWithExistingAudio === LANGUAGES.filter((lang) => {
+      const text = formData[`description_${lang.code}` as keyof POI];
+      return typeof text === 'string' && text.trim().length > 0;
+    }).length) {
+      toast.info('Các ngôn ngữ hiện có đã có âm thanh sẵn.');
+      return;
+    }
+
     setGenAllLoading(true);
     try {
       const updates: TranslationUpdates = {};
 
       for (const lang of LANGUAGES) {
         const text = formData[`description_${lang.code}` as keyof POI] as string;
-        if (!text) continue;
-
-        // Skip if audio already exists? Maybe not, allow overwrite.
+        const currentAudioUrl = formData[`audio_url_${lang.code}` as keyof POI];
+        if (!text || (typeof currentAudioUrl === 'string' && currentAudioUrl.trim().length > 0)) {
+          continue;
+        }
 
         try {
           const res = await fetch('/api/tts/generate', {
@@ -332,7 +352,11 @@ export function POIForm({
     try {
       const items = LANGUAGES.map((lang) => {
         const text = formData[`description_${lang.code}` as keyof POI];
+        const currentAudioUrl = formData[`audio_url_${lang.code}` as keyof POI];
         if (typeof text !== 'string' || text.trim().length === 0) {
+          return null;
+        }
+        if (typeof currentAudioUrl === 'string' && currentAudioUrl.trim().length > 0) {
           return null;
         }
 
@@ -345,7 +369,15 @@ export function POIForm({
       }).filter((item): item is NonNullable<typeof item> => item !== null);
 
       if (items.length === 0) {
-        toast.warning('Chưa có mô tả nào để tạo âm thanh.');
+        const hasAnyDescription = LANGUAGES.some((lang) => {
+          const text = formData[`description_${lang.code}` as keyof POI];
+          return typeof text === 'string' && text.trim().length > 0;
+        });
+        toast[hasAnyDescription ? 'info' : 'warning'](
+          hasAnyDescription
+            ? 'Các ngôn ngữ hiện có đã có âm thanh sẵn.'
+            : 'Chưa có mô tả nào để tạo âm thanh.'
+        );
         return;
       }
 
@@ -498,7 +530,11 @@ export function POIForm({
 
     const items = LANGUAGES.map((lang) => {
       const text = formData[`description_${lang.code}` as keyof POI];
+      const currentAudioUrl = formData[`audio_url_${lang.code}` as keyof POI];
       if (typeof text !== 'string' || text.trim().length === 0) {
+        return null;
+      }
+      if (typeof currentAudioUrl === 'string' && currentAudioUrl.trim().length > 0) {
         return null;
       }
 
@@ -511,7 +547,15 @@ export function POIForm({
     }).filter((item): item is NonNullable<typeof item> => item !== null);
 
     if (items.length === 0) {
-      toast.warning('Chưa có mô tả nào để tạo âm thanh.');
+      const hasAnyDescription = LANGUAGES.some((lang) => {
+        const text = formData[`description_${lang.code}` as keyof POI];
+        return typeof text === 'string' && text.trim().length > 0;
+      });
+      toast[hasAnyDescription ? 'info' : 'warning'](
+        hasAnyDescription
+          ? 'Các ngôn ngữ hiện có đã có âm thanh sẵn.'
+          : 'Chưa có mô tả nào để tạo âm thanh.'
+      );
       return;
     }
 
