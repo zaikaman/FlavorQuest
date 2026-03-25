@@ -3,7 +3,7 @@ import {
   getLanguageConfig,
   getLocalizedFieldName,
 } from '@/lib/constants';
-import { createOpenAIClient, getOpenAIModel } from '@/lib/services/openai-client';
+import { generatePreferredChatbotReply } from '@/lib/services/chatbot-ai';
 import { createAdminClient } from '@/lib/supabase/admin';
 import type { CurrentUserProfile } from '@/lib/supabase/server';
 import type { Language } from '@/lib/types';
@@ -551,7 +551,6 @@ export async function generateChatbotReply({
   workspaceRole,
   pageContext,
 }: ChatbotRequestPayload) {
-  const client = createOpenAIClient();
   const role = workspaceRole ?? (profile.role as WorkspaceRole);
   const safeMessages = sanitizeMessages(messages);
 
@@ -560,29 +559,11 @@ export async function generateChatbotReply({
   }
 
   const context = await buildContext(role, profile, language, pageContext);
-  const completion = await client.chat.completions.create({
-    model: getOpenAIModel(),
-    temperature: 1.0,
-    top_p: 1,
-    max_tokens: 100000,
-    messages: [
-      {
-        role: 'system',
-        content: buildRolePrompt(role, language),
-      },
-      {
-        role: 'system',
-        content: `Fresh FlavorQuest context:\n${context}`,
-      },
-      ...safeMessages,
-    ],
+  const result = await generatePreferredChatbotReply({
+    systemInstruction: buildRolePrompt(role, language),
+    context,
+    messages: safeMessages,
   });
 
-  const content = completion.choices[0]?.message?.content;
-
-  if (!content) {
-    throw new Error('No content received from chatbot API');
-  }
-
-  return content.trim();
+  return result.content;
 }
