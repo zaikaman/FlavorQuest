@@ -361,16 +361,6 @@ export async function POST(request: NextRequest) {
       pageContext: body.pageContext,
     });
 
-    const { error: insertAssistantMessageError } = await supabase.from('chat_messages').insert({
-      conversation_id: conversation.id,
-      role: 'assistant',
-      content: reply,
-    });
-
-    if (insertAssistantMessageError) {
-      throw new Error(insertAssistantMessageError.message);
-    }
-
     const nextTitle =
       previousMessages.length === 0
         ? buildConversationTitle(message, workspaceRole)
