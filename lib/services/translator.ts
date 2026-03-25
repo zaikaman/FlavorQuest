@@ -15,7 +15,7 @@ type TranslationLanguage = Exclude<SupportedLanguageCode, 'vi'>;
 type TranslationResponse = Record<TranslationLanguage, string>;
 
 const TARGET_LANGUAGES = NON_DEFAULT_LANGUAGE_CODES as readonly TranslationLanguage[];
-const MAX_TRANSLATION_CONCURRENCY = 10;
+const MAX_TRANSLATION_CONCURRENCY = 100;
 const translationValueCache = new Map<string, string>();
 const translationInFlightCache = new Map<string, Promise<string>>();
 
