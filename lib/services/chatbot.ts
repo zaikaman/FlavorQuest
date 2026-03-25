@@ -560,7 +560,7 @@ export async function generateChatbotReply({
   const context = await buildContext(role, profile, language, pageContext);
   const completion = await client.chat.completions.create({
     model: getOpenAIModel(),
-    temperature: 0.35,
+    temperature: 1.0,
     top_p: 1,
     max_tokens: 100000,
     messages: [

@@ -66,7 +66,7 @@ Return only the translated text with natural product copy. Do not add explanatio
           content: normalizedText,
         },
       ],
-      temperature: 0,
+      temperature: 1.0,
       top_p: 1,
     })
     .then((data) => {
