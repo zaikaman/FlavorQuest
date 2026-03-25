@@ -1,8 +1,8 @@
 /**
  * Audio Preloader Service
- * 
+ *
  * Preload audio files cho offline use
- * 
+ *
  * Features:
  * - Preload audio files trong bán kính gần
  * - Progress tracking
@@ -12,13 +12,13 @@
  */
 
 import type { POI, Language, Coordinates } from '@/lib/types/index';
-import { FALLBACK_LANGUAGE, SUPPORTED_LANGUAGE_CODES, getLocalizedFieldName } from '@/lib/constants';
-import { filterPOIsWithinRadius } from '@/lib/utils/distance';
 import {
-  savePreloadStatus,
-  loadPreloadStatus,
-  type PreloadStatus,
-} from '@/lib/services/storage';
+  FALLBACK_LANGUAGE,
+  SUPPORTED_LANGUAGE_CODES,
+  getLocalizedFieldName,
+} from '@/lib/constants';
+import { filterPOIsWithinRadius } from '@/lib/utils/distance';
+import { savePreloadStatus, loadPreloadStatus, type PreloadStatus } from '@/lib/services/storage';
 
 const AUDIO_CACHE_PREFIX = 'flavorquest-audio-';
 const IMAGE_CACHE_PREFIX = 'flavorquest-images-';
@@ -360,9 +360,7 @@ export class AudioPreloader {
         preloadedPOIs: preloadedPOIIds.length,
         preloadedAudio: [
           ...(currentStatus?.preloadedAudio || []),
-          ...preloadedPOIIds.filter(
-            (id) => !currentStatus?.preloadedAudio?.includes(id)
-          ),
+          ...preloadedPOIIds.filter((id) => !currentStatus?.preloadedAudio?.includes(id)),
         ],
         preloadedImages: currentStatus?.preloadedImages || [],
         lastPreloadTime: Date.now(),
@@ -485,9 +483,7 @@ export class AudioPreloader {
     const { onProgress, onComplete } = options || {};
 
     // Collect image URLs
-    const imageUrls: string[] = pois
-      .filter((poi) => poi.image_url)
-      .map((poi) => poi.image_url!);
+    const imageUrls: string[] = pois.filter((poi) => poi.image_url).map((poi) => poi.image_url!);
 
     if (imageUrls.length === 0) {
       const result: PreloadResult = {
@@ -564,9 +560,7 @@ export class AudioPreloader {
       preloadedAudio: currentStatus?.preloadedAudio || [],
       preloadedImages: [
         ...(currentStatus?.preloadedImages || []),
-        ...preloadedImageIds.filter(
-          (id) => !currentStatus?.preloadedImages?.includes(id)
-        ),
+        ...preloadedImageIds.filter((id) => !currentStatus?.preloadedImages?.includes(id)),
       ],
       lastPreloadTime: Date.now(),
     });
@@ -620,10 +614,7 @@ export async function isAudioCached(url: string): Promise<boolean> {
 /**
  * Get cached audio URLs for a POI
  */
-export async function getCachedAudioForPOI(
-  poi: POI,
-  language: Language
-): Promise<string | null> {
+export async function getCachedAudioForPOI(poi: POI, language: Language): Promise<string | null> {
   const url = getAudioUrlForLanguage(poi, language);
   if (!url) return null;
 

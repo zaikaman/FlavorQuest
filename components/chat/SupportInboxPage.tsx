@@ -140,7 +140,7 @@ export function SupportInboxPage({
       subtitle: t(
         'support.customer.subtitle',
         undefined,
-          'Bạn có thể nhắn riêng cho từng quán, hoặc hỏi quản trị viên nếu cần hỗ trợ về tài khoản và trải nghiệm.'
+        'Bạn có thể nhắn riêng cho từng quán, hoặc hỏi quản trị viên nếu cần hỗ trợ về tài khoản và trải nghiệm.'
       ),
       emptyTitle: t('support.customer.emptyTitle', undefined, 'Chưa có tin nhắn nào.'),
       emptyBody: t(
@@ -309,7 +309,11 @@ export function SupportInboxPage({
   }, [fetchInbox]);
 
   useEffect(() => {
-    if ((role !== 'customer' && role !== 'pending-owner') || isLoadingInbox || directory.length > 0) {
+    if (
+      (role !== 'customer' && role !== 'pending-owner') ||
+      isLoadingInbox ||
+      directory.length > 0
+    ) {
       setFallbackDirectory([]);
       return;
     }
@@ -744,8 +748,16 @@ export function SupportInboxPage({
                           {entry.thread_type === 'customer_owner'
                             ? t('support.threadTypes.customerOwner', undefined, 'Khách / Chủ quán')
                             : entry.thread_type === 'owner_admin'
-                              ? t('support.threadTypes.ownerAdmin', undefined, 'Chủ quán / Quản trị viên')
-                              : t('support.threadTypes.customerAdmin', undefined, 'Khách / Quản trị viên')}
+                              ? t(
+                                  'support.threadTypes.ownerAdmin',
+                                  undefined,
+                                  'Chủ quán / Quản trị viên'
+                                )
+                              : t(
+                                  'support.threadTypes.customerAdmin',
+                                  undefined,
+                                  'Khách / Quản trị viên'
+                                )}
                         </span>
                       </div>
 
@@ -920,7 +932,11 @@ export function SupportInboxPage({
                       ? t('support.threadTypes.customerOwner', undefined, 'Khách / Chủ quán')
                       : activeThread.thread_type === 'owner_admin'
                         ? t('support.threadTypes.ownerAdmin', undefined, 'Chủ quán / Quản trị viên')
-                          : t('support.threadTypes.customerAdmin', undefined, 'Khách / Quản trị viên')}
+                        : t(
+                            'support.threadTypes.customerAdmin',
+                            undefined,
+                            'Khách / Quản trị viên'
+                          )}
                   </span>
                   <span className="rounded-full border border-white/10 bg-black/15 px-3 py-1 text-[11px] font-semibold text-gray-300">
                     {t('support.thread.emailBadge', undefined, 'Có email thông báo')}

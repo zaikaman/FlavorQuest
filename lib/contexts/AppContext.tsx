@@ -1,8 +1,8 @@
 /**
  * App Context
- * 
+ *
  * Global application state management
- * 
+ *
  * Features:
  * - Tour state (active, paused, stopped)
  * - Auto mode toggle
@@ -10,7 +10,7 @@
  * - Audio player state
  * - Geolocation state
  * - Offline status
- * 
+ *
  * Use this context for state that needs to be shared across multiple components
  */
 
@@ -75,12 +75,12 @@ interface AppProviderProps {
 
 /**
  * App Provider Component
- * 
+ *
  * @example
  * ```tsx
  * // In app/layout.tsx
  * import { AppProvider } from '@/lib/contexts/AppContext';
- * 
+ *
  * export default function RootLayout({ children }) {
  *   return (
  *     <html>
@@ -204,15 +204,15 @@ export function AppProvider({ children }: AppProviderProps) {
 
 /**
  * useApp Hook
- * 
+ *
  * @example
  * ```tsx
  * 'use client';
  * import { useApp } from '@/lib/contexts/AppContext';
- * 
+ *
  * export function TourControls() {
  *   const { tourState, setTourState, autoMode, setAutoMode } = useApp();
- *   
+ *
  *   return (
  *     <div>
  *       <p>Tour: {tourState}</p>

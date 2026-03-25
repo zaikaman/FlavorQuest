@@ -12,10 +12,7 @@ const OWNER_ALLOWED_STATUS = new Set([
   'cancelled',
 ]);
 
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const supabase = await createServerClient();
   const profile = await getCurrentUserProfile(supabase);

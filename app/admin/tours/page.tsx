@@ -22,7 +22,10 @@ type TourFormState = TourPayload & {
   is_active: boolean;
 };
 
-function createEmptyTourTranslations(): Record<`name_${Language}` | `description_${Language}`, string> {
+function createEmptyTourTranslations(): Record<
+  `name_${Language}` | `description_${Language}`,
+  string
+> {
   return Object.fromEntries(
     TOUR_LANGUAGES.flatMap((language) => [
       [`name_${language.code}`, ''],
@@ -31,14 +34,13 @@ function createEmptyTourTranslations(): Record<`name_${Language}` | `description
   ) as Record<`name_${Language}` | `description_${Language}`, string>;
 }
 
-function getTourTranslations(tour: Tour): Record<`name_${Language}` | `description_${Language}`, string> {
+function getTourTranslations(
+  tour: Tour
+): Record<`name_${Language}` | `description_${Language}`, string> {
   return Object.fromEntries(
     TOUR_LANGUAGES.flatMap((language) => [
       [`name_${language.code}`, tour[`name_${language.code}` as keyof Tour] ?? ''],
-      [
-        `description_${language.code}`,
-        tour[`description_${language.code}` as keyof Tour] ?? '',
-      ],
+      [`description_${language.code}`, tour[`description_${language.code}` as keyof Tour] ?? ''],
     ])
   ) as Record<`name_${Language}` | `description_${Language}`, string>;
 }
@@ -437,12 +439,10 @@ export default function AdminToursPage() {
             }),
           });
 
-          const payload = (await response.json().catch(() => null)) as
-            | {
-                error?: string;
-                translations?: Record<string, Partial<Record<TourLanguageCode, string>>>;
-              }
-            | null;
+          const payload = (await response.json().catch(() => null)) as {
+            error?: string;
+            translations?: Record<string, Partial<Record<TourLanguageCode, string>>>;
+          } | null;
 
           if (!response.ok) {
             throw new Error(payload?.error || `Dịch thất bại cho ${language.nativeName}`);
@@ -612,8 +612,7 @@ export default function AdminToursPage() {
                 <div>
                   <h3 className="font-semibold text-white">Nội dung đa ngôn ngữ</h3>
                   <p className="mt-1 text-sm text-gray-400">
-                    Chọn một ngôn ngữ để nhập tên và mô tả. Nội dung thiếu sẽ dùng bản
-                    tiếng Việt.
+                    Chọn một ngôn ngữ để nhập tên và mô tả. Nội dung thiếu sẽ dùng bản tiếng Việt.
                   </p>
                 </div>
                 <div className="grid max-h-64 grid-cols-1 gap-2 overflow-y-auto pr-1 sm:grid-cols-2 lg:grid-cols-3">
@@ -640,8 +639,10 @@ export default function AdminToursPage() {
                             <p className="mt-1 text-xs text-white/55">{language.name}</p>
                           </div>
                           <span
-                            className={`rounded-full px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] ${
-                              hasName ? 'bg-emerald-500/15 text-emerald-300' : 'bg-white/8 text-white/55'
+                            className={`rounded-full px-2 py-1 text-[11px] font-semibold tracking-[0.18em] uppercase ${
+                              hasName
+                                ? 'bg-emerald-500/15 text-emerald-300'
+                                : 'bg-white/8 text-white/55'
                             }`}
                           >
                             {language.shortLabel}

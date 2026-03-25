@@ -18,7 +18,8 @@ import 'leaflet/dist/leaflet.css';
 
 // Dark map tile - CartoDB Dark Matter
 const DARK_TILE_URL = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
-const DARK_TILE_ATTRIBUTION = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>';
+const DARK_TILE_ATTRIBUTION =
+  '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>';
 
 interface InteractiveMapProps {
   userLocation: Coordinates | null;
@@ -62,7 +63,9 @@ export function InteractiveMap({
   const userMarkerRef = useRef<L.Marker | null>(null);
   const userCircleRef = useRef<L.Circle | null>(null);
   const poiMarkersRef = useRef<Map<string, L.Marker>>(new Map());
-  const initialCenterRef = useRef<[number, number]>(userLocation ? [userLocation.lat, userLocation.lng] : [10.7610, 106.7040]);
+  const initialCenterRef = useRef<[number, number]>(
+    userLocation ? [userLocation.lat, userLocation.lng] : [10.761, 106.704]
+  );
   const onSelectPOIRef = useRef(onSelectPOI);
   const [mapLoaded, setMapLoaded] = useState(false);
 
@@ -74,7 +77,7 @@ export function InteractiveMap({
   useEffect(() => {
     if (!mapContainerRef.current || mapRef.current) return;
 
-     setMapLoaded(false);
+    setMapLoaded(false);
 
     // Tạo map với style tối
     const map = L.map(mapContainerRef.current, {
@@ -182,7 +185,7 @@ export function InteractiveMap({
 
     // Xóa markers cũ không còn trong danh sách
     poiMarkersRef.current.forEach((marker, id) => {
-      if (!pois.find(p => p.id === id)) {
+      if (!pois.find((p) => p.id === id)) {
         marker.remove();
         poiMarkersRef.current.delete(id);
       }
@@ -234,7 +237,7 @@ export function InteractiveMap({
 
     // Fit bounds to show all POIs if this is first load
     if (pois.length > 0 && poiMarkersRef.current.size === pois.length) {
-      const bounds = L.latLngBounds(pois.map(p => [p.lat, p.lng]));
+      const bounds = L.latLngBounds(pois.map((p) => [p.lat, p.lng]));
       // Only fit if user location is not set (first time)
       if (!userLocation) {
         mapRef.current.fitBounds(bounds, { padding: [50, 50], maxZoom: preferredZoom });
@@ -286,37 +289,34 @@ export function InteractiveMap({
   return (
     <div className="relative h-full w-full overflow-hidden">
       {/* Map Container */}
-      <div
-        ref={mapContainerRef}
-        className="h-full w-full map-bg z-1"
-      />
+      <div ref={mapContainerRef} className="map-bg z-1 h-full w-full" />
 
       {/* Loading State */}
       {!mapLoaded && (
-        <div className="absolute inset-0 flex items-center justify-center bg-background-dark">
+        <div className="bg-background-dark absolute inset-0 flex items-center justify-center">
           <div className="flex flex-col items-center gap-3">
-            <span className="material-symbols-outlined text-4xl text-primary animate-spin">sync</span>
+            <span className="material-symbols-outlined text-primary animate-spin text-4xl">
+              sync
+            </span>
             <p className="text-white">{t('map.loadingMap')}</p>
           </div>
         </div>
       )}
 
-
-
       {/* Right Side Controls */}
-      <div className="absolute right-4 top-1/2 z-20 flex -translate-y-1/2 flex-col gap-3 pointer-events-none">
+      <div className="pointer-events-none absolute top-1/2 right-4 z-20 flex -translate-y-1/2 flex-col gap-3">
         {/* Zoom Controls */}
-        <div className="flex flex-col gap-0.5 rounded-lg bg-[#342418]/90 backdrop-blur shadow-lg pointer-events-auto border border-white/5">
+        <div className="pointer-events-auto flex flex-col gap-0.5 rounded-lg border border-white/5 bg-[#342418]/90 shadow-lg backdrop-blur">
           <button
             onClick={handleZoomIn}
-            className="flex h-10 w-10 items-center justify-center text-white hover:bg-white/10 rounded-t-lg transition-colors"
+            className="flex h-10 w-10 items-center justify-center rounded-t-lg text-white transition-colors hover:bg-white/10"
           >
             <span className="material-symbols-outlined text-[24px]">add</span>
           </button>
           <div className="h-px w-full bg-white/10"></div>
           <button
             onClick={handleZoomOut}
-            className="flex h-10 w-10 items-center justify-center text-white hover:bg-white/10 rounded-b-lg transition-colors"
+            className="flex h-10 w-10 items-center justify-center rounded-b-lg text-white transition-colors hover:bg-white/10"
           >
             <span className="material-symbols-outlined text-[24px]">remove</span>
           </button>
@@ -325,7 +325,7 @@ export function InteractiveMap({
         {/* Center on User Button */}
         <button
           onClick={handleCenterOnUser}
-          className="pointer-events-auto flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-white shadow-lg hover:bg-primary/90 transition-colors active:scale-95"
+          className="bg-primary hover:bg-primary/90 pointer-events-auto flex h-10 w-10 items-center justify-center rounded-lg text-white shadow-lg transition-colors active:scale-95"
         >
           <span className="material-symbols-outlined text-[20px]">my_location</span>
         </button>
@@ -333,7 +333,7 @@ export function InteractiveMap({
 
       {/* Selected POI Card */}
       {selectedPOI && (
-        <div className="absolute bottom-20 left-4 right-4 z-20 animate-slideInUp">
+        <div className="animate-slideInUp absolute right-4 bottom-20 left-4 z-20">
           <POIDetailCard
             poi={selectedPOI}
             distance={getDistanceToPOI(selectedPOI)}
@@ -373,7 +373,9 @@ export function InteractiveMap({
           height: 16px;
           background: #3b82f6;
           border-radius: 50%;
-          box-shadow: 0 0 0 3px white, 0 2px 8px rgba(0,0,0,0.3);
+          box-shadow:
+            0 0 0 3px white,
+            0 2px 8px rgba(0, 0, 0, 0.3);
           z-index: 2;
           position: relative;
         }
@@ -403,7 +405,8 @@ export function InteractiveMap({
         }
 
         @keyframes ping {
-          75%, 100% {
+          75%,
+          100% {
             transform: scale(1.5);
             opacity: 0;
           }
@@ -443,7 +446,7 @@ export function InteractiveMap({
           align-items: center;
           justify-content: center;
           color: #f26c0d;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
         }
 
         .poi-marker-icon .material-symbols-outlined {

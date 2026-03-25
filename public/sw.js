@@ -1,6 +1,6 @@
 /**
  * Service Worker for FlavorQuest PWA
- * 
+ *
  * Caching Strategy:
  * - App shell: Cache first with network fallback
  * - POI data: Network first with cache fallback (stale-while-revalidate)
@@ -8,13 +8,13 @@
  * - Images: Cache first with placeholder fallback
  * - OSM tiles: Cache first
  * - Supabase Storage: Cache first for audio/images
- * 
+ *
  * Features:
  * - Offline support
  * - Background sync for analytics
  * - Audio preloading
  * - Push notifications (future)
- * 
+ *
  * Cache Names:
  * - flavorquest-static-v1: App shell (HTML, CSS, JS)
  * - flavorquest-dynamic-v1: Dynamic content (POI data)
@@ -103,10 +103,7 @@ self.addEventListener('activate', (event) => {
         cacheNames
           .filter((name) => {
             // Delete old versions
-            return (
-              name.startsWith('flavorquest-') &&
-              !Object.values(CACHE_NAMES).includes(name)
-            );
+            return name.startsWith('flavorquest-') && !Object.values(CACHE_NAMES).includes(name);
           })
           .map((name) => {
             console.log('[SW] Deleting old cache:', name);
@@ -229,7 +226,7 @@ function isSupabaseImageUrl(href) {
  */
 function isAudioFile(pathname) {
   const lowerPath = pathname.toLowerCase();
-  return AUDIO_EXTENSIONS.some(ext => lowerPath.endsWith(ext));
+  return AUDIO_EXTENSIONS.some((ext) => lowerPath.endsWith(ext));
 }
 
 /**
@@ -237,16 +234,18 @@ function isAudioFile(pathname) {
  */
 function isImageFile(pathname) {
   const lowerPath = pathname.toLowerCase();
-  return IMAGE_EXTENSIONS.some(ext => lowerPath.endsWith(ext));
+  return IMAGE_EXTENSIONS.some((ext) => lowerPath.endsWith(ext));
 }
 
 /**
  * Check if URL is OSM tile
  */
 function isOSMTile(url) {
-  return url.hostname.includes('openstreetmap.org') ||
+  return (
+    url.hostname.includes('openstreetmap.org') ||
     url.hostname.includes('tile.osm.org') ||
-    url.pathname.includes('.tile.');
+    url.pathname.includes('.tile.')
+  );
 }
 
 function isNavigationRequest(request) {
@@ -473,7 +472,10 @@ async function handleAudioRangeRequest(request, cacheName) {
   }
 
   if (cached) {
-    console.log('[SW] Returning cached full audio as last fallback for range request:', request.url);
+    console.log(
+      '[SW] Returning cached full audio as last fallback for range request:',
+      request.url
+    );
     return cached;
   }
 
@@ -529,11 +531,14 @@ async function cacheFirstWithTimeout(request, cacheName, timeoutMs = 5000) {
       const responseToCache = response.clone();
 
       // Cache with both URL variants
-      cache.put(request, responseToCache).then(() => {
-        console.log('[SW] Audio cached successfully');
-      }).catch(err => {
-        console.error('[SW] Failed to cache audio:', err);
-      });
+      cache
+        .put(request, responseToCache)
+        .then(() => {
+          console.log('[SW] Audio cached successfully');
+        })
+        .catch((err) => {
+          console.error('[SW] Failed to cache audio:', err);
+        });
     }
 
     return response;
@@ -603,7 +608,7 @@ async function cacheFirstWithImageFallback(request, cacheName) {
  */
 function updateCacheInBackground(request, cache) {
   fetch(request)
-    .then(response => {
+    .then((response) => {
       if (response.ok) {
         cache.put(request, response);
       }
@@ -624,13 +629,13 @@ async function staleWhileRevalidate(request, cacheName) {
 
   // Start network fetch
   const fetchPromise = fetch(request)
-    .then(response => {
+    .then((response) => {
       if (response.ok) {
         cache.put(request, response.clone());
       }
       return response;
     })
-    .catch(error => {
+    .catch((error) => {
       console.error('[SW] Network fetch failed:', error);
       return null;
     });
@@ -717,7 +722,7 @@ async function syncAnalytics() {
 
     // Notify clients about successful sync
     const clients = await self.clients.matchAll();
-    clients.forEach(client => {
+    clients.forEach((client) => {
       client.postMessage({
         type: 'ANALYTICS_SYNCED',
         count: queue.length,
@@ -799,12 +804,14 @@ self.addEventListener('message', (event) => {
 
   // Get cache stats
   if (event.data && event.data.type === 'GET_CACHE_STATS') {
-    event.waitUntil(getCacheStats().then(stats => {
-      event.source.postMessage({
-        type: 'CACHE_STATS',
-        stats,
-      });
-    }));
+    event.waitUntil(
+      getCacheStats().then((stats) => {
+        event.source.postMessage({
+          type: 'CACHE_STATS',
+          stats,
+        });
+      })
+    );
   }
 });
 
@@ -824,7 +831,7 @@ async function preloadAudioFiles(urls) {
   const notifyProgress = async () => {
     completedCount++;
     const clients = await self.clients.matchAll();
-    clients.forEach(client => {
+    clients.forEach((client) => {
       client.postMessage({
         type: 'PRELOAD_PROGRESS',
         category: 'audio',
@@ -878,7 +885,7 @@ async function preloadAudioFiles(urls) {
             lastError = err.message;
             // Wait before retry
             if (retry < 2) {
-              await new Promise(resolve => setTimeout(resolve, 1000 * (retry + 1)));
+              await new Promise((resolve) => setTimeout(resolve, 1000 * (retry + 1)));
             }
           }
         }
@@ -894,15 +901,23 @@ async function preloadAudioFiles(urls) {
     })
   );
 
-  const cached = results.filter(r => r.status === 'fulfilled' && r.value.status === 'cached').length;
-  const alreadyCached = results.filter(r => r.status === 'fulfilled' && r.value.status === 'already-cached').length;
-  const failed = results.filter(r => r.status === 'rejected' || r.value?.status === 'failed').length;
+  const cached = results.filter(
+    (r) => r.status === 'fulfilled' && r.value.status === 'cached'
+  ).length;
+  const alreadyCached = results.filter(
+    (r) => r.status === 'fulfilled' && r.value.status === 'already-cached'
+  ).length;
+  const failed = results.filter(
+    (r) => r.status === 'rejected' || r.value?.status === 'failed'
+  ).length;
 
-  console.log(`[SW] Audio preload complete: ${cached} new, ${alreadyCached} already cached, ${failed} failed`);
+  console.log(
+    `[SW] Audio preload complete: ${cached} new, ${alreadyCached} already cached, ${failed} failed`
+  );
 
   // Notify clients
   const clients = await self.clients.matchAll();
-  clients.forEach(client => {
+  clients.forEach((client) => {
     client.postMessage({
       type: 'PRELOAD_COMPLETE',
       category: 'audio',
@@ -927,7 +942,7 @@ async function preloadImageFiles(urls) {
   const notifyProgress = async () => {
     completedCount++;
     const clients = await self.clients.matchAll();
-    clients.forEach(client => {
+    clients.forEach((client) => {
       client.postMessage({
         type: 'PRELOAD_PROGRESS',
         category: 'images',
@@ -961,15 +976,23 @@ async function preloadImageFiles(urls) {
     })
   );
 
-  const cached = results.filter(r => r.status === 'fulfilled' && r.value.status === 'cached').length;
-  const alreadyCached = results.filter(r => r.status === 'fulfilled' && r.value.status === 'already-cached').length;
-  const failed = results.filter(r => r.status === 'rejected' || r.value?.status === 'failed').length;
+  const cached = results.filter(
+    (r) => r.status === 'fulfilled' && r.value.status === 'cached'
+  ).length;
+  const alreadyCached = results.filter(
+    (r) => r.status === 'fulfilled' && r.value.status === 'already-cached'
+  ).length;
+  const failed = results.filter(
+    (r) => r.status === 'rejected' || r.value?.status === 'failed'
+  ).length;
 
-  console.log(`[SW] Image preload complete: ${cached} new, ${alreadyCached} already cached, ${failed} failed`);
+  console.log(
+    `[SW] Image preload complete: ${cached} new, ${alreadyCached} already cached, ${failed} failed`
+  );
 
   // Notify clients
   const clients = await self.clients.matchAll();
-  clients.forEach(client => {
+  clients.forEach((client) => {
     client.postMessage({
       type: 'PRELOAD_COMPLETE',
       category: 'images',

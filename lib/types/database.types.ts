@@ -5,13 +5,7 @@
  * Regenerate with Supabase CLI when schema changes.
  */
 
-export type Json =
-  | string
-  | number
-  | boolean
-  | null
-  | { [key: string]: Json | undefined }
-  | Json[];
+export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
 export interface Database {
   public: {
@@ -230,7 +224,7 @@ export interface Database {
             columns: ['owner_id'];
             referencedRelation: 'users';
             referencedColumns: ['id'];
-          }
+          },
         ];
       };
       tours: {
@@ -381,14 +375,20 @@ export interface Database {
             columns: ['created_by'];
             referencedRelation: 'users';
             referencedColumns: ['id'];
-          }
+          },
         ];
       };
       analytics_logs: {
         Row: {
           id: string;
           timestamp: string;
-          event_type: 'tour_start' | 'tour_end' | 'auto_play' | 'manual_play' | 'skip' | 'settings_change';
+          event_type:
+            | 'tour_start'
+            | 'tour_end'
+            | 'auto_play'
+            | 'manual_play'
+            | 'skip'
+            | 'settings_change';
           poi_id: string | null;
           language: string | null;
           rounded_lat: number | null;
@@ -400,7 +400,13 @@ export interface Database {
         Insert: {
           id?: string;
           timestamp?: string;
-          event_type: 'tour_start' | 'tour_end' | 'auto_play' | 'manual_play' | 'skip' | 'settings_change';
+          event_type:
+            | 'tour_start'
+            | 'tour_end'
+            | 'auto_play'
+            | 'manual_play'
+            | 'skip'
+            | 'settings_change';
           poi_id?: string | null;
           language?: string | null;
           rounded_lat?: number | null;
@@ -412,7 +418,13 @@ export interface Database {
         Update: {
           id?: string;
           timestamp?: string;
-          event_type?: 'tour_start' | 'tour_end' | 'auto_play' | 'manual_play' | 'skip' | 'settings_change';
+          event_type?:
+            | 'tour_start'
+            | 'tour_end'
+            | 'auto_play'
+            | 'manual_play'
+            | 'skip'
+            | 'settings_change';
           poi_id?: string | null;
           language?: string | null;
           rounded_lat?: number | null;
@@ -427,7 +439,7 @@ export interface Database {
             columns: ['poi_id'];
             referencedRelation: 'pois';
             referencedColumns: ['id'];
-          }
+          },
         ];
       };
       users: {
@@ -458,7 +470,7 @@ export interface Database {
             columns: ['id'];
             referencedRelation: 'users';
             referencedColumns: ['id'];
-          }
+          },
         ];
       };
       dishes: {
@@ -504,7 +516,7 @@ export interface Database {
             columns: ['poi_id'];
             referencedRelation: 'pois';
             referencedColumns: ['id'];
-          }
+          },
         ];
       };
       preorder_orders: {
@@ -589,7 +601,7 @@ export interface Database {
             columns: ['customer_id'];
             referencedRelation: 'users';
             referencedColumns: ['id'];
-          }
+          },
         ];
       };
       preorder_order_items: {
@@ -629,7 +641,7 @@ export interface Database {
             columns: ['dish_id'];
             referencedRelation: 'dishes';
             referencedColumns: ['id'];
-          }
+          },
         ];
       };
       notifications: {
@@ -675,7 +687,7 @@ export interface Database {
             columns: ['order_id'];
             referencedRelation: 'preorder_orders';
             referencedColumns: ['id'];
-          }
+          },
         ];
       };
       chat_conversations: {
@@ -712,7 +724,7 @@ export interface Database {
             columns: ['user_id'];
             referencedRelation: 'users';
             referencedColumns: ['id'];
-          }
+          },
         ];
       };
       chat_messages: {
@@ -743,7 +755,7 @@ export interface Database {
             columns: ['conversation_id'];
             referencedRelation: 'chat_conversations';
             referencedColumns: ['id'];
-          }
+          },
         ];
       };
     };
@@ -801,7 +813,13 @@ export interface Database {
       };
     };
     Enums: {
-      event_type: 'tour_start' | 'tour_end' | 'auto_play' | 'manual_play' | 'skip' | 'settings_change';
+      event_type:
+        | 'tour_start'
+        | 'tour_end'
+        | 'auto_play'
+        | 'manual_play'
+        | 'skip'
+        | 'settings_change';
       user_role: 'customer' | 'owner' | 'admin';
     };
     CompositeTypes: {

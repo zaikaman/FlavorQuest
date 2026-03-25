@@ -1,8 +1,8 @@
 /**
  * useOfflineSync Hook
- * 
+ *
  * Detect online/offline status và sync data khi connection changes
- * 
+ *
  * Features:
  * - Detect network status changes
  * - Auto-sync queued analytics khi online

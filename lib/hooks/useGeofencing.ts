@@ -43,27 +43,27 @@ type WorkerPOIEntry = {
 
 type GeofenceWorkerResponse =
   | {
-    type: 'GEOFENCE_RESULT';
-    requestId: number;
-    payload: {
-      triggeredPOIs: WorkerPOIEntry[];
-      nearbyPOIs: WorkerPOIEntry[];
-    };
-  }
+      type: 'GEOFENCE_RESULT';
+      requestId: number;
+      payload: {
+        triggeredPOIs: WorkerPOIEntry[];
+        nearbyPOIs: WorkerPOIEntry[];
+      };
+    }
   | {
-    type: 'NEARBY_POIS';
-    requestId: number;
-    payload: {
-      pois: WorkerPOIEntry[];
-    };
-  }
+      type: 'NEARBY_POIS';
+      requestId: number;
+      payload: {
+        pois: WorkerPOIEntry[];
+      };
+    }
   | {
-    type: 'ERROR';
-    requestId: number;
-    payload: {
-      message: string;
+      type: 'ERROR';
+      requestId: number;
+      payload: {
+        message: string;
+      };
     };
-  };
 
 function isValidPOI(poi: POI): boolean {
   return Number.isFinite(poi.lat) && Number.isFinite(poi.lng);

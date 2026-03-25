@@ -100,8 +100,7 @@ export default function OwnerLayout({ children }: { children: React.ReactNode })
       <div
         className="pointer-events-none fixed inset-0 opacity-[0.06]"
         style={{
-          backgroundImage:
-            'radial-gradient(rgba(255, 255, 255, 0.18) 0.8px, transparent 0.8px)',
+          backgroundImage: 'radial-gradient(rgba(255, 255, 255, 0.18) 0.8px, transparent 0.8px)',
           backgroundSize: '18px 18px',
         }}
       />
@@ -109,7 +108,7 @@ export default function OwnerLayout({ children }: { children: React.ReactNode })
       <header className="sticky top-0 z-20 border-b border-white/10 bg-[#2c1e16]/85 backdrop-blur-md">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid gap-4 py-4 xl:grid-cols-[auto_minmax(0,1fr)_auto] xl:items-center">
-            <div className="min-w-0 flex items-center gap-3">
+            <div className="flex min-w-0 items-center gap-3">
               <div className="bg-primary/15 text-primary border-primary/20 flex h-12 w-12 items-center justify-center rounded-2xl border">
                 <span className="material-symbols-outlined text-[26px]">storefront</span>
               </div>
@@ -117,14 +116,16 @@ export default function OwnerLayout({ children }: { children: React.ReactNode })
                 <p className="text-primary/80 text-[11px] font-semibold tracking-[0.28em] uppercase">
                   Khu vực chủ quán
                 </p>
-                <h1 className="text-xl font-black text-white sm:text-2xl">Bảng điều hành chủ quán</h1>
+                <h1 className="text-xl font-black text-white sm:text-2xl">
+                  Bảng điều hành chủ quán
+                </h1>
                 <p className="text-sm text-gray-400 sm:max-w-xl">
                   Theo dõi POI, món ăn, đơn đặt trước và tín hiệu vận hành trong một nơi.
                 </p>
               </div>
             </div>
 
-            <nav className="hidden min-w-0 overflow-x-auto xl:px-4 xl:block [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <nav className="hidden min-w-0 overflow-x-auto [scrollbar-width:none] xl:block xl:px-4 [&::-webkit-scrollbar]:hidden">
               <div className="flex min-w-max flex-nowrap items-center gap-1.5 xl:justify-center">
                 {[
                   { href: '/owner', label: 'Tổng quan' },
@@ -138,7 +139,7 @@ export default function OwnerLayout({ children }: { children: React.ReactNode })
                     <Link
                       key={item.href}
                       href={item.href}
-                      className={`whitespace-nowrap rounded-full border px-3 py-1.5 text-[13px] font-semibold transition-colors ${
+                      className={`rounded-full border px-3 py-1.5 text-[13px] font-semibold whitespace-nowrap transition-colors ${
                         isActive
                           ? 'border-primary bg-primary/15 text-primary'
                           : 'border-white/10 bg-white/5 text-gray-300 hover:bg-white/10'
@@ -164,7 +165,9 @@ export default function OwnerLayout({ children }: { children: React.ReactNode })
                 </span>
               </button>
               <div className="hidden rounded-2xl border border-white/10 bg-black/15 px-4 py-2 text-right lg:block">
-                <p className="max-w-[18rem] truncate text-sm font-semibold text-gray-100">{user.email}</p>
+                <p className="max-w-[18rem] truncate text-sm font-semibold text-gray-100">
+                  {user.email}
+                </p>
                 <p className="text-primary text-xs font-semibold">
                   {isAdmin ? 'Quản trị viên kiêm chủ quán' : 'Tài khoản chủ quán'}
                 </p>
@@ -219,7 +222,7 @@ export default function OwnerLayout({ children }: { children: React.ReactNode })
               </nav>
               <div className="mt-4 rounded-2xl border border-white/10 bg-black/15 p-4">
                 <p className="truncate text-sm font-semibold text-gray-100">{user.email}</p>
-                <p className="mt-1 text-xs font-semibold text-primary">
+                <p className="text-primary mt-1 text-xs font-semibold">
                   {isAdmin ? 'Quản trị viên kiêm chủ quán' : 'Tài khoản chủ quán'}
                 </p>
                 <button

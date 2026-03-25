@@ -67,38 +67,35 @@ export function NarrationOverlay({
   }, [nextDistanceLabel, stableDistanceLabel]);
 
   return (
-    <div
-      onClick={onExpand}
-      className="fixed bottom-20 left-4 right-4 z-40 cursor-pointer"
-    >
+    <div onClick={onExpand} className="fixed right-4 bottom-20 left-4 z-40 cursor-pointer">
       {/* Glass Panel */}
-      <div className="bg-[rgba(45,36,30,0.7)] backdrop-blur-md border border-white/5 rounded-xl p-3 flex items-center gap-3 shadow-lg transform transition-all hover:scale-[1.02]">
+      <div className="flex transform items-center gap-3 rounded-xl border border-white/5 bg-[rgba(45,36,30,0.7)] p-3 shadow-lg backdrop-blur-md transition-all hover:scale-[1.02]">
         {/* POI Indicator Icon */}
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-seafood-green/20 text-seafood-green">
-          <span className={`material-symbols-outlined text-[20px] ${isLoading ? 'animate-spin' : ''}`}>
+        <div className="bg-seafood-green/20 text-seafood-green flex h-10 w-10 shrink-0 items-center justify-center rounded-full">
+          <span
+            className={`material-symbols-outlined text-[20px] ${isLoading ? 'animate-spin' : ''}`}
+          >
             {isLoading ? 'sync' : isPlaying ? 'graphic_eq' : 'location_on'}
           </span>
         </div>
 
         {/* Content */}
-        <div className="flex flex-col min-w-0 flex-1">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-seafood-green">
+        <div className="flex min-w-0 flex-1 flex-col">
+          <span className="text-seafood-green text-[10px] font-bold tracking-wider uppercase">
             {isLoading ? t('audio.loading') : isPlaying ? t('audio.play') : t('tour.nearbyPOIs')}
           </span>
-          <span className="truncate text-sm font-semibold text-white">
-            {localizedPOI.name}
-          </span>
+          <span className="truncate text-sm font-semibold text-white">{localizedPOI.name}</span>
 
           {/* Progress Bar */}
           {isPlaying && !isLoading && duration > 0 && (
             <div className="mt-1 flex items-center gap-2">
-              <div className="flex-1 h-1 bg-white/10 rounded-full overflow-hidden">
+              <div className="h-1 flex-1 overflow-hidden rounded-full bg-white/10">
                 <div
-                  className="h-full bg-primary rounded-full transition-all duration-300"
+                  className="bg-primary h-full rounded-full transition-all duration-300"
                   style={{ width: `${progress}%` }}
                 ></div>
               </div>
-              <span className="text-[9px] text-white/60 font-mono tabular-nums">
+              <span className="font-mono text-[9px] text-white/60 tabular-nums">
                 {formatTime(currentTime)}
               </span>
             </div>
@@ -107,7 +104,7 @@ export function NarrationOverlay({
 
         {/* Distance Badge */}
         {stableDistanceLabel && (
-          <div className="min-w-[4.5rem] rounded-full bg-white/10 px-2.5 py-1 text-center text-xs font-semibold tabular-nums text-white/70">
+          <div className="min-w-[4.5rem] rounded-full bg-white/10 px-2.5 py-1 text-center text-xs font-semibold text-white/70 tabular-nums">
             {stableDistanceLabel}
           </div>
         )}
@@ -115,7 +112,9 @@ export function NarrationOverlay({
         {/* Play/Pause Indicator */}
         {(isPlaying || isLoading) && (
           <div className="flex size-8 items-center justify-center">
-            <span className={`material-symbols-outlined text-primary ${isLoading ? 'animate-spin' : 'animate-pulse'}`}>
+            <span
+              className={`material-symbols-outlined text-primary ${isLoading ? 'animate-spin' : 'animate-pulse'}`}
+            >
               {isLoading ? 'sync' : 'graphic_eq'}
             </span>
           </div>

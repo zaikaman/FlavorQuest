@@ -25,7 +25,9 @@ function findAudioPreloadLink(normalizedUrl: string): HTMLLinkElement | null {
     return null;
   }
 
-  const links = document.head.querySelectorAll<HTMLLinkElement>('link[data-flavorquest-audio-preload]');
+  const links = document.head.querySelectorAll<HTMLLinkElement>(
+    'link[data-flavorquest-audio-preload]'
+  );
   return Array.from(links).find((link) => link.href === normalizedUrl) ?? null;
 }
 

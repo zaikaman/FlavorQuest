@@ -295,9 +295,8 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
     const requestedPeriod = searchParams.get('period') || DEFAULT_PERIOD;
     const selectedTourId = searchParams.get('tour_id');
-    const { period, startDate, now, reportStartDate, reportEndDate } = getPeriodWindow(
-      requestedPeriod
-    );
+    const { period, startDate, now, reportStartDate, reportEndDate } =
+      getPeriodWindow(requestedPeriod);
     const cacheKey = getAnalyticsCacheKey(period, selectedTourId);
     const cachedSummary = analyticsSummaryCache.get(cacheKey);
 
@@ -313,13 +312,8 @@ export async function GET(request: NextRequest) {
         .select('id, name_vi, cover_image_url, estimated_duration_min, poi_ids, is_active')
         .is('deleted_at', null)
         .order('created_at', { ascending: false }),
-      adminClient
-        .from('pois')
-        .select(ANALYTICS_POI_SELECT)
-        .order('name_vi', { ascending: true }),
-      adminClient
-        .from('users')
-        .select('id, role, created_at'),
+      adminClient.from('pois').select(ANALYTICS_POI_SELECT).order('name_vi', { ascending: true }),
+      adminClient.from('users').select('id, role, created_at'),
       fetchAnalyticsLogsInRange(adminClient, startDate.toISOString(), now.toISOString()),
     ]);
 
@@ -430,9 +424,11 @@ export async function GET(request: NextRequest) {
       eventCounts.set(log.event_type, (eventCounts.get(log.event_type) ?? 0) + 1);
 
       if (log.language) {
-        const langItem =
-          languageMap.get(log.language) ??
-          { code: log.language, plays: 0, sessions: new Set<string>() };
+        const langItem = languageMap.get(log.language) ?? {
+          code: log.language,
+          plays: 0,
+          sessions: new Set<string>(),
+        };
         if (log.session_id) {
           langItem.sessions.add(log.session_id);
         }
@@ -443,14 +439,12 @@ export async function GET(request: NextRequest) {
       }
 
       if (matchesSelectedTour) {
-        const hourlyItem =
-          hourlyMap.get(hour) ??
-          {
-            hour,
-            total_tours: 0,
-            total_plays: 0,
-            sessions: new Set<string>(),
-          };
+        const hourlyItem = hourlyMap.get(hour) ?? {
+          hour,
+          total_tours: 0,
+          total_plays: 0,
+          sessions: new Set<string>(),
+        };
         hourlyMap.set(hour, hourlyItem);
 
         if (log.session_id) {
@@ -471,14 +465,12 @@ export async function GET(request: NextRequest) {
         const heatmapDay = heatmapMap.get(dayKey) ?? new Map<number, HeatmapCellAccumulator>();
         heatmapMap.set(dayKey, heatmapDay);
 
-        const heatmapCell =
-          heatmapDay.get(hour) ??
-          {
-            hour,
-            plays: 0,
-            total_tours: 0,
-            sessions: new Set<string>(),
-          };
+        const heatmapCell = heatmapDay.get(hour) ?? {
+          hour,
+          plays: 0,
+          total_tours: 0,
+          sessions: new Set<string>(),
+        };
         heatmapDay.set(hour, heatmapCell);
 
         if (log.session_id) {
@@ -500,19 +492,17 @@ export async function GET(request: NextRequest) {
       }
 
       if (log.session_id) {
-        const currentSession =
-          sessionMap.get(log.session_id) ??
-          {
-            id: log.session_id,
-            firstTimestamp: Number.POSITIVE_INFINITY,
-            lastTimestamp: 0,
-            plays: 0,
-            skips: 0,
-            starts: 0,
-            completedTours: 0,
-            languages: new Set<string>(),
-            durationMs: null,
-          };
+        const currentSession = sessionMap.get(log.session_id) ?? {
+          id: log.session_id,
+          firstTimestamp: Number.POSITIVE_INFINITY,
+          lastTimestamp: 0,
+          plays: 0,
+          skips: 0,
+          starts: 0,
+          completedTours: 0,
+          languages: new Set<string>(),
+          durationMs: null,
+        };
 
         const currentTimestamp = new Date(log.timestamp).getTime();
         currentSession.firstTimestamp = Math.min(currentSession.firstTimestamp, currentTimestamp);
@@ -526,7 +516,10 @@ export async function GET(request: NextRequest) {
           currentSession.starts += 1;
         }
 
-        if (matchesSelectedTour && (log.event_type === 'auto_play' || log.event_type === 'manual_play')) {
+        if (
+          matchesSelectedTour &&
+          (log.event_type === 'auto_play' || log.event_type === 'manual_play')
+        ) {
           currentSession.plays += 1;
         }
 
@@ -669,7 +662,9 @@ export async function GET(request: NextRequest) {
           completed_tours: completedTours,
           completion_rate: starts > 0 ? Math.round((completedTours / starts) * 100) : 0,
           avg_duration_min:
-            item.durationCount > 0 ? Math.round(item.totalDurationMs / item.durationCount / 60000) : null,
+            item.durationCount > 0
+              ? Math.round(item.totalDurationMs / item.durationCount / 60000)
+              : null,
         };
       })
       .filter((item) => !selectedTourId || item.id === selectedTourId)
@@ -709,7 +704,8 @@ export async function GET(request: NextRequest) {
         label: 'Lướt nhanh',
         note: 'Người dùng chỉ nghe rất ngắn rồi rời đi, nên xem lại phần mở đầu của hành trình.',
         count: sessionValues.filter(
-          (session) => session.plays <= 1 && session.completedTours === 0 && session.durationMs < 5 * 60000
+          (session) =>
+            session.plays <= 1 && session.completedTours === 0 && session.durationMs < 5 * 60000
         ).length,
       },
       {
@@ -837,7 +833,9 @@ export async function GET(request: NextRequest) {
       .slice(0, 6);
 
     const activePois = poiRows.filter((poi) => !poi.deleted_at);
-    const totalCustomers = userRows.filter((user) => normalizeRole(user.role) === 'customer').length;
+    const totalCustomers = userRows.filter(
+      (user) => normalizeRole(user.role) === 'customer'
+    ).length;
 
     const poisWithFullLanguageNames = activePois.filter((poi) =>
       NON_DEFAULT_LANGUAGE_CODES.every((language) => {
@@ -936,10 +934,16 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    const userTimeline = finalizeTimeline(userTimelineMap, reportStartDate, reportEndDate, period, (date) => ({
-      date,
-      new_users: 0,
-    }));
+    const userTimeline = finalizeTimeline(
+      userTimelineMap,
+      reportStartDate,
+      reportEndDate,
+      period,
+      (date) => ({
+        date,
+        new_users: 0,
+      })
+    );
 
     const journey = {
       total_manual_plays: totalManualPlays,
@@ -947,12 +951,15 @@ export async function GET(request: NextRequest) {
       total_skips: totalSkips,
       total_completed_tours: totalCompletedTours,
       completion_rate:
-        overview.total_tours > 0 ? Math.round((totalCompletedTours / overview.total_tours) * 100) : 0,
+        overview.total_tours > 0
+          ? Math.round((totalCompletedTours / overview.total_tours) * 100)
+          : 0,
       manual_share:
         overview.total_plays > 0 ? Math.round((totalManualPlays / overview.total_plays) * 100) : 0,
       auto_share:
         overview.total_plays > 0 ? Math.round((totalAutoPlays / overview.total_plays) * 100) : 0,
-      skip_rate: overview.total_plays > 0 ? Math.round((totalSkips / overview.total_plays) * 100) : 0,
+      skip_rate:
+        overview.total_plays > 0 ? Math.round((totalSkips / overview.total_plays) * 100) : 0,
       avg_plays_per_session:
         overview.unique_sessions > 0
           ? Number((overview.total_plays / overview.unique_sessions).toFixed(1))

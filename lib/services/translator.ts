@@ -92,13 +92,10 @@ Return only the translated text with natural product copy. Do not add explanatio
 }
 
 function createEmptyTranslationResponse(): TranslationResponse {
-  return TARGET_LANGUAGES.reduce(
-    (accumulator, language) => {
-      accumulator[language] = '';
-      return accumulator;
-    },
-    {} as TranslationResponse
-  );
+  return TARGET_LANGUAGES.reduce((accumulator, language) => {
+    accumulator[language] = '';
+    return accumulator;
+  }, {} as TranslationResponse);
 }
 
 export async function translateText(text: string): Promise<TranslationResponse> {

@@ -12,7 +12,9 @@ const DISH_SELECT_FIELDS = `
   image_url,
   created_at,
   updated_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 
 export async function GET(request: NextRequest) {
   const supabase = await createServerClient();
@@ -48,7 +50,10 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
 
     if (!body.poi_id || !body.name || body.price === undefined) {
-      return NextResponse.json({ error: 'Missing required fields: poi_id, name, price' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Missing required fields: poi_id, name, price' },
+        { status: 400 }
+      );
     }
 
     const { data: poi, error: poiError } = await supabase

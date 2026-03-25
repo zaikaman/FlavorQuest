@@ -10,15 +10,8 @@ import { useTranslations } from '@/lib/hooks/useTranslations';
 
 export default function PendingOwnerPage() {
   const router = useRouter();
-  const {
-    user,
-    userRole,
-    ownerRequestStatus,
-    isLoading,
-    isRoleReady,
-    refreshUserRole,
-    signOut,
-  } = useAuth();
+  const { user, userRole, ownerRequestStatus, isLoading, isRoleReady, refreshUserRole, signOut } =
+    useAuth();
   const { t } = useTranslations();
   const [isSigningOut, setIsSigningOut] = useState(false);
 

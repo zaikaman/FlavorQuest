@@ -8,11 +8,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import {
-  checkForUpdates,
-  registerServiceWorker,
-  skipWaitingAndActivate,
-} from '@/lib/services/pwa';
+import { checkForUpdates, registerServiceWorker, skipWaitingAndActivate } from '@/lib/services/pwa';
 import { Button } from '@/components/ui/Button';
 
 export default function ServiceWorkerRegistration() {
@@ -55,12 +51,15 @@ export default function ServiceWorkerRegistration() {
         });
       });
 
-      checkInterval = setInterval(async () => {
-        const hasUpdate = await checkForUpdates(reg);
-        if (hasUpdate) {
-          syncWaitingState(reg);
-        }
-      }, 60 * 60 * 1000);
+      checkInterval = setInterval(
+        async () => {
+          const hasUpdate = await checkForUpdates(reg);
+          if (hasUpdate) {
+            syncWaitingState(reg);
+          }
+        },
+        60 * 60 * 1000
+      );
     };
 
     void setupRegistration();
@@ -97,8 +96,8 @@ export default function ServiceWorkerRegistration() {
   }
 
   return (
-    <div className="fixed bottom-4 left-4 right-4 z-[100] md:left-auto md:right-4 md:max-w-sm">
-      <div className="rounded-lg border border-primary-200 bg-white p-4 shadow-lg dark:border-primary-800 dark:bg-gray-800">
+    <div className="fixed right-4 bottom-4 left-4 z-[100] md:right-4 md:left-auto md:max-w-sm">
+      <div className="border-primary-200 dark:border-primary-800 rounded-lg border bg-white p-4 shadow-lg dark:bg-gray-800">
         <h3 className="mb-2 text-base font-semibold text-gray-900 dark:text-white">
           Phiên bản mới có sẵn
         </h3>

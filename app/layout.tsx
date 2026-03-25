@@ -56,9 +56,7 @@ export const metadata: Metadata = {
       { url: '/icons/icon-192x192.png', sizes: '192x192', type: 'image/png' },
       { url: '/icons/icon-512x512.png', sizes: '512x512', type: 'image/png' },
     ],
-    apple: [
-      { url: '/icons/icon-192x192.png', sizes: '192x192', type: 'image/png' },
-    ],
+    apple: [{ url: '/icons/icon-192x192.png', sizes: '192x192', type: 'image/png' }],
   },
 };
 
@@ -86,7 +84,10 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
         {/* eslint-disable-next-line @next/next/no-page-custom-font */}
-        <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+          rel="stylesheet"
+        />
       </head>
       <body
         className={`${appSans.variable} ${geistMono.variable} antialiased`}
@@ -95,9 +96,7 @@ export default function RootLayout({
         <AuthProvider>
           <LanguageProvider>
             <ToastProvider>
-              <AppProvider>
-                {children}
-              </AppProvider>
+              <AppProvider>{children}</AppProvider>
             </ToastProvider>
           </LanguageProvider>
         </AuthProvider>

@@ -49,7 +49,10 @@ export async function PATCH(request: NextRequest) {
     const adminClient = createAdminClient();
 
     if (!userId || !role || !['customer', 'pending-owner', 'owner', 'admin'].includes(role)) {
-      return NextResponse.json({ error: 'Invalid userId or role' }, { status: 400, headers: NO_STORE_HEADERS });
+      return NextResponse.json(
+        { error: 'Invalid userId or role' },
+        { status: 400, headers: NO_STORE_HEADERS }
+      );
     }
 
     const { data, error } = await adminClient
@@ -60,11 +63,17 @@ export async function PATCH(request: NextRequest) {
       .single();
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500, headers: NO_STORE_HEADERS });
+      return NextResponse.json(
+        { error: error.message },
+        { status: 500, headers: NO_STORE_HEADERS }
+      );
     }
 
     return NextResponse.json(data, { headers: NO_STORE_HEADERS });
   } catch {
-    return NextResponse.json({ error: 'Invalid request body' }, { status: 400, headers: NO_STORE_HEADERS });
+    return NextResponse.json(
+      { error: 'Invalid request body' },
+      { status: 400, headers: NO_STORE_HEADERS }
+    );
   }
 }

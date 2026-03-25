@@ -88,7 +88,8 @@ export function assessDevicePerformance(): DeviceCapabilityAssessment {
 
   const nav = navigator as NavigatorWithDeviceInfo;
   const connectionType = normalizeNetworkType(nav.connection?.effectiveType);
-  const hardwareConcurrency = typeof nav.hardwareConcurrency === 'number' ? nav.hardwareConcurrency : null;
+  const hardwareConcurrency =
+    typeof nav.hardwareConcurrency === 'number' ? nav.hardwareConcurrency : null;
   const deviceMemory = typeof nav.deviceMemory === 'number' ? nav.deviceMemory : null;
   const saveDataEnabled = Boolean(nav.connection?.saveData);
   const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;

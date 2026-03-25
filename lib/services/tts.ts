@@ -1,7 +1,7 @@
 /**
  * Text-to-Speech Service
  * Web Speech API wrapper
- * 
+ *
  * Features:
  * - Fallback khi audio file không available
  * - Multi-language support
@@ -61,7 +61,7 @@ export class TTSService {
    */
   getVoicesForLanguage(lang: Language): SpeechSynthesisVoice[] {
     const langCode = LANGUAGE_CONFIG_MAP[lang]?.ttsLang ?? 'vi-VN';
-    return this.voices.filter(voice => voice.lang.startsWith(langCode.split('-')[0]!));
+    return this.voices.filter((voice) => voice.lang.startsWith(langCode.split('-')[0]!));
   }
 
   /**
@@ -72,11 +72,11 @@ export class TTSService {
     const voices = this.getVoicesForLanguage(lang);
 
     // Prefer exact match
-    let voice = voices.find(v => v.lang === langCode);
+    let voice = voices.find((v) => v.lang === langCode);
     if (voice) return voice;
 
     // Prefer local voices
-    voice = voices.find(v => !v.localService);
+    voice = voices.find((v) => !v.localService);
     if (voice) return voice;
 
     // Return first available

@@ -1,11 +1,11 @@
 /**
  * Supabase Client Configuration
- * 
+ *
  * Tạo Supabase clients cho:
  * - Client Components: Sử dụng trong browser với auth persistence
  * - Server Components: Sử dụng trong Server Components với cookies
  * - Server Actions: Sử dụng trong Server Actions với cookies
- * 
+ *
  * @see https://supabase.com/docs/guides/auth/server-side/nextjs
  */
 
@@ -23,7 +23,7 @@ function getSupabaseEnv() {
   if (!url || !anonKey) {
     throw new Error(
       'Missing Supabase environment variables. ' +
-      'Please check NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in .env.local'
+        'Please check NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in .env.local'
     );
   }
 
@@ -32,25 +32,25 @@ function getSupabaseEnv() {
 
 /**
  * Create Supabase client cho Client Components
- * 
+ *
  * Sử dụng trong:
  * - 'use client' components
  * - Client-side hooks
  * - Browser-only code
- * 
+ *
  * Features:
  * - Automatic auth state persistence in localStorage
  * - Cookie-based session management
  * - Real-time subscriptions support
- * 
+ *
  * @example
  * ```tsx
  * 'use client';
  * import { createClient } from '@/lib/supabase/client';
- * 
+ *
  * export function MyComponent() {
  *   const supabase = createClient();
- *   
+ *
  *   useEffect(() => {
  *     const fetchPOIs = async () => {
  *       const { data } = await supabase.from('pois').select('*');
@@ -75,7 +75,7 @@ export type SupabaseClient = ReturnType<typeof createClient>;
 
 /**
  * Helper function: Check if user is authenticated
- * 
+ *
  * @example
  * ```tsx
  * const supabase = createClient();
@@ -86,13 +86,15 @@ export type SupabaseClient = ReturnType<typeof createClient>;
  * ```
  */
 export async function isAuthenticated(client: SupabaseClient): Promise<boolean> {
-  const { data: { session } } = await client.auth.getSession();
+  const {
+    data: { session },
+  } = await client.auth.getSession();
   return !!session;
 }
 
 /**
  * Helper function: Get current user
- * 
+ *
  * @example
  * ```tsx
  * const supabase = createClient();
@@ -101,13 +103,15 @@ export async function isAuthenticated(client: SupabaseClient): Promise<boolean> 
  * ```
  */
 export async function getCurrentUser(client: SupabaseClient) {
-  const { data: { user } } = await client.auth.getUser();
+  const {
+    data: { user },
+  } = await client.auth.getUser();
   return user;
 }
 
 /**
  * Helper function: Sign out user
- * 
+ *
  * @example
  * ```tsx
  * const supabase = createClient();

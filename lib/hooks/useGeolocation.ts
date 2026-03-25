@@ -1,7 +1,7 @@
 /**
  * useGeolocation Hook
  * Wrapper cho navigator.geolocation.watchPosition
- * 
+ *
  * Features:
  * - Real-time GPS tracking
  * - Error handling
@@ -69,11 +69,17 @@ export function useGeolocation(options: UseGeolocationOptions = {}) {
 
     try {
       const result = await navigator.permissions.query({ name: 'geolocation' as PermissionName });
-      setState(prev => ({ ...prev, permissionState: result.state as 'prompt' | 'granted' | 'denied' }));
+      setState((prev) => ({
+        ...prev,
+        permissionState: result.state as 'prompt' | 'granted' | 'denied',
+      }));
 
       // Listen for permission changes
       result.addEventListener('change', () => {
-        setState(prev => ({ ...prev, permissionState: result.state as 'prompt' | 'granted' | 'denied' }));
+        setState((prev) => ({
+          ...prev,
+          permissionState: result.state as 'prompt' | 'granted' | 'denied',
+        }));
       });
     } catch (error) {
       console.warn('Permission API not supported:', error);
@@ -108,28 +114,31 @@ export function useGeolocation(options: UseGeolocationOptions = {}) {
   }, []);
 
   // Error callback
-  const onError = useCallback((error: GeolocationPositionError) => {
-    console.warn('[useGeolocation] error:', {
-      code: error.code,
-      message: error.message,
-      highAccuracy: useHighAccuracy,
-    });
+  const onError = useCallback(
+    (error: GeolocationPositionError) => {
+      console.warn('[useGeolocation] error:', {
+        code: error.code,
+        message: error.message,
+        highAccuracy: useHighAccuracy,
+      });
 
-    // If timeout (code 3) and using high accuracy, try falling back to low accuracy
-    if (error.code === 3 && useHighAccuracy) {
-      console.warn('Geolocation timed out, falling back to low accuracy...');
-      setUseHighAccuracy(false);
-      setState(prev => ({ ...prev, error: null, isLoading: true })); // Clear error and set loading
-      return;
-    }
+      // If timeout (code 3) and using high accuracy, try falling back to low accuracy
+      if (error.code === 3 && useHighAccuracy) {
+        console.warn('Geolocation timed out, falling back to low accuracy...');
+        setUseHighAccuracy(false);
+        setState((prev) => ({ ...prev, error: null, isLoading: true })); // Clear error and set loading
+        return;
+      }
 
-    setState(prev => ({
-      ...prev,
-      error,
-      isLoading: false,
-      permissionState: error.code === error.PERMISSION_DENIED ? 'denied' : prev.permissionState,
-    }));
-  }, [useHighAccuracy]);
+      setState((prev) => ({
+        ...prev,
+        error,
+        isLoading: false,
+        permissionState: error.code === error.PERMISSION_DENIED ? 'denied' : prev.permissionState,
+      }));
+    },
+    [useHighAccuracy]
+  );
 
   // Start watching position
   const startWatching = useCallback(() => {
@@ -150,7 +159,7 @@ export function useGeolocation(options: UseGeolocationOptions = {}) {
       watchIdRef.current = null;
     }
 
-    setState(prev => ({ ...prev, isLoading: true }));
+    setState((prev) => ({ ...prev, isLoading: true }));
 
     // Use longer timeout for low accuracy mode (20s) to give it a fair chance
     const watchOptions = {
@@ -167,17 +176,9 @@ export function useGeolocation(options: UseGeolocationOptions = {}) {
     });
 
     if (watch) {
-      watchIdRef.current = navigator.geolocation.watchPosition(
-        onSuccess,
-        onError,
-        watchOptions
-      );
+      watchIdRef.current = navigator.geolocation.watchPosition(onSuccess, onError, watchOptions);
     } else {
-      navigator.geolocation.getCurrentPosition(
-        onSuccess,
-        onError,
-        watchOptions
-      );
+      navigator.geolocation.getCurrentPosition(onSuccess, onError, watchOptions);
     }
   }, [maximumAge, onError, onSuccess, timeout, useHighAccuracy, watch]);
 

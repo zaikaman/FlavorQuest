@@ -20,11 +20,23 @@ type SortOption = 'updated-desc' | 'created-desc' | 'email-asc';
 const PAGE_SIZE = 10;
 const ROLE_OPTIONS: Array<{ value: UserRole; label: string; tone: string }> = [
   { value: 'customer', label: 'Khách hàng', tone: 'bg-sky-500/15 text-sky-300 border-sky-400/20' },
-  { value: 'pending-owner', label: 'Chờ duyệt chủ quán', tone: 'bg-amber-500/15 text-amber-300 border-amber-400/20' },
-  { value: 'owner', label: 'Chủ quán', tone: 'bg-emerald-500/15 text-emerald-300 border-emerald-400/20' },
+  {
+    value: 'pending-owner',
+    label: 'Chờ duyệt chủ quán',
+    tone: 'bg-amber-500/15 text-amber-300 border-amber-400/20',
+  },
+  {
+    value: 'owner',
+    label: 'Chủ quán',
+    tone: 'bg-emerald-500/15 text-emerald-300 border-emerald-400/20',
+  },
   { value: 'admin', label: 'Quản trị viên', tone: 'bg-primary/15 text-primary border-primary/25' },
 ];
-const DEFAULT_ROLE_META = { value: 'customer', label: 'Khách hàng', tone: 'bg-sky-500/15 text-sky-300 border-sky-400/20' } as const;
+const DEFAULT_ROLE_META = {
+  value: 'customer',
+  label: 'Khách hàng',
+  tone: 'bg-sky-500/15 text-sky-300 border-sky-400/20',
+} as const;
 
 function getRoleMeta(role: UserRole) {
   return ROLE_OPTIONS.find((option) => option.value === role) ?? DEFAULT_ROLE_META;
@@ -125,24 +137,25 @@ export function UserRoleManager() {
           return true;
         }
 
-        return [
-          account.email,
-          account.id,
-          account.role,
-          getRoleMeta(account.role).label,
-        ]
+        return [account.email, account.id, account.role, getRoleMeta(account.role).label]
           .filter((value): value is string => typeof value === 'string' && value.length > 0)
           .some((value) => value.toLowerCase().includes(normalizedQuery));
       })
       .sort((left, right) => {
         switch (sortBy) {
           case 'created-desc':
-            return compareDateDesc(left.created_at, right.created_at) || left.email.localeCompare(right.email);
+            return (
+              compareDateDesc(left.created_at, right.created_at) ||
+              left.email.localeCompare(right.email)
+            );
           case 'email-asc':
             return left.email.localeCompare(right.email);
           case 'updated-desc':
           default:
-            return compareDateDesc(left.updated_at, right.updated_at) || left.email.localeCompare(right.email);
+            return (
+              compareDateDesc(left.updated_at, right.updated_at) ||
+              left.email.localeCompare(right.email)
+            );
         }
       });
   }, [roleFilter, searchQuery, sortBy, users]);
@@ -162,9 +175,8 @@ export function UserRoleManager() {
   const pageStart = (currentPage - 1) * PAGE_SIZE;
   const paginatedUsers = filteredUsers.slice(pageStart, pageStart + PAGE_SIZE);
   const pageEnd = Math.min(pageStart + PAGE_SIZE, filteredUsers.length);
-  const visiblePages = Array.from(
-    { length: Math.min(5, totalPages) },
-    (_, index) => Math.min(Math.max(currentPage - 2, 1) + index, totalPages)
+  const visiblePages = Array.from({ length: Math.min(5, totalPages) }, (_, index) =>
+    Math.min(Math.max(currentPage - 2, 1) + index, totalPages)
   ).filter((page, index, array) => array.indexOf(page) === index);
 
   const handleUpdateRole = async (userId: string, role: UserRole) => {
@@ -189,7 +201,12 @@ export function UserRoleManager() {
       setUsers((previous) =>
         previous.map((item) =>
           item.id === userId
-            ? { ...item, role: updatedUser.role, email: updatedUser.email, updated_at: new Date().toISOString() }
+            ? {
+                ...item,
+                role: updatedUser.role,
+                email: updatedUser.email,
+                updated_at: new Date().toISOString(),
+              }
             : item
         )
       );
@@ -216,47 +233,67 @@ export function UserRoleManager() {
     <div className="space-y-6">
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <article className="rounded-[24px] border border-white/10 bg-[#2c1e16] p-5">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-gray-500">Tổng tài khoản</p>
+          <p className="text-xs font-semibold tracking-[0.2em] text-gray-500 uppercase">
+            Tổng tài khoản
+          </p>
           <div className="mt-3 flex items-end justify-between gap-3">
             <strong className="text-3xl font-extrabold text-white">{summary.total}</strong>
             <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-gray-200">
               Tất cả vai trò
             </span>
           </div>
-          <p className="mt-3 text-sm text-gray-400">Theo dõi toàn bộ tài khoản đang có trong hệ thống quản trị.</p>
+          <p className="mt-3 text-sm text-gray-400">
+            Theo dõi toàn bộ tài khoản đang có trong hệ thống quản trị.
+          </p>
         </article>
 
         <article className="rounded-[24px] border border-white/10 bg-[#2c1e16] p-5">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-gray-500">Khách hàng</p>
+          <p className="text-xs font-semibold tracking-[0.2em] text-gray-500 uppercase">
+            Khách hàng
+          </p>
           <div className="mt-3 flex items-end justify-between gap-3">
             <strong className="text-3xl font-extrabold text-white">{summary.customer}</strong>
             <span className="rounded-full bg-sky-500/15 px-3 py-1 text-xs font-semibold text-sky-300">
               Đang hoạt động
             </span>
           </div>
-          <p className="mt-3 text-sm text-gray-400">Nhóm tài khoản trải nghiệm tour và thanh toán mở khóa nội dung.</p>
+          <p className="mt-3 text-sm text-gray-400">
+            Nhóm tài khoản trải nghiệm tour và thanh toán mở khóa nội dung.
+          </p>
         </article>
 
         <article className="rounded-[24px] border border-white/10 bg-[#2c1e16] p-5">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-gray-500">Chờ duyệt chủ quán</p>
+          <p className="text-xs font-semibold tracking-[0.2em] text-gray-500 uppercase">
+            Chờ duyệt chủ quán
+          </p>
           <div className="mt-3 flex items-end justify-between gap-3">
-            <strong className="text-3xl font-extrabold text-white">{summary['pending-owner']}</strong>
+            <strong className="text-3xl font-extrabold text-white">
+              {summary['pending-owner']}
+            </strong>
             <span className="rounded-full bg-amber-500/15 px-3 py-1 text-xs font-semibold text-amber-300">
               Cần xử lý
             </span>
           </div>
-          <p className="mt-3 text-sm text-gray-400">Nhận diện nhanh các tài khoản đang chờ được cấp quyền chủ quán.</p>
+          <p className="mt-3 text-sm text-gray-400">
+            Nhận diện nhanh các tài khoản đang chờ được cấp quyền chủ quán.
+          </p>
         </article>
 
         <article className="rounded-[24px] border border-white/10 bg-[#2c1e16] p-5">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-gray-500">Nhóm vận hành</p>
+          <p className="text-xs font-semibold tracking-[0.2em] text-gray-500 uppercase">
+            Nhóm vận hành
+          </p>
           <div className="mt-3 flex items-end justify-between gap-3">
-            <strong className="text-3xl font-extrabold text-white">{summary.owner + summary.admin}</strong>
-            <span className="rounded-full bg-primary/15 px-3 py-1 text-xs font-semibold text-primary">
+            <strong className="text-3xl font-extrabold text-white">
+              {summary.owner + summary.admin}
+            </strong>
+            <span className="bg-primary/15 text-primary rounded-full px-3 py-1 text-xs font-semibold">
               Chủ quán + Admin
             </span>
           </div>
-          <p className="mt-3 text-sm text-gray-400">Gộp các vai trò quản trị nội dung và vận hành điểm bán.</p>
+          <p className="mt-3 text-sm text-gray-400">
+            Gộp các vai trò quản trị nội dung và vận hành điểm bán.
+          </p>
         </article>
       </section>
 
@@ -264,31 +301,31 @@ export function UserRoleManager() {
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
             <div className="flex-1">
-              <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
+              <label className="mb-2 block text-xs font-semibold tracking-[0.18em] text-gray-500 uppercase">
                 Tìm kiếm tài khoản
               </label>
               <div className="relative">
-                <span className="material-symbols-outlined pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">
+                <span className="material-symbols-outlined pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 text-gray-500">
                   search
                 </span>
                 <input
                   value={searchQuery}
                   onChange={(event) => setSearchQuery(event.target.value)}
                   placeholder="Tìm theo email, mã người dùng hoặc vai trò"
-                  className="min-h-12 w-full rounded-2xl border border-white/10 bg-black/20 pl-12 pr-4 text-sm text-white outline-none transition-colors placeholder:text-gray-500 focus:border-primary/40"
+                  className="focus:border-primary/40 min-h-12 w-full rounded-2xl border border-white/10 bg-black/20 pr-4 pl-12 text-sm text-white transition-colors outline-none placeholder:text-gray-500"
                 />
               </div>
             </div>
 
             <div className="grid gap-3 sm:grid-cols-2 xl:w-[420px]">
               <div>
-                <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
+                <label className="mb-2 block text-xs font-semibold tracking-[0.18em] text-gray-500 uppercase">
                   Lọc vai trò
                 </label>
                 <select
                   value={roleFilter}
                   onChange={(event) => setRoleFilter(event.target.value as RoleFilter)}
-                  className="min-h-12 w-full rounded-2xl border border-white/10 bg-[#17110d] px-3 text-sm text-white outline-none focus:border-primary/40"
+                  className="focus:border-primary/40 min-h-12 w-full rounded-2xl border border-white/10 bg-[#17110d] px-3 text-sm text-white outline-none"
                 >
                   <option value="all">Tất cả vai trò</option>
                   {ROLE_OPTIONS.map((option) => (
@@ -300,13 +337,13 @@ export function UserRoleManager() {
               </div>
 
               <div>
-                <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
+                <label className="mb-2 block text-xs font-semibold tracking-[0.18em] text-gray-500 uppercase">
                   Sắp xếp
                 </label>
                 <select
                   value={sortBy}
                   onChange={(event) => setSortBy(event.target.value as SortOption)}
-                  className="min-h-12 w-full rounded-2xl border border-white/10 bg-[#17110d] px-3 text-sm text-white outline-none focus:border-primary/40"
+                  className="focus:border-primary/40 min-h-12 w-full rounded-2xl border border-white/10 bg-[#17110d] px-3 text-sm text-white outline-none"
                 >
                   <option value="updated-desc">Cập nhật gần nhất</option>
                   <option value="created-desc">Tạo gần nhất</option>
@@ -333,7 +370,7 @@ export function UserRoleManager() {
               10 tài khoản / trang
             </span>
             {roleFilter !== 'all' && (
-              <span className="rounded-full border border-primary/20 bg-primary/10 px-3 py-2 text-primary">
+              <span className="border-primary/20 bg-primary/10 text-primary rounded-full border px-3 py-2">
                 {getRoleMeta(roleFilter).label}
               </span>
             )}
@@ -355,7 +392,9 @@ export function UserRoleManager() {
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
                       <h3 className="truncate text-lg font-bold text-white">{account.email}</h3>
-                      <span className={`rounded-full border px-3 py-1 text-[11px] font-semibold ${roleMeta.tone}`}>
+                      <span
+                        className={`rounded-full border px-3 py-1 text-[11px] font-semibold ${roleMeta.tone}`}
+                      >
                         {roleMeta.label}
                       </span>
                       {isCurrentUser && (
@@ -370,21 +409,27 @@ export function UserRoleManager() {
                         <span className="text-gray-500">Mã người dùng:</span> {account.id}
                       </p>
                       <p>
-                        <span className="text-gray-500">Tạo lúc:</span> {formatTimestamp(account.created_at)}
+                        <span className="text-gray-500">Tạo lúc:</span>{' '}
+                        {formatTimestamp(account.created_at)}
                       </p>
                       <p>
-                        <span className="text-gray-500">Cập nhật:</span> {formatTimestamp(account.updated_at)}
+                        <span className="text-gray-500">Cập nhật:</span>{' '}
+                        {formatTimestamp(account.updated_at)}
                       </p>
                     </div>
                   </div>
 
                   <div className="rounded-[20px] border border-white/8 bg-black/15 p-4">
-                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500">Vai trò mới</p>
+                    <p className="text-xs font-semibold tracking-[0.16em] text-gray-500 uppercase">
+                      Vai trò mới
+                    </p>
                     <select
                       value={account.role}
                       disabled={isSaving}
-                      onChange={(event) => void handleUpdateRole(account.id, event.target.value as UserRole)}
-                      className="mt-3 min-h-11 w-full rounded-xl border border-white/10 bg-[#17110d] px-3 text-sm text-white outline-none focus:border-primary/40 disabled:cursor-not-allowed disabled:opacity-60"
+                      onChange={(event) =>
+                        void handleUpdateRole(account.id, event.target.value as UserRole)
+                      }
+                      className="focus:border-primary/40 mt-3 min-h-11 w-full rounded-xl border border-white/10 bg-[#17110d] px-3 text-sm text-white outline-none disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       {ROLE_OPTIONS.map((option) => (
                         <option key={option.value} value={option.value}>
@@ -393,13 +438,17 @@ export function UserRoleManager() {
                       ))}
                     </select>
                     <p className="mt-3 text-xs text-gray-500">
-                      {isSaving ? 'Đang lưu thay đổi...' : 'Cập nhật quyền truy cập ngay trên từng tài khoản.'}
+                      {isSaving
+                        ? 'Đang lưu thay đổi...'
+                        : 'Cập nhật quyền truy cập ngay trên từng tài khoản.'}
                     </p>
                   </div>
 
                   <div className="flex items-center justify-start xl:justify-end">
                     <div className="rounded-[20px] border border-white/8 bg-black/15 px-4 py-3 text-sm text-gray-300">
-                      <div className="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500">Tóm tắt</div>
+                      <div className="text-xs font-semibold tracking-[0.16em] text-gray-500 uppercase">
+                        Tóm tắt
+                      </div>
                       <div className="mt-2 font-semibold text-white">{roleMeta.label}</div>
                       <div className="mt-1 text-xs text-gray-500">
                         {isCurrentUser ? 'Đang dùng phiên hiện tại' : 'Có thể điều chỉnh ngay'}

@@ -116,8 +116,7 @@ const DEVICE_PROFILE_COPY: Partial<Record<Language, Record<DeviceCopyKey, string
       '現在の端末に合わせて、動きや地図の詳細、バックグラウンド読み込みを自動で調整します。',
     deviceProfileLightDescription:
       '視覚効果とバックグラウンド読み込みを抑えて、電池持ちと安定性を優先します。',
-    deviceProfileBalancedDescription:
-      '多くの端末で快適さと負荷のバランスを保ちます。',
+    deviceProfileBalancedDescription: '多くの端末で快適さと負荷のバランスを保ちます。',
     deviceProfileFullDescription:
       '端末に余裕があるときは、より豊かな動きと広めの先読みを優先します。',
     deviceProfileUnknown: '不明',
@@ -166,15 +165,13 @@ const DEVICE_PROFILE_COPY: Partial<Record<Language, Record<DeviceCopyKey, string
       '현재 기기에 맞춰 움직임, 지도 디테일, 백그라운드 로딩을 자동으로 조절합니다.',
     deviceProfileLightDescription:
       '시각 효과와 백그라운드 로딩을 줄여 배터리와 안정성을 우선합니다.',
-    deviceProfileBalancedDescription:
-      '대부분의 기기에서 부드러움과 자원 사용의 균형을 맞춥니다.',
+    deviceProfileBalancedDescription: '대부분의 기기에서 부드러움과 자원 사용의 균형을 맞춥니다.',
     deviceProfileFullDescription:
       '기기 여유가 충분할 때 더 풍부한 움직임과 넓은 사전 로딩을 우선합니다.',
     deviceProfileUnknown: '알 수 없음',
     deviceProfileMotionReduced: '움직임 줄이기',
     deviceProfileMotionStandard: '기본 움직임',
-    deviceProfileBatteryHint:
-      '절전 모드로 인해 현재 프로필이 한 단계 더 보수적으로 적용됩니다.',
+    deviceProfileBatteryHint: '절전 모드로 인해 현재 프로필이 한 단계 더 보수적으로 적용됩니다.',
   },
   zh: {
     tourExperience: '导览体验',
@@ -187,14 +184,10 @@ const DEVICE_PROFILE_COPY: Partial<Record<Language, Record<DeviceCopyKey, string
     deviceProfileLight: '轻量',
     deviceProfileBalanced: '均衡',
     deviceProfileFull: '完整',
-    deviceProfileAutoDescription:
-      '让应用根据当前设备自动平衡动效、地图细节和后台加载。',
-    deviceProfileLightDescription:
-      '减少视觉效果和后台加载，优先保证续航与稳定性。',
-    deviceProfileBalancedDescription:
-      '在大多数设备上兼顾流畅体验和资源占用。',
-    deviceProfileFullDescription:
-      '当设备性能充足时，优先启用更丰富的动效和更宽的预加载范围。',
+    deviceProfileAutoDescription: '让应用根据当前设备自动平衡动效、地图细节和后台加载。',
+    deviceProfileLightDescription: '减少视觉效果和后台加载，优先保证续航与稳定性。',
+    deviceProfileBalancedDescription: '在大多数设备上兼顾流畅体验和资源占用。',
+    deviceProfileFullDescription: '当设备性能充足时，优先启用更丰富的动效和更宽的预加载范围。',
     deviceProfileUnknown: '未知',
     deviceProfileMotionReduced: '减少动效',
     deviceProfileMotionStandard: '标准动效',
@@ -207,7 +200,7 @@ function isCorruptedTranslation(value: string, fallback: string) {
     return false;
   }
 
-  return /Ã|�/.test(value) || (value.includes('?') && /[^\x00-\x7F]/.test(fallback));
+  return /\u00C3|\uFFFD/.test(value) || (value.includes('?') && /[^\x00-\x7F]/.test(fallback));
 }
 
 export function SettingsPanel({ isOpen, onClose, onSettingsChange }: SettingsPanelProps) {
@@ -285,9 +278,7 @@ export function SettingsPanel({ isOpen, onClose, onSettingsChange }: SettingsPan
       router.refresh();
     } catch (error) {
       console.error('Sign out failed:', error);
-      toast.error(
-        t('settings.signOutFailed', undefined, 'Đăng xuất thất bại. Vui lòng thử lại.')
-      );
+      toast.error(t('settings.signOutFailed', undefined, 'Đăng xuất thất bại. Vui lòng thử lại.'));
     } finally {
       setIsSigningOut(false);
     }
@@ -328,7 +319,8 @@ export function SettingsPanel({ isOpen, onClose, onSettingsChange }: SettingsPan
     deviceAssessment?.deviceMemory
       ? `RAM ${deviceAssessment.deviceMemory} GB`
       : `RAM ${getDeviceCopy('deviceProfileUnknown')}`,
-    deviceAssessment?.effectiveConnectionType && deviceAssessment.effectiveConnectionType !== 'unknown'
+    deviceAssessment?.effectiveConnectionType &&
+    deviceAssessment.effectiveConnectionType !== 'unknown'
       ? deviceAssessment.effectiveConnectionType.toUpperCase()
       : getDeviceCopy('deviceProfileUnknown'),
     deviceAssessment?.prefersReducedMotion
@@ -341,10 +333,10 @@ export function SettingsPanel({ isOpen, onClose, onSettingsChange }: SettingsPan
   return (
     <div className="fixed inset-0 z-[60] bg-black/60 backdrop-blur-sm" onClick={onClose}>
       <div
-        className="absolute inset-0 flex flex-col overflow-hidden bg-background-dark animate-slideUp"
-        onClick={e => e.stopPropagation()}
+        className="bg-background-dark animate-slideUp absolute inset-0 flex flex-col overflow-hidden"
+        onClick={(e) => e.stopPropagation()}
       >
-        <div className="sticky top-0 z-10 shrink-0 border-b border-white/5 bg-background-dark px-4 py-4">
+        <div className="bg-background-dark sticky top-0 z-10 shrink-0 border-b border-white/5 px-4 py-4">
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-bold text-white">{t('settings.title')}</h2>
             <button
@@ -387,12 +379,14 @@ export function SettingsPanel({ isOpen, onClose, onSettingsChange }: SettingsPan
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0">
-                          <p className="text-sm font-semibold leading-5">{lang.nativeName}</p>
+                          <p className="text-sm leading-5 font-semibold">{lang.nativeName}</p>
                           <p className="mt-1 text-xs text-white/65">{lang.name}</p>
                         </div>
                         <span
-                          className={`rounded-full px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] ${
-                            language === lang.code ? 'bg-white/18 text-white' : 'bg-white/8 text-white/55'
+                          className={`rounded-full px-2 py-1 text-[11px] font-semibold tracking-[0.18em] uppercase ${
+                            language === lang.code
+                              ? 'bg-white/18 text-white'
+                              : 'bg-white/8 text-white/55'
                           }`}
                         >
                           {lang.shortLabel}
@@ -415,14 +409,14 @@ export function SettingsPanel({ isOpen, onClose, onSettingsChange }: SettingsPan
                       {getDeviceCopy('deviceProfileDescription')}
                     </p>
                   </div>
-                  <span className="rounded-full border border-white/10 bg-black/20 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-primary">
+                  <span className="text-primary rounded-full border border-white/10 bg-black/20 px-3 py-1 text-xs font-semibold tracking-[0.18em] uppercase">
                     {getPerformanceLabel(effectivePerformance.effectiveTier)}
                   </span>
                 </div>
 
                 <div className="mt-4 grid grid-cols-2 gap-3">
                   <div className="rounded-2xl border border-white/10 bg-black/20 p-3">
-                    <p className="text-xs uppercase tracking-[0.18em] text-white/45">
+                    <p className="text-xs tracking-[0.18em] text-white/45 uppercase">
                       {getDeviceCopy('deviceProfileDetectedLabel')}
                     </p>
                     <p className="mt-2 text-base font-semibold text-white">
@@ -430,7 +424,7 @@ export function SettingsPanel({ isOpen, onClose, onSettingsChange }: SettingsPan
                     </p>
                   </div>
                   <div className="rounded-2xl border border-white/10 bg-black/20 p-3">
-                    <p className="text-xs uppercase tracking-[0.18em] text-white/45">
+                    <p className="text-xs tracking-[0.18em] text-white/45 uppercase">
                       {getDeviceCopy('deviceProfileAppliedLabel')}
                     </p>
                     <p className="mt-2 text-base font-semibold text-white">
@@ -473,13 +467,17 @@ export function SettingsPanel({ isOpen, onClose, onSettingsChange }: SettingsPan
                       >
                         <div className="flex items-start justify-between gap-3">
                           <div>
-                            <p className="font-semibold text-white">{getPerformanceLabel(option)}</p>
+                            <p className="font-semibold text-white">
+                              {getPerformanceLabel(option)}
+                            </p>
                             <p className="mt-1 text-sm leading-5 text-white/70">
                               {getPerformanceDescription(option)}
                             </p>
                           </div>
                           {isSelected && (
-                            <span className="material-symbols-outlined text-primary">check_circle</span>
+                            <span className="material-symbols-outlined text-primary">
+                              check_circle
+                            </span>
                           )}
                         </div>
                       </button>
@@ -498,42 +496,44 @@ export function SettingsPanel({ isOpen, onClose, onSettingsChange }: SettingsPan
                 <div className="flex items-center justify-between py-3">
                   <div>
                     <p className="font-medium text-white">{t('settings.autoMode')}</p>
-                    <p className="text-sm text-muted">{t('tour.autoMode')}</p>
+                    <p className="text-muted text-sm">{t('tour.autoMode')}</p>
                   </div>
                   <label className="relative inline-flex cursor-pointer items-center">
                     <input
                       type="checkbox"
                       checked={settings.autoPlayEnabled}
-                      onChange={e => updateSetting('autoPlayEnabled', e.target.checked)}
+                      onChange={(e) => updateSetting('autoPlayEnabled', e.target.checked)}
                       className="peer sr-only"
                     />
-                    <div className="h-7 w-12 rounded-full bg-white/20 peer-checked:bg-primary peer-checked:after:translate-x-full peer-checked:after:border-white after:absolute after:start-[2px] after:top-[2px] after:h-6 after:w-6 after:rounded-full after:bg-white after:transition-all after:content-['']" />
+                    <div className="peer-checked:bg-primary h-7 w-12 rounded-full bg-white/20 after:absolute after:start-[2px] after:top-[2px] after:h-6 after:w-6 after:rounded-full after:bg-white after:transition-all after:content-[''] peer-checked:after:translate-x-full peer-checked:after:border-white" />
                   </label>
                 </div>
 
                 <div className="py-3">
                   <div className="mb-2 flex items-center justify-between">
                     <p className="font-medium text-white">{t('settings.volume')}</p>
-                    <span className="text-sm text-muted">{Math.round(settings.volume * 100)}%</span>
+                    <span className="text-muted text-sm">{Math.round(settings.volume * 100)}%</span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <span className="material-symbols-outlined text-lg text-muted">volume_mute</span>
+                    <span className="material-symbols-outlined text-muted text-lg">
+                      volume_mute
+                    </span>
                     <input
                       type="range"
                       min="0"
                       max="100"
                       value={settings.volume * 100}
-                      onChange={e => updateSetting('volume', Number(e.target.value) / 100)}
-                      className="h-2 flex-1 cursor-pointer appearance-none rounded-lg bg-white/10 accent-primary"
+                      onChange={(e) => updateSetting('volume', Number(e.target.value) / 100)}
+                      className="accent-primary h-2 flex-1 cursor-pointer appearance-none rounded-lg bg-white/10"
                     />
-                    <span className="material-symbols-outlined text-lg text-muted">volume_up</span>
+                    <span className="material-symbols-outlined text-muted text-lg">volume_up</span>
                   </div>
                 </div>
 
                 <div className="py-3">
                   <div className="mb-2 flex items-center justify-between">
                     <p className="font-medium text-white">{t('settings.geofenceRadius')}</p>
-                    <span className="text-sm text-muted">{settings.geofenceRadius}m</span>
+                    <span className="text-muted text-sm">{settings.geofenceRadius}m</span>
                   </div>
                   <input
                     type="range"
@@ -541,10 +541,10 @@ export function SettingsPanel({ isOpen, onClose, onSettingsChange }: SettingsPan
                     max="50"
                     step="5"
                     value={settings.geofenceRadius}
-                    onChange={e => updateSetting('geofenceRadius', Number(e.target.value))}
-                    className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-white/10 accent-primary"
+                    onChange={(e) => updateSetting('geofenceRadius', Number(e.target.value))}
+                    className="accent-primary h-2 w-full cursor-pointer appearance-none rounded-lg bg-white/10"
                   />
-                  <div className="mt-1 flex justify-between text-xs text-muted">
+                  <div className="text-muted mt-1 flex justify-between text-xs">
                     <span>{t('settings.geofenceClose')}</span>
                     <span>{t('settings.geofenceFar')}</span>
                   </div>
@@ -559,16 +559,16 @@ export function SettingsPanel({ isOpen, onClose, onSettingsChange }: SettingsPan
                 <div className="flex items-center justify-between py-3">
                   <div>
                     <p className="font-medium text-white">{t('settings.batteryOptimization')}</p>
-                    <p className="text-sm text-muted">{t('battery.recommendation')}</p>
+                    <p className="text-muted text-sm">{t('battery.recommendation')}</p>
                   </div>
                   <label className="relative inline-flex cursor-pointer items-center">
                     <input
                       type="checkbox"
                       checked={settings.batterySaverMode}
-                      onChange={e => updateSetting('batterySaverMode', e.target.checked)}
+                      onChange={(e) => updateSetting('batterySaverMode', e.target.checked)}
                       className="peer sr-only"
                     />
-                    <div className="h-7 w-12 rounded-full bg-white/20 peer-checked:bg-primary peer-checked:after:translate-x-full peer-checked:after:border-white after:absolute after:start-[2px] after:top-[2px] after:h-6 after:w-6 after:rounded-full after:bg-white after:transition-all after:content-['']" />
+                    <div className="peer-checked:bg-primary h-7 w-12 rounded-full bg-white/20 after:absolute after:start-[2px] after:top-[2px] after:h-6 after:w-6 after:rounded-full after:bg-white after:transition-all after:content-[''] peer-checked:after:translate-x-full peer-checked:after:border-white" />
                   </label>
                 </div>
               </section>
@@ -596,9 +596,9 @@ export function SettingsPanel({ isOpen, onClose, onSettingsChange }: SettingsPan
                 </section>
               )}
 
-              <div className="pb-8 pt-4 text-center">
-                <p className="text-sm text-muted">FlavorQuest v1.0.0</p>
-                <a href="#" className="text-sm text-primary hover:underline">
+              <div className="pt-4 pb-8 text-center">
+                <p className="text-muted text-sm">FlavorQuest v1.0.0</p>
+                <a href="#" className="text-primary text-sm hover:underline">
                   {t('common.privacyPolicy')}
                 </a>
               </div>

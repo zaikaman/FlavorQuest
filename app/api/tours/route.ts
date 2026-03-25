@@ -47,7 +47,11 @@ async function validatePoiIds(
     return 'Tour phải có ít nhất 1 POI';
   }
 
-  const { data, error } = await supabase.from('pois').select('id').in('id', poiIds).is('deleted_at', null);
+  const { data, error } = await supabase
+    .from('pois')
+    .select('id')
+    .in('id', poiIds)
+    .is('deleted_at', null);
 
   if (error) {
     return error.message;
@@ -65,14 +69,19 @@ function buildPayload(body: Record<string, unknown>, poiIds: string[], createdBy
     poi_ids: poiIds,
     is_active: body.is_active !== false,
     estimated_duration_min:
-      typeof body.estimated_duration_min === 'number' && Number.isFinite(body.estimated_duration_min)
+      typeof body.estimated_duration_min === 'number' &&
+      Number.isFinite(body.estimated_duration_min)
         ? Math.round(body.estimated_duration_min)
         : null,
   };
 
   for (const field of TOUR_TEXT_FIELDS) {
     payload[field] =
-      field === 'name_vi' ? (typeof body[field] === 'string' ? body[field].trim() : '') : toNullableText(body[field]);
+      field === 'name_vi'
+        ? typeof body[field] === 'string'
+          ? body[field].trim()
+          : ''
+        : toNullableText(body[field]);
   }
 
   if (typeof createdBy !== 'undefined') {

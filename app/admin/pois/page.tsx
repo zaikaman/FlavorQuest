@@ -10,10 +10,7 @@ import {
   SUPPORTED_LANGUAGES,
   getLocalizedFieldName,
 } from '@/lib/constants';
-import {
-  POI_CATEGORY_OPTIONS,
-  type POICategoryTag,
-} from '@/lib/constants/poiCategories';
+import { POI_CATEGORY_OPTIONS, type POICategoryTag } from '@/lib/constants/poiCategories';
 import type { Language, POI } from '@/lib/types/index';
 
 interface OwnerOption {
@@ -27,7 +24,9 @@ type CoverageFilter = 'all' | 'ready' | 'missing-image' | 'missing-audio' | 'nee
 type SortOption = 'updated-desc' | 'updated-asc' | 'name-asc' | 'name-desc';
 
 const AUDIO_LANGUAGES: AudioLanguage[] = [...SUPPORTED_LANGUAGE_CODES];
-const AUDIO_LANGUAGE_META = new Map(SUPPORTED_LANGUAGES.map((language) => [language.code, language]));
+const AUDIO_LANGUAGE_META = new Map(
+  SUPPORTED_LANGUAGES.map((language) => [language.code, language])
+);
 const PAGE_SIZE = 10;
 
 function getAudioFieldKey(lang: AudioLanguage) {
@@ -147,7 +146,8 @@ export default function POIsPage() {
   };
 
   const hasImage = (poi: POI) => Boolean(poi.image_url);
-  const hasFullAudio = (poi: POI) => AUDIO_LANGUAGES.every((lang) => Boolean(poi[getAudioFieldKey(lang)]));
+  const hasFullAudio = (poi: POI) =>
+    AUDIO_LANGUAGES.every((lang) => Boolean(poi[getAudioFieldKey(lang)]));
   const audioCount = (poi: POI) =>
     AUDIO_LANGUAGES.filter((lang) => Boolean(poi[getAudioFieldKey(lang)])).length;
 
@@ -221,7 +221,10 @@ export default function POIsPage() {
           }
         }
 
-        if (selectedCategories.length > 0 && !selectedCategories.some((tag) => categoryTags.includes(tag))) {
+        if (
+          selectedCategories.length > 0 &&
+          !selectedCategories.some((tag) => categoryTags.includes(tag))
+        ) {
           return false;
         }
 
@@ -258,18 +261,36 @@ export default function POIsPage() {
       .sort((left, right) => {
         switch (sortBy) {
           case 'updated-asc':
-            return compareDateDesc(right.updated_at, left.updated_at) || left.name_vi.localeCompare(right.name_vi, 'vi');
+            return (
+              compareDateDesc(right.updated_at, left.updated_at) ||
+              left.name_vi.localeCompare(right.name_vi, 'vi')
+            );
           case 'updated-desc':
-            return compareDateDesc(left.updated_at, right.updated_at) || left.name_vi.localeCompare(right.name_vi, 'vi');
+            return (
+              compareDateDesc(left.updated_at, right.updated_at) ||
+              left.name_vi.localeCompare(right.name_vi, 'vi')
+            );
           case 'name-desc':
             return right.name_vi.localeCompare(left.name_vi, 'vi');
           case 'name-asc':
             return left.name_vi.localeCompare(right.name_vi, 'vi');
           default:
-            return compareDateDesc(left.updated_at, right.updated_at) || left.name_vi.localeCompare(right.name_vi, 'vi');
+            return (
+              compareDateDesc(left.updated_at, right.updated_at) ||
+              left.name_vi.localeCompare(right.name_vi, 'vi')
+            );
         }
       });
-  }, [assignmentFilter, coverageFilter, ownerEmailMap, pois, searchQuery, selectedCategories, selectedOwnerId, sortBy]);
+  }, [
+    assignmentFilter,
+    coverageFilter,
+    ownerEmailMap,
+    pois,
+    searchQuery,
+    selectedCategories,
+    selectedOwnerId,
+    sortBy,
+  ]);
 
   useEffect(() => {
     setCurrentPage(1);
@@ -286,9 +307,8 @@ export default function POIsPage() {
   const pageStart = (currentPage - 1) * PAGE_SIZE;
   const paginatedPois = filteredPois.slice(pageStart, pageStart + PAGE_SIZE);
   const pageEnd = Math.min(pageStart + PAGE_SIZE, filteredPois.length);
-  const visiblePages = Array.from(
-    { length: Math.min(5, totalPages) },
-    (_, index) => Math.min(Math.max(currentPage - 2, 1) + index, totalPages)
+  const visiblePages = Array.from({ length: Math.min(5, totalPages) }, (_, index) =>
+    Math.min(Math.max(currentPage - 2, 1) + index, totalPages)
   ).filter((page, index, array) => array.indexOf(page) === index);
 
   const handleDelete = async (id: string) => {
@@ -331,7 +351,9 @@ export default function POIsPage() {
 
       const updatedPoi = JSON.parse(responseText) as POI;
       setPois((previous) =>
-        previous.map((poi) => (poi.id === poiId ? { ...poi, owner_id: updatedPoi.owner_id ?? null } : poi))
+        previous.map((poi) =>
+          poi.id === poiId ? { ...poi, owner_id: updatedPoi.owner_id ?? null } : poi
+        )
       );
       await fetchPOIs();
       toast.success(ownerId ? 'Đã gán chủ quán cho địa điểm' : 'Đã gỡ chủ quán khỏi địa điểm');
@@ -347,7 +369,9 @@ export default function POIsPage() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-white">Quản lý địa điểm</h1>
-            <p className="text-gray-400">Sắp xếp danh sách POI, rà soát nội dung và phân công chủ quán.</p>
+            <p className="text-gray-400">
+              Sắp xếp danh sách POI, rà soát nội dung và phân công chủ quán.
+            </p>
           </div>
         </div>
         <TableSkeleton columns={6} rows={10} />
@@ -360,7 +384,7 @@ export default function POIsPage() {
       <section className="overflow-hidden rounded-[28px] border border-white/10 bg-[radial-gradient(circle_at_top_left,_rgba(255,145,77,0.2),_transparent_42%),linear-gradient(135deg,rgba(44,30,22,0.98),rgba(24,16,12,0.98))] p-6 shadow-[0_24px_80px_rgba(0,0,0,0.28)]">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-3xl space-y-3">
-            <span className="inline-flex w-fit items-center rounded-full border border-primary/25 bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-primary">
+            <span className="border-primary/25 bg-primary/10 text-primary inline-flex w-fit items-center rounded-full border px-3 py-1 text-xs font-semibold tracking-[0.24em] uppercase">
               Điều phối POI
             </span>
             <div>
@@ -368,19 +392,20 @@ export default function POIsPage() {
                 Quản lý POI chi tiết hơn, lọc nhanh hơn.
               </h1>
               <p className="mt-2 max-w-2xl text-sm leading-6 text-gray-300 sm:text-base">
-                Tìm đúng địa điểm cần xử lý theo danh mục, trạng thái nội dung hoặc chủ quán phụ trách. Mỗi trang hiển thị 10 POI để thao tác gọn hơn.
+                Tìm đúng địa điểm cần xử lý theo danh mục, trạng thái nội dung hoặc chủ quán phụ
+                trách. Mỗi trang hiển thị 10 POI để thao tác gọn hơn.
               </p>
             </div>
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
             <div className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-gray-200">
-              <div className="text-xs uppercase tracking-[0.18em] text-gray-500">Tổng hiện có</div>
+              <div className="text-xs tracking-[0.18em] text-gray-500 uppercase">Tổng hiện có</div>
               <div className="mt-1 text-2xl font-bold text-white">{summary.total}</div>
             </div>
             <Link
               href="/admin/pois/new"
-              className="inline-flex min-h-12 items-center gap-2 rounded-2xl bg-primary px-5 py-3 text-sm font-bold text-white shadow-lg shadow-primary/20 transition-transform hover:-translate-y-0.5 hover:bg-orange-600"
+              className="bg-primary shadow-primary/20 inline-flex min-h-12 items-center gap-2 rounded-2xl px-5 py-3 text-sm font-bold text-white shadow-lg transition-transform hover:-translate-y-0.5 hover:bg-orange-600"
             >
               <span className="material-symbols-outlined text-lg">add</span>
               Thêm địa điểm mới
@@ -391,31 +416,47 @@ export default function POIsPage() {
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <article className="rounded-[24px] border border-white/10 bg-[#2c1e16] p-5">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-gray-500">Đã gán chủ quán</p>
+          <p className="text-xs font-semibold tracking-[0.2em] text-gray-500 uppercase">
+            Đã gán chủ quán
+          </p>
           <div className="mt-3 flex items-end justify-between gap-3">
             <strong className="text-3xl font-extrabold text-white">{summary.assignedCount}</strong>
             <span className="rounded-full bg-emerald-500/15 px-3 py-1 text-xs font-semibold text-emerald-300">
-              {summary.total === 0 ? '0%' : `${Math.round((summary.assignedCount / summary.total) * 100)}%`}
+              {summary.total === 0
+                ? '0%'
+                : `${Math.round((summary.assignedCount / summary.total) * 100)}%`}
             </span>
           </div>
-          <p className="mt-3 text-sm text-gray-400">Theo dõi nhanh các điểm đã có người phụ trách vận hành.</p>
+          <p className="mt-3 text-sm text-gray-400">
+            Theo dõi nhanh các điểm đã có người phụ trách vận hành.
+          </p>
         </article>
 
         <article className="rounded-[24px] border border-white/10 bg-[#2c1e16] p-5">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-gray-500">Thiếu hình ảnh</p>
+          <p className="text-xs font-semibold tracking-[0.2em] text-gray-500 uppercase">
+            Thiếu hình ảnh
+          </p>
           <div className="mt-3 flex items-end justify-between gap-3">
-            <strong className="text-3xl font-extrabold text-white">{summary.missingImageCount}</strong>
+            <strong className="text-3xl font-extrabold text-white">
+              {summary.missingImageCount}
+            </strong>
             <span className="rounded-full bg-amber-500/15 px-3 py-1 text-xs font-semibold text-amber-300">
               Cần bổ sung
             </span>
           </div>
-          <p className="mt-3 text-sm text-gray-400">Nhận diện nhanh các POI chưa đủ hình ảnh để hiển thị tốt hơn.</p>
+          <p className="mt-3 text-sm text-gray-400">
+            Nhận diện nhanh các POI chưa đủ hình ảnh để hiển thị tốt hơn.
+          </p>
         </article>
 
         <article className="rounded-[24px] border border-white/10 bg-[#2c1e16] p-5">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-gray-500">Thiếu audio</p>
+          <p className="text-xs font-semibold tracking-[0.2em] text-gray-500 uppercase">
+            Thiếu audio
+          </p>
           <div className="mt-3 flex items-end justify-between gap-3">
-            <strong className="text-3xl font-extrabold text-white">{summary.missingAudioCount}</strong>
+            <strong className="text-3xl font-extrabold text-white">
+              {summary.missingAudioCount}
+            </strong>
             <span className="rounded-full bg-rose-500/15 px-3 py-1 text-xs font-semibold text-rose-300">
               Chưa hoàn chỉnh
             </span>
@@ -426,14 +467,18 @@ export default function POIsPage() {
         </article>
 
         <article className="rounded-[24px] border border-white/10 bg-[#2c1e16] p-5">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-gray-500">Kết quả hiện tại</p>
+          <p className="text-xs font-semibold tracking-[0.2em] text-gray-500 uppercase">
+            Kết quả hiện tại
+          </p>
           <div className="mt-3 flex items-end justify-between gap-3">
             <strong className="text-3xl font-extrabold text-white">{filteredPois.length}</strong>
-            <span className="rounded-full bg-primary/15 px-3 py-1 text-xs font-semibold text-primary">
+            <span className="bg-primary/15 text-primary rounded-full px-3 py-1 text-xs font-semibold">
               {totalPages} trang
             </span>
           </div>
-          <p className="mt-3 text-sm text-gray-400">Bộ lọc đang giúp thu hẹp danh sách để thao tác chính xác hơn.</p>
+          <p className="mt-3 text-sm text-gray-400">
+            Bộ lọc đang giúp thu hẹp danh sách để thao tác chính xác hơn.
+          </p>
         </article>
       </section>
 
@@ -441,18 +486,18 @@ export default function POIsPage() {
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
             <div className="flex-1">
-              <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
+              <label className="mb-2 block text-xs font-semibold tracking-[0.18em] text-gray-500 uppercase">
                 Tìm kiếm nâng cao
               </label>
               <div className="relative">
-                <span className="material-symbols-outlined pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">
+                <span className="material-symbols-outlined pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 text-gray-500">
                   search
                 </span>
                 <input
                   value={searchQuery}
                   onChange={(event) => setSearchQuery(event.target.value)}
                   placeholder="Tìm theo tên, món nổi bật, email chủ quán hoặc tọa độ"
-                  className="min-h-12 w-full rounded-2xl border border-white/10 bg-black/20 pl-12 pr-4 text-sm text-white outline-none transition-colors placeholder:text-gray-500 focus:border-primary/40"
+                  className="focus:border-primary/40 min-h-12 w-full rounded-2xl border border-white/10 bg-black/20 pr-4 pl-12 text-sm text-white transition-colors outline-none placeholder:text-gray-500"
                 />
               </div>
             </div>
@@ -482,9 +527,13 @@ export default function POIsPage() {
 
           <div>
             <div className="mb-3 flex items-center justify-between gap-3">
-              <label className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Danh mục</label>
+              <label className="text-xs font-semibold tracking-[0.18em] text-gray-500 uppercase">
+                Danh mục
+              </label>
               <span className="text-xs text-gray-400">
-                {selectedCategories.length === 0 ? 'Đang hiển thị tất cả danh mục' : `Đã chọn ${selectedCategories.length} danh mục`}
+                {selectedCategories.length === 0
+                  ? 'Đang hiển thị tất cả danh mục'
+                  : `Đã chọn ${selectedCategories.length} danh mục`}
               </span>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -512,13 +561,13 @@ export default function POIsPage() {
           {showAdvancedFilters && (
             <div className="grid gap-4 rounded-[24px] border border-white/8 bg-black/15 p-4 md:grid-cols-2 xl:grid-cols-4">
               <div>
-                <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
+                <label className="mb-2 block text-xs font-semibold tracking-[0.18em] text-gray-500 uppercase">
                   Trạng thái gán
                 </label>
                 <select
                   value={assignmentFilter}
                   onChange={(event) => setAssignmentFilter(event.target.value as AssignmentFilter)}
-                  className="min-h-11 w-full rounded-xl border border-white/10 bg-[#17110d] px-3 text-sm text-white outline-none focus:border-primary/40"
+                  className="focus:border-primary/40 min-h-11 w-full rounded-xl border border-white/10 bg-[#17110d] px-3 text-sm text-white outline-none"
                 >
                   <option value="all">Tất cả</option>
                   <option value="assigned">Đã gán chủ quán</option>
@@ -527,13 +576,13 @@ export default function POIsPage() {
               </div>
 
               <div>
-                <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
+                <label className="mb-2 block text-xs font-semibold tracking-[0.18em] text-gray-500 uppercase">
                   Chủ quán phụ trách
                 </label>
                 <select
                   value={selectedOwnerId}
                   onChange={(event) => setSelectedOwnerId(event.target.value)}
-                  className="min-h-11 w-full rounded-xl border border-white/10 bg-[#17110d] px-3 text-sm text-white outline-none focus:border-primary/40"
+                  className="focus:border-primary/40 min-h-11 w-full rounded-xl border border-white/10 bg-[#17110d] px-3 text-sm text-white outline-none"
                 >
                   <option value="all">Tất cả chủ quán</option>
                   {owners.map((owner) => (
@@ -545,13 +594,13 @@ export default function POIsPage() {
               </div>
 
               <div>
-                <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
+                <label className="mb-2 block text-xs font-semibold tracking-[0.18em] text-gray-500 uppercase">
                   Chất lượng nội dung
                 </label>
                 <select
                   value={coverageFilter}
                   onChange={(event) => setCoverageFilter(event.target.value as CoverageFilter)}
-                  className="min-h-11 w-full rounded-xl border border-white/10 bg-[#17110d] px-3 text-sm text-white outline-none focus:border-primary/40"
+                  className="focus:border-primary/40 min-h-11 w-full rounded-xl border border-white/10 bg-[#17110d] px-3 text-sm text-white outline-none"
                 >
                   <option value="all">Tất cả trạng thái</option>
                   <option value="ready">Đủ ảnh và audio</option>
@@ -562,13 +611,13 @@ export default function POIsPage() {
               </div>
 
               <div>
-                <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
+                <label className="mb-2 block text-xs font-semibold tracking-[0.18em] text-gray-500 uppercase">
                   Sắp xếp
                 </label>
                 <select
                   value={sortBy}
                   onChange={(event) => setSortBy(event.target.value as SortOption)}
-                  className="min-h-11 w-full rounded-xl border border-white/10 bg-[#17110d] px-3 text-sm text-white outline-none focus:border-primary/40"
+                  className="focus:border-primary/40 min-h-11 w-full rounded-xl border border-white/10 bg-[#17110d] px-3 text-sm text-white outline-none"
                 >
                   <option value="updated-desc">Cập nhật gần nhất</option>
                   <option value="updated-asc">Cập nhật lần đầu</option>
@@ -596,7 +645,7 @@ export default function POIsPage() {
               10 POI / trang
             </span>
             {activeFilterCount > 0 && (
-              <span className="rounded-full border border-primary/20 bg-primary/10 px-3 py-2 text-primary">
+              <span className="border-primary/20 bg-primary/10 text-primary rounded-full border px-3 py-2">
                 {activeFilterCount} bộ lọc đang bật
               </span>
             )}
@@ -657,7 +706,9 @@ export default function POIsPage() {
                       <div className="mt-3 flex flex-wrap gap-2">
                         {categoryTags.length > 0 ? (
                           categoryTags.map((tag) => {
-                            const category = POI_CATEGORY_OPTIONS.find((option) => option.value === tag);
+                            const category = POI_CATEGORY_OPTIONS.find(
+                              (option) => option.value === tag
+                            );
 
                             return (
                               <span
@@ -681,24 +732,28 @@ export default function POIsPage() {
                           {poi.signature_dish?.trim() || 'Chưa cập nhật'}
                         </p>
                         <p>
-                          <span className="text-gray-500">Tọa độ:</span> {poi.lat.toFixed(5)}, {poi.lng.toFixed(5)}
+                          <span className="text-gray-500">Tọa độ:</span> {poi.lat.toFixed(5)},{' '}
+                          {poi.lng.toFixed(5)}
                         </p>
                       </div>
                     </div>
                   </div>
                   <div className="space-y-3 rounded-[20px] border border-white/8 bg-black/15 p-4">
                     <div>
-                      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500">
+                      <p className="text-xs font-semibold tracking-[0.16em] text-gray-500 uppercase">
                         Chủ quán
                       </p>
-                      <p className="mt-2 truncate text-sm font-semibold text-white" title={ownerEmail}>
+                      <p
+                        className="mt-2 truncate text-sm font-semibold text-white"
+                        title={ownerEmail}
+                      >
                         {ownerEmail}
                       </p>
                     </div>
                     <select
                       value={poi.owner_id || ''}
                       onChange={(event) => void handleAssignOwner(poi.id, event.target.value)}
-                      className="min-h-11 w-full rounded-xl border border-white/10 bg-[#17110d] px-3 text-sm text-white outline-none focus:border-primary/40"
+                      className="focus:border-primary/40 min-h-11 w-full rounded-xl border border-white/10 bg-[#17110d] px-3 text-sm text-white outline-none"
                     >
                       <option value="">Chưa gán chủ quán</option>
                       {owners.map((owner) => (
@@ -711,7 +766,7 @@ export default function POIsPage() {
 
                   <div className="space-y-3 rounded-[20px] border border-white/8 bg-black/15 p-4">
                     <div>
-                      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500">
+                      <p className="text-xs font-semibold tracking-[0.16em] text-gray-500 uppercase">
                         Audio
                       </p>
                       <p className="mt-2 text-sm font-semibold text-white">

@@ -247,8 +247,6 @@ export default function TourPage() {
     autoPlayCooldownRef.current.clear();
   }, [language, selectedTourId]);
 
-
-
   const isAutoPlayOnCooldown = useCallback((poiId: string) => {
     const lastPlayedAt = autoPlayCooldownRef.current.get(poiId);
     if (!lastPlayedAt) {
@@ -382,14 +380,17 @@ export default function TourPage() {
       const nearest = findNearestPOI(filteredPosition, activePOIs);
 
       if (nearest && nearest.poi.id !== poi.id) {
-        console.log('[TourPage] skip auto-play because another POI is nearer under low GPS accuracy:', {
-          poiId: poi.id,
-          nearestPoiId: nearest.poi.id,
-          nearestDistance: Math.round(nearest.distance),
-          candidateDistance: Math.round(event.distance),
-          accuracy,
-          effectiveGeofenceRadius,
-        });
+        console.log(
+          '[TourPage] skip auto-play because another POI is nearer under low GPS accuracy:',
+          {
+            poiId: poi.id,
+            nearestPoiId: nearest.poi.id,
+            nearestDistance: Math.round(nearest.distance),
+            candidateDistance: Math.round(event.distance),
+            accuracy,
+            effectiveGeofenceRadius,
+          }
+        );
         return;
       }
     }
@@ -879,7 +880,10 @@ export default function TourPage() {
     if (filteredPosition) {
       rankedPOIs.sort((left, right) => {
         const leftDistance = calculateDistance(filteredPosition, { lat: left.lat, lng: left.lng });
-        const rightDistance = calculateDistance(filteredPosition, { lat: right.lat, lng: right.lng });
+        const rightDistance = calculateDistance(filteredPosition, {
+          lat: right.lat,
+          lng: right.lng,
+        });
         return leftDistance - rightDistance;
       });
     } else {
@@ -912,7 +916,11 @@ export default function TourPage() {
     }
 
     const connection = (navigator as Navigator & { connection?: NavigatorConnection }).connection;
-    if (connection?.saveData || connection?.effectiveType === 'slow-2g' || connection?.effectiveType === '2g') {
+    if (
+      connection?.saveData ||
+      connection?.effectiveType === 'slow-2g' ||
+      connection?.effectiveType === '2g'
+    ) {
       return;
     }
 
@@ -1115,10 +1123,10 @@ export default function TourPage() {
                 <button
                   type="button"
                   onClick={() => void resumeBlockedPlayback()}
-                  className="bg-[rgba(45,36,30,0.82)] border border-primary/30 shadow-lg backdrop-blur-md rounded-xl p-4 w-full text-left"
+                  className="border-primary/30 w-full rounded-xl border bg-[rgba(45,36,30,0.82)] p-4 text-left shadow-lg backdrop-blur-md"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/20 text-primary">
+                    <div className="bg-primary/20 text-primary flex h-11 w-11 shrink-0 items-center justify-center rounded-full">
                       <span className="material-symbols-outlined text-[22px]">touch_app</span>
                     </div>
                     <div className="min-w-0">
@@ -1161,13 +1169,13 @@ export default function TourPage() {
             isPlaying={audioPlayer.isPlaying}
             isPaused={audioPlayer.isPaused}
             currentTime={audioPlayer.currentTime}
-              duration={audioPlayer.duration}
-              volume={audioPlayer.volume}
-              playbackRate={audioPlayer.playbackRate}
-              isRepeatEnabled={audioPlayer.isRepeatEnabled}
-              isLoading={audioPlayer.isLoading}
-              nextPOI={nextPOI}
-              onPlay={audioPlayer.play}
+            duration={audioPlayer.duration}
+            volume={audioPlayer.volume}
+            playbackRate={audioPlayer.playbackRate}
+            isRepeatEnabled={audioPlayer.isRepeatEnabled}
+            isLoading={audioPlayer.isLoading}
+            nextPOI={nextPOI}
+            onPlay={audioPlayer.play}
             onPause={audioPlayer.pause}
             onSeek={audioPlayer.seek}
             onVolumeChange={audioPlayer.setVolume}
@@ -1221,7 +1229,6 @@ export default function TourPage() {
           <Toast message={toastMessage} type="info" onClose={() => setShowToast(false)} />
         </div>
       )}
-
       {/* Bottom Navigation */}
       <BottomNav
         activeTab={activeTab}

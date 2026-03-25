@@ -115,8 +115,9 @@ export function OwnerRequestManager() {
             </p>
             <h2 className="mt-2 text-2xl font-black text-white">Ưu tiên xử lý các yêu cầu mới</h2>
             <p className="mt-3 max-w-2xl text-sm leading-6 text-gray-400">
-              Các tài khoản hiển thị ở đây đã chọn đăng ký quyền chủ quán khi đăng nhập. Bạn có thể mở
-              nhanh đoạn trò chuyện với người dùng để xem ngữ cảnh, sau đó duyệt hoặc từ chối ngay tại đây.
+              Các tài khoản hiển thị ở đây đã chọn đăng ký quyền chủ quán khi đăng nhập. Bạn có thể
+              mở nhanh đoạn trò chuyện với người dùng để xem ngữ cảnh, sau đó duyệt hoặc từ chối
+              ngay tại đây.
             </p>
           </div>
 
@@ -192,7 +193,7 @@ export function OwnerRequestManager() {
                       onClick={() =>
                         request.threadId
                           ? router.push(`/admin/chat?threadId=${request.threadId}`)
-                            : toast.warning('Yêu cầu này chưa có đoạn trò chuyện để mở nhanh.')
+                          : toast.warning('Yêu cầu này chưa có đoạn trò chuyện để mở nhanh.')
                       }
                       className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-gray-100 transition-colors hover:bg-white/10"
                     >

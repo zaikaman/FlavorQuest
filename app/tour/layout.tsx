@@ -10,15 +10,10 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/contexts/AuthContext';
 import { useTranslations } from '@/lib/hooks/useTranslations';
 
-export default function TourLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function TourLayout({ children }: { children: React.ReactNode }) {
   const { t } = useTranslations();
   const router = useRouter();
-  const { user, isLoading, isRoleReady, isAdmin, isOwner, isPendingOwner } =
-    useAuth();
+  const { user, isLoading, isRoleReady, isAdmin, isOwner, isPendingOwner } = useAuth();
 
   useEffect(() => {
     if (isLoading) return;
@@ -46,29 +41,18 @@ export default function TourLayout({
       router.replace('/pending-owner');
       return;
     }
-
   }, [isAdmin, isLoading, isOwner, isPendingOwner, isRoleReady, router, user]);
 
-  if (
-    isLoading ||
-    !user ||
-    isOwner ||
-    isAdmin ||
-    isPendingOwner
-  ) {
+  if (isLoading || !user || isOwner || isAdmin || isPendingOwner) {
     return (
-      <div className="flex items-center justify-center h-screen bg-background-dark">
+      <div className="bg-background-dark flex h-screen items-center justify-center">
         <div className="flex flex-col items-center gap-4">
-          <span className="material-symbols-outlined text-primary text-5xl animate-spin">sync</span>
-          <p className="text-white text-lg">{t('common.loading')}</p>
+          <span className="material-symbols-outlined text-primary animate-spin text-5xl">sync</span>
+          <p className="text-lg text-white">{t('common.loading')}</p>
         </div>
       </div>
     );
   }
 
-  return (
-    <>
-      {children}
-    </>
-  );
+  return <>{children}</>;
 }

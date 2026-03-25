@@ -16,7 +16,9 @@ export default function AdminLoginPage() {
   const [isSendingOtp, setIsSendingOtp] = useState(false);
   const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
   const [cooldown, setCooldown] = useState(0);
-  const [feedback, setFeedback] = useState<{ type: 'error' | 'success'; message: string } | null>(null);
+  const [feedback, setFeedback] = useState<{ type: 'error' | 'success'; message: string } | null>(
+    null
+  );
 
   const normalizedEmail = useMemo(() => email.trim().toLowerCase(), [email]);
   const isResendLocked = cooldown > 0 && normalizedEmail === lastSentEmail;
@@ -165,19 +167,22 @@ export default function AdminLoginPage() {
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-12 text-white">
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute left-[-10%] top-[-8%] h-[38%] w-[38%] rounded-full bg-primary/18 blur-[120px]" />
-        <div className="absolute bottom-[4%] right-[-8%] h-[30%] w-[30%] rounded-full bg-[#f8d3a5]/10 blur-[110px]" />
+        <div className="bg-primary/18 absolute top-[-8%] left-[-10%] h-[38%] w-[38%] rounded-full blur-[120px]" />
+        <div className="absolute right-[-8%] bottom-[4%] h-[30%] w-[30%] rounded-full bg-[#f8d3a5]/10 blur-[110px]" />
       </div>
 
       <div className="relative z-10 w-full max-w-md">
         <div className="mb-8 text-center">
-          <div className="mb-4 inline-flex h-20 w-20 items-center justify-center rounded-[28px] border border-primary/20 bg-primary/10 shadow-[0_0_24px_rgba(242,108,13,0.22)]">
+          <div className="border-primary/20 bg-primary/10 mb-4 inline-flex h-20 w-20 items-center justify-center rounded-[28px] border shadow-[0_0_24px_rgba(242,108,13,0.22)]">
             <span className="material-symbols-outlined text-primary text-[40px]">shield_lock</span>
           </div>
-          <p className="text-xs font-semibold uppercase tracking-[0.28em] text-primary/80">Cổng quản trị</p>
+          <p className="text-primary/80 text-xs font-semibold tracking-[0.28em] uppercase">
+            Cổng quản trị
+          </p>
           <h1 className="mt-3 text-3xl font-black text-white">Đăng nhập quản trị</h1>
           <p className="mt-3 text-sm leading-6 text-gray-400">
-            Dành riêng cho tài khoản quản trị. Email không có quyền quản trị sẽ không thể vào khu vực này.
+            Dành riêng cho tài khoản quản trị. Email không có quyền quản trị sẽ không thể vào khu
+            vực này.
           </p>
         </div>
 
@@ -197,7 +202,8 @@ export default function AdminLoginPage() {
           <div className="space-y-6">
             <div className="rounded-2xl border border-white/10 bg-black/15 px-4 py-4">
               <p className="text-sm leading-6 text-gray-300">
-                Nhập email quản trị để nhận mã OTP. Khu vực này không dùng chung với cổng khách hàng hoặc chủ quán.
+                Nhập email quản trị để nhận mã OTP. Khu vực này không dùng chung với cổng khách hàng
+                hoặc chủ quán.
               </p>
             </div>
 
@@ -212,13 +218,13 @@ export default function AdminLoginPage() {
                 onChange={(event) => setEmail(event.target.value)}
                 placeholder="admin@example.com"
                 autoComplete="email"
-                className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-white outline-none transition-colors placeholder:text-gray-500 focus:border-primary/50"
+                className="focus:border-primary/50 w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-white transition-colors outline-none placeholder:text-gray-500"
               />
               <button
                 type="button"
                 onClick={handleSendOtp}
                 disabled={isSendingOtp || isResendLocked}
-                className="w-full rounded-2xl bg-primary px-6 py-3 font-bold text-white transition-colors hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
+                className="bg-primary w-full rounded-2xl px-6 py-3 font-bold text-white transition-colors hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {isSendingOtp ? (
                   <InlineSpinner label="Đang gửi mã..." />
@@ -252,13 +258,13 @@ export default function AdminLoginPage() {
                   placeholder="123456"
                   autoComplete="one-time-code"
                   maxLength={6}
-                  className="w-full rounded-2xl border border-white/10 bg-[#17100b] px-4 py-3 text-center text-xl tracking-[0.4em] text-white outline-none transition-colors placeholder:tracking-normal placeholder:text-gray-500 focus:border-primary/50"
+                  className="focus:border-primary/50 w-full rounded-2xl border border-white/10 bg-[#17100b] px-4 py-3 text-center text-xl tracking-[0.4em] text-white transition-colors outline-none placeholder:tracking-normal placeholder:text-gray-500"
                 />
                 <button
                   type="button"
                   onClick={handleVerifyOtp}
                   disabled={isVerifyingOtp}
-                  className="w-full rounded-2xl border border-primary/30 bg-primary/15 px-6 py-3 font-bold text-primary transition-colors hover:bg-primary/20 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="border-primary/30 bg-primary/15 text-primary hover:bg-primary/20 w-full rounded-2xl border px-6 py-3 font-bold transition-colors disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {isVerifyingOtp ? (
                     <InlineSpinner label="Đang xác thực..." color="primary" />

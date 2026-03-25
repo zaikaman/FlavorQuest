@@ -67,9 +67,7 @@ export async function ensureOwnerRequestForUser(user: { id: string; email: strin
   const adminClient = createAdminClient();
   const { data: existingProfile, error: profileError } = await adminClient
     .from('users')
-    .select(
-      'id, email, role, owner_request_status, owner_requested_at, owner_reviewed_at'
-    )
+    .select('id, email, role, owner_request_status, owner_requested_at, owner_reviewed_at')
     .eq('id', user.id)
     .maybeSingle<UserOwnerRequestRow>();
 

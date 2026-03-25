@@ -1,7 +1,7 @@
 /**
  * Geolocation Service
  * Browser API wrapper cho GPS tracking
- * 
+ *
  * Exports:
  * - getCurrentPosition: Get current GPS position
  * - watchPosition: Watch position changes

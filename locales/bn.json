@@ -6,14 +6,7 @@
   "metadata": {
     "title": "FlavorQuest - Vĩnh Khánhের খাবারের আবিষ্কার",
     "description": "Vĩnh Khánh-র phố-খাদ্য অন্বেষণের স্বয়ংক্রিয় অডিও ন্যারেশন ট্যুর. বহু-ভাষা সমর্থিত offline-first PWA.",
-    "keywords": [
-      "food tour",
-      "audio guide",
-      "Vĩnh Khánh",
-      "Cần Thơ",
-      "ẩm thực",
-      "PWA"
-    ]
+    "keywords": ["food tour", "audio guide", "Vĩnh Khánh", "Cần Thơ", "ẩm thực", "PWA"]
   },
   "manifest": {
     "name": "FlavorQuest - স্বয়ংক্রিয় অডিও ন্যারেশন অনভিজ্ঞতা",

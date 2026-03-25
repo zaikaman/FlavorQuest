@@ -12,12 +12,12 @@ export default async function Home() {
   const isAuth = await isAuthenticated(supabase);
 
   return (
-    <div className="relative flex min-h-screen w-full overflow-x-hidden bg-background-dark text-white font-display selection:bg-primary selection:text-white">
+    <div className="bg-background-dark font-display selection:bg-primary relative flex min-h-screen w-full overflow-x-hidden text-white selection:text-white">
       {/* Full Screen Background Image with Overlay */}
-      <div className="absolute inset-0 z-0 select-none pointer-events-none">
+      <div className="pointer-events-none absolute inset-0 z-0 select-none">
         {/* Main Image */}
         <div
-          className="w-full h-full bg-cover bg-center object-cover animate-fade-in"
+          className="animate-fade-in h-full w-full bg-cover bg-center object-cover"
           data-alt="Close up of delicious grilled food cooking on a charcoal street food grill at night with smoke rising"
           style={{
             backgroundImage: `url('https://lh3.googleusercontent.com/aida-public/AB6AXuD1td4WSx6nl5TKAIPQHvb3mXshqreYAsVVo5NGNLo4nkeSZVy-c4WPWG5TBcBOnTUczh9Q4wjij1A12mpRZrc-ME4sJthwOil3ubDdHgHAPCiXAM-77eCwcoDOIozkEpSVKWANT49fnbkrsEeUQ6qRhE7Cjs7ecrqz_iS4B9ha0zKruboEGSrVxELdqF2B3ohGZZ99cp-OG1iRCCZ4t-cqTc7bQjxoV9kFzigSrAi2XDwsssfntyMkvmsUooxLreHQfcjVYlaTnbaN')`,
@@ -25,14 +25,14 @@ export default async function Home() {
         ></div>
 
         {/* Gradient Overlay: Clearer top for image visibility, dark bottom for text contrast */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-background-dark/40 to-background-dark"></div>
+        <div className="via-background-dark/40 to-background-dark absolute inset-0 bg-gradient-to-b from-black/20"></div>
 
         {/* Extra bottom fade for seamless UI integration */}
-        <div className="absolute bottom-0 left-0 w-full h-2/3 bg-gradient-to-t from-[#221710] via-[#221710]/90 to-transparent"></div>
+        <div className="absolute bottom-0 left-0 h-2/3 w-full bg-gradient-to-t from-[#221710] via-[#221710]/90 to-transparent"></div>
       </div>
 
       {/* Main Content Container */}
-      <div className="relative z-10 flex min-h-screen w-full flex-col safe-pt safe-pb px-6">
+      <div className="safe-pt safe-pb relative z-10 flex min-h-screen w-full flex-col px-6">
         <SplashContent isAuthenticated={isAuth} />
       </div>
     </div>

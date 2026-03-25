@@ -1,14 +1,14 @@
 /**
  * Speed Calculator
- * 
+ *
  * Tính tốc độ di chuyển từ GPS coordinates
- * 
+ *
  * Features:
  * - Calculate speed from consecutive GPS readings
  * - Smooth speed using moving average (reduce GPS noise)
  * - Detect movement states (stationary, walking, running, vehicle)
  * - Format speed for display
- * 
+ *
  * Use cases:
  * - Pause auto-play khi user đi quá nhanh (>15 km/h)
  * - Detect stationary state (pause tour sau 5 phút)
@@ -79,17 +79,17 @@ const DEFAULT_CONFIG: SpeedCalculatorConfig = {
 
 /**
  * Speed Calculator Class
- * 
+ *
  * @example
  * ```ts
  * const speedCalc = new SpeedCalculator();
- * 
+ *
  * // Add GPS readings
  * const speed = speedCalc.addReading({
  *   lat: 10.759,
  *   lng: 106.705,
  * });
- * 
+ *
  * console.log(speed); // 1.5 m/s
  * console.log(speedCalc.getState()); // 'walking'
  * console.log(speedCalc.getSpeedKmh()); // 5.4 km/h
@@ -106,7 +106,7 @@ export class SpeedCalculator {
 
   /**
    * Add new GPS reading and calculate speed
-   * 
+   *
    * @param coordinates - New GPS coordinates
    * @param timestamp - Optional timestamp (default: now)
    * @returns Calculated speed in m/s (null if not enough data)
@@ -283,7 +283,7 @@ export class SpeedCalculator {
 
   /**
    * Format speed for display
-   * 
+   *
    * @param locale - Locale for number formatting
    * @returns Formatted string (e.g., "5.4 km/h", "Đang đứng yên")
    */
@@ -332,7 +332,7 @@ let globalSpeedCalculator: SpeedCalculator | null = null;
 
 /**
  * Get global speed calculator instance (singleton)
- * 
+ *
  * @example
  * ```ts
  * const speedCalc = getSpeedCalculator();

@@ -11,7 +11,7 @@ export default function TourChatPage() {
   return (
     <div className="bg-background-dark relative min-h-screen overflow-hidden text-white">
       <div className="pointer-events-none fixed inset-0">
-        <div className="absolute top-[-8%] left-[-12%] h-[42%] w-[42%] rounded-full bg-primary/18 blur-[120px]" />
+        <div className="bg-primary/18 absolute top-[-8%] left-[-12%] h-[42%] w-[42%] rounded-full blur-[120px]" />
         <div className="absolute right-[-8%] bottom-[10%] h-[32%] w-[32%] rounded-full bg-[#ffb07a]/10 blur-[110px]" />
       </div>
 
@@ -26,7 +26,9 @@ export default function TourChatPage() {
           params.set('tab', tab);
 
           if (tab === 'assistant') {
-            const nextUrl = params.toString() ? `/tour/assistant?${params.toString()}` : '/tour/assistant';
+            const nextUrl = params.toString()
+              ? `/tour/assistant?${params.toString()}`
+              : '/tour/assistant';
             router.push(nextUrl);
             return;
           }

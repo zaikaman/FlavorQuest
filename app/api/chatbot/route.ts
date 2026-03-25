@@ -252,10 +252,7 @@ export async function GET(request: NextRequest) {
   const profile = await getCurrentUserProfile(supabase);
 
   if (!profile) {
-    return NextResponse.json(
-      { error: 'Unauthorized' },
-      { status: 401, headers: NO_STORE_HEADERS }
-    );
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401, headers: NO_STORE_HEADERS });
   }
 
   if (profile.role === 'pending-owner') {
@@ -296,10 +293,7 @@ export async function POST(request: NextRequest) {
   const profile = await getCurrentUserProfile(supabase);
 
   if (!profile) {
-    return NextResponse.json(
-      { error: 'Unauthorized' },
-      { status: 401, headers: NO_STORE_HEADERS }
-    );
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401, headers: NO_STORE_HEADERS });
   }
 
   if (profile.role === 'pending-owner') {
@@ -378,7 +372,9 @@ export async function POST(request: NextRequest) {
     }
 
     const nextTitle =
-      previousMessages.length === 0 ? buildConversationTitle(message, workspaceRole) : conversation.title;
+      previousMessages.length === 0
+        ? buildConversationTitle(message, workspaceRole)
+        : conversation.title;
 
     const { updatedConversation } = await persistConversationTurn(
       supabase,

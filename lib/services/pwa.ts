@@ -1,12 +1,12 @@
 /**
  * PWA Lifecycle Service
- * 
+ *
  * Quản lý PWA lifecycle events:
  * - Service Worker registration
  * - Update notifications
  * - Install prompts
  * - Offline/online detection
- * 
+ *
  * Features:
  * - Auto-register service worker
  * - Check for updates
@@ -31,7 +31,7 @@ export type PWAInstallState = 'not-installed' | 'prompt-available' | 'installed'
 
 /**
  * Service Worker Registration
- * 
+ *
  * @returns Promise resolving to ServiceWorkerRegistration or null
  */
 export async function registerServiceWorker(): Promise<ServiceWorkerRegistration | null> {
@@ -54,9 +54,12 @@ export async function registerServiceWorker(): Promise<ServiceWorkerRegistration
     console.log('Service Worker registered:', registration.scope);
 
     // Check for updates every hour
-    setInterval(() => {
-      registration.update();
-    }, 60 * 60 * 1000);
+    setInterval(
+      () => {
+        registration.update();
+      },
+      60 * 60 * 1000
+    );
 
     return registration;
   } catch (error) {
@@ -67,12 +70,10 @@ export async function registerServiceWorker(): Promise<ServiceWorkerRegistration
 
 /**
  * Check for Service Worker updates
- * 
+ *
  * @param registration - ServiceWorkerRegistration object
  */
-export async function checkForUpdates(
-  registration: ServiceWorkerRegistration
-): Promise<boolean> {
+export async function checkForUpdates(registration: ServiceWorkerRegistration): Promise<boolean> {
   try {
     await registration.update();
     return !!registration.waiting;
@@ -114,7 +115,7 @@ async function waitForWaitingServiceWorker(
 
 /**
  * Skip waiting and activate new Service Worker immediately
- * 
+ *
  * @param registration - ServiceWorkerRegistration object
  */
 export async function skipWaitingAndActivate(
@@ -178,14 +179,14 @@ interface BeforeInstallPromptEvent extends Event {
 
 /**
  * Setup A2HS (Add to Home Screen) prompt
- * 
+ *
  * @param callback - Called when prompt is available or user accepts/dismisses
  */
 export function setupInstallPrompt(
   callback: (event: BeforeInstallPromptEvent | null, outcome?: 'accepted' | 'dismissed') => void
 ): () => void {
   if (typeof window === 'undefined') {
-    return () => { };
+    return () => {};
   }
 
   let deferredPrompt: BeforeInstallPromptEvent | null = null;
@@ -215,7 +216,7 @@ export function setupInstallPrompt(
 
 /**
  * Show A2HS prompt
- * 
+ *
  * @param promptEvent - BeforeInstallPromptEvent from setupInstallPrompt
  * @returns User choice outcome
  */
@@ -249,7 +250,11 @@ export async function clearAllCaches(): Promise<void> {
  * Get cache storage estimate
  */
 export async function getCacheSize(): Promise<{ usage: number; quota: number } | null> {
-  if (typeof window === 'undefined' || !('storage' in navigator) || !('estimate' in navigator.storage)) {
+  if (
+    typeof window === 'undefined' ||
+    !('storage' in navigator) ||
+    !('estimate' in navigator.storage)
+  ) {
     return null;
   }
 

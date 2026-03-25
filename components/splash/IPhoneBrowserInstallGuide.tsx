@@ -1,4 +1,3 @@
-
 'use client';
 
 import Image from 'next/image';
@@ -14,7 +13,8 @@ export function isIPhoneSafariBrowser() {
 
   const userAgent = window.navigator.userAgent;
   const isIPhone = /iPhone/i.test(userAgent);
-  const isSafari = /Safari/i.test(userAgent) && !/CriOS|FxiOS|EdgiOS|OPiOS|DuckDuckGo/i.test(userAgent);
+  const isSafari =
+    /Safari/i.test(userAgent) && !/CriOS|FxiOS|EdgiOS|OPiOS|DuckDuckGo/i.test(userAgent);
 
   return isIPhone && isSafari && !isStandalone();
 }
@@ -56,14 +56,15 @@ export function IPhoneBrowserInstallGuide() {
     <section className="w-full rounded-[32px] bg-[#eef3f7] px-4 py-8 text-slate-900 shadow-[0_20px_80px_rgba(0,0,0,0.18)] md:px-6 md:py-10">
       <div className="mx-auto max-w-3xl">
         <div className="mb-8 text-center">
-          <span className="inline-flex rounded-full bg-sky-100 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.24em] text-sky-700">
+          <span className="inline-flex rounded-full bg-sky-100 px-4 py-1.5 text-xs font-bold tracking-[0.24em] text-sky-700 uppercase">
             Safari trên iPhone
           </span>
           <h2 className="mt-4 text-3xl font-bold tracking-tight text-slate-900">
             Hướng dẫn cài đặt ứng dụng
           </h2>
           <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-slate-600 md:text-base">
-            Nếu bạn đang mở FlavorQuest bằng trình duyệt trên iPhone, hãy thêm ứng dụng vào màn hình chính để có trải nghiệm như một PWA đầy đủ.
+            Nếu bạn đang mở FlavorQuest bằng trình duyệt trên iPhone, hãy thêm ứng dụng vào màn hình
+            chính để có trải nghiệm như một PWA đầy đủ.
           </p>
         </div>
 

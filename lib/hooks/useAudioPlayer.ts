@@ -77,10 +77,7 @@ function createAudioPlayTimeoutError(): Error {
 }
 
 export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
-  const opts = useMemo(
-    () => ({ ...DEFAULT_OPTIONS, ...options }),
-    [options]
-  );
+  const opts = useMemo(() => ({ ...DEFAULT_OPTIONS, ...options }), [options]);
 
   const [state, setState] = useState<AudioPlayerState>({
     isPlaying: false,
@@ -96,7 +93,9 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
     error: null,
     isTTSFallback: false,
   });
-  const [interactionRequiredItem, setInteractionRequiredItem] = useState<AudioQueueItem | null>(null);
+  const [interactionRequiredItem, setInteractionRequiredItem] = useState<AudioQueueItem | null>(
+    null
+  );
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const playPromiseRef = useRef<Promise<void> | null>(null);
@@ -158,78 +157,81 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
     return LANGUAGE_CONFIG_MAP[lang || 'vi']?.ttsLang || 'vi-VN';
   }, []);
 
-  const playWithTTS = useCallback((item: AudioQueueItem) => {
-    if (typeof speechSynthesis === 'undefined') {
-      setState(prev => ({
-        ...prev,
-        isPlaying: false,
-        isLoading: false,
-        error: 'TTS not supported',
-      }));
-      optionsRef.current.onError?.('TTS not supported', item);
-      return;
-    }
-
-    speechSynthesis.cancel();
-
-    const text = item.description || item.title || '';
-    if (!text) {
-      playNextRef.current();
-      return;
-    }
-
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = getLangCode(item.language || opts.language);
-    utterance.rate = state.playbackRate;
-    utterance.pitch = 1;
-    utterance.volume = state.volume;
-
-    utterance.onstart = () => {
-      setState(prev => ({
-        ...prev,
-        isPlaying: true,
-        isPaused: false,
-        isLoading: false,
-        isTTSFallback: true,
-      }));
-      optionsRef.current.onTTSFallback?.(item);
-    };
-
-    utterance.onend = () => {
-      if (isRepeatEnabledRef.current) {
-        playWithTTSRef.current(item);
+  const playWithTTS = useCallback(
+    (item: AudioQueueItem) => {
+      if (typeof speechSynthesis === 'undefined') {
+        setState((prev) => ({
+          ...prev,
+          isPlaying: false,
+          isLoading: false,
+          error: 'TTS not supported',
+        }));
+        optionsRef.current.onError?.('TTS not supported', item);
         return;
       }
 
-      setState(prev => ({
-        ...prev,
-        isPlaying: false,
-        isPaused: false,
-        isTTSFallback: false,
-        currentTime: 0,
-      }));
-      ttsUtteranceRef.current = null;
-      optionsRef.current.onEnded?.(item);
-      playNextRef.current();
-    };
+      speechSynthesis.cancel();
 
-    utterance.onerror = event => {
-      const errorMessage = `TTS error: ${event.error}`;
-      setState(prev => ({
-        ...prev,
-        isPlaying: false,
-        isLoading: false,
-        isTTSFallback: false,
-        error: errorMessage,
-      }));
-      ttsUtteranceRef.current = null;
-      optionsRef.current.onError?.(errorMessage, item);
-      playNextRef.current();
-    };
+      const text = item.description || item.title || '';
+      if (!text) {
+        playNextRef.current();
+        return;
+      }
 
-    ttsUtteranceRef.current = utterance;
-    speechSynthesis.speak(utterance);
-  }, [getLangCode, opts.language, state.playbackRate, state.volume]);
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = getLangCode(item.language || opts.language);
+      utterance.rate = state.playbackRate;
+      utterance.pitch = 1;
+      utterance.volume = state.volume;
+
+      utterance.onstart = () => {
+        setState((prev) => ({
+          ...prev,
+          isPlaying: true,
+          isPaused: false,
+          isLoading: false,
+          isTTSFallback: true,
+        }));
+        optionsRef.current.onTTSFallback?.(item);
+      };
+
+      utterance.onend = () => {
+        if (isRepeatEnabledRef.current) {
+          playWithTTSRef.current(item);
+          return;
+        }
+
+        setState((prev) => ({
+          ...prev,
+          isPlaying: false,
+          isPaused: false,
+          isTTSFallback: false,
+          currentTime: 0,
+        }));
+        ttsUtteranceRef.current = null;
+        optionsRef.current.onEnded?.(item);
+        playNextRef.current();
+      };
+
+      utterance.onerror = (event) => {
+        const errorMessage = `TTS error: ${event.error}`;
+        setState((prev) => ({
+          ...prev,
+          isPlaying: false,
+          isLoading: false,
+          isTTSFallback: false,
+          error: errorMessage,
+        }));
+        ttsUtteranceRef.current = null;
+        optionsRef.current.onError?.(errorMessage, item);
+        playNextRef.current();
+      };
+
+      ttsUtteranceRef.current = utterance;
+      speechSynthesis.speak(utterance);
+    },
+    [getLangCode, opts.language, state.playbackRate, state.volume]
+  );
 
   useEffect(() => {
     playWithTTSRef.current = playWithTTS;
@@ -248,38 +250,41 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
     });
   }, [ensureAudioElement]);
 
-  const registerInteractionRetry = useCallback((item: AudioQueueItem) => {
-    if (typeof window === 'undefined') {
-      return;
-    }
-
-    pendingInteractionItemRef.current = item;
-
-    if (interactionRetryHandlerRef.current) {
-      return;
-    }
-
-    const handler = () => {
-      const nextItem = pendingInteractionItemRef.current;
-      pendingInteractionItemRef.current = null;
-      detachInteractionRetryListeners();
-      setInteractionRequiredItem(null);
-
-      if (!nextItem) {
+  const registerInteractionRetry = useCallback(
+    (item: AudioQueueItem) => {
+      if (typeof window === 'undefined') {
         return;
       }
 
-      void (async () => {
-        await unlockAudio();
-        await playRef.current(nextItem);
-      })();
-    };
+      pendingInteractionItemRef.current = item;
 
-    interactionRetryHandlerRef.current = handler;
-    window.addEventListener('pointerdown', handler, { capture: true, once: true });
-    window.addEventListener('keydown', handler, { capture: true, once: true });
-    window.addEventListener('touchstart', handler, { capture: true, once: true });
-  }, [detachInteractionRetryListeners, unlockAudio]);
+      if (interactionRetryHandlerRef.current) {
+        return;
+      }
+
+      const handler = () => {
+        const nextItem = pendingInteractionItemRef.current;
+        pendingInteractionItemRef.current = null;
+        detachInteractionRetryListeners();
+        setInteractionRequiredItem(null);
+
+        if (!nextItem) {
+          return;
+        }
+
+        void (async () => {
+          await unlockAudio();
+          await playRef.current(nextItem);
+        })();
+      };
+
+      interactionRetryHandlerRef.current = handler;
+      window.addEventListener('pointerdown', handler, { capture: true, once: true });
+      window.addEventListener('keydown', handler, { capture: true, once: true });
+      window.addEventListener('touchstart', handler, { capture: true, once: true });
+    },
+    [detachInteractionRetryListeners, unlockAudio]
+  );
 
   const safePause = useCallback(async () => {
     const audio = ensureAudioElement();
@@ -327,155 +332,124 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
     await playAttempt;
   }, []);
 
-  const play = useCallback(async (item?: AudioQueueItem) => {
-    const audio = ensureAudioElement();
-    if (!audio) return;
-    let targetItem = item;
+  const play = useCallback(
+    async (item?: AudioQueueItem) => {
+      const audio = ensureAudioElement();
+      if (!audio) return;
+      let targetItem = item;
 
-    if (playPromiseRef.current) {
-      try {
-        await playPromiseRef.current;
-      } catch {
-        // Bỏ qua vì request phát cũ có thể đã bị hủy.
-      }
-      playPromiseRef.current = null;
-    }
-
-    if (!targetItem && currentItemRef.current && optionsRef.current.language) {
-      const currentItem = currentItemRef.current;
-      const nextLanguage = optionsRef.current.language;
-
-      if (currentItem.language !== nextLanguage) {
-        const localizedPOI = getLocalizedPOI(currentItem.poi, nextLanguage);
-        targetItem = {
-          poi: currentItem.poi,
-          audioUrl: localizedPOI.audio_url,
-          title: localizedPOI.name,
-          description: localizedPOI.description,
-          language: nextLanguage,
-        };
-      }
-    }
-
-    if (!isUnlockedRef.current) {
-      await unlockAudio();
-    }
-
-    setInteractionRequiredItem(null);
-
-    if (targetItem) {
-      if (!targetItem.audioUrl) {
-        playWithTTSRef.current(targetItem);
-        return;
+      if (playPromiseRef.current) {
+        try {
+          await playPromiseRef.current;
+        } catch {
+          // Bỏ qua vì request phát cũ có thể đã bị hủy.
+        }
+        playPromiseRef.current = null;
       }
 
-      console.log('[useAudioPlayer] play requested:', {
-        poiId: targetItem.poi.id,
-        title: targetItem.title,
-        language: targetItem.language ?? optionsRef.current.language ?? 'vi',
-        hasAudioUrl: Boolean(targetItem.audioUrl),
-      });
+      if (!targetItem && currentItemRef.current && optionsRef.current.language) {
+        const currentItem = currentItemRef.current;
+        const nextLanguage = optionsRef.current.language;
 
-      const requestId = ++playRequestIdRef.current;
-      const currentSrc = audio.currentSrc || audio.src;
-      const currentNormalizedUrl = currentSrc
-        ? new URL(currentSrc, window.location.href).href
-        : '';
-      const targetNormalizedUrl = new URL(targetItem.audioUrl, window.location.href).href;
-      const isSourceChanged = currentNormalizedUrl !== targetNormalizedUrl;
-
-      void warmAudioUrl(targetItem.audioUrl);
-
-      setState(prev => ({
-        ...prev,
-        currentItem: targetItem ?? null,
-        isLoading: true,
-        error: null,
-        isTTSFallback: false,
-        isPaused: false,
-        currentTime: isSourceChanged ? 0 : prev.currentTime,
-        duration: isSourceChanged ? 0 : prev.duration,
-      }));
-
-      if (isSourceChanged) {
-        isSwitchingSourceRef.current = true;
-        audio.pause();
-        audio.currentTime = 0;
-        audio.src = targetItem.audioUrl;
-        audio.load();
-        isSwitchingSourceRef.current = false;
+        if (currentItem.language !== nextLanguage) {
+          const localizedPOI = getLocalizedPOI(currentItem.poi, nextLanguage);
+          targetItem = {
+            poi: currentItem.poi,
+            audioUrl: localizedPOI.audio_url,
+            title: localizedPOI.name,
+            description: localizedPOI.description,
+            language: nextLanguage,
+          };
+        }
       }
 
-      if (playRequestIdRef.current !== requestId) {
-        return;
-      }
-    }
-
-    console.info('[useAudioPlayer] play attempt', {
-      poiId: targetItem?.poi.id ?? currentItemRef.current?.poi.id ?? null,
-      isUnlocked: isUnlockedRef.current,
-      sharedPrimed: isSharedAudioPrimed(),
-    });
-
-    try {
-      await attemptPlay(audio);
-      playPromiseRef.current = null;
-      isUnlockedRef.current = true;
-      setState(prev => ({ ...prev, isPlaying: true, isPaused: false, isLoading: false }));
-    } catch (error) {
-      playPromiseRef.current = null;
-      if ((error as Error).name === 'AbortError') {
-        return;
+      if (!isUnlockedRef.current) {
+        await unlockAudio();
       }
 
-      if ((error as Error).name === 'NotAllowedError') {
-        const blockedItem = targetItem ?? currentItemRef.current;
+      setInteractionRequiredItem(null);
 
-        console.warn('[useAudioPlayer] autoplay blocked by browser:', {
-          poiId: blockedItem?.poi.id ?? null,
-          title: blockedItem?.title ?? null,
-          sharedPrimed: isSharedAudioPrimed(),
-        });
-
-        if (blockedItem) {
-          registerInteractionRetry(blockedItem);
+      if (targetItem) {
+        if (!targetItem.audioUrl) {
+          playWithTTSRef.current(targetItem);
+          return;
         }
 
-        setInteractionRequiredItem(blockedItem ?? null);
-
-        setState(prev => ({
-          ...prev,
-          currentItem: null,
-          isPlaying: false,
-          isPaused: false,
-          isLoading: false,
-          currentTime: 0,
-          duration: 0,
-          error: null,
-        }));
-        return;
-      }
-
-      if ((error as Error).name === 'AudioPlayTimeoutError') {
-        const blockedItem = targetItem ?? currentItemRef.current;
-
-        console.warn('[useAudioPlayer] play attempt timed out:', {
-          poiId: blockedItem?.poi.id ?? null,
-          title: blockedItem?.title ?? null,
-          isUnlocked: isUnlockedRef.current,
-          sharedPrimed: isSharedAudioPrimed(),
-          readyState: audio.readyState,
-          networkState: audio.networkState,
-          currentSrc: audio.currentSrc || audio.src,
+        console.log('[useAudioPlayer] play requested:', {
+          poiId: targetItem.poi.id,
+          title: targetItem.title,
+          language: targetItem.language ?? optionsRef.current.language ?? 'vi',
+          hasAudioUrl: Boolean(targetItem.audioUrl),
         });
 
-        audio.pause();
-        audio.currentTime = 0;
+        const requestId = ++playRequestIdRef.current;
+        const currentSrc = audio.currentSrc || audio.src;
+        const currentNormalizedUrl = currentSrc
+          ? new URL(currentSrc, window.location.href).href
+          : '';
+        const targetNormalizedUrl = new URL(targetItem.audioUrl, window.location.href).href;
+        const isSourceChanged = currentNormalizedUrl !== targetNormalizedUrl;
 
-        if (blockedItem && !isUnlockedRef.current) {
-          registerInteractionRetry(blockedItem);
-          setInteractionRequiredItem(blockedItem);
-          setState(prev => ({
+        void warmAudioUrl(targetItem.audioUrl);
+
+        setState((prev) => ({
+          ...prev,
+          currentItem: targetItem ?? null,
+          isLoading: true,
+          error: null,
+          isTTSFallback: false,
+          isPaused: false,
+          currentTime: isSourceChanged ? 0 : prev.currentTime,
+          duration: isSourceChanged ? 0 : prev.duration,
+        }));
+
+        if (isSourceChanged) {
+          isSwitchingSourceRef.current = true;
+          audio.pause();
+          audio.currentTime = 0;
+          audio.src = targetItem.audioUrl;
+          audio.load();
+          isSwitchingSourceRef.current = false;
+        }
+
+        if (playRequestIdRef.current !== requestId) {
+          return;
+        }
+      }
+
+      console.info('[useAudioPlayer] play attempt', {
+        poiId: targetItem?.poi.id ?? currentItemRef.current?.poi.id ?? null,
+        isUnlocked: isUnlockedRef.current,
+        sharedPrimed: isSharedAudioPrimed(),
+      });
+
+      try {
+        await attemptPlay(audio);
+        playPromiseRef.current = null;
+        isUnlockedRef.current = true;
+        setState((prev) => ({ ...prev, isPlaying: true, isPaused: false, isLoading: false }));
+      } catch (error) {
+        playPromiseRef.current = null;
+        if ((error as Error).name === 'AbortError') {
+          return;
+        }
+
+        if ((error as Error).name === 'NotAllowedError') {
+          const blockedItem = targetItem ?? currentItemRef.current;
+
+          console.warn('[useAudioPlayer] autoplay blocked by browser:', {
+            poiId: blockedItem?.poi.id ?? null,
+            title: blockedItem?.title ?? null,
+            sharedPrimed: isSharedAudioPrimed(),
+          });
+
+          if (blockedItem) {
+            registerInteractionRetry(blockedItem);
+          }
+
+          setInteractionRequiredItem(blockedItem ?? null);
+
+          setState((prev) => ({
             ...prev,
             currentItem: null,
             isPlaying: false,
@@ -488,45 +462,82 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
           return;
         }
 
-        if (blockedItem && optionsRef.current.enableTTSFallback) {
-          playWithTTSRef.current(blockedItem);
+        if ((error as Error).name === 'AudioPlayTimeoutError') {
+          const blockedItem = targetItem ?? currentItemRef.current;
+
+          console.warn('[useAudioPlayer] play attempt timed out:', {
+            poiId: blockedItem?.poi.id ?? null,
+            title: blockedItem?.title ?? null,
+            isUnlocked: isUnlockedRef.current,
+            sharedPrimed: isSharedAudioPrimed(),
+            readyState: audio.readyState,
+            networkState: audio.networkState,
+            currentSrc: audio.currentSrc || audio.src,
+          });
+
+          audio.pause();
+          audio.currentTime = 0;
+
+          if (blockedItem && !isUnlockedRef.current) {
+            registerInteractionRetry(blockedItem);
+            setInteractionRequiredItem(blockedItem);
+            setState((prev) => ({
+              ...prev,
+              currentItem: null,
+              isPlaying: false,
+              isPaused: false,
+              isLoading: false,
+              currentTime: 0,
+              duration: 0,
+              error: null,
+            }));
+            return;
+          }
+
+          if (blockedItem && optionsRef.current.enableTTSFallback) {
+            playWithTTSRef.current(blockedItem);
+            return;
+          }
+
+          const timeoutMessage = 'Audio load timed out';
+          setState((prev) => ({
+            ...prev,
+            isPlaying: false,
+            isLoading: false,
+            error: timeoutMessage,
+          }));
+          if (blockedItem) {
+            optionsRef.current.onError?.(timeoutMessage, blockedItem);
+          }
           return;
         }
 
-        const timeoutMessage = 'Audio load timed out';
-        setState(prev => ({
+        setState((prev) => ({
           ...prev,
-          isPlaying: false,
+          error: error instanceof Error ? error.message : 'Failed to play audio',
           isLoading: false,
-          error: timeoutMessage,
         }));
-        if (blockedItem) {
-          optionsRef.current.onError?.(timeoutMessage, blockedItem);
-        }
-        return;
+        console.error('[useAudioPlayer] play failed:', error);
       }
-
-      setState(prev => ({
-        ...prev,
-        error: error instanceof Error ? error.message : 'Failed to play audio',
-        isLoading: false,
-      }));
-      console.error('[useAudioPlayer] play failed:', error);
-    }
-  }, [attemptPlay, ensureAudioElement, registerInteractionRetry, unlockAudio]);
+    },
+    [attemptPlay, ensureAudioElement, registerInteractionRetry, unlockAudio]
+  );
 
   useEffect(() => {
     playRef.current = play;
   }, [play]);
 
-  const playNow = useCallback(async (item: AudioQueueItem, clearQueue = false) => {
-    if (clearQueue) {
-      setState(prev => ({ ...prev, queue: [] }));
-    }
-    setInteractionRequiredItem(null);
-    await safePause();
-    await play(item);
-  }, [play, safePause]);
+  const playNow = useCallback(
+    async (item: AudioQueueItem, clearQueue = false) => {
+      if (clearQueue) {
+        setState((prev) => ({ ...prev, queue: [] }));
+      }
+      setInteractionRequiredItem(null);
+      await safePause();
+      await play(item);
+    },
+    [play, safePause]
+  );
 
   const pause = useCallback(() => {
     void safePause();
@@ -589,7 +600,7 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
     setInteractionRequiredItem(null);
     await safePause();
     audio.currentTime = 0;
-    setState(prev => ({
+    setState((prev) => ({
       ...prev,
       currentItem: null,
       isPlaying: false,
@@ -602,34 +613,43 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
     }));
   }, [detachInteractionRetryListeners, ensureAudioElement, safePause]);
 
-  const seek = useCallback((time: number) => {
-    const audio = ensureAudioElement();
-    if (!audio) return;
-    audio.currentTime = Math.max(0, Math.min(time, audio.duration));
-  }, [ensureAudioElement]);
+  const seek = useCallback(
+    (time: number) => {
+      const audio = ensureAudioElement();
+      if (!audio) return;
+      audio.currentTime = Math.max(0, Math.min(time, audio.duration));
+    },
+    [ensureAudioElement]
+  );
 
-  const setVolume = useCallback((volume: number) => {
-    const audio = ensureAudioElement();
-    if (!audio) return;
-    const clampedVolume = Math.max(0, Math.min(1, volume));
-    audio.volume = clampedVolume;
-    setState(prev => ({ ...prev, volume: clampedVolume }));
-  }, [ensureAudioElement]);
+  const setVolume = useCallback(
+    (volume: number) => {
+      const audio = ensureAudioElement();
+      if (!audio) return;
+      const clampedVolume = Math.max(0, Math.min(1, volume));
+      audio.volume = clampedVolume;
+      setState((prev) => ({ ...prev, volume: clampedVolume }));
+    },
+    [ensureAudioElement]
+  );
 
-  const setPlaybackRate = useCallback((playbackRate: number) => {
-    const audio = ensureAudioElement();
-    if (!audio) return;
-    const clampedRate = Math.max(0.5, Math.min(2, playbackRate));
-    audio.playbackRate = clampedRate;
-    setState(prev => ({ ...prev, playbackRate: clampedRate }));
-  }, [ensureAudioElement]);
+  const setPlaybackRate = useCallback(
+    (playbackRate: number) => {
+      const audio = ensureAudioElement();
+      if (!audio) return;
+      const clampedRate = Math.max(0.5, Math.min(2, playbackRate));
+      audio.playbackRate = clampedRate;
+      setState((prev) => ({ ...prev, playbackRate: clampedRate }));
+    },
+    [ensureAudioElement]
+  );
 
   const toggleRepeat = useCallback(() => {
-    setState(prev => ({ ...prev, isRepeatEnabled: !prev.isRepeatEnabled }));
+    setState((prev) => ({ ...prev, isRepeatEnabled: !prev.isRepeatEnabled }));
   }, []);
 
   const shuffleQueue = useCallback(() => {
-    setState(prev => {
+    setState((prev) => {
       if (prev.queue.length <= 1) {
         return prev;
       }
@@ -651,49 +671,52 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
     });
   }, []);
 
-  const enqueue = useCallback((item: AudioQueueItem) => {
-    setState(prev => {
-      const currentLanguage = prev.currentItem?.language ?? opts.language;
-      const itemLanguage = item.language ?? opts.language;
-      const isCurrentItemDuplicate =
-        prev.currentItem?.poi.id === item.poi.id && currentLanguage === itemLanguage;
-      const isQueuedDuplicate = prev.queue.some(
-        queuedItem =>
-          queuedItem.poi.id === item.poi.id &&
-          (queuedItem.language ?? opts.language) === itemLanguage
-      );
+  const enqueue = useCallback(
+    (item: AudioQueueItem) => {
+      setState((prev) => {
+        const currentLanguage = prev.currentItem?.language ?? opts.language;
+        const itemLanguage = item.language ?? opts.language;
+        const isCurrentItemDuplicate =
+          prev.currentItem?.poi.id === item.poi.id && currentLanguage === itemLanguage;
+        const isQueuedDuplicate = prev.queue.some(
+          (queuedItem) =>
+            queuedItem.poi.id === item.poi.id &&
+            (queuedItem.language ?? opts.language) === itemLanguage
+        );
 
-      if (isCurrentItemDuplicate || isQueuedDuplicate) {
-        return prev;
-      }
+        if (isCurrentItemDuplicate || isQueuedDuplicate) {
+          return prev;
+        }
 
-      const shouldAutoPlay = !prev.currentItem && opts.autoPlay;
+        const shouldAutoPlay = !prev.currentItem && opts.autoPlay;
 
-      console.log('[useAudioPlayer] enqueue:', {
-        poiId: item.poi.id,
-        title: item.title,
-        language: item.language ?? opts.language ?? 'vi',
-        shouldAutoPlay,
-        queueLengthBefore: prev.queue.length,
-        hasCurrentItem: Boolean(prev.currentItem),
+        console.log('[useAudioPlayer] enqueue:', {
+          poiId: item.poi.id,
+          title: item.title,
+          language: item.language ?? opts.language ?? 'vi',
+          shouldAutoPlay,
+          queueLengthBefore: prev.queue.length,
+          hasCurrentItem: Boolean(prev.currentItem),
+        });
+
+        if (shouldAutoPlay) {
+          window.setTimeout(() => {
+            void play(item);
+          }, 0);
+          return prev;
+        }
+
+        return {
+          ...prev,
+          queue: [...prev.queue, item],
+        };
       });
-
-      if (shouldAutoPlay) {
-        window.setTimeout(() => {
-          void play(item);
-        }, 0);
-        return prev;
-      }
-
-      return {
-        ...prev,
-        queue: [...prev.queue, item],
-      };
-    });
-  }, [opts.autoPlay, opts.language, play]);
+    },
+    [opts.autoPlay, opts.language, play]
+  );
 
   const playNext = useCallback(() => {
-    setState(prev => {
+    setState((prev) => {
       const [nextItem, ...restQueue] = prev.queue;
 
       if (nextItem) {
@@ -730,31 +753,31 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
       if (isSharedAudioPriming()) {
         return;
       }
-      setState(prev => ({ ...prev, duration: audio.duration }));
+      setState((prev) => ({ ...prev, duration: audio.duration }));
     };
     const onTimeUpdate = () => {
       if (isSharedAudioPriming()) {
         return;
       }
-      setState(prev => ({ ...prev, currentTime: audio.currentTime }));
+      setState((prev) => ({ ...prev, currentTime: audio.currentTime }));
     };
     const onLoadStart = () => {
       if (isSharedAudioPriming()) {
         return;
       }
-      setState(prev => ({ ...prev, isLoading: true, error: null }));
+      setState((prev) => ({ ...prev, isLoading: true, error: null }));
     };
     const onCanPlay = () => {
       if (isSharedAudioPriming()) {
         return;
       }
-      setState(prev => ({ ...prev, isLoading: false }));
+      setState((prev) => ({ ...prev, isLoading: false }));
     };
     const onWaiting = () => {
       if (isSharedAudioPriming()) {
         return;
       }
-      setState(prev => ({ ...prev, isLoading: true }));
+      setState((prev) => ({ ...prev, isLoading: true }));
     };
     const onEnded = () => {
       if (isSharedAudioPriming()) {
@@ -762,13 +785,13 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
       }
       const currentItem = currentItemRef.current;
       if (currentItem && isRepeatEnabledRef.current) {
-        void audio.play().catch(error => {
+        void audio.play().catch((error) => {
           console.error('[useAudioPlayer] Failed to replay audio:', error);
         });
         return;
       }
 
-      setState(prev => ({ ...prev, isPlaying: false, isPaused: false, currentTime: 0 }));
+      setState((prev) => ({ ...prev, isPlaying: false, isPaused: false, currentTime: 0 }));
       if (currentItem) {
         optionsRef.current.onEnded?.(currentItem);
       }
@@ -787,7 +810,7 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
         return;
       }
 
-      setState(prev => ({ ...prev, isPlaying: false, isLoading: false, error: errorMessage }));
+      setState((prev) => ({ ...prev, isPlaying: false, isLoading: false, error: errorMessage }));
       if (currentItem) {
         optionsRef.current.onError?.(errorMessage, currentItem);
       }
@@ -797,14 +820,14 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
         return;
       }
       isUnlockedRef.current = true;
-      setState(prev => ({ ...prev, isPlaying: true, isPaused: false, isLoading: false }));
+      setState((prev) => ({ ...prev, isPlaying: true, isPaused: false, isLoading: false }));
     };
     const onPlaying = () => {
       if (isSharedAudioPriming()) {
         return;
       }
       isUnlockedRef.current = true;
-      setState(prev => ({ ...prev, isPlaying: true, isPaused: false, isLoading: false }));
+      setState((prev) => ({ ...prev, isPlaying: true, isPaused: false, isLoading: false }));
       console.info('[useAudioPlayer] audio started', {
         poiId: currentItemRef.current?.poi.id ?? null,
         currentSrc: audio.currentSrc,
@@ -817,7 +840,7 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
       if (isSharedAudioPriming() || isSwitchingSourceRef.current) {
         return;
       }
-      setState(prev => ({ ...prev, isPlaying: false, isPaused: true, isLoading: false }));
+      setState((prev) => ({ ...prev, isPlaying: false, isPaused: true, isLoading: false }));
       if (currentItemRef.current) {
         optionsRef.current.onPause?.(currentItemRef.current);
       }
@@ -857,14 +880,14 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
   useEffect(() => {
     if (!audioRef.current || typeof opts.volume !== 'number') return;
     audioRef.current.volume = opts.volume;
-    setState(prev => ({ ...prev, volume: opts.volume ?? 1 }));
+    setState((prev) => ({ ...prev, volume: opts.volume ?? 1 }));
   }, [opts.volume]);
 
   useEffect(() => {
     if (!audioRef.current || typeof opts.playbackRate !== 'number') return;
     const clampedRate = Math.max(0.5, Math.min(2, opts.playbackRate));
     audioRef.current.playbackRate = clampedRate;
-    setState(prev => ({ ...prev, playbackRate: clampedRate }));
+    setState((prev) => ({ ...prev, playbackRate: clampedRate }));
   }, [opts.playbackRate]);
 
   const skip = useCallback(() => {
@@ -873,7 +896,7 @@ export function useAudioPlayer(options: UseAudioPlayerOptions = {}) {
   }, [playNext, stop]);
 
   const clearQueue = useCallback(() => {
-    setState(prev => ({ ...prev, queue: [] }));
+    setState((prev) => ({ ...prev, queue: [] }));
   }, []);
 
   const resumeBlockedPlayback = useCallback(async () => {

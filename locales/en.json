@@ -6,14 +6,7 @@
   "metadata": {
     "title": "FlavorQuest - Discover Vinh Khanh Cuisine",
     "description": "Automatic guided audio tour to explore Vinh Khanh food street, Can Tho. Offline-first PWA with multi-language support.",
-    "keywords": [
-      "food tour",
-      "audio guide",
-      "Vinh Khanh",
-      "Can Tho",
-      "cuisine",
-      "PWA"
-    ]
+    "keywords": ["food tour", "audio guide", "Vinh Khanh", "Can Tho", "cuisine", "PWA"]
   },
   "manifest": {
     "name": "FlavorQuest - Automatic Audio Tour Experience",

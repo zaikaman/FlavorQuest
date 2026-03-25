@@ -1,7 +1,7 @@
 /**
  * StartTourButton Component
  * Unlock audio context và bắt đầu tour
- * 
+ *
  * Required for:
  * - Browser autoplay policy compliance
  * - User gesture to enable audio
@@ -63,8 +63,7 @@ export function StartTourButton({
     userRole,
     isLoading: authLoading,
     isRoleReady,
-  } =
-    useAuth();
+  } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
 
   const resolveAuthenticatedDestination = async (): Promise<string | null> => {
@@ -114,11 +113,7 @@ export function StartTourButton({
         return null;
       }
 
-      return isOwner
-        ? '/owner'
-        : isPendingOwner
-          ? '/pending-owner'
-          : '/tour';
+      return isOwner ? '/owner' : isPendingOwner ? '/pending-owner' : '/tour';
     } finally {
       window.clearTimeout(timeoutId);
     }
@@ -139,16 +134,12 @@ export function StartTourButton({
         authLoading,
         isRoleReady,
       });
-      
+
       // Đảm bảo language đã được lưu vào IndexedDB
       // Thêm delay nhỏ để tránh race condition với setLanguage
-      await new Promise(resolve => setTimeout(resolve, 150));
+      await new Promise((resolve) => setTimeout(resolve, 150));
       await Promise.allSettled([
-        withTimeout(
-          primeSharedAudioElement(),
-          START_ACTION_TIMEOUT_MS,
-          'primeSharedAudioElement'
-        ),
+        withTimeout(primeSharedAudioElement(), START_ACTION_TIMEOUT_MS, 'primeSharedAudioElement'),
         withTimeout(logTourStart(language), START_ACTION_TIMEOUT_MS, 'logTourStart'),
       ]);
 
@@ -177,25 +168,15 @@ export function StartTourButton({
     <button
       onClick={handleStart}
       disabled={disabled || isLoading}
-      className={`
-        w-full flex items-center justify-center rounded-xl h-14 px-6 
-        bg-primary hover:bg-orange-600 text-white text-[17px] font-bold tracking-wide 
-        shadow-lg shadow-orange-900/30 
-        transition-all active:scale-[0.98] 
-        group relative overflow-hidden
-        disabled:opacity-50 disabled:cursor-not-allowed
-        ${className}
-      `}
+      className={`bg-primary group relative flex h-14 w-full items-center justify-center overflow-hidden rounded-xl px-6 text-[17px] font-bold tracking-wide text-white shadow-lg shadow-orange-900/30 transition-all hover:bg-orange-600 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 ${className} `}
     >
       {/* Shimmer effect */}
-      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]"></div>
+      <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent group-hover:animate-[shimmer_1.5s_infinite]"></div>
 
-      <span className="mr-2">
-        {isLoading ? t('common.loading') : t('splash.startTour')}
-      </span>
+      <span className="mr-2">{isLoading ? t('common.loading') : t('splash.startTour')}</span>
 
       {!isLoading && (
-        <span className="material-symbols-outlined text-xl group-hover:translate-x-1 transition-transform">
+        <span className="material-symbols-outlined text-xl transition-transform group-hover:translate-x-1">
           arrow_forward
         </span>
       )}

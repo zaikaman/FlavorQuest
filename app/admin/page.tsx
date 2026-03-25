@@ -72,12 +72,7 @@ export default function AdminDashboard() {
     try {
       const supabase = createClient();
 
-      const [
-        analyticsResponse,
-        poisResponse,
-        toursResponse,
-        userCountResult,
-      ] = await Promise.all([
+      const [analyticsResponse, poisResponse, toursResponse, userCountResult] = await Promise.all([
         fetch('/api/analytics/summary?period=7days'),
         fetch('/api/pois?include_deleted=true', { cache: 'no-store' }),
         fetch('/api/tours?admin_view=true', { cache: 'no-store' }),
@@ -414,7 +409,7 @@ export default function AdminDashboard() {
         <div className="overflow-hidden rounded-[28px] border border-white/10 bg-[#2c1e16]">
           <div className="from-primary/12 border-b border-white/10 bg-gradient-to-r via-transparent to-transparent px-6 py-6">
             <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-              <div className="min-w-0 max-w-2xl">
+              <div className="max-w-2xl min-w-0">
                 <p className="text-primary text-sm font-semibold">Nhịp hoạt động 7 ngày</p>
                 <h3 className="mt-2 text-2xl font-black text-white">
                   {derived.topTour
@@ -429,7 +424,7 @@ export default function AdminDashboard() {
               </div>
 
               <div className="grid w-full gap-3 sm:max-w-xl sm:grid-cols-2">
-                {[ 
+                {[
                   {
                     label: 'Lượt bắt đầu tour',
                     value: formatNumber(snapshot.analytics.overview.total_tours),
@@ -565,7 +560,7 @@ export default function AdminDashboard() {
                       {index + 1}
                     </div>
                     <div className="min-w-0">
-                      <p className="break-words font-semibold text-white">{tour.name_vi}</p>
+                      <p className="font-semibold break-words text-white">{tour.name_vi}</p>
                       <p className="mt-1 text-xs text-gray-400">
                         {formatNumber(tour.sessions)} phiên • {formatNumber(tour.total_plays)} lượt
                         phát • {tour.poi_count} POI
@@ -642,7 +637,7 @@ export default function AdminDashboard() {
                         <span className="rounded-full bg-white/10 px-2 py-1 text-[11px] font-semibold text-gray-300">
                           {item.type}
                         </span>
-                        <p className="break-words font-semibold text-white">{item.title}</p>
+                        <p className="font-semibold break-words text-white">{item.title}</p>
                       </div>
                       <p className="mt-2 text-sm text-gray-400">{item.subtitle}</p>
                     </div>

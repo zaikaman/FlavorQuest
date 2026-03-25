@@ -1,24 +1,24 @@
 /**
  * Geofencing Web Worker
- * 
+ *
  * Offload geofencing calculations to background thread
  * Prevents blocking main thread khi check multiple POIs
- * 
+ *
  * Features:
  * - Distance calculations in background
  * - POI proximity detection
  * - Cooldown checking
  * - Stable sorting for simultaneous POI triggers
- * 
+ *
  * Communication:
  * - postMessage: Send data to worker
  * - onmessage: Receive results from worker
- * 
+ *
  * Browser Support:
  * - Chrome/Edge: ✅ Full support
  * - Firefox: ✅ Full support
  * - Safari: ✅ Full support
- * 
+ *
  * @see https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API
  */
 
@@ -30,76 +30,76 @@ import { calculateDistance, filterPOIsWithinRadius } from '@/lib/utils/distance'
  */
 type WorkerRequest =
   | {
-    type: 'CHECK_GEOFENCE';
-    requestId: number;
-    payload: {
-      userPosition: Coordinates;
-      pois: POI[];
-      geofenceRadius: number;
-      cooldownTracker: Record<string, number>;
-      cooldownPeriod: number;
-    };
-  }
+      type: 'CHECK_GEOFENCE';
+      requestId: number;
+      payload: {
+        userPosition: Coordinates;
+        pois: POI[];
+        geofenceRadius: number;
+        cooldownTracker: Record<string, number>;
+        cooldownPeriod: number;
+      };
+    }
   | {
-    type: 'CALCULATE_DISTANCE';
-    requestId: number;
-    payload: {
-      from: Coordinates;
-      to: Coordinates;
-    };
-  }
+      type: 'CALCULATE_DISTANCE';
+      requestId: number;
+      payload: {
+        from: Coordinates;
+        to: Coordinates;
+      };
+    }
   | {
-    type: 'FILTER_NEARBY';
-    requestId: number;
-    payload: {
-      userPosition: Coordinates;
-      pois: POI[];
-      radius: number;
+      type: 'FILTER_NEARBY';
+      requestId: number;
+      payload: {
+        userPosition: Coordinates;
+        pois: POI[];
+        radius: number;
+      };
     };
-  };
 
 /**
  * Response types trả về main thread
  */
 type WorkerResponse =
   | {
-    type: 'GEOFENCE_RESULT';
-    requestId: number;
-    payload: {
-      triggeredPOIs: Array<{
-        poi: POI;
-        distance: number;
-      }>;
-      nearbyPOIs: Array<{
-        poi: POI;
-        distance: number;
-      }>;
-    };
-  }
+      type: 'GEOFENCE_RESULT';
+      requestId: number;
+      payload: {
+        triggeredPOIs: Array<{
+          poi: POI;
+          distance: number;
+        }>;
+        nearbyPOIs: Array<{
+          poi: POI;
+          distance: number;
+        }>;
+      };
+    }
   | {
-    type: 'DISTANCE_RESULT';
-    requestId: number;
-    payload: {
-      distance: number;
-    };
-  }
-  | {
-    type: 'NEARBY_POIS';
-    requestId: number;
-    payload: {
-      pois: Array<{
-        poi: POI;
+      type: 'DISTANCE_RESULT';
+      requestId: number;
+      payload: {
         distance: number;
-      }>;
-    };
-  }
+      };
+    }
   | {
-    type: 'ERROR';
-    requestId: number;
-    payload: {
-      message: string;
+      type: 'NEARBY_POIS';
+      requestId: number;
+      payload: {
+        pois: Array<{
+          poi: POI;
+          distance: number;
+        }>;
+      };
+    }
+  | {
+      type: 'ERROR';
+      requestId: number;
+      payload: {
+        message: string;
+      };
     };
-  };
 
 function createErrorResponse(requestId: number, message: string): WorkerResponse {
   return {
@@ -198,10 +198,7 @@ function processGeofenceCheck(request: WorkerRequest): WorkerResponse {
       },
     };
   } catch (error) {
-    return createErrorResponse(
-      requestId,
-      error instanceof Error ? error.message : 'Unknown error'
-    );
+    return createErrorResponse(requestId, error instanceof Error ? error.message : 'Unknown error');
   }
 }
 
@@ -225,10 +222,7 @@ function processDistanceCalculation(request: WorkerRequest): WorkerResponse {
       payload: { distance },
     };
   } catch (error) {
-    return createErrorResponse(
-      requestId,
-      error instanceof Error ? error.message : 'Unknown error'
-    );
+    return createErrorResponse(requestId, error instanceof Error ? error.message : 'Unknown error');
   }
 }
 
@@ -252,10 +246,7 @@ function processNearbyFilter(request: WorkerRequest): WorkerResponse {
       payload: { pois: nearbyPOIs },
     };
   } catch (error) {
-    return createErrorResponse(
-      requestId,
-      error instanceof Error ? error.message : 'Unknown error'
-    );
+    return createErrorResponse(requestId, error instanceof Error ? error.message : 'Unknown error');
   }
 }
 

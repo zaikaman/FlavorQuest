@@ -1,8 +1,8 @@
 /**
  * Analytics Batch Sync API
- * 
+ *
  * POST /api/analytics/batch
- * 
+ *
  * Nhận batch analytics events từ client (offline sync)
  * và insert vào Supabase
  */
@@ -32,26 +32,20 @@ export async function POST(request: NextRequest) {
     const { events } = body as { events: AnalyticsEvent[] };
 
     if (!events || !Array.isArray(events) || events.length === 0) {
-      return NextResponse.json(
-        { error: 'No events provided' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'No events provided' }, { status: 400 });
     }
 
     // Validate events
-    const validEvents = events.filter(event => {
+    const validEvents = events.filter((event) => {
       return event.session_id && event.event_type;
     });
 
     if (validEvents.length === 0) {
-      return NextResponse.json(
-        { error: 'No valid events' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'No valid events' }, { status: 400 });
     }
 
     // Transform events to match database schema
-    const dbEvents = validEvents.map(event => ({
+    const dbEvents = validEvents.map((event) => ({
       poi_id: event.poi_id || null,
       session_id: event.session_id,
       rounded_lat: event.rounded_lat ?? null,
@@ -67,10 +61,7 @@ export async function POST(request: NextRequest) {
 
     const supabase = await createServerClient();
 
-    const { data, error } = await supabase
-      .from('analytics_logs')
-      .insert(dbEvents)
-      .select('id');
+    const { data, error } = await supabase.from('analytics_logs').insert(dbEvents).select('id');
 
     if (error) {
       console.error('Failed to batch insert analytics:', error);
@@ -87,16 +78,13 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error('Analytics batch sync error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
 
 /**
  * GET /api/analytics/batch
- * 
+ *
  * Health check endpoint
  */
 export async function GET() {

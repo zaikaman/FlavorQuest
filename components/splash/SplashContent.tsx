@@ -1,7 +1,7 @@
 /**
  * SplashContent Component
  * Hiển thị nội dung splash screen với dynamic translations
- * 
+ *
  * Features:
  * - Thay đổi ngôn ngữ real-time
  * - LanguageSelector với danh sách ngôn ngữ mở rộng
@@ -9,7 +9,6 @@
  */
 
 'use client';
-
 
 import { useEffect } from 'react';
 import { StartTourButton } from '@/components/tour/StartTourButton';
@@ -47,29 +46,33 @@ export function SplashContent({ isAuthenticated }: SplashContentProps) {
     <>
       <section className="flex min-h-screen flex-col justify-between py-6">
         {/* Branding Section (Top/Center) */}
-        <div className="flex flex-col items-center justify-center flex-grow">
+        <div className="flex flex-grow flex-col items-center justify-center">
           {/* Logo Icon Composite */}
-          <div className="relative mb-6 group">
-            <div className="absolute -inset-1 bg-primary/30 rounded-full blur-xl opacity-50 group-hover:opacity-75 transition-opacity"></div>
-            <div className="relative w-24 h-24 bg-[#2c1e16]/80 backdrop-blur-md rounded-full flex items-center justify-center border border-white/10 shadow-2xl">
-              <span className="material-symbols-outlined text-primary text-5xl drop-shadow-lg">restaurant</span>
-              <span className="material-symbols-outlined text-white absolute -bottom-1 -right-1 bg-primary rounded-full p-1 text-sm border-4 border-[#2c1e16]">graphic_eq</span>
+          <div className="group relative mb-6">
+            <div className="bg-primary/30 absolute -inset-1 rounded-full opacity-50 blur-xl transition-opacity group-hover:opacity-75"></div>
+            <div className="relative flex h-24 w-24 items-center justify-center rounded-full border border-white/10 bg-[#2c1e16]/80 shadow-2xl backdrop-blur-md">
+              <span className="material-symbols-outlined text-primary text-5xl drop-shadow-lg">
+                restaurant
+              </span>
+              <span className="material-symbols-outlined bg-primary absolute -right-1 -bottom-1 rounded-full border-4 border-[#2c1e16] p-1 text-sm text-white">
+                graphic_eq
+              </span>
             </div>
           </div>
 
           {/* Headline */}
-          <h1 className="text-white tracking-tight text-[40px] font-extrabold leading-tight text-center drop-shadow-xl">
+          <h1 className="text-center text-[40px] leading-tight font-extrabold tracking-tight text-white drop-shadow-xl">
             FlavorQuest
           </h1>
 
           {/* Sub-headline - Dynamic based on language */}
-          <h2 className="text-gray-200 text-lg font-medium leading-relaxed tracking-wide mt-4 text-center max-w-[280px] drop-shadow-md opacity-90">
+          <h2 className="mt-4 max-w-[280px] text-center text-lg leading-relaxed font-medium tracking-wide text-gray-200 opacity-90 drop-shadow-md">
             {t('splash.subtitle')}
           </h2>
         </div>
 
         {/* Action Section (Bottom) */}
-        <div className="flex flex-col items-center w-full gap-5 pb-12">
+        <div className="flex w-full flex-col items-center gap-5 pb-12">
           {/* Language Pills */}
           <LanguageSelector variant="splash" />
 

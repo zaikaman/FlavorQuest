@@ -111,7 +111,8 @@ export async function GET() {
 
   let query = supabase
     .from('preorder_orders')
-    .select(`
+    .select(
+      `
       id,
       poi_id,
       customer_id,
@@ -128,7 +129,8 @@ export async function GET() {
       updated_at,
       pois!inner(id, name_vi, owner_id),
       preorder_order_items(id, dish_id, quantity, unit_price, dishes(name))
-    `)
+    `
+    )
     .order('created_at', { ascending: false });
 
   if (profile.role === 'customer') {
@@ -196,19 +198,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const dishIds = items.map(item => item.dish_id);
-    const [{ data: dishes, error: dishesError }, { data: poi, error: poiError }] = await Promise.all([
-      supabase
-        .from('dishes')
-        .select('id, poi_id, name, price, is_available')
-        .in('id', dishIds)
-        .is('deleted_at', null),
-      supabase
-        .from('pois')
-        .select('id, name_vi, owner_id')
-        .eq('id', body.poi_id)
-        .single(),
-    ]);
+    const dishIds = items.map((item) => item.dish_id);
+    const [{ data: dishes, error: dishesError }, { data: poi, error: poiError }] =
+      await Promise.all([
+        supabase
+          .from('dishes')
+          .select('id, poi_id, name, price, is_available')
+          .in('id', dishIds)
+          .is('deleted_at', null),
+        supabase.from('pois').select('id, name_vi, owner_id').eq('id', body.poi_id).single(),
+      ]);
 
     if (poiError || !poi) {
       return NextResponse.json({ error: 'POI not found' }, { status: 404 });
@@ -218,12 +217,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: dishesError.message }, { status: 500 });
     }
 
-    const validDishes = (dishes ?? []).filter(dish => dish.poi_id === body.poi_id && dish.is_available);
+    const validDishes = (dishes ?? []).filter(
+      (dish) => dish.poi_id === body.poi_id && dish.is_available
+    );
     if (validDishes.length !== items.length) {
       return NextResponse.json({ error: 'Một số món không hợp lệ hoặc đã hết' }, { status: 400 });
     }
 
-    const dishMap = new Map(validDishes.map(dish => [dish.id, dish]));
+    const dishMap = new Map(validDishes.map((dish) => [dish.id, dish]));
     const totalAmount = items.reduce((sum, item) => {
       const dish = dishMap.get(item.dish_id);
       if (!dish) {
@@ -254,10 +255,13 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (orderError || !order) {
-      return NextResponse.json({ error: orderError?.message || 'Create order failed' }, { status: 500 });
+      return NextResponse.json(
+        { error: orderError?.message || 'Create order failed' },
+        { status: 500 }
+      );
     }
 
-    const orderItems = items.map(item => {
+    const orderItems = items.map((item) => {
       const dish = dishMap.get(item.dish_id)!;
       return {
         order_id: order.id,
@@ -311,7 +315,7 @@ export async function POST(request: NextRequest) {
       );
 
       const summary = orderItems
-        .map(item => {
+        .map((item) => {
           const dish = dishMap.get(item.dish_id);
           return `${dish?.name ?? 'Món'} x${item.quantity}`;
         })

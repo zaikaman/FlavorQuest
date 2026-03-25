@@ -6,14 +6,7 @@
   "metadata": {
     "title": "FlavorQuest - Entdecke die Food Street von Vĩnh Khánh",
     "description": "Automatische standortbasierte Audiotour durch die Food Street von Vĩnh Khánh, Cần Thơ. Offline-first-PWA mit Mehrsprachenunterstützung.",
-    "keywords": [
-      "Food Tour",
-      "Audioguide",
-      "Vĩnh Khánh",
-      "Cần Thơ",
-      "Küche",
-      "PWA"
-    ]
+    "keywords": ["Food Tour", "Audioguide", "Vĩnh Khánh", "Cần Thơ", "Küche", "PWA"]
   },
   "manifest": {
     "name": "FlavorQuest - Automatisches Audioerlebnis",

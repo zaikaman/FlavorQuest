@@ -1,11 +1,11 @@
 /**
  * Haversine Distance Calculator
- * 
+ *
  * Tính khoảng cách giữa 2 tọa độ GPS sử dụng công thức Haversine
- * 
+ *
  * Độ chính xác: ~1-3 meters (đủ cho geofencing)
  * Performance: ~0.01ms per calculation
- * 
+ *
  * @see https://en.wikipedia.org/wiki/Haversine_formula
  */
 
@@ -25,21 +25,21 @@ function toRadians(degrees: number): number {
 
 /**
  * Calculate distance between two coordinates using Haversine formula
- * 
+ *
  * Formula:
  * a = sin²(Δφ/2) + cos(φ1) * cos(φ2) * sin²(Δλ/2)
  * c = 2 * atan2(√a, √(1−a))
  * d = R * c
- * 
+ *
  * Where:
  * - φ = latitude in radians
  * - λ = longitude in radians
  * - R = Earth radius
- * 
+ *
  * @param from - Starting coordinates {lat, lng}
  * @param to - Destination coordinates {lat, lng}
  * @returns Distance in meters
- * 
+ *
  * @example
  * ```ts
  * const userPos = { lat: 10.759, lng: 106.705 };
@@ -68,12 +68,12 @@ export function calculateDistance(from: Coordinates, to: Coordinates): number {
 
 /**
  * Check if coordinates are within a certain radius (geofencing check)
- * 
+ *
  * @param from - Starting coordinates
  * @param to - Destination coordinates
  * @param radius - Radius in meters
  * @returns True if within radius
- * 
+ *
  * @example
  * ```ts
  * const userPos = { lat: 10.759, lng: 106.705 };
@@ -89,11 +89,11 @@ export function isWithinRadius(from: Coordinates, to: Coordinates, radius: numbe
 
 /**
  * Find nearest POI from user position
- * 
+ *
  * @param userPos - User's current position
  * @param pois - Array of POIs with coordinates
  * @returns Nearest POI and distance, or null if no POIs
- * 
+ *
  * @example
  * ```ts
  * const userPos = { lat: 10.759, lng: 106.705 };
@@ -131,12 +131,12 @@ export function findNearestPOI<T extends { lat: number; lng: number }>(
 
 /**
  * Filter POIs within a certain radius from user position
- * 
+ *
  * @param userPos - User's current position
  * @param pois - Array of POIs with coordinates
  * @param radius - Radius in meters
  * @returns Array of POIs with distances
- * 
+ *
  * @example
  * ```ts
  * const userPos = { lat: 10.759, lng: 106.705 };
@@ -168,11 +168,11 @@ export function filterPOIsWithinRadius<T extends { lat: number; lng: number }>(
 
 /**
  * Calculate bearing between two points (direction in degrees)
- * 
+ *
  * @param from - Starting coordinates
  * @param to - Destination coordinates
  * @returns Bearing in degrees (0-360, 0 = North, 90 = East, 180 = South, 270 = West)
- * 
+ *
  * @example
  * ```ts
  * const from = { lat: 10.759, lng: 106.705 };
@@ -198,10 +198,10 @@ export function calculateBearing(from: Coordinates, to: Coordinates): number {
 
 /**
  * Get compass direction from bearing
- * 
+ *
  * @param bearing - Bearing in degrees (0-360)
  * @returns Compass direction (N, NE, E, SE, S, SW, W, NW)
- * 
+ *
  * @example
  * ```ts
  * const direction = getCompassDirection(45);
@@ -216,11 +216,11 @@ export function getCompassDirection(bearing: number): string {
 
 /**
  * Format distance for display (human-readable)
- * 
+ *
  * @param meters - Distance in meters
  * @param locale - Locale for number formatting (default: 'vi-VN')
  * @returns Formatted string (e.g., "<20m", "150m", "1.5km")
- * 
+ *
  * @example
  * ```ts
  * console.log(formatDistance(13)); // "<20m"

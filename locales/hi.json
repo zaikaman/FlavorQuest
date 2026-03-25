@@ -6,14 +6,7 @@
   "metadata": {
     "title": "FlavorQuest - Vinh Khanh फूड स्ट्रीट की खोज",
     "description": "Vinh Khanh फूड स्ट्रीट, C?n Th? का स्वचालित स्थान-आधारित ऑडियो टूर। ऑफ़लाइन-प्रथम PWA मल्टी-भाषा समर्थन के साथ।",
-    "keywords": [
-      "फूड टूर",
-      "ऑडियो गाइड",
-      "Vinh Khanh",
-      "C?n Th?",
-      "पाक कला",
-      "PWA"
-    ]
+    "keywords": ["फूड टूर", "ऑडियो गाइड", "Vinh Khanh", "C?n Th?", "पाक कला", "PWA"]
   },
   "manifest": {
     "name": "FlavorQuest - स्वचालित ऑडियो टूर अनुभव",

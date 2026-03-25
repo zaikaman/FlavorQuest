@@ -6,14 +6,7 @@
   "metadata": {
     "title": "FlavorQuest - Explora la Calle Gastronómica Vinh Khanh",
     "description": "Tour de audio automático basado en ubicación para descubrir la calle gastronómica Vinh Khanh, Can Tho. PWA offline-first con soporte multilingüe.",
-    "keywords": [
-      "tour gastronómico",
-      "guía de audio",
-      "Vinh Khanh",
-      "Can Tho",
-      "cocina",
-      "PWA"
-    ]
+    "keywords": ["tour gastronómico", "guía de audio", "Vinh Khanh", "Can Tho", "cocina", "PWA"]
   },
   "manifest": {
     "name": "FlavorQuest - Experiencia de Narración de Audio Automática",

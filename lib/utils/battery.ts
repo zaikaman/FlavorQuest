@@ -1,26 +1,26 @@
 /**
  * Battery Status Detection
- * 
+ *
  * Monitor battery level và charging status để optimize app behavior
- * 
+ *
  * Features:
  * - Detect battery level (0-100%)
  * - Detect charging status
  * - Battery optimization recommendations
  * - Low battery warnings
- * 
+ *
  * Use cases:
  * - Reduce GPS update frequency khi battery thấp
  * - Disable audio preload khi battery < 20%
  * - Show low battery warning
  * - Auto-enable battery saver mode
- * 
+ *
  * Browser Support:
  * - Chrome/Edge: ✅ Full support
  * - Firefox: ✅ Full support
  * - Safari: ❌ Not supported (returns null)
  * - iOS Safari: ❌ Not supported
- * 
+ *
  * @see https://developer.mozilla.org/en-US/docs/Web/API/Battery_Status_API
  */
 
@@ -77,16 +77,16 @@ const BATTERY_THRESHOLDS = {
 
 /**
  * Battery Manager Class
- * 
+ *
  * @example
  * ```ts
  * const battery = new BatteryManager();
  * await battery.init();
- * 
+ *
  * const info = battery.getInfo();
  * console.log(`Battery: ${info.level * 100}%`);
  * console.log(`Charging: ${info.charging}`);
- * 
+ *
  * if (battery.isLow()) {
  *   console.log('Battery low! Enabling power saving...');
  * }
@@ -100,7 +100,7 @@ export class BatteryManager {
   /**
    * Initialize battery manager
    * Must call before using other methods
-   * 
+   *
    * @returns True if battery API is supported
    */
   async init(): Promise<boolean> {
@@ -259,7 +259,7 @@ export class BatteryManager {
 
   /**
    * Add change listener
-   * 
+   *
    * @param callback - Called when battery status changes
    */
   onChange(callback: (info: BatteryInfo) => void): void {
@@ -305,7 +305,7 @@ let globalBatteryManager: BatteryManager | null = null;
 /**
  * Get global battery manager instance (singleton)
  * Auto-initializes on first call
- * 
+ *
  * @example
  * ```ts
  * const battery = await getBatteryManager();
@@ -323,7 +323,7 @@ export async function getBatteryManager(): Promise<BatteryManager> {
 
 /**
  * Quick check: Is battery low?
- * 
+ *
  * @example
  * ```ts
  * if (await isBatteryLow()) {
@@ -362,10 +362,10 @@ export async function getBatteryLevel(): Promise<number | null> {
 
 /**
  * Apply battery optimization settings
- * 
+ *
  * @param mode - Battery mode
  * @returns Recommended settings
- * 
+ *
  * @example
  * ```ts
  * const battery = await getBatteryManager();

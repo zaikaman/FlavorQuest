@@ -55,34 +55,32 @@ export function POIDetailCard({
           />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center bg-[#3a2d25]">
-            <span className="material-symbols-outlined text-2xl text-primary">restaurant</span>
+            <span className="material-symbols-outlined text-primary text-2xl">restaurant</span>
           </div>
         )}
       </div>
 
       <div
-        className="min-w-0 flex flex-1 cursor-pointer flex-col justify-center"
+        className="flex min-w-0 flex-1 cursor-pointer flex-col justify-center"
         onClick={onViewDetail}
       >
         <div className="flex items-center gap-2">
-          <h3 className="truncate text-base font-bold leading-tight text-white">
+          <h3 className="truncate text-base leading-tight font-bold text-white">
             {localized.name}
           </h3>
         </div>
-        <p className="mt-0.5 truncate text-xs font-normal leading-relaxed text-[#cba990]">
+        <p className="mt-0.5 truncate text-xs leading-relaxed font-normal text-[#cba990]">
           {t('poi.cuisine')}
           {distanceLabel ? ` | ${distanceLabel}` : ''}
         </p>
         {poi.signature_dish && (
-          <p className="mt-1 truncate text-[10px] text-[#8d7b6f]">
-            {poi.signature_dish}
-          </p>
+          <p className="mt-1 truncate text-[10px] text-[#8d7b6f]">{poi.signature_dish}</p>
         )}
       </div>
 
       <button
         onClick={onPlay}
-        className="group flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary text-white shadow-lg shadow-primary/30 transition-all hover:bg-primary/90 active:scale-95"
+        className="group bg-primary shadow-primary/30 hover:bg-primary/90 flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-white shadow-lg transition-all active:scale-95"
         aria-label={isLoading ? t('audio.loading') : isPlaying ? t('audio.pause') : t('audio.play')}
         disabled={isLoading}
       >

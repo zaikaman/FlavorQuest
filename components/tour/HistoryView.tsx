@@ -41,9 +41,9 @@ export function HistoryView({ isOpen, onClose, onPlayPOI, onViewPOI }: HistoryVi
         const entries = await loadVisitHistory();
 
         // Merge with POI data
-        const withPOI = entries.map(entry => ({
+        const withPOI = entries.map((entry) => ({
           ...entry,
-          poi: pois.find(p => p.id === entry.poi_id),
+          poi: pois.find((p) => p.id === entry.poi_id),
         }));
 
         // Sort by visited_at descending (most recent first)
@@ -51,7 +51,7 @@ export function HistoryView({ isOpen, onClose, onPlayPOI, onViewPOI }: HistoryVi
 
         // Remove duplicates (keep most recent for each POI)
         const seen = new Set<string>();
-        const unique = withPOI.filter(item => {
+        const unique = withPOI.filter((item) => {
           if (seen.has(item.poi_id)) return false;
           seen.add(item.poi_id);
           return true;
@@ -83,48 +83,71 @@ export function HistoryView({ isOpen, onClose, onPlayPOI, onViewPOI }: HistoryVi
 
     // Today
     if (date.toDateString() === now.toDateString()) {
-      return t('history.today', { time: date.toLocaleTimeString(language === 'vi' ? 'vi-VN' : 'en-US', { hour: '2-digit', minute: '2-digit' }) });
+      return t('history.today', {
+        time: date.toLocaleTimeString(language === 'vi' ? 'vi-VN' : 'en-US', {
+          hour: '2-digit',
+          minute: '2-digit',
+        }),
+      });
     }
 
     // Yesterday
     const yesterday = new Date(now);
     yesterday.setDate(yesterday.getDate() - 1);
     if (date.toDateString() === yesterday.toDateString()) {
-      return t('history.yesterday', { time: date.toLocaleTimeString(language === 'vi' ? 'vi-VN' : 'en-US', { hour: '2-digit', minute: '2-digit' }) });
+      return t('history.yesterday', {
+        time: date.toLocaleTimeString(language === 'vi' ? 'vi-VN' : 'en-US', {
+          hour: '2-digit',
+          minute: '2-digit',
+        }),
+      });
     }
 
     // Older
-    return date.toLocaleDateString(language === 'vi' ? 'vi-VN' : 'en-US', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    return date.toLocaleDateString(language === 'vi' ? 'vi-VN' : 'en-US', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+    });
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[60] bg-black/80 backdrop-blur-md flex flex-col justify-end" onClick={onClose}>
+    <div
+      className="fixed inset-0 z-[60] flex flex-col justify-end bg-black/80 backdrop-blur-md"
+      onClick={onClose}
+    >
       <div
-        className="relative bg-[#150f0d] rounded-t-[32px] w-full max-h-[85vh] flex flex-col overflow-hidden animate-slideUp shadow-[0_-20px_40px_-15px_rgba(0,0,0,0.5)] border-t border-white/5"
-        onClick={e => e.stopPropagation()}
+        className="animate-slideUp relative flex max-h-[85vh] w-full flex-col overflow-hidden rounded-t-[32px] border-t border-white/5 bg-[#150f0d] shadow-[0_-20px_40px_-15px_rgba(0,0,0,0.5)]"
+        onClick={(e) => e.stopPropagation()}
       >
         {/* Grab Handle */}
-        <div className="absolute top-0 left-0 right-0 flex justify-center py-3 z-20">
-          <div className="w-12 h-1.5 rounded-full bg-white/10" />
+        <div className="absolute top-0 right-0 left-0 z-20 flex justify-center py-3">
+          <div className="h-1.5 w-12 rounded-full bg-white/10" />
         </div>
 
         {/* Header */}
-        <div className="sticky top-0 z-10 bg-[#150f0d]/90 backdrop-blur-xl border-b border-white/5 px-6 pt-8 pb-5">
+        <div className="sticky top-0 z-10 border-b border-white/5 bg-[#150f0d]/90 px-6 pt-8 pb-5 backdrop-blur-xl">
           <div className="flex items-start justify-between">
             <div className="flex flex-col gap-1.5">
-              <h2 className="text-3xl font-black tracking-tight text-white drop-shadow-sm">{t('history.title')}</h2>
+              <h2 className="text-3xl font-black tracking-tight text-white drop-shadow-sm">
+                {t('history.title')}
+              </h2>
               <div className="flex items-center gap-2">
-                <span className="flex h-1.5 w-1.5 rounded-full bg-primary animate-pulse shadow-[0_0_8px_var(--primary)]"></span>
-                <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#a68a77]">{history.length} {t('history.visited')}</p>
+                <span className="bg-primary flex h-1.5 w-1.5 animate-pulse rounded-full shadow-[0_0_8px_var(--primary)]"></span>
+                <p className="text-[11px] font-bold tracking-[0.2em] text-[#a68a77] uppercase">
+                  {history.length} {t('history.visited')}
+                </p>
               </div>
             </div>
             <button
               onClick={onClose}
-              className="group flex h-10 w-10 items-center justify-center rounded-full bg-white/5 border border-white/5 text-white/70 hover:bg-white/10 hover:text-white transition-all active:scale-95 mt-1"
+              className="group mt-1 flex h-10 w-10 items-center justify-center rounded-full border border-white/5 bg-white/5 text-white/70 transition-all hover:bg-white/10 hover:text-white active:scale-95"
             >
-              <span className="material-symbols-outlined text-xl transition-transform duration-300 group-hover:rotate-90">close</span>
+              <span className="material-symbols-outlined text-xl transition-transform duration-300 group-hover:rotate-90">
+                close
+              </span>
             </button>
           </div>
         </div>
@@ -134,13 +157,17 @@ export function HistoryView({ isOpen, onClose, onPlayPOI, onViewPOI }: HistoryVi
           {isLoading ? (
             <FeedSkeleton items={4} className="py-4" />
           ) : history.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-20 px-4 text-center">
-              <div className="relative mb-6 flex h-24 w-24 items-center justify-center rounded-[2rem] bg-gradient-to-br from-white/5 to-transparent border border-white/10 backdrop-blur-md shadow-2xl">
-                <span className="material-symbols-outlined text-5xl text-white/30 drop-shadow-lg">headphones_off</span>
-                <div className="absolute inset-0 rounded-[2rem] bg-primary/10 opacity-30 blur-xl"></div>
+            <div className="flex flex-col items-center justify-center px-4 py-20 text-center">
+              <div className="relative mb-6 flex h-24 w-24 items-center justify-center rounded-[2rem] border border-white/10 bg-gradient-to-br from-white/5 to-transparent shadow-2xl backdrop-blur-md">
+                <span className="material-symbols-outlined text-5xl text-white/30 drop-shadow-lg">
+                  headphones_off
+                </span>
+                <div className="bg-primary/10 absolute inset-0 rounded-[2rem] opacity-30 blur-xl"></div>
               </div>
-              <h3 className="text-xl font-bold text-white mb-2 tracking-tight">{t('history.empty')}</h3>
-              <p className="text-[#a68a77] text-sm max-w-[260px] leading-relaxed">
+              <h3 className="mb-2 text-xl font-bold tracking-tight text-white">
+                {t('history.empty')}
+              </h3>
+              <p className="max-w-[260px] text-sm leading-relaxed text-[#a68a77]">
                 {t('welcome.step3')}
               </p>
             </div>
@@ -153,14 +180,14 @@ export function HistoryView({ isOpen, onClose, onPlayPOI, onViewPOI }: HistoryVi
                 return (
                   <div
                     key={`${item.poi_id}-${item.visited_at}`}
-                    className="group relative flex items-center gap-4 p-4 rounded-3xl bg-white/[0.02] border border-white/[0.04] overflow-hidden transition-all duration-300 hover:bg-white/[0.06] hover:border-white/10 hover:-translate-y-0.5"
+                    className="group relative flex items-center gap-4 overflow-hidden rounded-3xl border border-white/[0.04] bg-white/[0.02] p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-white/10 hover:bg-white/[0.06]"
                   >
                     {/* Decorative ambient glow on hover */}
-                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-r from-primary/10 via-transparent to-transparent pointer-events-none" />
+                    <div className="from-primary/10 pointer-events-none absolute inset-0 bg-gradient-to-r via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
 
                     {/* Image - FIXED BUG HERE WITH `relative` */}
                     <div
-                      className="relative h-16 w-16 shrink-0 overflow-hidden rounded-[1.25rem] bg-[#2a1d17] border border-white/5 cursor-pointer shadow-[0_8px_16px_-6px_rgba(0,0,0,0.5)] group-hover:shadow-[0_8px_20px_-6px_var(--primary-glow,rgba(234,88,12,0.3))] transition-all duration-300"
+                      className="relative h-16 w-16 shrink-0 cursor-pointer overflow-hidden rounded-[1.25rem] border border-white/5 bg-[#2a1d17] shadow-[0_8px_16px_-6px_rgba(0,0,0,0.5)] transition-all duration-300 group-hover:shadow-[0_8px_20px_-6px_var(--primary-glow,rgba(234,88,12,0.3))]"
                       onClick={() => onViewPOI?.(item.poi!)}
                     >
                       {item.poi.image_url ? (
@@ -172,27 +199,39 @@ export function HistoryView({ isOpen, onClose, onPlayPOI, onViewPOI }: HistoryVi
                           className="object-cover transition-transform duration-700 group-hover:scale-110"
                         />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#3a2d25] to-[#2a1d17]">
-                          <span className="material-symbols-outlined text-white/20 text-2xl">restaurant</span>
+                        <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-[#3a2d25] to-[#2a1d17]">
+                          <span className="material-symbols-outlined text-2xl text-white/20">
+                            restaurant
+                          </span>
                         </div>
                       )}
                     </div>
 
                     {/* Content */}
                     <div
-                      className="flex-1 min-w-0 py-1 cursor-pointer"
+                      className="min-w-0 flex-1 cursor-pointer py-1"
                       onClick={() => onViewPOI?.(item.poi!)}
                     >
-                      <h4 className="text-white font-bold text-lg truncate tracking-tight group-hover:text-primary transition-colors duration-300">{localized.name}</h4>
-                      <div className="flex items-center gap-1.5 mt-0.5">
-                        <span className="material-symbols-outlined text-[14px] text-white/30">schedule</span>
-                        <p className="text-[13px] font-medium text-white/50">{formatDate(item.visited_at)}</p>
+                      <h4 className="group-hover:text-primary truncate text-lg font-bold tracking-tight text-white transition-colors duration-300">
+                        {localized.name}
+                      </h4>
+                      <div className="mt-0.5 flex items-center gap-1.5">
+                        <span className="material-symbols-outlined text-[14px] text-white/30">
+                          schedule
+                        </span>
+                        <p className="text-[13px] font-medium text-white/50">
+                          {formatDate(item.visited_at)}
+                        </p>
                       </div>
 
                       {item.listened && (
-                        <div className="mt-2.5 flex items-center gap-1 w-max rounded-full bg-green-500/10 px-2 py-0.5 border border-green-500/20 shadow-sm">
-                          <span className="material-symbols-outlined text-[10px] text-green-400">graphic_eq</span>
-                          <span className="text-[9px] uppercase tracking-widest font-black text-green-400">{t('history.listened')}</span>
+                        <div className="mt-2.5 flex w-max items-center gap-1 rounded-full border border-green-500/20 bg-green-500/10 px-2 py-0.5 shadow-sm">
+                          <span className="material-symbols-outlined text-[10px] text-green-400">
+                            graphic_eq
+                          </span>
+                          <span className="text-[9px] font-black tracking-widest text-green-400 uppercase">
+                            {t('history.listened')}
+                          </span>
                         </div>
                       )}
                     </div>
@@ -200,10 +239,13 @@ export function HistoryView({ isOpen, onClose, onPlayPOI, onViewPOI }: HistoryVi
                     {/* Replay Button */}
                     <button
                       onClick={() => onPlayPOI(item.poi!)}
-                      className="relative z-10 flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/5 border border-white/10 text-white/80 hover:bg-primary hover:border-primary hover:text-[#1a1311] transition-all duration-300 hover:scale-[1.05] active:scale-95 shadow-sm group-hover:shadow-md"
+                      className="hover:bg-primary hover:border-primary relative z-10 flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-white/80 shadow-sm transition-all duration-300 group-hover:shadow-md hover:scale-[1.05] hover:text-[#1a1311] active:scale-95"
                       aria-label="Phát lại"
                     >
-                      <span className="material-symbols-outlined text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>
+                      <span
+                        className="material-symbols-outlined text-2xl"
+                        style={{ fontVariationSettings: "'FILL' 1" }}
+                      >
                         replay
                       </span>
                     </button>

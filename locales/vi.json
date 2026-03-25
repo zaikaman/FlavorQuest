@@ -6,14 +6,7 @@
   "metadata": {
     "title": "FlavorQuest - Khám Phá Ẩm Thực Vĩnh Khánh",
     "description": "Tour âm thanh tự động dẫn đường khám phá ẩm thực phố Vĩnh Khánh, Cần Thơ. Offline-first PWA với hỗ trợ đa ngôn ngữ.",
-    "keywords": [
-      "food tour",
-      "audio guide",
-      "Vĩnh Khánh",
-      "Cần Thơ",
-      "ẩm thực",
-      "PWA"
-    ]
+    "keywords": ["food tour", "audio guide", "Vĩnh Khánh", "Cần Thơ", "ẩm thực", "PWA"]
   },
   "manifest": {
     "name": "FlavorQuest - Trải Nghiệm Thuyết Minh Âm Thanh Tự Động",

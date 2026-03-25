@@ -36,10 +36,7 @@ async function canManageDish(dishId: string) {
   return { allowed, adminClient, profile, dish };
 }
 
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const access = await canManageDish(id);
 

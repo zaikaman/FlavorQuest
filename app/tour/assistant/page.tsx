@@ -15,10 +15,10 @@ export default function TourAssistantPage() {
   const activeTab = searchParams.get('tab') ?? 'assistant';
 
   return (
-    <div className="bg-background-dark relative min-h-screen text-white overflow-hidden">
+    <div className="bg-background-dark relative min-h-screen overflow-hidden text-white">
       {/* Background gradients */}
       <div className="pointer-events-none fixed inset-0">
-        <div className="absolute top-[-10%] left-[-10%] h-[40%] w-[40%] rounded-full bg-primary/20 blur-[120px]" />
+        <div className="bg-primary/20 absolute top-[-10%] left-[-10%] h-[40%] w-[40%] rounded-full blur-[120px]" />
         <div className="absolute right-[-5%] bottom-[10%] h-[30%] w-[30%] rounded-full bg-[#ffb07a]/15 blur-[100px]" />
       </div>
 
@@ -54,9 +54,9 @@ export default function TourAssistantPage() {
                 ? params.toString()
                   ? `/tour/chat?${params.toString()}`
                   : '/tour/chat'
-              : params.toString()
-                ? `/tour?${params.toString()}`
-                : '/tour';
+                : params.toString()
+                  ? `/tour?${params.toString()}`
+                  : '/tour';
 
           router.push(nextUrl);
         }}

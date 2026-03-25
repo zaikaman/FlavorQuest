@@ -31,7 +31,9 @@ interface ChatbotRequestPayload {
   pageContext?: ChatbotPageContext;
 }
 
-type LocalizedChatbotRecord = Partial<Record<`name_${Language}` | `description_${Language}`, string | null>>;
+type LocalizedChatbotRecord = Partial<
+  Record<`name_${Language}` | `description_${Language}`, string | null>
+>;
 
 const LOCALIZED_NAME_SELECT_FIELDS = [
   'name_vi',

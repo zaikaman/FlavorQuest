@@ -117,20 +117,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setIsRoleReady(roleReady);
   }, []);
 
-  const withTimeout = useCallback(async <T,>(
-    promise: Promise<T>,
-    timeoutMs: number,
-    label: string
-  ): Promise<T> => {
-    return await Promise.race([
-      promise,
-      new Promise<T>((_, reject) => {
-        window.setTimeout(() => {
-          reject(new Error(`${label} timed out after ${timeoutMs}ms`));
-        }, timeoutMs);
-      }),
-    ]);
-  }, []);
+  const withTimeout = useCallback(
+    async <T,>(promise: Promise<T>, timeoutMs: number, label: string): Promise<T> => {
+      return await Promise.race([
+        promise,
+        new Promise<T>((_, reject) => {
+          window.setTimeout(() => {
+            reject(new Error(`${label} timed out after ${timeoutMs}ms`));
+          }, timeoutMs);
+        }),
+      ]);
+    },
+    []
+  );
 
   const fetchRoleFromApi = useCallback(async (): Promise<MeResponse> => {
     const response = await withTimeout(

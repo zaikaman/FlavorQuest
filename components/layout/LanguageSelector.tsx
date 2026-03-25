@@ -16,20 +16,14 @@ export function LanguageSelector({ variant = 'compact', className = '' }: Langua
   const { language, setLanguage, availableLanguages } = useLanguage();
   const featuredLanguageSet = new Set<string>(FEATURED_LANGUAGE_CODES);
 
-  const featuredLanguages = availableLanguages.filter((item) =>
-    featuredLanguageSet.has(item.code)
-  );
+  const featuredLanguages = availableLanguages.filter((item) => featuredLanguageSet.has(item.code));
   const extraLanguages = availableLanguages.filter((item) => !item.featured);
   const compactLanguages = featuredLanguages.slice(0, 6);
   const displayLanguages =
-    variant === 'compact'
-      ? compactLanguages
-      : [...featuredLanguages, ...extraLanguages];
+    variant === 'compact' ? compactLanguages : [...featuredLanguages, ...extraLanguages];
 
   const gridClassName =
-    variant === 'compact'
-      ? 'grid-cols-2 sm:grid-cols-3'
-      : 'grid-cols-2 md:grid-cols-3';
+    variant === 'compact' ? 'grid-cols-2 sm:grid-cols-3' : 'grid-cols-2 md:grid-cols-3';
 
   if (variant === 'splash') {
     return (
@@ -38,11 +32,11 @@ export function LanguageSelector({ variant = 'compact', className = '' }: Langua
       >
         <div className="rounded-[26px] border border-white/8 bg-[linear-gradient(180deg,rgba(255,255,255,0.05),rgba(0,0,0,0.1))] p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
           <div className="mb-4 flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-full bg-white/8 text-primary">
+            <div className="text-primary flex h-11 w-11 items-center justify-center rounded-full bg-white/8">
               <span className="material-symbols-outlined text-[20px]">language</span>
             </div>
             <div className="min-w-0">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/40">
+              <p className="text-[11px] font-semibold tracking-[0.22em] text-white/40 uppercase">
                 {language.toUpperCase()}
               </p>
               <p className="truncate text-[1.05rem] font-semibold text-white">
@@ -75,7 +69,7 @@ export function LanguageSelector({ variant = 'compact', className = '' }: Langua
                           {lang.nativeName}
                         </p>
                         {isFeatured && (
-                          <span className="rounded-full bg-white/8 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/52">
+                          <span className="rounded-full bg-white/8 px-2 py-0.5 text-[10px] font-semibold tracking-[0.16em] text-white/52 uppercase">
                             {lang.shortLabel}
                           </span>
                         )}
@@ -96,7 +90,6 @@ export function LanguageSelector({ variant = 'compact', className = '' }: Langua
               })}
             </div>
           </div>
-
         </div>
       </div>
     );
@@ -123,7 +116,7 @@ export function LanguageSelector({ variant = 'compact', className = '' }: Langua
             >
               <div className="flex items-start justify-between gap-3">
                 <span
-                  className={`rounded-full px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] ${
+                  className={`rounded-full px-2 py-1 text-[11px] font-semibold tracking-[0.22em] uppercase ${
                     isActive ? 'bg-white/18 text-white' : 'bg-white/8 text-white/58'
                   }`}
                 >
@@ -135,8 +128,10 @@ export function LanguageSelector({ variant = 'compact', className = '' }: Langua
                   }`}
                 />
               </div>
-              <p className="mt-3 text-sm font-semibold leading-5">{lang.nativeName}</p>
-              <p className={`mt-1 text-xs leading-4 ${isActive ? 'text-white/78' : 'text-white/54'}`}>
+              <p className="mt-3 text-sm leading-5 font-semibold">{lang.nativeName}</p>
+              <p
+                className={`mt-1 text-xs leading-4 ${isActive ? 'text-white/78' : 'text-white/54'}`}
+              >
                 {lang.name}
               </p>
             </button>

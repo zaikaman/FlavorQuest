@@ -1,7 +1,7 @@
 /**
  * Analytics Service
  * Log events to Supabase analytics table
- * 
+ *
  * Features:
  * - Event logging với metadata
  * - Batch queuing cho offline support
@@ -74,8 +74,8 @@ function getSessionId(): string {
     } else {
       // Fallback for very old browsers (unlikely needed but safe)
       sessionId = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-        const r = Math.random() * 16 | 0;
-        const v = c === 'x' ? r : (r & 0x3 | 0x8);
+        const r = (Math.random() * 16) | 0;
+        const v = c === 'x' ? r : (r & 0x3) | 0x8;
         return v.toString(16);
       });
     }
@@ -87,7 +87,10 @@ function getSessionId(): string {
 /**
  * Log event to Supabase
  */
-export async function logEvent(event: AnalyticsEventBase, coordinates?: Coordinates): Promise<void> {
+export async function logEvent(
+  event: AnalyticsEventBase,
+  coordinates?: Coordinates
+): Promise<void> {
   const timestamp = new Date().toISOString();
   const sessionId = getSessionId();
 
@@ -125,7 +128,6 @@ export async function logEvent(event: AnalyticsEventBase, coordinates?: Coordina
       // Consider completed if > 95% listened
       dbEvent.completed = meta.completion_percent > 95;
     }
-
   }
 
   try {
@@ -167,30 +169,40 @@ export async function logEvent(event: AnalyticsEventBase, coordinates?: Coordina
  * Log tour start event
  */
 export async function logTourStart(language: Language, coordinates?: Coordinates): Promise<void> {
-  return logEvent({
-    event_type: 'tour_start',
-    language,
-    metadata: {
-      user_agent: typeof navigator !== 'undefined' ? navigator.userAgent : '',
-      screen_size: typeof window !== 'undefined' ? `${window.screen.width}x${window.screen.height}` : '',
-    } as Json,
-  }, coordinates);
+  return logEvent(
+    {
+      event_type: 'tour_start',
+      language,
+      metadata: {
+        user_agent: typeof navigator !== 'undefined' ? navigator.userAgent : '',
+        screen_size:
+          typeof window !== 'undefined' ? `${window.screen.width}x${window.screen.height}` : '',
+      } as Json,
+    },
+    coordinates
+  );
 }
 
 export async function logTourStartWithMetadata(
   language: Language,
   metadata?: Json,
-  coordinates?: Coordinates,
+  coordinates?: Coordinates
 ): Promise<void> {
-  return logEvent({
-    event_type: 'tour_start',
-    language,
-    metadata: {
-      user_agent: typeof navigator !== 'undefined' ? navigator.userAgent : '',
-      screen_size: typeof window !== 'undefined' ? `${window.screen.width}x${window.screen.height}` : '',
-      ...(metadata && typeof metadata === 'object' && !Array.isArray(metadata) ? metadata as Record<string, Json> : {}),
-    } as Json,
-  }, coordinates);
+  return logEvent(
+    {
+      event_type: 'tour_start',
+      language,
+      metadata: {
+        user_agent: typeof navigator !== 'undefined' ? navigator.userAgent : '',
+        screen_size:
+          typeof window !== 'undefined' ? `${window.screen.width}x${window.screen.height}` : '',
+        ...(metadata && typeof metadata === 'object' && !Array.isArray(metadata)
+          ? (metadata as Record<string, Json>)
+          : {}),
+      } as Json,
+    },
+    coordinates
+  );
 }
 
 /**
@@ -202,12 +214,15 @@ export async function logAutoPlay(
   coordinates?: Coordinates,
   metadata?: Json
 ): Promise<void> {
-  return logEvent({
-    event_type: 'auto_play',
-    poi_id: poiId,
-    language,
-    metadata,
-  }, coordinates);
+  return logEvent(
+    {
+      event_type: 'auto_play',
+      poi_id: poiId,
+      language,
+      metadata,
+    },
+    coordinates
+  );
 }
 
 /**
@@ -234,7 +249,7 @@ export async function logSkip(
   language: Language,
   playedDuration: number,
   totalDuration: number,
-  metadata?: Json,
+  metadata?: Json
 ): Promise<void> {
   return logEvent({
     event_type: 'skip',
@@ -244,7 +259,9 @@ export async function logSkip(
       played_duration: playedDuration,
       total_duration: totalDuration,
       completion_percent: Math.round((playedDuration / totalDuration) * 100),
-      ...(metadata && typeof metadata === 'object' && !Array.isArray(metadata) ? metadata as Record<string, Json> : {}),
+      ...(metadata && typeof metadata === 'object' && !Array.isArray(metadata)
+        ? (metadata as Record<string, Json>)
+        : {}),
     } as Json,
   });
 }
@@ -257,17 +274,22 @@ export async function logTourEnd(
   duration: number,
   poisVisited: number,
   coordinates?: Coordinates,
-  metadata?: Json,
+  metadata?: Json
 ): Promise<void> {
-  return logEvent({
-    event_type: 'tour_end',
-    language,
-    metadata: {
-      duration,
-      pois_visited: poisVisited,
-      ...(metadata && typeof metadata === 'object' && !Array.isArray(metadata) ? metadata as Record<string, Json> : {}),
-    } as Json,
-  }, coordinates);
+  return logEvent(
+    {
+      event_type: 'tour_end',
+      language,
+      metadata: {
+        duration,
+        pois_visited: poisVisited,
+        ...(metadata && typeof metadata === 'object' && !Array.isArray(metadata)
+          ? (metadata as Record<string, Json>)
+          : {}),
+      } as Json,
+    },
+    coordinates
+  );
 }
 
 /**

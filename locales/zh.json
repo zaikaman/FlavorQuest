@@ -6,14 +6,7 @@
   "metadata": {
     "title": "FlavorQuest - 探索永庆美食",
     "description": "永庆美食街自动定位语音导览体验，位于芹苴。离线优先 PWA，支持多语言。",
-    "keywords": [
-      "美食之旅",
-      "语音导览",
-      "永庆",
-      "芹苴",
-      "美食",
-      "PWA"
-    ]
+    "keywords": ["美食之旅", "语音导览", "永庆", "芹苴", "美食", "PWA"]
   },
   "manifest": {
     "name": "FlavorQuest - 自动语音导览体验",

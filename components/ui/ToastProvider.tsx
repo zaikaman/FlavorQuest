@@ -43,14 +43,14 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   const idRef = useRef(0);
 
   const dismiss = useCallback((id: string) => {
-    setToasts(prev => prev.filter(toast => toast.id !== id));
+    setToasts((prev) => prev.filter((toast) => toast.id !== id));
   }, []);
 
   const show = useCallback((type: ToastType, input: ToastInput | string) => {
     const normalized = normalizeToastInput(input);
     const id = `toast-${Date.now()}-${idRef.current++}`;
 
-    setToasts(prev => [
+    setToasts((prev) => [
       ...prev,
       {
         id,
@@ -60,19 +60,22 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     ]);
   }, []);
 
-  const value = useMemo<ToastContextValue>(() => ({
-    show,
-    success: input => show('success', input),
-    error: input => show('error', input),
-    warning: input => show('warning', input),
-    info: input => show('info', input),
-  }), [show]);
+  const value = useMemo<ToastContextValue>(
+    () => ({
+      show,
+      success: (input) => show('success', input),
+      error: (input) => show('error', input),
+      warning: (input) => show('warning', input),
+      info: (input) => show('info', input),
+    }),
+    [show]
+  );
 
   return (
     <ToastContext.Provider value={value}>
       {children}
       <ToastContainer position="top-right">
-        {toasts.map(toast => (
+        {toasts.map((toast) => (
           <Toast
             key={toast.id}
             id={toast.id}

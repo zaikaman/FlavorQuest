@@ -56,7 +56,10 @@ export function POIForm({
   const [activeTab, setActiveTab] = useState<Language>('vi');
   const [translating, setTranslating] = useState(false);
   const [genAllLoading, setGenAllLoading] = useState(false);
-  const [translationProgress, setTranslationProgress] = useState<{ completed: number; total: number } | null>(null);
+  const [translationProgress, setTranslationProgress] = useState<{
+    completed: number;
+    total: number;
+  } | null>(null);
   const [ttsProgress, setTtsProgress] = useState<{ completed: number; total: number } | null>(null);
 
   useEffect(() => {
@@ -423,12 +426,13 @@ export function POIForm({
             }),
           });
 
-          const payload = (await res.json().catch(() => null)) as
-            | {
-                error?: string;
-                translations?: Record<string, Partial<Record<(typeof LANGUAGES)[number]['code'], string>>>;
-              }
-            | null;
+          const payload = (await res.json().catch(() => null)) as {
+            error?: string;
+            translations?: Record<
+              string,
+              Partial<Record<(typeof LANGUAGES)[number]['code'], string>>
+            >;
+          } | null;
 
           if (!res.ok) {
             throw new Error(payload?.error || `Dịch thất bại cho ${lang.nativeName}`);
@@ -526,9 +530,10 @@ export function POIForm({
             body: JSON.stringify(item),
           });
 
-          const payload = (await res.json().catch(() => null)) as
-            | { error?: string; url?: string }
-            | null;
+          const payload = (await res.json().catch(() => null)) as {
+            error?: string;
+            url?: string;
+          } | null;
 
           if (!res.ok || !payload?.url) {
             throw new Error(payload?.error || `Tạo âm thanh thất bại cho ${item.languageCode}`);
@@ -770,7 +775,7 @@ export function POIForm({
           </div>
 
           {/* Tab ngôn ngữ */}
-          <div className="grid max-h-64 grid-cols-1 gap-2 overflow-y-auto border-b border-white/10 pb-2 pr-1 sm:grid-cols-2">
+          <div className="grid max-h-64 grid-cols-1 gap-2 overflow-y-auto border-b border-white/10 pr-1 pb-2 sm:grid-cols-2">
             {LANGUAGES.map((lang) => (
               <button
                 key={lang.code}
@@ -787,7 +792,7 @@ export function POIForm({
                     <p className="text-sm font-semibold">{lang.nativeName}</p>
                     <p className="mt-1 text-xs text-white/55">{lang.name}</p>
                   </div>
-                  <span className="rounded-full bg-white/8 px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.18em]">
+                  <span className="rounded-full bg-white/8 px-2 py-1 text-[11px] font-semibold tracking-[0.18em] uppercase">
                     {lang.shortLabel}
                   </span>
                 </div>

@@ -81,13 +81,13 @@ export function useTourManager(options: UseTourManagerOptions = {}) {
 
           if (navigator.onLine) {
             fetchFromApi()
-              .then(async freshTours => {
+              .then(async (freshTours) => {
                 await saveTours(freshTours);
                 setTours(freshTours);
                 setLastFetchTime(Date.now());
                 updateMemoryCache(freshTours);
               })
-              .catch(fetchError => {
+              .catch((fetchError) => {
                 console.warn('[useTourManager] Background fetch failed:', fetchError);
               });
           } else {
@@ -104,7 +104,8 @@ export function useTourManager(options: UseTourManagerOptions = {}) {
       setLastFetchTime(Date.now());
       updateMemoryCache(fetchedTours);
     } catch (fetchError) {
-      const message = fetchError instanceof Error ? fetchError.message : 'Không thể tải danh sách tour';
+      const message =
+        fetchError instanceof Error ? fetchError.message : 'Không thể tải danh sách tour';
 
       try {
         const cachedTours = await loadTours();
@@ -143,7 +144,8 @@ export function useTourManager(options: UseTourManagerOptions = {}) {
       setIsOfflineMode(false);
       updateMemoryCache(fetchedTours);
     } catch (fetchError) {
-      const message = fetchError instanceof Error ? fetchError.message : 'Không thể tải danh sách tour';
+      const message =
+        fetchError instanceof Error ? fetchError.message : 'Không thể tải danh sách tour';
       setError(message);
       onError?.(message);
     } finally {

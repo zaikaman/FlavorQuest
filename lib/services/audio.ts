@@ -1,7 +1,7 @@
 /**
  * Audio Service
  * AudioPlayer class với queue management
- * 
+ *
  * Features:
  * - HTML5 Audio wrapper
  * - Queue management
@@ -23,7 +23,7 @@ export interface AudioTrack {
   metadata?: Record<string, unknown>;
 }
 
-export type AudioPlayerEvent = 
+export type AudioPlayerEvent =
   | 'play'
   | 'pause'
   | 'ended'
@@ -181,7 +181,7 @@ export class AudioPlayer {
    * Remove track from queue
    */
   dequeue(trackId: string): void {
-    this.queue = this.queue.filter(t => t.id !== trackId);
+    this.queue = this.queue.filter((t) => t.id !== trackId);
   }
 
   /**
@@ -244,7 +244,7 @@ export class AudioPlayer {
   private emit(event: AudioPlayerEvent, ...args: unknown[]): void {
     const callbacks = this.listeners.get(event);
     if (callbacks) {
-      callbacks.forEach(callback => callback(...args));
+      callbacks.forEach((callback) => callback(...args));
     }
   }
 

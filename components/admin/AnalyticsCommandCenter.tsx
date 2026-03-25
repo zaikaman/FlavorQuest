@@ -291,7 +291,7 @@ function MiniTimeline<T extends TimelinePoint>({
           <p className="text-primary text-sm font-semibold">{title}</p>
           <p className="mt-1 text-sm leading-6 text-gray-400">{subtitle}</p>
         </div>
-        <div className="flex flex-wrap gap-3 text-[11px] uppercase tracking-[0.22em] text-gray-500">
+        <div className="flex flex-wrap gap-3 text-[11px] tracking-[0.22em] text-gray-500 uppercase">
           <span className="flex items-center gap-2">
             <span className={`h-2.5 w-2.5 rounded-full ${primaryTone}`} />
             {primaryLabel}
@@ -305,7 +305,7 @@ function MiniTimeline<T extends TimelinePoint>({
         </div>
       </div>
 
-      <div className="mt-6 overflow-x-auto pb-2 [scrollbar-color:rgba(245,130,32,0.55)_rgba(255,255,255,0.08)] [scrollbar-width:thin] [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-white/5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-primary/60 [&::-webkit-scrollbar-thumb:hover]:bg-primary/80">
+      <div className="[&::-webkit-scrollbar-thumb]:bg-primary/60 [&::-webkit-scrollbar-thumb:hover]:bg-primary/80 mt-6 overflow-x-auto pb-2 [scrollbar-color:rgba(245,130,32,0.55)_rgba(255,255,255,0.08)] [scrollbar-width:thin] [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-white/5">
         <div
           className="grid min-w-full gap-2"
           style={{
@@ -363,7 +363,7 @@ function ActivityHeatmap({ heatmap }: { heatmap: HeatmapSummary }) {
             đầu tour để đọc đúng ngữ cảnh thay vì chỉ nhìn màu.
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-3 text-[11px] uppercase tracking-[0.22em] text-gray-500">
+        <div className="flex flex-wrap items-center gap-3 text-[11px] tracking-[0.22em] text-gray-500 uppercase">
           <span>Thấp</span>
           <div className="flex items-center gap-1.5">
             {legendLevels.map((level) => (
@@ -387,20 +387,20 @@ function ActivityHeatmap({ heatmap }: { heatmap: HeatmapSummary }) {
       </div>
 
       {hasRows ? (
-        <div className="mt-6 overflow-x-auto pb-2 [scrollbar-color:rgba(245,130,32,0.55)_rgba(255,255,255,0.08)] [scrollbar-width:thin] [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-white/5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-primary/60 [&::-webkit-scrollbar-thumb:hover]:bg-primary/80">
+        <div className="[&::-webkit-scrollbar-thumb]:bg-primary/60 [&::-webkit-scrollbar-thumb:hover]:bg-primary/80 mt-6 overflow-x-auto pb-2 [scrollbar-color:rgba(245,130,32,0.55)_rgba(255,255,255,0.08)] [scrollbar-width:thin] [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-white/5">
           <div
             className="grid min-w-[760px] gap-1.5"
             style={{
               gridTemplateColumns: '72px repeat(24, minmax(18px, 1fr))',
             }}
           >
-            <div className="flex items-end pb-2 text-[10px] font-semibold uppercase tracking-[0.24em] text-gray-500">
+            <div className="flex items-end pb-2 text-[10px] font-semibold tracking-[0.24em] text-gray-500 uppercase">
               Ngày
             </div>
             {Array.from({ length: 24 }, (_, hour) => (
               <div
                 key={`hour-${hour}`}
-                className="pb-2 text-center text-[10px] font-semibold uppercase tracking-[0.18em] text-gray-500"
+                className="pb-2 text-center text-[10px] font-semibold tracking-[0.18em] text-gray-500 uppercase"
               >
                 {String(hour).padStart(2, '0')}
               </div>
@@ -507,7 +507,11 @@ export default function AnalyticsCommandCenter() {
     };
 
     channel
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'analytics_logs' }, refreshAnalytics)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'analytics_logs' },
+        refreshAnalytics
+      )
       .on('postgres_changes', { event: '*', schema: 'public', table: 'tours' }, refreshAnalytics)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'pois' }, refreshAnalytics)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'users' }, refreshAnalytics)
@@ -596,7 +600,9 @@ export default function AnalyticsCommandCenter() {
       case 'sessions':
         return items.sort((a, b) => b.sessions - a.sessions || b.total_plays - a.total_plays);
       case 'completion':
-        return items.sort((a, b) => b.completion_rate - a.completion_rate || b.sessions - a.sessions);
+        return items.sort(
+          (a, b) => b.completion_rate - a.completion_rate || b.sessions - a.sessions
+        );
       case 'skipPressure':
         return items.sort((a, b) => getSkipPressure(b) - getSkipPressure(a) || b.skips - a.skips);
       default:
@@ -604,15 +610,15 @@ export default function AnalyticsCommandCenter() {
     }
   }, [leaderboardSort, tourData]);
 
-  const focusedTour =
-    tourData.find((tour) => tour.id === selectedTourId) ?? leaderboard[0] ?? null;
+  const focusedTour = tourData.find((tour) => tour.id === selectedTourId) ?? leaderboard[0] ?? null;
   const topTour = leaderboard[0] ?? null;
   const topLanguage = languages[0] ?? null;
   const topGap = contentGaps[0] ?? null;
   const topPoi = poiLeaders[0] ?? null;
-  const topHour = [...hourlyData].sort(
-    (a, b) => b.total_plays + b.total_tours - (a.total_plays + a.total_tours)
-  )[0] ?? null;
+  const topHour =
+    [...hourlyData].sort(
+      (a, b) => b.total_plays + b.total_tours - (a.total_plays + a.total_tours)
+    )[0] ?? null;
 
   const opportunityTours = useMemo(() => {
     return [...tourData]
@@ -710,9 +716,7 @@ export default function AnalyticsCommandCenter() {
   ];
 
   if (isLoading && !data) {
-    return (
-      <DashboardSkeleton stats={6} />
-    );
+    return <DashboardSkeleton stats={6} />;
   }
 
   if (!data) {
@@ -728,15 +732,15 @@ export default function AnalyticsCommandCenter() {
       <section className="overflow-hidden rounded-[32px] border border-white/10 bg-[#241711]">
         <div className="grid gap-8 px-6 py-7 lg:grid-cols-[1.15fr_0.85fr] lg:px-8">
           <div>
-            <p className="text-primary/80 text-xs font-semibold uppercase tracking-[0.32em]">
+            <p className="text-primary/80 text-xs font-semibold tracking-[0.32em] uppercase">
               Trung tâm phân tích
             </p>
             <h1 className="mt-3 max-w-4xl text-3xl font-black text-white lg:text-4xl">
               Toàn cảnh vận hành FlavorQuest trong một màn hình
             </h1>
             <p className="mt-4 max-w-3xl text-sm leading-7 text-gray-300">
-              Ở đây bạn có thể nhìn cùng lúc hành vi nghe, chất lượng nội dung, hiệu suất tour,
-              POI, người dùng và nhịp tăng trưởng, thay vì phải ghép nhiều màn hình rời rạc với nhau.
+              Ở đây bạn có thể nhìn cùng lúc hành vi nghe, chất lượng nội dung, hiệu suất tour, POI,
+              người dùng và nhịp tăng trưởng, thay vì phải ghép nhiều màn hình rời rạc với nhau.
             </p>
 
             <div className="mt-6 flex flex-col gap-3 lg:flex-row lg:flex-wrap lg:items-center">
@@ -764,7 +768,7 @@ export default function AnalyticsCommandCenter() {
               <select
                 value={selectedTourId}
                 onChange={(event) => setSelectedTourId(event.target.value)}
-                className="min-w-[260px] rounded-xl border border-white/10 bg-black/20 px-4 py-2 text-sm text-white outline-none transition-colors focus:border-primary/40"
+                className="focus:border-primary/40 min-w-[260px] rounded-xl border border-white/10 bg-black/20 px-4 py-2 text-sm text-white transition-colors outline-none"
               >
                 <option value="">Tất cả tour</option>
                 {availableTours.map((tour) => (
@@ -798,14 +802,18 @@ export default function AnalyticsCommandCenter() {
               },
               {
                 kicker: 'Điểm cần xử lý',
-                title: topGap ? `${topGap.label}: ${formatNumber(topGap.count)}` : 'Kho nội dung đang ổn định',
+                title: topGap
+                  ? `${topGap.label}: ${formatNumber(topGap.count)}`
+                  : 'Kho nội dung đang ổn định',
                 body: topGap
                   ? topGap.note
                   : 'Khi có chênh lệch lớn về chất lượng nội dung, khu vực này sẽ nhắc ngay.',
               },
               {
                 kicker: 'Khung giờ nổi bật',
-                title: topHour ? `${formatHour(topHour.hour)} đang hút mạnh nhất` : 'Chưa có giờ cao điểm',
+                title: topHour
+                  ? `${formatHour(topHour.hour)} đang hút mạnh nhất`
+                  : 'Chưa có giờ cao điểm',
                 body: topHour
                   ? `${formatNumber(topHour.total_plays)} lượt phát và ${formatNumber(topHour.unique_sessions)} phiên trong khung giờ này.`
                   : 'Cần thêm dữ liệu trong kỳ để thấy nhịp theo giờ.',
@@ -815,7 +823,7 @@ export default function AnalyticsCommandCenter() {
                 key={item.kicker}
                 className="rounded-[24px] border border-white/10 bg-black/20 p-5"
               >
-                <p className="text-primary text-xs font-semibold uppercase tracking-[0.28em]">
+                <p className="text-primary text-xs font-semibold tracking-[0.28em] uppercase">
                   {item.kicker}
                 </p>
                 <p className="mt-3 text-lg font-bold text-white">{item.title}</p>
@@ -850,7 +858,7 @@ export default function AnalyticsCommandCenter() {
                 thay vì chỉ nhìn một con số riêng lẻ.
               </p>
             </div>
-            <div className="flex flex-wrap gap-3 text-[11px] uppercase tracking-[0.22em] text-gray-500">
+            <div className="flex flex-wrap gap-3 text-[11px] tracking-[0.22em] text-gray-500 uppercase">
               <span className="flex items-center gap-2">
                 <span className="bg-primary h-2.5 w-2.5 rounded-full" />
                 Bắt đầu
@@ -866,7 +874,7 @@ export default function AnalyticsCommandCenter() {
             </div>
           </div>
 
-          <div className="mt-8 overflow-x-auto pb-2 [scrollbar-color:rgba(245,130,32,0.55)_rgba(255,255,255,0.08)] [scrollbar-width:thin] [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-white/5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-primary/60 [&::-webkit-scrollbar-thumb:hover]:bg-primary/80">
+          <div className="[&::-webkit-scrollbar-thumb]:bg-primary/60 [&::-webkit-scrollbar-thumb:hover]:bg-primary/80 mt-8 overflow-x-auto pb-2 [scrollbar-color:rgba(245,130,32,0.55)_rgba(255,255,255,0.08)] [scrollbar-width:thin] [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-white/5">
             <div
               className="grid min-w-full items-end gap-2"
               style={{
@@ -883,8 +891,14 @@ export default function AnalyticsCommandCenter() {
                     <div className="flex h-64 w-full items-end justify-center gap-1">
                       {[
                         { value: day.total_tours, tone: 'bg-primary/45 group-hover:bg-primary/75' },
-                        { value: day.total_plays, tone: 'bg-orange-300/45 group-hover:bg-orange-300/80' },
-                        { value: day.unique_sessions, tone: 'bg-sky-300/45 group-hover:bg-sky-300/80' },
+                        {
+                          value: day.total_plays,
+                          tone: 'bg-orange-300/45 group-hover:bg-orange-300/80',
+                        },
+                        {
+                          value: day.unique_sessions,
+                          tone: 'bg-sky-300/45 group-hover:bg-sky-300/80',
+                        },
                       ].map((bar, index) => (
                         <div
                           key={`${day.date}-${index}`}
@@ -934,10 +948,15 @@ export default function AnalyticsCommandCenter() {
 
           <div className="rounded-[30px] border border-white/10 bg-[#2c1e16] p-6">
             <p className="text-primary text-sm font-semibold">Độ sâu phiên nghe</p>
-            <h2 className="mt-1 text-xl font-black text-white">Người dùng đi tới đâu trong hành trình</h2>
+            <h2 className="mt-1 text-xl font-black text-white">
+              Người dùng đi tới đâu trong hành trình
+            </h2>
             <div className="mt-5 space-y-3">
               {sessionSegments.map((segment) => (
-                <div key={segment.key} className="rounded-2xl border border-white/10 bg-black/15 p-4">
+                <div
+                  key={segment.key}
+                  className="rounded-2xl border border-white/10 bg-black/15 p-4"
+                >
                   <div className="flex items-center justify-between gap-3">
                     <p className="font-semibold text-white">{segment.label}</p>
                     <span className="text-sm font-semibold text-gray-300">
@@ -958,21 +977,26 @@ export default function AnalyticsCommandCenter() {
 
           <div className="rounded-[30px] border border-white/10 bg-[#2c1e16] p-6">
             <p className="text-primary text-sm font-semibold">Ngôn ngữ sử dụng</p>
-            <h2 className="mt-1 text-xl font-black text-white">Người dùng đang nghe bằng ngôn ngữ nào</h2>
+            <h2 className="mt-1 text-xl font-black text-white">
+              Người dùng đang nghe bằng ngôn ngữ nào
+            </h2>
             <div className="mt-5 space-y-3">
               {languages.map((language) => (
                 <div key={language.code} className="flex items-center justify-between gap-4">
                   <div className="min-w-0">
                     <p className="font-semibold text-white">{language.label}</p>
                     <p className="mt-1 text-xs text-gray-500">
-                      {formatNumber(language.sessions)} phiên • {formatNumber(language.plays)} lượt phát
+                      {formatNumber(language.sessions)} phiên • {formatNumber(language.plays)} lượt
+                      phát
                     </p>
                   </div>
                   <div className="flex min-w-[124px] items-center gap-3">
                     <div className="h-2 flex-1 overflow-hidden rounded-full bg-white/5">
                       <div
-                        className="bg-sky-300 h-full rounded-full"
-                        style={{ width: `${Math.max(language.share, language.plays > 0 ? 4 : 0)}%` }}
+                        className="h-full rounded-full bg-sky-300"
+                        style={{
+                          width: `${Math.max(language.share, language.plays > 0 ? 4 : 0)}%`,
+                        }}
                       />
                     </div>
                     <span className="text-xs font-semibold text-gray-300">
@@ -1026,9 +1050,16 @@ export default function AnalyticsCommandCenter() {
                   accent: 'text-emerald-300',
                 },
               ].map((item) => (
-                <div key={item.label} className="rounded-2xl border border-white/10 bg-black/15 p-4">
-                  <p className="text-[11px] uppercase tracking-[0.22em] text-gray-500">{item.label}</p>
-                  <p className={`mt-3 text-3xl font-black ${item.accent}`}>{formatNumber(item.value)}</p>
+                <div
+                  key={item.label}
+                  className="rounded-2xl border border-white/10 bg-black/15 p-4"
+                >
+                  <p className="text-[11px] tracking-[0.22em] text-gray-500 uppercase">
+                    {item.label}
+                  </p>
+                  <p className={`mt-3 text-3xl font-black ${item.accent}`}>
+                    {formatNumber(item.value)}
+                  </p>
                   <p className="mt-2 text-sm leading-6 text-gray-400">{item.note}</p>
                 </div>
               ))}
@@ -1052,8 +1083,8 @@ export default function AnalyticsCommandCenter() {
         <div className="min-w-0 rounded-[30px] border border-white/10 bg-[#2c1e16] p-6">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div>
-                <p className="text-primary text-sm font-semibold">Chất lượng nội dung</p>
-                <h2 className="mt-1 text-xl font-black text-white">Kho nội dung đang khỏe tới đâu</h2>
+              <p className="text-primary text-sm font-semibold">Chất lượng nội dung</p>
+              <h2 className="mt-1 text-xl font-black text-white">Kho nội dung đang khỏe tới đâu</h2>
               <p className="mt-2 max-w-2xl text-sm leading-6 text-gray-400">
                 Nhìn nhanh để biết hệ thống đang thiếu ở đâu: ảnh, audio, đa ngôn ngữ, ảnh bìa tour
                 hay người phụ trách.
@@ -1069,13 +1100,19 @@ export default function AnalyticsCommandCenter() {
               const ratio = item.total ? Math.round((item.value / item.total) * 100) : 0;
 
               return (
-                <div key={item.label} className="rounded-2xl border border-white/10 bg-black/15 p-4">
+                <div
+                  key={item.label}
+                  className="rounded-2xl border border-white/10 bg-black/15 p-4"
+                >
                   <div className="flex items-center justify-between gap-3">
                     <p className="font-semibold text-white">{item.label}</p>
                     <span className="text-xs font-semibold text-gray-400">{ratio}%</span>
                   </div>
                   <div className="mt-3 h-2 overflow-hidden rounded-full bg-white/5">
-                    <div className={`h-full rounded-full ${item.tone}`} style={{ width: `${ratio}%` }} />
+                    <div
+                      className={`h-full rounded-full ${item.tone}`}
+                      style={{ width: `${ratio}%` }}
+                    />
                   </div>
                   <p className="mt-3 text-xs text-gray-400">
                     {formatNumber(item.value)} / {formatNumber(item.total)} mục đã sẵn sàng
@@ -1089,10 +1126,13 @@ export default function AnalyticsCommandCenter() {
             <div className="flex items-center justify-between gap-3">
               <div>
                 <p className="text-primary text-sm font-semibold">Tổng tài nguyên</p>
-                <h3 className="mt-1 text-lg font-black text-white">Những gì đang có trong hệ thống</h3>
+                <h3 className="mt-1 text-lg font-black text-white">
+                  Những gì đang có trong hệ thống
+                </h3>
               </div>
               <span className="text-xs text-gray-400">
-                {formatNumber(content.active_pois)} POI hoạt động • {formatNumber(content.active_tours)} tour mở
+                {formatNumber(content.active_pois)} POI hoạt động •{' '}
+                {formatNumber(content.active_tours)} tour mở
               </span>
             </div>
             <div className="mt-4 grid gap-3 sm:grid-cols-3">
@@ -1102,7 +1142,9 @@ export default function AnalyticsCommandCenter() {
                 { label: 'POI chưa có chủ quản lý', value: content.orphan_pois },
               ].map((item) => (
                 <div key={item.label} className="rounded-2xl bg-black/20 px-4 py-4">
-                  <p className="text-[11px] uppercase tracking-[0.22em] text-gray-500">{item.label}</p>
+                  <p className="text-[11px] tracking-[0.22em] text-gray-500 uppercase">
+                    {item.label}
+                  </p>
                   <p className="mt-3 text-2xl font-black text-white">{formatNumber(item.value)}</p>
                 </div>
               ))}
@@ -1146,16 +1188,20 @@ export default function AnalyticsCommandCenter() {
             <div className="flex items-center justify-between gap-4">
               <div>
                 <p className="text-primary text-sm font-semibold">Theo dõi POI</p>
-                <h2 className="mt-1 text-xl font-black text-white">POI nổi bật và POI cần xem lại</h2>
+                <h2 className="mt-1 text-xl font-black text-white">
+                  POI nổi bật và POI cần xem lại
+                </h2>
               </div>
               <span className="text-xs text-gray-400">
-                {topPoi ? `${formatNumber(topPoi.plays)} lượt phát ở POI dẫn đầu` : 'Chưa có dữ liệu'}
+                {topPoi
+                  ? `${formatNumber(topPoi.plays)} lượt phát ở POI dẫn đầu`
+                  : 'Chưa có dữ liệu'}
               </span>
             </div>
 
             <div className="mt-5 grid gap-6 lg:grid-cols-2">
               <div className="space-y-3">
-                <p className="text-xs uppercase tracking-[0.24em] text-gray-500">Nghe nhiều nhất</p>
+                <p className="text-xs tracking-[0.24em] text-gray-500 uppercase">Nghe nhiều nhất</p>
                 {poiLeaders.map((poi, index) => (
                   <div key={poi.id} className="rounded-2xl border border-white/10 bg-black/15 p-4">
                     <div className="flex items-start gap-3">
@@ -1164,7 +1210,13 @@ export default function AnalyticsCommandCenter() {
                       </div>
                       <div className="relative h-12 w-16 shrink-0 overflow-hidden rounded-xl bg-black/20">
                         {poi.image_url ? (
-                          <Image src={poi.image_url} alt={poi.name_vi} fill unoptimized className="object-cover" />
+                          <Image
+                            src={poi.image_url}
+                            alt={poi.name_vi}
+                            fill
+                            unoptimized
+                            className="object-cover"
+                          />
                         ) : (
                           <div className="from-primary/15 text-primary/50 flex h-full w-full items-center justify-center bg-gradient-to-br to-black/20">
                             <span className="text-sm font-black">P</span>
@@ -1186,17 +1238,21 @@ export default function AnalyticsCommandCenter() {
               </div>
 
               <div className="space-y-3">
-                <p className="text-xs uppercase tracking-[0.24em] text-gray-500">Cần ưu tiên xử lý</p>
+                <p className="text-xs tracking-[0.24em] text-gray-500 uppercase">
+                  Cần ưu tiên xử lý
+                </p>
                 {poiOpportunities.map((poi) => (
                   <div key={poi.id} className="rounded-2xl border border-white/10 bg-black/15 p-4">
                     <div className="flex items-start justify-between gap-4">
                       <div>
                         <p className="font-semibold text-white">{poi.name_vi}</p>
                         <p className="mt-2 text-sm text-gray-400">
-                          Bỏ qua {formatPercent(poi.skip_rate)} • {formatNumber(poi.skips)} lượt bỏ qua
+                          Bỏ qua {formatPercent(poi.skip_rate)} • {formatNumber(poi.skips)} lượt bỏ
+                          qua
                         </p>
                         <p className="mt-2 text-xs text-gray-500">
-                          {poi.has_audio_vi ? 'Có audio VI' : 'Thiếu audio VI'} • {poi.has_image ? 'Có ảnh' : 'Thiếu ảnh'}
+                          {poi.has_audio_vi ? 'Có audio VI' : 'Thiếu audio VI'} •{' '}
+                          {poi.has_image ? 'Có ảnh' : 'Thiếu ảnh'}
                         </p>
                       </div>
                       <span className="rounded-full bg-amber-500/15 px-3 py-1 text-xs font-bold text-amber-200">
@@ -1222,7 +1278,9 @@ export default function AnalyticsCommandCenter() {
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div>
               <p className="text-primary text-sm font-semibold">Phân tích tour</p>
-              <h2 className="mt-1 text-xl font-black text-white">Xếp hạng và chẩn đoán hành trình</h2>
+              <h2 className="mt-1 text-xl font-black text-white">
+                Xếp hạng và chẩn đoán hành trình
+              </h2>
               <p className="mt-2 text-sm leading-6 text-gray-400">
                 Tour vẫn rất quan trọng, nhưng ở trang này nó được đặt trong bức tranh rộng hơn của
                 toàn hệ thống.
@@ -1271,7 +1329,8 @@ export default function AnalyticsCommandCenter() {
                     <div>
                       <p className="font-semibold text-white">{tour.name_vi}</p>
                       <p className="mt-2 text-sm text-gray-400">
-                        {formatNumber(tour.total_plays)} lượt phát • {formatNumber(tour.sessions)} phiên • {tour.poi_count} POI
+                        {formatNumber(tour.total_plays)} lượt phát • {formatNumber(tour.sessions)}{' '}
+                        phiên • {tour.poi_count} POI
                       </p>
                     </div>
                   </div>
@@ -1289,7 +1348,13 @@ export default function AnalyticsCommandCenter() {
             {topTour ? (
               <div className="relative aspect-[16/9] bg-black/20">
                 {topTour.cover_image_url ? (
-                  <Image src={topTour.cover_image_url} alt={topTour.name_vi} fill unoptimized className="object-cover" />
+                  <Image
+                    src={topTour.cover_image_url}
+                    alt={topTour.name_vi}
+                    fill
+                    unoptimized
+                    className="object-cover"
+                  />
                 ) : (
                   <div className="from-primary/20 flex h-full w-full items-center justify-center bg-gradient-to-br to-black/20">
                     <span className="text-primary/35 text-6xl font-black">T</span>
@@ -1327,7 +1392,8 @@ export default function AnalyticsCommandCenter() {
                     <p className="text-primary text-sm font-semibold">Tour được chọn</p>
                     <h3 className="mt-1 text-2xl font-black text-white">{focusedTour.name_vi}</h3>
                     <p className="mt-2 text-sm text-gray-400">
-                      {focusedTour.poi_count} POI • {formatDuration(focusedTour.estimated_duration_min)}
+                      {focusedTour.poi_count} POI •{' '}
+                      {formatDuration(focusedTour.estimated_duration_min)}
                     </p>
                   </div>
                   <span
@@ -1349,7 +1415,9 @@ export default function AnalyticsCommandCenter() {
                     { label: 'Thời lượng TB', value: formatDuration(focusedTour.avg_duration_min) },
                   ].map((item) => (
                     <div key={item.label} className="rounded-2xl bg-black/20 px-4 py-4">
-                      <p className="text-[11px] uppercase tracking-[0.22em] text-gray-500">{item.label}</p>
+                      <p className="text-[11px] tracking-[0.22em] text-gray-500 uppercase">
+                        {item.label}
+                      </p>
                       <p className="mt-2 text-lg font-bold text-white">{item.value}</p>
                     </div>
                   ))}
@@ -1379,12 +1447,16 @@ export default function AnalyticsCommandCenter() {
                     <div key={metric.label}>
                       <div className="flex items-center justify-between gap-3 text-sm">
                         <span className="font-semibold text-white">{metric.label}</span>
-                        <span className="font-semibold text-gray-300">{formatPercent(metric.value)}</span>
+                        <span className="font-semibold text-gray-300">
+                          {formatPercent(metric.value)}
+                        </span>
                       </div>
                       <div className="mt-2 h-3 overflow-hidden rounded-full bg-white/5">
                         <div
                           className={`h-full rounded-full bg-gradient-to-r ${metric.tone}`}
-                          style={{ width: `${Math.max(Math.min(metric.value, 100), metric.value > 0 ? 4 : 0)}%` }}
+                          style={{
+                            width: `${Math.max(Math.min(metric.value, 100), metric.value > 0 ? 4 : 0)}%`,
+                          }}
                         />
                       </div>
                       <p className="mt-2 text-xs text-gray-400">{metric.note}</p>
@@ -1419,7 +1491,8 @@ export default function AnalyticsCommandCenter() {
                     <div>
                       <p className="font-semibold text-white">{tour.name_vi}</p>
                       <p className="mt-2 text-sm text-gray-400">
-                        Hoàn tất {tour.completion_rate}% • bỏ qua {formatPercent(getSkipPressure(tour))}
+                        Hoàn tất {tour.completion_rate}% • bỏ qua{' '}
+                        {formatPercent(getSkipPressure(tour))}
                       </p>
                     </div>
                     <span className="rounded-full bg-amber-500/15 px-3 py-1 text-xs font-bold text-amber-200">

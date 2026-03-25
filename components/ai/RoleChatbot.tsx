@@ -139,8 +139,7 @@ export function RoleChatbot({
         subtitle: 'Tóm tắt việc cần làm, đơn cần ưu tiên và chỗ nào nên rà soát trước.',
         welcome:
           'Tôi có thể giúp bạn rà soát POI, món ăn, đơn đặt trước và thông báo để biết việc nào nên xử lý trước.',
-        placeholder:
-          'Hỏi về bất cứ điều gì...',
+        placeholder: 'Hỏi về bất cứ điều gì...',
         openLabel: 'Mở trợ lý chủ quán',
         closeLabel: 'Đóng trợ lý chủ quán',
         thinking: 'Đang rà soát dữ liệu vận hành...',
@@ -163,8 +162,7 @@ export function RoleChatbot({
       subtitle: 'Đọc nhanh snapshot vận hành, thanh toán và các tín hiệu cần để mắt tới.',
       welcome:
         'Tôi có thể tóm tắt tình hình hệ thống, chỉ ra điểm nghẽn và gợi ý việc nào admin nên xử lý trước.',
-      placeholder:
-        'Hỏi về bất cứ điều gì...',
+      placeholder: 'Hỏi về bất cứ điều gì...',
       openLabel: 'Mở trợ lý quản trị',
       closeLabel: 'Đóng trợ lý quản trị',
       thinking: 'Đang tổng hợp snapshot quản trị...',
@@ -191,7 +189,8 @@ export function RoleChatbot({
         assistantBubble: 'bg-[#2a1e16] border border-white/10 text-white/90',
         userBubble: 'bg-primary/20 text-white border border-primary/30',
         inputFocus: 'focus-within:border-primary/50 focus-within:bg-black/60',
-        iconGlow: 'bg-primary/20 text-primary border-primary/30 shadow-[0_0_30px_rgba(242,108,13,0.15)]',
+        iconGlow:
+          'bg-primary/20 text-primary border-primary/30 shadow-[0_0_30px_rgba(242,108,13,0.15)]',
       };
     }
 
@@ -204,7 +203,8 @@ export function RoleChatbot({
         assistantBubble: 'bg-[#182c22] border border-white/10 text-white/90',
         userBubble: 'bg-[#1f9d62]/20 text-white border border-[#1f9d62]/30',
         inputFocus: 'focus-within:border-[#1f9d62]/50 focus-within:bg-black/60',
-        iconGlow: 'bg-[#1f9d62]/20 text-[#4ecb89] border-[#1f9d62]/30 shadow-[0_0_30px_rgba(31,157,98,0.15)]',
+        iconGlow:
+          'bg-[#1f9d62]/20 text-[#4ecb89] border-[#1f9d62]/30 shadow-[0_0_30px_rgba(31,157,98,0.15)]',
       };
     }
 
@@ -216,7 +216,8 @@ export function RoleChatbot({
       assistantBubble: 'bg-[#211a11] border border-white/10 text-white/90',
       userBubble: 'bg-[#f0a202]/20 text-white border border-[#f0a202]/30',
       inputFocus: 'focus-within:border-[#f0a202]/50 focus-within:bg-black/60',
-      iconGlow: 'bg-[#f0a202]/20 text-[#f0a202] border-[#f0a202]/30 shadow-[0_0_30px_rgba(240,162,2,0.15)]',
+      iconGlow:
+        'bg-[#f0a202]/20 text-[#f0a202] border-[#f0a202]/30 shadow-[0_0_30px_rgba(240,162,2,0.15)]',
     };
   }, [role]);
 
@@ -379,12 +380,18 @@ export function RoleChatbot({
       className={`${
         isPageMode
           ? 'flex h-full min-h-[calc(100vh-7.5rem)] w-full flex-col border-none bg-transparent'
-          : `w-[calc(100vw-2rem)] sm:w-[24rem] overflow-hidden rounded-[28px] border bg-[#2c1e16]/85 backdrop-blur-xl ${theme.ring} origin-bottom-right`
+          : `w-[calc(100vw-2rem)] overflow-hidden rounded-[28px] border bg-[#2c1e16]/85 backdrop-blur-xl sm:w-[24rem] ${theme.ring} origin-bottom-right`
       }`}
     >
-      <div className={`${isPageMode ? 'flex h-full flex-col' : `bg-gradient-to-br ${theme.shell} p-[1px]`}`}>
-        <div className={`${isPageMode ? 'flex h-full flex-col' : 'rounded-[27px] bg-[#1a120b]/90 backdrop-blur-xl'}`}>
-          <div className={`px-5 py-4 ${isPageMode ? 'border-b border-white/10' : 'border-b border-white/10'}`}>
+      <div
+        className={`${isPageMode ? 'flex h-full flex-col' : `bg-gradient-to-br ${theme.shell} p-[1px]`}`}
+      >
+        <div
+          className={`${isPageMode ? 'flex h-full flex-col' : 'rounded-[27px] bg-[#1a120b]/90 backdrop-blur-xl'}`}
+        >
+          <div
+            className={`px-5 py-4 ${isPageMode ? 'border-b border-white/10' : 'border-b border-white/10'}`}
+          >
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p className={`text-[11px] font-bold tracking-[0.22em] uppercase ${theme.accent}`}>
@@ -438,7 +445,12 @@ export function RoleChatbot({
                   <div className="space-y-2">
                     {conversations.map((conversation) => {
                       const isActive = conversation.id === activeConversationId;
-                      const activeBorder = role === 'customer' ? 'border-primary/50' : role === 'owner' ? 'border-[#1f9d62]/50' : 'border-[#f0a202]/50';
+                      const activeBorder =
+                        role === 'customer'
+                          ? 'border-primary/50'
+                          : role === 'owner'
+                            ? 'border-[#1f9d62]/50'
+                            : 'border-[#f0a202]/50';
 
                       return (
                         <button
@@ -452,7 +464,9 @@ export function RoleChatbot({
                           }`}
                         >
                           <span className="min-w-0 pr-3">
-                            <span className="block truncate font-semibold">{conversation.title}</span>
+                            <span className="block truncate font-semibold">
+                              {conversation.title}
+                            </span>
                             {conversation.last_message_at && (
                               <span className="mt-1 block text-[10px] opacity-70">
                                 {formatRelativeDate(conversation.last_message_at)}
@@ -460,7 +474,9 @@ export function RoleChatbot({
                             )}
                           </span>
                           {isActive && (
-                            <span className="material-symbols-outlined text-[18px]">check_circle</span>
+                            <span className="material-symbols-outlined text-[18px]">
+                              check_circle
+                            </span>
                           )}
                         </button>
                       );
@@ -484,24 +500,24 @@ export function RoleChatbot({
           >
             {isPageMode && messages.length === 0 && !isSending && !error && (
               <div className="mb-6 flex flex-col items-center justify-center text-center">
-                <div className={`flex h-20 w-20 items-center justify-center rounded-full border ${theme.iconGlow}`}>
+                <div
+                  className={`flex h-20 w-20 items-center justify-center rounded-full border ${theme.iconGlow}`}
+                >
                   <span className="material-symbols-outlined text-[36px]">psychology_alt</span>
                 </div>
                 <h4 className="mt-6 text-xl font-bold text-white">Xin chào!</h4>
-                <p className="mt-2 max-w-sm text-sm leading-6 text-white/60">
-                  {copy.welcome}
-                </p>
+                <p className="mt-2 max-w-sm text-sm leading-6 text-white/60">{copy.welcome}</p>
               </div>
             )}
 
             {!isPageMode && messages.length === 0 && !isSending && !error && (
               <div className="mb-4 flex flex-col items-center justify-center text-center">
-                <div className={`mb-3 flex h-14 w-14 items-center justify-center rounded-full border ${theme.iconGlow}`}>
+                <div
+                  className={`mb-3 flex h-14 w-14 items-center justify-center rounded-full border ${theme.iconGlow}`}
+                >
                   <span className="material-symbols-outlined text-[28px]">psychology_alt</span>
                 </div>
-                <p className="max-w-[200px] text-xs leading-5 text-white/60">
-                  {copy.welcome}
-                </p>
+                <p className="max-w-[200px] text-xs leading-5 text-white/60">{copy.welcome}</p>
               </div>
             )}
 
@@ -509,19 +525,20 @@ export function RoleChatbot({
               if (isPageMode && message.role === 'assistant' && message.id === 'welcome') {
                 return null;
               }
-              
+
               return (
-              <div
-                key={message.id}
-                className={`max-w-[88%] rounded-2xl px-4 py-3 text-sm leading-6 shadow-sm ${
-                  message.role === 'assistant'
-                    ? `${theme.assistantBubble} mr-auto`
-                    : `${theme.userBubble} ml-auto`
-                }`}
-              >
-                <p className="whitespace-pre-wrap">{message.content}</p>
-              </div>
-            )})}
+                <div
+                  key={message.id}
+                  className={`max-w-[88%] rounded-2xl px-4 py-3 text-sm leading-6 shadow-sm ${
+                    message.role === 'assistant'
+                      ? `${theme.assistantBubble} mr-auto`
+                      : `${theme.userBubble} ml-auto`
+                  }`}
+                >
+                  <p className="whitespace-pre-wrap">{message.content}</p>
+                </div>
+              );
+            })}
 
             {isSending && (
               <div
@@ -529,8 +546,14 @@ export function RoleChatbot({
               >
                 <div className="flex items-center gap-2">
                   <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-current"></span>
-                  <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-current" style={{ animationDelay: '150ms' }}></span>
-                  <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-current" style={{ animationDelay: '300ms' }}></span>
+                  <span
+                    className="h-1.5 w-1.5 animate-bounce rounded-full bg-current"
+                    style={{ animationDelay: '150ms' }}
+                  ></span>
+                  <span
+                    className="h-1.5 w-1.5 animate-bounce rounded-full bg-current"
+                    style={{ animationDelay: '300ms' }}
+                  ></span>
                 </div>
               </div>
             )}
@@ -571,14 +594,16 @@ export function RoleChatbot({
             <label className="sr-only" htmlFor={`role-chatbot-input-${role}`}>
               {copy.title}
             </label>
-            <div className={`rounded-[22px] border border-white/10 bg-black/40 p-2 shadow-sm backdrop-blur-md transition-colors ${theme.inputFocus}`}>
+            <div
+              className={`rounded-[22px] border border-white/10 bg-black/40 p-2 shadow-sm backdrop-blur-md transition-colors ${theme.inputFocus}`}
+            >
               <textarea
                 id={`role-chatbot-input-${role}`}
                 value={input}
                 onChange={(event) => setInput(event.target.value)}
                 placeholder={copy.placeholder}
                 rows={1}
-                className="min-h-[44px] w-full resize-none bg-transparent px-3 py-3 text-sm text-white outline-none placeholder:text-white/40 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+                className="min-h-[44px] w-full resize-none bg-transparent px-3 py-3 text-sm text-white outline-none [-ms-overflow-style:none] [scrollbar-width:none] placeholder:text-white/40 [&::-webkit-scrollbar]:hidden"
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault();
@@ -586,12 +611,12 @@ export function RoleChatbot({
                   }
                 }}
               />
-              <div className="flex items-center justify-between gap-3 px-3 pb-1 pt-2">
+              <div className="flex items-center justify-between gap-3 px-3 pt-2 pb-1">
                 <p className="text-[11px] leading-4 text-white/40">{copy.footer}</p>
                 <button
                   type="submit"
                   disabled={isSending || input.trim().length === 0}
-                  className={`inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br ${theme.button} text-white transition-all transform hover:scale-[1.03] active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50`}
+                  className={`inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br ${theme.button} transform text-white transition-all hover:scale-[1.03] active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50`}
                 >
                   <span className="material-symbols-outlined text-[20px]">arrow_upward</span>
                 </button>
@@ -608,9 +633,11 @@ export function RoleChatbot({
   }
 
   return (
-    <div className={`pointer-events-none fixed right-4 sm:right-6 lg:right-8 z-[65] flex flex-col items-end ${bottomOffsetClassName}`}>
+    <div
+      className={`pointer-events-none fixed right-4 z-[65] flex flex-col items-end sm:right-6 lg:right-8 ${bottomOffsetClassName}`}
+    >
       <div
-        className={`transition-all duration-300 ${isOpen ? 'pointer-events-auto translate-y-0 opacity-100 scale-100' : 'pointer-events-none translate-y-4 opacity-0 scale-95'}`}
+        className={`transition-all duration-300 ${isOpen ? 'pointer-events-auto translate-y-0 scale-100 opacity-100' : 'pointer-events-none translate-y-4 scale-95 opacity-0'}`}
       >
         <div className="mb-4">{surface}</div>
       </div>
@@ -618,7 +645,7 @@ export function RoleChatbot({
       <button
         type="button"
         onClick={() => setIsOpen((current) => !current)}
-        className={`pointer-events-auto group flex items-center rounded-full border border-white/30 bg-gradient-to-br ${theme.button} text-white shadow-[0_20px_50px_rgba(22,18,15,0.4)] transition-all hover:scale-[1.02] active:scale-95 ${
+        className={`group pointer-events-auto flex items-center rounded-full border border-white/30 bg-gradient-to-br ${theme.button} text-white shadow-[0_20px_50px_rgba(22,18,15,0.4)] transition-all hover:scale-[1.02] active:scale-95 ${
           isCompactFloatingTrigger ? 'p-3' : 'gap-3 px-4 py-3'
         }`}
         aria-expanded={isOpen}

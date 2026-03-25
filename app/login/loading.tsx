@@ -2,7 +2,7 @@ import { Skeleton } from '@/components/ui/Loading';
 
 export default function LoginLoading() {
   return (
-    <div className="min-h-screen bg-background-dark px-4 py-10">
+    <div className="bg-background-dark min-h-screen px-4 py-10">
       <div className="mx-auto max-w-md">
         <div className="mb-8 text-center">
           <Skeleton className="mx-auto h-20 w-20 rounded-full" />

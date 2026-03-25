@@ -111,7 +111,11 @@ function buildThreadSubject(threadType: SupportThreadType, poiName?: string | nu
   return 'Hỗ trợ FlavorQuest';
 }
 
-function buildNotificationTitle(senderRole: UserRole, threadType: SupportThreadType, poiName?: string | null) {
+function buildNotificationTitle(
+  senderRole: UserRole,
+  threadType: SupportThreadType,
+  poiName?: string | null
+) {
   if (threadType === 'customer_owner') {
     return senderRole === 'customer' || senderRole === 'pending-owner'
       ? `Khách vừa nhắn về ${poiName || 'quán của bạn'}`
@@ -144,10 +148,7 @@ async function loadUsersByIds(ids: string[]) {
   }
 
   const adminClient = createAdminClient();
-  const { data, error } = await adminClient
-    .from('users')
-    .select('id, email, role')
-    .in('id', ids);
+  const { data, error } = await adminClient.from('users').select('id, email, role').in('id', ids);
 
   if (error) {
     throw new Error(error.message);
@@ -250,7 +251,9 @@ function getCounterpartForThread(
   return thread.customer_id ? (usersById.get(thread.customer_id) ?? null) : null;
 }
 
-export async function listSupportThreads(profile: CurrentUserProfile): Promise<ListSupportThreadsResult> {
+export async function listSupportThreads(
+  profile: CurrentUserProfile
+): Promise<ListSupportThreadsResult> {
   const adminClient = createAdminClient();
   let query = adminClient
     .from('support_threads')
@@ -276,9 +279,13 @@ export async function listSupportThreads(profile: CurrentUserProfile): Promise<L
     throw new Error(error.message);
   }
 
-  const threads = ((data ?? []) as ThreadRow[]).filter((thread) => isThreadAccessible(profile, thread));
+  const threads = ((data ?? []) as ThreadRow[]).filter((thread) =>
+    isThreadAccessible(profile, thread)
+  );
   const threadIds = threads.map((thread) => thread.id);
-  const poiIds = Array.from(new Set(threads.map((thread) => thread.poi_id).filter(Boolean))) as string[];
+  const poiIds = Array.from(
+    new Set(threads.map((thread) => thread.poi_id).filter(Boolean))
+  ) as string[];
   const userIds = Array.from(
     new Set(
       threads
@@ -308,7 +315,10 @@ export async function listSupportThreads(profile: CurrentUserProfile): Promise<L
       return;
     }
 
-    unreadCountByThread.set(message.thread_id, (unreadCountByThread.get(message.thread_id) ?? 0) + 1);
+    unreadCountByThread.set(
+      message.thread_id,
+      (unreadCountByThread.get(message.thread_id) ?? 0) + 1
+    );
   });
 
   const threadByCompositeKey = new Map<string, ThreadRow>();
@@ -321,7 +331,7 @@ export async function listSupportThreads(profile: CurrentUserProfile): Promise<L
   });
 
   const summaries: SupportThreadSummary[] = threads.map((thread) => {
-    const poi = thread.poi_id ? poisById.get(thread.poi_id) ?? null : null;
+    const poi = thread.poi_id ? (poisById.get(thread.poi_id) ?? null) : null;
     const counterpart = getCounterpartForThread(profile, thread, usersById, primaryAdminEmail);
 
     return {
@@ -361,13 +371,17 @@ export async function listSupportThreads(profile: CurrentUserProfile): Promise<L
     }
 
     const ownerIds = Array.from(
-      new Set((ownedPois ?? []).map((poi) => poi.owner_id).filter((value): value is string => Boolean(value)))
+      new Set(
+        (ownedPois ?? [])
+          .map((poi) => poi.owner_id)
+          .filter((value): value is string => Boolean(value))
+      )
     );
     const ownerUsers = await loadUsersByIds(ownerIds);
     meta.availableOwnerPoiCount = (ownedPois ?? []).length;
 
     (ownedPois ?? []).forEach((poi) => {
-      const owner = poi.owner_id ? ownerUsers.get(poi.owner_id) ?? null : null;
+      const owner = poi.owner_id ? (ownerUsers.get(poi.owner_id) ?? null) : null;
       const existingThread = threadByCompositeKey.get(`customer_owner:${poi.id}`);
 
       directory.push({
@@ -478,7 +492,10 @@ export async function getSupportMessages(profile: CurrentUserProfile, threadId: 
   };
 }
 
-export async function createSupportThread(profile: CurrentUserProfile, input: CreateSupportThreadInput) {
+export async function createSupportThread(
+  profile: CurrentUserProfile,
+  input: CreateSupportThreadInput
+) {
   const adminClient = createAdminClient();
 
   if (input.threadType === 'customer_owner') {
@@ -676,7 +693,11 @@ async function resolveRecipients(thread: ThreadRow, senderId: string) {
   return (data ?? []) as UserRow[];
 }
 
-export async function sendSupportMessage(profile: CurrentUserProfile, threadId: string, rawContent: string) {
+export async function sendSupportMessage(
+  profile: CurrentUserProfile,
+  threadId: string,
+  rawContent: string
+) {
   const thread = await getAccessibleThread(profile, threadId);
 
   if (!thread) {
@@ -694,13 +715,13 @@ export async function sendSupportMessage(profile: CurrentUserProfile, threadId: 
 
   const { data: insertedMessage, error: messageError } = await adminClient
     .from('support_messages')
-      .insert({
-        thread_id: threadId,
-        sender_id: profile.id,
-        sender_role: toMessageSenderRole(profile.role),
-        content,
-        created_at: now,
-      })
+    .insert({
+      thread_id: threadId,
+      sender_id: profile.id,
+      sender_role: toMessageSenderRole(profile.role),
+      content,
+      created_at: now,
+    })
     .select('id, thread_id, sender_id, sender_role, content, created_at')
     .single();
 
@@ -735,7 +756,7 @@ export async function sendSupportMessage(profile: CurrentUserProfile, threadId: 
   ]);
 
   const sender = senderUsers.get(profile.id) ?? null;
-  const poi = thread.poi_id ? poisById.get(thread.poi_id) ?? null : null;
+  const poi = thread.poi_id ? (poisById.get(thread.poi_id) ?? null) : null;
   const notificationTitle = buildNotificationTitle(profile.role, thread.thread_type, poi?.name_vi);
   const notificationMessage = buildNotificationMessage(sender?.email ?? null, content);
 
@@ -747,7 +768,9 @@ export async function sendSupportMessage(profile: CurrentUserProfile, threadId: 
       type: 'system' as const,
     }));
 
-    const { error: notificationError } = await adminClient.from('notifications').insert(notificationRows);
+    const { error: notificationError } = await adminClient
+      .from('notifications')
+      .insert(notificationRows);
     if (notificationError) {
       console.error('[support-chat] insert notifications failed:', notificationError);
     }

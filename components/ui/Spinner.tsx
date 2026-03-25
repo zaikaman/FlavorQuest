@@ -1,15 +1,15 @@
 /**
  * Spinner Component
- * 
+ *
  * Loading spinner indicator
- * 
+ *
  * Sizes:
  * - xs: 16px
  * - sm: 20px
  * - md: 24px (default)
  * - lg: 32px
  * - xl: 40px
- * 
+ *
  * Colors:
  * - primary: Red (default)
  * - secondary: Gray
@@ -41,7 +41,7 @@ export function Spinner({ size = 'md', color = 'primary', className = '' }: Spin
 
   return (
     <div
-      className={`inline-block ${sizeClasses[size]} ${colorClasses[color]} rounded-full animate-spin ${className}`}
+      className={`inline-block ${sizeClasses[size]} ${colorClasses[color]} animate-spin rounded-full ${className}`}
       role="status"
       aria-label="Loading"
     >
@@ -61,9 +61,7 @@ export function FullPageSpinner({ message }: FullPageSpinnerProps) {
   return (
     <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-white/80 backdrop-blur-sm dark:bg-gray-900/80">
       <Spinner size="xl" />
-      {message && (
-        <p className="mt-4 text-lg text-gray-700 dark:text-gray-300">{message}</p>
-      )}
+      {message && <p className="mt-4 text-lg text-gray-700 dark:text-gray-300">{message}</p>}
     </div>
   );
 }

@@ -47,7 +47,11 @@ async function validatePoiIds(
     return 'Tour phải có ít nhất 1 POI';
   }
 
-  const { data, error } = await supabase.from('pois').select('id').in('id', poiIds).is('deleted_at', null);
+  const { data, error } = await supabase
+    .from('pois')
+    .select('id')
+    .in('id', poiIds)
+    .is('deleted_at', null);
 
   if (error) {
     return error.message;
@@ -65,23 +69,25 @@ function buildPayload(body: Record<string, unknown>, poiIds: string[]) {
     poi_ids: poiIds,
     is_active: body.is_active !== false,
     estimated_duration_min:
-      typeof body.estimated_duration_min === 'number' && Number.isFinite(body.estimated_duration_min)
+      typeof body.estimated_duration_min === 'number' &&
+      Number.isFinite(body.estimated_duration_min)
         ? Math.round(body.estimated_duration_min)
         : null,
   };
 
   for (const field of TOUR_TEXT_FIELDS) {
     payload[field] =
-      field === 'name_vi' ? (typeof body[field] === 'string' ? body[field].trim() : '') : toNullableText(body[field]);
+      field === 'name_vi'
+        ? typeof body[field] === 'string'
+          ? body[field].trim()
+          : ''
+        : toNullableText(body[field]);
   }
 
   return payload;
 }
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const supabase = await createServerClient();
   const adminView = request.nextUrl.searchParams.get('admin_view') === 'true';
@@ -108,10 +114,7 @@ export async function GET(
   return NextResponse.json(data);
 }
 
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const supabase = await createServerClient();
   const profile = await getCurrentUserProfile(supabase);
@@ -135,7 +138,12 @@ export async function PUT(
     }
 
     const payload = buildPayload(body, poiIds);
-    const { data, error } = await supabase.from('tours').update(payload).eq('id', id).select('*').single();
+    const { data, error } = await supabase
+      .from('tours')
+      .update(payload)
+      .eq('id', id)
+      .select('*')
+      .single();
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
@@ -159,7 +167,10 @@ export async function DELETE(
     return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
   }
 
-  const { error } = await supabase.from('tours').update({ deleted_at: new Date().toISOString() }).eq('id', id);
+  const { error } = await supabase
+    .from('tours')
+    .update({ deleted_at: new Date().toISOString() })
+    .eq('id', id);
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });

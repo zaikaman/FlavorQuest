@@ -1,14 +1,14 @@
 /**
  * Language Context
- * 
+ *
  * Quản lý global language state cho toàn bộ app
- * 
+ *
  * Features:
  * - Current language state
  * - Change language function
  * - Persist language preference to IndexedDB
  * - Type-safe với Language type
- * 
+ *
  * Supported Languages:
  * - vi: Tiếng Việt
  * - en: English
@@ -60,12 +60,12 @@ interface LanguageProviderProps {
 
 /**
  * Language Provider Component
- * 
+ *
  * @example
  * ```tsx
  * // In app/layout.tsx
  * import { LanguageProvider } from '@/lib/contexts/LanguageContext';
- * 
+ *
  * export default function RootLayout({ children }) {
  *   return (
  *     <html>
@@ -114,7 +114,7 @@ export function LanguageProvider({ children, defaultLanguage = 'vi' }: LanguageP
   const setLanguage = useCallback(async (newLanguage: Language) => {
     try {
       console.log('[LanguageContext] Changing language to:', newLanguage);
-      
+
       // Update state
       setLanguageState(newLanguage);
 
@@ -125,7 +125,7 @@ export function LanguageProvider({ children, defaultLanguage = 'vi' }: LanguageP
       if (typeof document !== 'undefined') {
         document.documentElement.lang = newLanguage;
       }
-      
+
       console.log('[LanguageContext] Language changed successfully to:', newLanguage);
     } catch (error) {
       console.error('Failed to save language to storage:', error);
@@ -151,15 +151,15 @@ export function LanguageProvider({ children, defaultLanguage = 'vi' }: LanguageP
 
 /**
  * useLanguage Hook
- * 
+ *
  * @example
  * ```tsx
  * 'use client';
  * import { useLanguage } from '@/lib/contexts/LanguageContext';
- * 
+ *
  * export function MyComponent() {
  *   const { language, setLanguage } = useLanguage();
- *   
+ *
  *   return (
  *     <div>
  *       <p>Current: {language}</p>

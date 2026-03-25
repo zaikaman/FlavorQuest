@@ -7,7 +7,9 @@ interface SkeletonProps {
 }
 
 export function Skeleton({ className = '' }: SkeletonProps) {
-  return <div aria-hidden="true" className={`loading-shimmer rounded-2xl bg-white/8 ${className}`} />;
+  return (
+    <div aria-hidden="true" className={`loading-shimmer rounded-2xl bg-white/8 ${className}`} />
+  );
 }
 
 export function InlineSpinner({
@@ -39,15 +41,14 @@ export function CardSkeleton({
   className?: string;
 }) {
   return (
-    <div className={`overflow-hidden rounded-[24px] border border-white/10 bg-[#2a1e16] ${className}`}>
+    <div
+      className={`overflow-hidden rounded-[24px] border border-white/10 bg-[#2a1e16] ${className}`}
+    >
       {showMedia ? <Skeleton className="aspect-[16/9] w-full rounded-none" /> : null}
       <div className="space-y-3 p-4">
         <Skeleton className="h-5 w-2/3" />
         {Array.from({ length: lines }).map((_, index) => (
-          <Skeleton
-            key={index}
-            className={`h-3 ${index === lines - 1 ? 'w-1/2' : 'w-full'}`}
-          />
+          <Skeleton key={index} className={`h-3 ${index === lines - 1 ? 'w-1/2' : 'w-full'}`} />
         ))}
       </div>
     </div>
@@ -91,7 +92,9 @@ export function TableSkeleton({
   className?: string;
 }) {
   return (
-    <div className={`overflow-hidden rounded-[24px] border border-white/10 bg-[#2a1e16] ${className}`}>
+    <div
+      className={`overflow-hidden rounded-[24px] border border-white/10 bg-[#2a1e16] ${className}`}
+    >
       <div className="border-b border-white/10 px-4 py-4">
         <div
           className="grid gap-3"
@@ -175,7 +178,7 @@ export function DashboardSkeleton({
 export function TourPageSkeleton() {
   return (
     <div className="flex h-full flex-col">
-      <div className="px-4 pb-3 pt-2">
+      <div className="px-4 pt-2 pb-3">
         <div className="rounded-2xl border border-white/10 bg-black/25 p-4 backdrop-blur-md">
           <Skeleton className="h-5 w-40" />
           <Skeleton className="mt-3 h-3 w-64 rounded-full" />
@@ -194,7 +197,7 @@ export function TourPageSkeleton() {
 
 export function POIDetailSkeleton() {
   return (
-    <div className="min-h-screen bg-background-dark text-white">
+    <div className="bg-background-dark min-h-screen text-white">
       <Skeleton className="aspect-[4/3] w-full rounded-none" />
       <div className="relative z-10 -mt-16 space-y-4 px-4">
         <div className="rounded-3xl border border-white/10 bg-[#2a1e16] p-5">

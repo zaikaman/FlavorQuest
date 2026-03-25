@@ -92,7 +92,7 @@ function buildPOIInsertPayload(rawBody: Record<string, unknown>) {
 
     payload[nameField] =
       language === 'en'
-        ? normalizeOptionalText(rawBody[nameField]) ?? nameVi
+        ? (normalizeOptionalText(rawBody[nameField]) ?? nameVi)
         : normalizeOptionalText(rawBody[nameField]);
     payload[descriptionField] = normalizeOptionalText(rawBody[descriptionField]);
     payload[audioField] = normalizeOptionalText(rawBody[audioField]);

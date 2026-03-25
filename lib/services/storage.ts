@@ -1,9 +1,9 @@
 /**
  * Offline Storage Service
- * 
+ *
  * Wrapper cho IndexedDB sử dụng idb-keyval library
  * Lưu trữ data offline để app hoạt động without network
- * 
+ *
  * Storage Keys:
  * - 'pois': Cached POI data từ Supabase
  * - 'tours': Cached tour data từ Supabase
@@ -12,7 +12,7 @@
  * - 'cooldown-tracker': Last played timestamp per POI
  * - 'analytics-queue': Queued analytics events (sync khi online)
  * - 'last-sync': Timestamp of last successful sync
- * 
+ *
  * @see https://github.com/jakearchibald/idb-keyval
  */
 
@@ -108,7 +108,7 @@ export async function saveSettings(settings: UserSettings): Promise<void> {
  */
 export async function loadSettings(): Promise<UserSettings> {
   const settings = await get<UserSettings>(STORAGE_KEYS.USER_SETTINGS);
-  
+
   // Default settings nếu chưa có
   if (!settings) {
     return DEFAULT_USER_SETTINGS;

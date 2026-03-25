@@ -1,8 +1,8 @@
 /**
  * AudioPreloadIndicator Component
- * 
+ *
  * Hiển thị trạng thái preload audio files cho chế độ offline
- * 
+ *
  * Features:
  * - Progress bar cho quá trình download
  * - Auto-preload khi online
@@ -158,7 +158,6 @@ export function AudioPreloadIndicator({
           setShowSuccessToast(true);
         },
       });
-
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Lỗi không xác định');
       setIsPreloading(false);
@@ -201,7 +200,7 @@ export function AudioPreloadIndicator({
   // Toast Success
   if (showSuccessToast) {
     return (
-      <div className="fixed top-24 left-1/2 -translate-x-1/2 z-[100] w-full max-w-sm px-4">
+      <div className="fixed top-24 left-1/2 z-[100] w-full max-w-sm -translate-x-1/2 px-4">
         <Toast
           type="success"
           title={t('offline.successTitle') || 'Ready for Offline'}
@@ -216,51 +215,85 @@ export function AudioPreloadIndicator({
   // Nếu đang preload, hiển thị progress
   if (progress && progress.total > 0 && !isDismissed) {
     return (
-      <div className={`fixed ${compact ? 'bottom-20 right-4 w-auto' : 'bottom-24 left-4 right-4 md:left-auto md:right-4 md:w-80'} 
-        bg-white/95 dark:bg-[#221710]/95 backdrop-blur-md rounded-2xl shadow-xl shadow-black/10 p-4 z-50 
-        border border-orange-100 dark:border-orange-900/30 animate-slideInUp`}>
+      <div
+        className={`fixed ${compact ? 'right-4 bottom-20 w-auto' : 'right-4 bottom-24 left-4 md:right-4 md:left-auto md:w-80'} animate-slideInUp z-50 rounded-2xl border border-orange-100 bg-white/95 p-4 shadow-xl shadow-black/10 backdrop-blur-md dark:border-orange-900/30 dark:bg-[#221710]/95`}
+      >
         <button
           onClick={() => setIsDismissed(true)}
-          className="absolute top-2 right-2 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition-colors z-10 rounded-full p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800"
+          className="absolute top-2 right-2 z-10 rounded-full p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:text-gray-500 dark:hover:bg-gray-800 dark:hover:text-gray-300"
           aria-label={t('common.close') || 'Close'}
         >
-          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
             <line x1="18" y1="6" x2="6" y2="18"></line>
             <line x1="6" y1="6" x2="18" y2="18"></line>
           </svg>
         </button>
-        <div className="flex items-center justify-between mb-3 pr-6">
+        <div className="mb-3 flex items-center justify-between pr-6">
           <div className="flex items-center gap-3">
-            <div className="relative flex items-center justify-center w-5 h-5">
-              <svg className="animate-spin text-orange-600 dark:text-orange-500 w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            <div className="relative flex h-5 w-5 items-center justify-center">
+              <svg
+                className="h-5 w-5 animate-spin text-orange-600 dark:text-orange-500"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                ></circle>
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                ></path>
               </svg>
             </div>
-            <span className="font-semibold text-sm text-gray-900 dark:text-gray-100">
+            <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">
               {t('offline.downloadingContent') || 'Downloading assets...'}
             </span>
           </div>
-          <span className="text-xs font-medium text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/30 px-2 py-1 rounded-md">
+          <span className="rounded-md bg-orange-50 px-2 py-1 text-xs font-medium text-orange-600 dark:bg-orange-900/30 dark:text-orange-400">
             {progress.completed}/{progress.total}
           </span>
         </div>
 
         {/* Progress bar */}
-        <div className="w-full bg-gray-100 dark:bg-gray-800 rounded-full h-1.5 mb-2 overflow-hidden">
+        <div className="mb-2 h-1.5 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-gray-800">
           <div
-            className="bg-gradient-to-r from-orange-500 to-amber-500 h-1.5 rounded-full transition-all duration-300 ease-out"
+            className="h-1.5 rounded-full bg-gradient-to-r from-orange-500 to-amber-500 transition-all duration-300 ease-out"
             style={{ width: `${progress.percent}%` }}
           />
         </div>
 
-        <div className="flex items-center justify-between text-[10px] uppercase tracking-wider font-medium">
-          <span className="text-gray-500 dark:text-gray-400">
-            {progress.percent}% Completed
-          </span>
+        <div className="flex items-center justify-between text-[10px] font-medium tracking-wider uppercase">
+          <span className="text-gray-500 dark:text-gray-400">{progress.percent}% Completed</span>
           {progress.failed > 0 && (
-            <span className="text-red-500 flex items-center gap-1">
-              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <span className="flex items-center gap-1 text-red-500">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
                 <circle cx="12" cy="12" r="10"></circle>
                 <line x1="12" y1="8" x2="12" y2="12"></line>
                 <line x1="12" y1="16" x2="12.01" y2="16"></line>
@@ -276,28 +309,48 @@ export function AudioPreloadIndicator({
   // Nếu có lỗi
   if (error) {
     return (
-      <div className="fixed bottom-24 right-4 bg-white dark:bg-[#221710] rounded-xl 
-        shadow-xl shadow-red-500/10 p-4 z-50 border border-red-100 dark:border-red-900/30 max-w-xs animate-shake">
+      <div className="animate-shake fixed right-4 bottom-24 z-50 max-w-xs rounded-xl border border-red-100 bg-white p-4 shadow-xl shadow-red-500/10 dark:border-red-900/30 dark:bg-[#221710]">
         <div className="flex items-start gap-3">
-          <div className="w-8 h-8 rounded-full bg-red-50 dark:bg-red-900/20 flex items-center justify-center flex-shrink-0">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-red-500">
+          <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-red-50 dark:bg-red-900/20">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="text-red-500"
+            >
               <circle cx="12" cy="12" r="10"></circle>
               <line x1="12" y1="8" x2="12" y2="12"></line>
               <line x1="12" y1="16" x2="12.01" y2="16"></line>
             </svg>
           </div>
-          <div className="flex-1 min-w-0">
-            <h4 className="text-sm font-bold text-gray-900 dark:text-white mb-1">
+          <div className="min-w-0 flex-1">
+            <h4 className="mb-1 text-sm font-bold text-gray-900 dark:text-white">
               {t('offline.downloadError') || 'Download Failed'}
             </h4>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mb-3 break-words leading-relaxed">
+            <p className="mb-3 text-xs leading-relaxed break-words text-gray-500 dark:text-gray-400">
               {error}
             </p>
             <button
               onClick={handlePreload}
-              className="text-xs font-semibold text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 flex items-center gap-1"
+              className="flex items-center gap-1 text-xs font-semibold text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
                 <path d="M23 4v6h-6"></path>
                 <path d="M1 20v-6h6"></path>
                 <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
@@ -313,21 +366,29 @@ export function AudioPreloadIndicator({
   // Nếu offline và chưa có cache, hiển thị warning
   if (!navigator.onLine && (!preloadStatus || preloadStatus.preloadedAudio.length === 0)) {
     return (
-      <div className="fixed bottom-24 right-4 bg-amber-50 dark:bg-amber-900/20 rounded-xl 
-        shadow-xl p-4 z-50 border border-amber-200 dark:border-amber-800/50 max-w-xs animate-bounce-subtle">
+      <div className="animate-bounce-subtle fixed right-4 bottom-24 z-50 max-w-xs rounded-xl border border-amber-200 bg-amber-50 p-4 shadow-xl dark:border-amber-800/50 dark:bg-amber-900/20">
         <div className="flex items-start gap-3">
-          <div className="w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center flex-shrink-0">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-amber-600 dark:text-amber-400">
+          <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/40">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="text-amber-600 dark:text-amber-400"
+            >
               <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
               <line x1="12" y1="9" x2="12" y2="13"></line>
               <line x1="12" y1="17" x2="12.01" y2="17"></line>
             </svg>
           </div>
           <div className="flex-1">
-            <h4 className="text-sm font-bold text-gray-900 dark:text-white mb-1">
-              Offline Mode
-            </h4>
-            <p className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed">
+            <h4 className="mb-1 text-sm font-bold text-gray-900 dark:text-white">Offline Mode</h4>
+            <p className="text-xs leading-relaxed text-gray-600 dark:text-gray-300">
               {t('offline.noAudioCache') || 'Connection lost. Some content may be unavailable.'}
             </p>
           </div>

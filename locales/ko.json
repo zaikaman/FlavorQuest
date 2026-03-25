@@ -6,14 +6,7 @@
   "metadata": {
     "title": "FlavorQuest - 빈칸 미식 탐험",
     "description": "빈칸 거리 음식 탐방을 위한 자동 오디오 가이드 투어, 껀터. 다국어 지원과 오프라인 우선 PWA.",
-    "keywords": [
-      "음식 투어",
-      "오디오 가이드",
-      "Vĩnh Khánh",
-      "Cần Thơ",
-      "요리",
-      "PWA"
-    ]
+    "keywords": ["음식 투어", "오디오 가이드", "Vĩnh Khánh", "Cần Thơ", "요리", "PWA"]
   },
   "manifest": {
     "name": "FlavorQuest - 자동 오디오 해설 경험",

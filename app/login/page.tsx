@@ -70,11 +70,7 @@ export default function LoginPage() {
         return;
       }
 
-      if (
-        accountType === 'owner' &&
-        isCompletingOwnerLogin &&
-        ownerRequestStatus === null
-      ) {
+      if (accountType === 'owner' && isCompletingOwnerLogin && ownerRequestStatus === null) {
         return;
       }
 

@@ -27,15 +27,8 @@ function LoadingScreen() {
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
-  const {
-    user,
-    isAdmin,
-    isOwner,
-    isPendingOwner,
-    isLoading,
-    isRoleReady,
-    refreshUserRole,
-  } = useAuth();
+  const { user, isAdmin, isOwner, isPendingOwner, isLoading, isRoleReady, refreshUserRole } =
+    useAuth();
   const refreshedUserIdRef = useRef<string | null>(null);
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
   const isAdminLoginPage = pathname === '/admin/login';
@@ -120,8 +113,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <div
           className="pointer-events-none fixed inset-0 opacity-[0.06]"
           style={{
-            backgroundImage:
-              'radial-gradient(rgba(255, 255, 255, 0.18) 0.8px, transparent 0.8px)',
+            backgroundImage: 'radial-gradient(rgba(255, 255, 255, 0.18) 0.8px, transparent 0.8px)',
             backgroundSize: '18px 18px',
           }}
         />
@@ -147,17 +139,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <div
         className="pointer-events-none fixed inset-0 opacity-[0.06]"
         style={{
-          backgroundImage:
-            'radial-gradient(rgba(255, 255, 255, 0.18) 0.8px, transparent 0.8px)',
+          backgroundImage: 'radial-gradient(rgba(255, 255, 255, 0.18) 0.8px, transparent 0.8px)',
           backgroundSize: '18px 18px',
         }}
       />
 
       {/* Sidebar (Desktop & Tablet) */}
       <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 border-r border-white/10 bg-[#2c1e16]/80 backdrop-blur-md lg:flex">
-        <div className="flex h-full flex-col p-4 overflow-y-auto [&::-webkit-scrollbar]:hidden [scrollbar-width:none]">
+        <div className="flex h-full flex-col overflow-y-auto p-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {/* Logo */}
-          <div className="flex items-center gap-3 mb-8 px-2 mt-4">
+          <div className="mt-4 mb-8 flex items-center gap-3 px-2">
             <div className="bg-primary/20 rounded-lg p-2">
               <svg
                 className="text-primary h-6 w-6"
@@ -203,9 +194,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </nav>
 
           {/* User / Logout */}
-          <div className="mt-auto border-t border-white/10 pt-4 px-2">
+          <div className="mt-auto border-t border-white/10 px-2 pt-4">
             <div className="mb-4">
-              <p className="text-sm font-medium text-gray-200 truncate" title={user.email}>{user.email}</p>
+              <p className="truncate text-sm font-medium text-gray-200" title={user.email}>
+                {user.email}
+              </p>
               <p className="text-primary text-xs font-semibold">Quản trị viên</p>
             </div>
             <button
@@ -223,7 +216,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <header className="sticky top-0 z-20 border-b border-white/10 bg-[#2c1e16]/80 backdrop-blur-md lg:hidden">
         <div className="px-4 py-3">
           <div className="flex items-center justify-between">
-            <div className="min-w-0 flex items-center gap-2">
+            <div className="flex min-w-0 items-center gap-2">
               <div className="bg-primary/20 rounded-lg p-1.5">
                 <svg
                   className="text-primary h-5 w-5"
@@ -292,7 +285,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               </nav>
               <div className="mt-4 rounded-2xl border border-white/10 bg-black/15 p-4">
                 <p className="truncate text-sm font-semibold text-gray-100">{user.email}</p>
-                <p className="mt-1 text-xs font-semibold text-primary">Quản trị viên</p>
+                <p className="text-primary mt-1 text-xs font-semibold">Quản trị viên</p>
                 <button
                   type="button"
                   onClick={() => void handleSignOut()}

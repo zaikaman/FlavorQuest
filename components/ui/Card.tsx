@@ -1,13 +1,13 @@
 /**
  * Card Component
- * 
+ *
  * Container component với shadow và border
- * 
+ *
  * Variants:
  * - default: Standard card with shadow
  * - outline: Card với border only
  * - elevated: Card với larger shadow
- * 
+ *
  * Padding:
  * - none: No padding
  * - sm: 12px
@@ -80,7 +80,10 @@ export type CardTitleProps = React.HTMLAttributes<HTMLHeadingElement>;
 
 export function CardTitle({ children, className = '', ...props }: CardTitleProps) {
   return (
-    <h3 className={`text-lg font-semibold text-gray-900 dark:text-gray-100 ${className}`} {...props}>
+    <h3
+      className={`text-lg font-semibold text-gray-900 dark:text-gray-100 ${className}`}
+      {...props}
+    >
       {children}
     </h3>
   );
@@ -119,7 +122,10 @@ export type CardFooterProps = React.HTMLAttributes<HTMLDivElement>;
 
 export function CardFooter({ children, className = '', ...props }: CardFooterProps) {
   return (
-    <div className={`mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 ${className}`} {...props}>
+    <div
+      className={`mt-4 border-t border-gray-200 pt-4 dark:border-gray-700 ${className}`}
+      {...props}
+    >
       {children}
     </div>
   );

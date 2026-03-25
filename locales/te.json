@@ -6,14 +6,7 @@
   "metadata": {
     "title": "FlavorQuest - Vĩnh Khánh వంటకాలను అన్వేషించండి",
     "description": "Vĩnh Khánh వీధి వంటకాల కోసం Cần Thơ లో ఆటోమేటిక్ ఆడియో టూర్. మల్టి-భాష మద్దతుతో Offline-First PWA.",
-    "keywords": [
-      "ఫుడ్ టూర్",
-      "ఆడియో గైడ్",
-      "Vĩnh Khánh",
-      "Cần Thơ",
-      "వంటకాలు",
-      "PWA"
-    ]
+    "keywords": ["ఫుడ్ టూర్", "ఆడియో గైడ్", "Vĩnh Khánh", "Cần Thơ", "వంటకాలు", "PWA"]
   },
   "manifest": {
     "name": "FlavorQuest - ఆటోమేటిక్ ఆడియో అనుభవం",

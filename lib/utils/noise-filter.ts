@@ -1,16 +1,16 @@
 /**
  * GPS Noise Filter
- * 
+ *
  * Lọc nhiễu GPS drift sử dụng Simple Moving Average (SMA)
- * 
+ *
  * Problem: GPS coordinates có thể jump/drift ngay cả khi đứng yên
  * Solution: Smooth coordinates bằng cách tính trung bình N samples gần nhất
- * 
+ *
  * Benefits:
  * - Giảm false positive trong geofencing detection
  * - Smoother animation cho user location marker
  * - Tăng accuracy cho distance calculations
- * 
+ *
  * Trade-offs:
  * - Độ trễ: ~3-5 giây (tùy window size)
  * - Memory: ~1KB per 100 samples
@@ -36,7 +36,7 @@ export interface NoiseFilterConfig {
    * Window size for moving average
    * Lớn hơn = smoother nhưng lag hơn
    * Nhỏ hơn = responsive hơn nhưng nhiều noise hơn
-   * 
+   *
    * Recommended: 5-10 samples
    */
   windowSize: number;
@@ -44,7 +44,7 @@ export interface NoiseFilterConfig {
   /**
    * Max age of samples to keep (milliseconds)
    * Samples cũ hơn sẽ bị discard
-   * 
+   *
    * Recommended: 30000ms (30 seconds)
    */
   maxAge: number;
@@ -52,7 +52,7 @@ export interface NoiseFilterConfig {
   /**
    * Min accuracy threshold (meters)
    * Discard samples với accuracy thấp hơn threshold
-   * 
+   *
    * Recommended: 50 meters
    * Set to Infinity to disable accuracy filtering
    */
@@ -70,11 +70,11 @@ const DEFAULT_CONFIG: NoiseFilterConfig = {
 
 /**
  * GPS Noise Filter Class
- * 
+ *
  * @example
  * ```ts
  * const filter = new NoiseFilter({ windowSize: 5 });
- * 
+ *
  * // Add GPS readings as they arrive
  * const smoothed = filter.addSample({
  *   lat: 10.759,
@@ -82,7 +82,7 @@ const DEFAULT_CONFIG: NoiseFilterConfig = {
  *   timestamp: Date.now(),
  *   accuracy: 15,
  * });
- * 
+ *
  * console.log(smoothed); // { lat: 10.7588, lng: 106.7048 }
  * ```
  */
@@ -96,7 +96,7 @@ export class NoiseFilter {
 
   /**
    * Add new GPS sample and return smoothed coordinates
-   * 
+   *
    * @param sample - New GPS reading
    * @returns Smoothed coordinates using moving average
    */
@@ -211,10 +211,10 @@ export class NoiseFilter {
 
 /**
  * Weighted Moving Average Filter
- * 
+ *
  * Gần giống Simple Moving Average nhưng samples gần đây có weight cao hơn
  * Better responsiveness với reasonable smoothing
- * 
+ *
  * @example
  * ```ts
  * const filter = new WeightedNoiseFilter({ windowSize: 5 });
@@ -259,11 +259,11 @@ export class WeightedNoiseFilter extends NoiseFilter {
 
 /**
  * Create noise filter helper function
- * 
+ *
  * @param type - Filter type ('simple' | 'weighted')
  * @param config - Filter configuration
  * @returns NoiseFilter instance
- * 
+ *
  * @example
  * ```ts
  * const filter = createNoiseFilter('weighted', { windowSize: 7 });

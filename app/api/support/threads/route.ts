@@ -49,7 +49,9 @@ export async function POST(request: NextRequest) {
   try {
     const body = (await request.json()) as { threadType?: string; poiId?: string };
     const threadId = await createSupportThread(profile, {
-      threadType: (body.threadType as 'customer_owner' | 'customer_admin' | 'owner_admin') ?? 'customer_admin',
+      threadType:
+        (body.threadType as 'customer_owner' | 'customer_admin' | 'owner_admin') ??
+        'customer_admin',
       poiId: body.poiId,
     });
 

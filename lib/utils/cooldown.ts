@@ -1,38 +1,43 @@
 /**
  * Cooldown Manager
- * 
+ *
  * Quản lý cooldown period cho POI auto-play
  * Prevent audio phát lại lần nữa trong vòng N phút sau lần phát gần nhất
- * 
+ *
  * Features:
  * - Per-POI cooldown tracking
  * - Persistent storage (survives page reload)
  * - Configurable cooldown duration
  * - Memory-efficient (chỉ lưu timestamp, không lưu POI data)
- * 
+ *
  * Use cases:
  * - Ngăn audio lặp lại khi user đi qua POI nhiều lần
  * - Ngăn audio phát khi user đứng gần POI boundary (GPS drift)
  * - Allow replay sau một thời gian đủ dài
  */
 
-import { saveCooldown, getLastPlayed, loadCooldownTracker, clearCooldownTracker } from '@/lib/services/storage';
+import {
+  saveCooldown,
+  getLastPlayed,
+  loadCooldownTracker,
+  clearCooldownTracker,
+} from '@/lib/services/storage';
 import { COOLDOWN_PERIOD_MS } from '@/lib/constants/index';
 
 /**
  * Cooldown Manager Class
- * 
+ *
  * @example
  * ```ts
  * const cooldown = new CooldownManager();
- * 
+ *
  * // Check if POI is in cooldown
  * const canPlay = await cooldown.canPlay('poi-123');
- * 
+ *
  * if (canPlay) {
  *   // Play audio
  *   await playAudio(poiId);
- *   
+ *
  *   // Mark as played
  *   await cooldown.markAsPlayed('poi-123');
  * }
@@ -50,7 +55,7 @@ export class CooldownManager {
 
   /**
    * Check if POI can be played (not in cooldown)
-   * 
+   *
    * @param poiId - POI UUID
    * @returns True if POI can be played (cooldown expired or never played)
    */
@@ -70,7 +75,7 @@ export class CooldownManager {
 
   /**
    * Mark POI as played (start cooldown)
-   * 
+   *
    * @param poiId - POI UUID
    * @param timestamp - Optional timestamp (default: now)
    */
@@ -80,7 +85,7 @@ export class CooldownManager {
 
   /**
    * Get remaining cooldown time for POI
-   * 
+   *
    * @param poiId - POI UUID
    * @returns Remaining cooldown in milliseconds (0 if cooldown expired)
    */
@@ -100,7 +105,7 @@ export class CooldownManager {
 
   /**
    * Get time since last play
-   * 
+   *
    * @param poiId - POI UUID
    * @returns Time since last play in milliseconds (null if never played)
    */
@@ -117,7 +122,7 @@ export class CooldownManager {
 
   /**
    * Get all POIs currently in cooldown
-   * 
+   *
    * @returns Array of POI IDs in cooldown
    */
   async getPOIsInCooldown(): Promise<string[]> {
@@ -137,7 +142,7 @@ export class CooldownManager {
 
   /**
    * Clear cooldown for specific POI (allow immediate replay)
-   * 
+   *
    * @param poiId - POI UUID
    */
   async clearCooldown(poiId: string): Promise<void> {
@@ -158,7 +163,7 @@ export class CooldownManager {
 
   /**
    * Filter POIs that can be played (not in cooldown)
-   * 
+   *
    * @param poiIds - Array of POI IDs to filter
    * @returns Array of POI IDs that can be played
    */
@@ -177,7 +182,7 @@ export class CooldownManager {
 
   /**
    * Update cooldown duration
-   * 
+   *
    * @param duration - New cooldown duration in milliseconds
    */
   setCooldownDuration(duration: number): void {
@@ -193,7 +198,7 @@ export class CooldownManager {
 
   /**
    * Format cooldown time for display
-   * 
+   *
    * @param milliseconds - Time in milliseconds
    * @returns Human-readable string (e.g., "5 phút", "1 giờ 30 phút")
    */
@@ -226,7 +231,7 @@ let globalCooldownManager: CooldownManager | null = null;
 
 /**
  * Get global cooldown manager instance (singleton)
- * 
+ *
  * @example
  * ```ts
  * const cooldown = getCooldownManager();

@@ -6,64 +6,65 @@
 import { LANGUAGE_CONFIG_MAP } from '@/lib/constants';
 
 interface TTSRequest {
-    text: string;
-    languageCode: string; // Keep for compatibility, though OpenAI models are multilingual
-    name?: string; // Voice name (alloy, echo, etc.)
+  text: string;
+  languageCode: string; // Keep for compatibility, though OpenAI models are multilingual
+  name?: string; // Voice name (alloy, echo, etc.)
 }
 
 /**
  * Generate audio content string (Buffer) from Azure OpenAI TTS
  */
 export async function generateTTSAudio({ text, languageCode, name }: TTSRequest): Promise<Buffer> {
-    const apiKey = process.env.AZURE_API_KEY;
+  const apiKey = process.env.AZURE_API_KEY;
 
-    if (!apiKey) {
-        throw new Error('Missing AZURE_API_KEY environment variable');
+  if (!apiKey) {
+    throw new Error('Missing AZURE_API_KEY environment variable');
+  }
+
+  // Default to 'alloy' if no valid OpenAI voice is provided
+  const voice = isValidOpenAIVoice(name) ? name : getRecommendedVoice(languageCode);
+
+  // Endpoint structure: https://{resource}.cognitiveservices.azure.com/openai/deployments/{deployment}/audio/speech?api-version={version}
+  // Resource: flavorquest-resource
+  // Deployment: gpt-4o-mini-tts
+  const url =
+    'https://flavorquest-resource.cognitiveservices.azure.com/openai/deployments/gpt-4o-mini-tts/audio/speech?api-version=2024-02-15-preview';
+
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'api-key': apiKey,
+      Authorization: `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({
+      model: 'gpt-4o-mini-tts',
+      input: text,
+      voice: voice,
+      response_format: 'mp3',
+      speed: 1.0,
+    }),
+  });
+
+  if (!response.ok) {
+    let errorMessage = 'Failed to generate TTS audio';
+    try {
+      const error = await response.json();
+      errorMessage = error.error?.message || JSON.stringify(error);
+    } catch {
+      errorMessage = await response.text();
     }
+    throw new Error(`Azure TTS Error (${response.status}): ${errorMessage}`);
+  }
 
-    // Default to 'alloy' if no valid OpenAI voice is provided
-    const voice = isValidOpenAIVoice(name) ? name : getRecommendedVoice(languageCode);
-
-    // Endpoint structure: https://{resource}.cognitiveservices.azure.com/openai/deployments/{deployment}/audio/speech?api-version={version}
-    // Resource: flavorquest-resource
-    // Deployment: gpt-4o-mini-tts
-    const url = 'https://flavorquest-resource.cognitiveservices.azure.com/openai/deployments/gpt-4o-mini-tts/audio/speech?api-version=2024-02-15-preview';
-
-    const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'api-key': apiKey, 
-            'Authorization': `Bearer ${apiKey}`
-        },
-        body: JSON.stringify({
-            model: 'gpt-4o-mini-tts',
-            input: text,
-            voice: voice,
-            response_format: 'mp3',
-            speed: 1.0
-        }),
-    });
-
-    if (!response.ok) {
-        let errorMessage = 'Failed to generate TTS audio';
-        try {
-            const error = await response.json();
-            errorMessage = error.error?.message || JSON.stringify(error);
-        } catch {
-            errorMessage = await response.text();
-        }
-        throw new Error(`Azure TTS Error (${response.status}): ${errorMessage}`);
-    }
-
-    const arrayBuffer = await response.arrayBuffer();
-    return Buffer.from(arrayBuffer);
+  const arrayBuffer = await response.arrayBuffer();
+  return Buffer.from(arrayBuffer);
 }
 
 const OPENAI_VOICES = ['alloy', 'echo', 'fable', 'onyx', 'nova', 'shimmer'];
 
 function isValidOpenAIVoice(name?: string): boolean {
-    return !!name && OPENAI_VOICES.includes(name);
+  return !!name && OPENAI_VOICES.includes(name);
 }
 
 /**
@@ -71,10 +72,10 @@ function isValidOpenAIVoice(name?: string): boolean {
  * OpenAI voices are multilingual, so we map loosely to preferences or cycle them.
  */
 export function getRecommendedVoice(language: string): string {
-    return LANGUAGE_CONFIG_MAP[language as keyof typeof LANGUAGE_CONFIG_MAP]?.voice ?? 'alloy';
+  return LANGUAGE_CONFIG_MAP[language as keyof typeof LANGUAGE_CONFIG_MAP]?.voice ?? 'alloy';
 }
 
 export function getGoogleLanguageCode(language: string): string {
-    // Kept for backward compatibility if needed, but really just returns the code
-    return language;
+  // Kept for backward compatibility if needed, but really just returns the code
+  return language;
 }

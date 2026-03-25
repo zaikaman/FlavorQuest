@@ -1,7 +1,7 @@
 /**
  * usePOIManager Hook
  * Fetch, cache, and filter POIs
- * 
+ *
  * Features:
  * - Fetch POIs from Supabase
  * - Cache POIs in IndexedDB
@@ -68,7 +68,9 @@ const POI_SELECT_FIELDS = `
   created_at,
   updated_at,
   deleted_at
-`.replace(/\s+/g, ' ').trim();
+`
+  .replace(/\s+/g, ' ')
+  .trim();
 const POI_MEMORY_CACHE_TTL_MS = 60_000;
 
 let poiMemoryCache: { data: POI[]; cachedAt: number } | null = null;
@@ -82,7 +84,7 @@ export function usePOIManager(options: UsePOIManagerOptions = {}) {
   const preloadRadius = options.preloadRadius ?? DEFAULT_OPTIONS.preloadRadius ?? 500;
   const onOfflineReady = options.onOfflineReady;
   const onError = options.onError;
-  
+
   const [pois, setPOIs] = useState<POI[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -146,7 +148,7 @@ export function usePOIManager(options: UsePOIManagerOptions = {}) {
         if (cachedPOIs && cachedPOIs.length > 0) {
           setPOIs(cachedPOIs);
           setIsLoading(false);
-          
+
           // Check if we're online
           if (navigator.onLine) {
             // Fetch in background to update cache
@@ -165,7 +167,7 @@ export function usePOIManager(options: UsePOIManagerOptions = {}) {
             const lastSync = await loadLastSync();
             setLastFetchTime(lastSync);
           }
-          
+
           return;
         }
       }
@@ -182,7 +184,7 @@ export function usePOIManager(options: UsePOIManagerOptions = {}) {
       };
     } catch (err) {
       const errorMessage = (err as Error).message;
-      
+
       // Try loading from cache as fallback
       try {
         const cachedPOIs = await loadPOIs();
@@ -190,10 +192,10 @@ export function usePOIManager(options: UsePOIManagerOptions = {}) {
           setPOIs(cachedPOIs);
           setIsOfflineMode(true);
           setError('Đang sử dụng dữ liệu đã lưu (chế độ ngoại tuyến)');
-          
+
           const lastSync = await loadLastSync();
           setLastFetchTime(lastSync);
-          
+
           // Notify offline mode but with data
           if (!offlineReadyTriggeredRef.current) {
             offlineReadyTriggeredRef.current = true;
@@ -244,42 +246,45 @@ export function usePOIManager(options: UsePOIManagerOptions = {}) {
   }, [fetchFromSupabase, onError]);
 
   // Preload audio for nearby POIs
-  const preloadNearbyAudio = useCallback(async (position: Coordinates) => {
-    if (!autoPreloadAudio || pois.length === 0) return;
+  const preloadNearbyAudio = useCallback(
+    async (position: Coordinates) => {
+      if (!autoPreloadAudio || pois.length === 0) return;
 
-    try {
-      setIsPreloading(true);
-      
-      // Dynamically import to avoid SSR issues
-      const { audioPreloader } = await import('@/lib/services/audio-preloader');
-      
-      await audioPreloader.preload(pois, {
-        language,
-        currentPosition: position,
-        preloadRadius,
-        onProgress: (progress) => {
-          setPreloadProgress(progress.percent);
-        },
-        onComplete: () => {
-          setIsPreloading(false);
-          setPreloadProgress(100);
-          
-          // Notify offline ready
-          if (!offlineReadyTriggeredRef.current) {
-            offlineReadyTriggeredRef.current = true;
-            onOfflineReady?.();
-          }
-        },
-        onError: (error) => {
-          console.error('Preload error:', error);
-          setIsPreloading(false);
-        },
-      });
-    } catch (error) {
-      console.error('Failed to preload audio:', error);
-      setIsPreloading(false);
-    }
-  }, [autoPreloadAudio, language, onOfflineReady, pois, preloadRadius]);
+      try {
+        setIsPreloading(true);
+
+        // Dynamically import to avoid SSR issues
+        const { audioPreloader } = await import('@/lib/services/audio-preloader');
+
+        await audioPreloader.preload(pois, {
+          language,
+          currentPosition: position,
+          preloadRadius,
+          onProgress: (progress) => {
+            setPreloadProgress(progress.percent);
+          },
+          onComplete: () => {
+            setIsPreloading(false);
+            setPreloadProgress(100);
+
+            // Notify offline ready
+            if (!offlineReadyTriggeredRef.current) {
+              offlineReadyTriggeredRef.current = true;
+              onOfflineReady?.();
+            }
+          },
+          onError: (error) => {
+            console.error('Preload error:', error);
+            setIsPreloading(false);
+          },
+        });
+      } catch (error) {
+        console.error('Failed to preload audio:', error);
+        setIsPreloading(false);
+      }
+    },
+    [autoPreloadAudio, language, onOfflineReady, pois, preloadRadius]
+  );
 
   // Preload all audio (for manual trigger)
   const preloadAllAudio = useCallback(async () => {
@@ -287,9 +292,9 @@ export function usePOIManager(options: UsePOIManagerOptions = {}) {
 
     try {
       setIsPreloading(true);
-      
+
       const { audioPreloader } = await import('@/lib/services/audio-preloader');
-      
+
       await audioPreloader.preload(pois, {
         language,
         preloadAll: true,
@@ -299,7 +304,7 @@ export function usePOIManager(options: UsePOIManagerOptions = {}) {
         onComplete: () => {
           setIsPreloading(false);
           setPreloadProgress(100);
-          
+
           if (!offlineReadyTriggeredRef.current) {
             offlineReadyTriggeredRef.current = true;
             onOfflineReady?.();
@@ -357,19 +362,28 @@ export function usePOIManager(options: UsePOIManagerOptions = {}) {
   }, [language, onOfflineReady, pois]);
 
   // Get localized POIs
-  const getLocalizedPOIs = useCallback((lang: Language = language): LocalizedPOI[] => {
-    return pois.map((poi) => getLocalizedPOI(poi, lang));
-  }, [language, pois]);
+  const getLocalizedPOIs = useCallback(
+    (lang: Language = language): LocalizedPOI[] => {
+      return pois.map((poi) => getLocalizedPOI(poi, lang));
+    },
+    [language, pois]
+  );
 
   // Filter POIs within radius
-  const filterNearby = useCallback((position: Coordinates, radiusMeters: number = 500): POI[] => {
-    return filterPOIsWithinRadius<POI>(position, pois, radiusMeters).map(item => item.poi);
-  }, [pois]);
+  const filterNearby = useCallback(
+    (position: Coordinates, radiusMeters: number = 500): POI[] => {
+      return filterPOIsWithinRadius<POI>(position, pois, radiusMeters).map((item) => item.poi);
+    },
+    [pois]
+  );
 
   // Get POI by ID
-  const getPOIById = useCallback((id: string): POI | undefined => {
-    return pois.find((poi) => poi.id === id);
-  }, [pois]);
+  const getPOIById = useCallback(
+    (id: string): POI | undefined => {
+      return pois.find((poi) => poi.id === id);
+    },
+    [pois]
+  );
 
   // Initialize
   useEffect(() => {
