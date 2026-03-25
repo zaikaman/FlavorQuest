@@ -8,6 +8,7 @@ import { TTSGenerator } from './TTSGenerator';
 import { useToast } from '@/components/ui/ToastProvider';
 import { SUPPORTED_LANGUAGES } from '@/lib/constants';
 import { POI_CATEGORY_OPTIONS, type POICategoryTag } from '@/lib/constants/poiCategories';
+import { runWithConcurrencySettled } from '@/lib/utils/async';
 import type { Coordinates, Language, POI } from '@/lib/types/index';
 
 interface POIFormProps {
@@ -31,6 +32,8 @@ type TranslationUpdates = Partial<
 >;
 
 const LANGUAGES = SUPPORTED_LANGUAGES;
+const TRANSLATION_CONCURRENCY = 4;
+const TTS_CONCURRENCY = 3;
 
 export function POIForm({
   initialData,
@@ -53,6 +56,8 @@ export function POIForm({
   const [activeTab, setActiveTab] = useState<Language>('vi');
   const [translating, setTranslating] = useState(false);
   const [genAllLoading, setGenAllLoading] = useState(false);
+  const [translationProgress, setTranslationProgress] = useState<{ completed: number; total: number } | null>(null);
+  const [ttsProgress, setTtsProgress] = useState<{ completed: number; total: number } | null>(null);
 
   useEffect(() => {
     if (!allowOwnerAssignment) return;
@@ -384,8 +389,195 @@ export function POIForm({
     }
   };
 
+  const handleAutoTranslateProgressive = async () => {
+    const vietnameseName = typeof formData.name_vi === 'string' ? formData.name_vi.trim() : '';
+    const vietnameseDescription =
+      typeof formData.description_vi === 'string' ? formData.description_vi.trim() : '';
+
+    if (!vietnameseName && !vietnameseDescription) {
+      toast.warning('Vui lòng nhập tên hoặc mô tả tiếng Việt trước khi dịch.');
+      return;
+    }
+
+    const targetLanguages = LANGUAGES.filter((lang) => lang.code !== 'vi');
+    if (targetLanguages.length === 0) {
+      return;
+    }
+
+    setTranslating(true);
+    setTranslationProgress({ completed: 0, total: targetLanguages.length });
+
+    try {
+      let completedCount = 0;
+      const results = await runWithConcurrencySettled(
+        targetLanguages.map((lang) => async () => {
+          const res = await fetch('/api/translate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              texts: {
+                ...(vietnameseName ? { name: vietnameseName } : {}),
+                ...(vietnameseDescription ? { description: vietnameseDescription } : {}),
+              },
+              targetLanguages: [lang.code],
+            }),
+          });
+
+          const payload = (await res.json().catch(() => null)) as
+            | {
+                error?: string;
+                translations?: Record<string, Partial<Record<(typeof LANGUAGES)[number]['code'], string>>>;
+              }
+            | null;
+
+          if (!res.ok) {
+            throw new Error(payload?.error || `Dịch thất bại cho ${lang.nativeName}`);
+          }
+
+          return {
+            languageCode: lang.code,
+            translations: payload?.translations ?? {},
+          };
+        }),
+        TRANSLATION_CONCURRENCY,
+        (result) => {
+          completedCount += 1;
+          setTranslationProgress({ completed: completedCount, total: targetLanguages.length });
+
+          if (result.status !== 'fulfilled' || !result.value) {
+            return;
+          }
+
+          const updates: TranslationUpdates = {};
+          const translatedName = result.value.translations.name?.[result.value.languageCode];
+          const translatedDescription =
+            result.value.translations.description?.[result.value.languageCode];
+
+          if (translatedName) {
+            updates[`name_${result.value.languageCode}` as LocalizedNameField] = translatedName;
+          }
+
+          if (translatedDescription) {
+            updates[`description_${result.value.languageCode}` as LocalizedDescriptionField] =
+              translatedDescription;
+          }
+
+          if (Object.keys(updates).length > 0) {
+            setFormData((prev) => ({ ...prev, ...updates }));
+          }
+        }
+      );
+
+      const failedCount = results.filter((result) => result.status === 'rejected').length;
+      if (failedCount > 0) {
+        toast.warning(
+          `Đã cập nhật ${targetLanguages.length - failedCount}/${targetLanguages.length} ngôn ngữ. Một vài bản dịch cần thử lại.`
+        );
+      } else {
+        toast.success('Đã cập nhật bản dịch. Vui lòng kiểm tra lại trước khi lưu.');
+      }
+    } catch (error) {
+      console.error('Translate progressive error:', error);
+      toast.error(error instanceof Error ? error.message : 'Dịch tự động thất bại');
+    } finally {
+      setTranslating(false);
+      setTranslationProgress(null);
+    }
+  };
+
+  const handleGenerateAllAudioProgressive = async () => {
+    if (
+      !confirm(
+        'Tạo âm thanh cho toàn bộ ngôn ngữ ngay bây giờ? Với mô tả dài, quá trình này có thể mất vài phút.'
+      )
+    ) {
+      return;
+    }
+
+    const items = LANGUAGES.map((lang) => {
+      const text = formData[`description_${lang.code}` as keyof POI];
+      if (typeof text !== 'string' || text.trim().length === 0) {
+        return null;
+      }
+
+      return {
+        text,
+        languageCode: lang.code,
+        poiId: formData.id,
+        fieldName: `audio_url_${lang.code}`,
+      };
+    }).filter((item): item is NonNullable<typeof item> => item !== null);
+
+    if (items.length === 0) {
+      toast.warning('Chưa có mô tả nào để tạo âm thanh.');
+      return;
+    }
+
+    setGenAllLoading(true);
+    setTtsProgress({ completed: 0, total: items.length });
+
+    try {
+      let completedCount = 0;
+      const results = await runWithConcurrencySettled(
+        items.map((item) => async () => {
+          const res = await fetch('/api/tts/generate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(item),
+          });
+
+          const payload = (await res.json().catch(() => null)) as
+            | { error?: string; url?: string }
+            | null;
+
+          if (!res.ok || !payload?.url) {
+            throw new Error(payload?.error || `Tạo âm thanh thất bại cho ${item.languageCode}`);
+          }
+
+          return {
+            fieldName: item.fieldName,
+            url: payload.url,
+          };
+        }),
+        TTS_CONCURRENCY,
+        (result) => {
+          completedCount += 1;
+          setTtsProgress({ completed: completedCount, total: items.length });
+
+          if (result.status !== 'fulfilled' || !result.value?.fieldName) {
+            return;
+          }
+
+          const value = result.value;
+
+          setFormData((prev) => ({
+            ...prev,
+            [value.fieldName as LocalizedAudioField]: value.url,
+          }));
+        }
+      );
+
+      const failedCount = results.filter((result) => result.status === 'rejected').length;
+      if (failedCount > 0) {
+        toast.warning(
+          `Đã tạo ${items.length - failedCount}/${items.length} tệp âm thanh. Một vài ngôn ngữ cần thử lại.`
+        );
+      } else {
+        toast.success('Đã tạo xong âm thanh cho các ngôn ngữ hiện có.');
+      }
+    } catch (error) {
+      console.error('Generate all audio progressive error:', error);
+      toast.error(error instanceof Error ? error.message : 'Tạo âm thanh hàng loạt thất bại');
+    } finally {
+      setGenAllLoading(false);
+      setTtsProgress(null);
+    }
+  };
+
   void handleAutoTranslate;
+  void handleAutoTranslateFast;
   void handleGenerateAllAudio;
+  void handleGenerateAllAudioFast;
 
   return (
     <form
@@ -502,8 +694,13 @@ export function POIForm({
             <div className="flex gap-2">
               <button
                 type="button"
-                onClick={handleAutoTranslateFast}
+                onClick={handleAutoTranslateProgressive}
                 disabled={translating}
+                title={
+                  translating && translationProgress
+                    ? `Đang dịch ${translationProgress.completed}/${translationProgress.total}`
+                    : 'Dịch tự động (AI)'
+                }
                 className="flex items-center gap-2 rounded-lg bg-blue-600/20 px-3 py-1.5 text-sm font-medium text-blue-400 transition-colors hover:bg-blue-600/30 disabled:opacity-50"
               >
                 {translating ? (
@@ -534,8 +731,13 @@ export function POIForm({
               </button>
               <button
                 type="button"
-                onClick={handleGenerateAllAudioFast}
+                onClick={handleGenerateAllAudioProgressive}
                 disabled={genAllLoading}
+                title={
+                  genAllLoading && ttsProgress
+                    ? `Đang tạo ${ttsProgress.completed}/${ttsProgress.total}`
+                    : 'Tạo âm thanh tất cả'
+                }
                 className="flex items-center gap-2 rounded-lg bg-purple-600/20 px-3 py-1.5 text-sm font-medium text-purple-400 transition-colors hover:bg-purple-600/30 disabled:opacity-50"
               >
                 {genAllLoading ? (

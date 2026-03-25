@@ -5,9 +5,11 @@ import { ImageUploader } from '@/components/admin/ImageUploader';
 import { DashboardSkeleton } from '@/components/ui/Loading';
 import { useToast } from '@/components/ui/ToastProvider';
 import { SUPPORTED_LANGUAGES } from '@/lib/constants';
+import { runWithConcurrencySettled } from '@/lib/utils/async';
 import type { Language, POI, Tour, TourPayload } from '@/lib/types/index';
 
 const TOUR_LANGUAGES = SUPPORTED_LANGUAGES;
+const TOUR_TRANSLATION_CONCURRENCY = 4;
 
 type TourLanguageCode = (typeof TOUR_LANGUAGES)[number]['code'];
 type LocalizedTourNameField = `name_${Exclude<Language, 'vi'>}`;
@@ -68,6 +70,10 @@ export default function AdminToursPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isTranslating, setIsTranslating] = useState(false);
+  const [translationProgress, setTranslationProgress] = useState<{
+    completed: number;
+    total: number;
+  } | null>(null);
   const [poiSearchQuery, setPoiSearchQuery] = useState('');
   const [activeLanguage, setActiveLanguage] = useState<Language>('vi');
 
@@ -398,7 +404,103 @@ export default function AdminToursPage() {
     }
   };
 
+  const handleAutoTranslateProgressive = async () => {
+    const vietnameseName = formData.name_vi.trim();
+    const vietnameseDescription = formData.description_vi?.trim() ?? '';
+
+    if (!vietnameseName && !vietnameseDescription) {
+      toast.warning('Vui lòng nhập tên hoặc mô tả tiếng Việt trước khi dịch.');
+      return;
+    }
+
+    const targetLanguages = TOUR_LANGUAGES.filter((language) => language.code !== 'vi');
+    if (targetLanguages.length === 0) {
+      return;
+    }
+
+    setIsTranslating(true);
+    setTranslationProgress({ completed: 0, total: targetLanguages.length });
+
+    try {
+      let completedCount = 0;
+      const results = await runWithConcurrencySettled(
+        targetLanguages.map((language) => async () => {
+          const response = await fetch('/api/translate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              texts: {
+                ...(vietnameseName ? { name: vietnameseName } : {}),
+                ...(vietnameseDescription ? { description: vietnameseDescription } : {}),
+              },
+              targetLanguages: [language.code],
+            }),
+          });
+
+          const payload = (await response.json().catch(() => null)) as
+            | {
+                error?: string;
+                translations?: Record<string, Partial<Record<TourLanguageCode, string>>>;
+              }
+            | null;
+
+          if (!response.ok) {
+            throw new Error(payload?.error || `Dịch thất bại cho ${language.nativeName}`);
+          }
+
+          return {
+            languageCode: language.code,
+            translations: payload?.translations ?? {},
+          };
+        }),
+        TOUR_TRANSLATION_CONCURRENCY,
+        (result) => {
+          completedCount += 1;
+          setTranslationProgress({ completed: completedCount, total: targetLanguages.length });
+
+          if (result.status !== 'fulfilled' || !result.value) {
+            return;
+          }
+
+          const updates: TranslationUpdates = {};
+          const translatedName = result.value.translations.name?.[result.value.languageCode];
+          const translatedDescription =
+            result.value.translations.description?.[result.value.languageCode];
+
+          if (translatedName) {
+            updates[`name_${result.value.languageCode}` as LocalizedTourNameField] = translatedName;
+          }
+
+          if (translatedDescription) {
+            updates[`description_${result.value.languageCode}` as LocalizedTourDescriptionField] =
+              translatedDescription;
+          }
+
+          if (Object.keys(updates).length > 0) {
+            setFormData((prev) => ({ ...prev, ...updates }));
+          }
+        }
+      );
+
+      const failedCount = results.filter((result) => result.status === 'rejected').length;
+      if (failedCount > 0) {
+        toast.warning(
+          `Đã cập nhật ${targetLanguages.length - failedCount}/${targetLanguages.length} ngôn ngữ. Một vài bản dịch cần thử lại.`
+        );
+      } else {
+        toast.success('Đã cập nhật bản dịch. Vui lòng kiểm tra lại trước khi lưu.');
+      }
+    } catch (error) {
+      console.error('[AdminTours] Progressive translate failed:', error);
+      toast.error(error instanceof Error ? error.message : 'Dịch tự động thất bại');
+    } finally {
+      setIsTranslating(false);
+      setTranslationProgress(null);
+    }
+  };
+
   void handleAutoTranslate;
+  void handleAutoTranslateFast;
 
   if (isLoading) {
     return <DashboardSkeleton stats={4} />;
@@ -437,8 +539,13 @@ export default function AdminToursPage() {
             </div>
             <button
               type="button"
-              onClick={handleAutoTranslateFast}
+              onClick={handleAutoTranslateProgressive}
               disabled={isTranslating}
+              title={
+                isTranslating && translationProgress
+                  ? `Đang dịch ${translationProgress.completed}/${translationProgress.total}`
+                  : 'Dịch tự động (AI)'
+              }
               className="border-primary/30 bg-primary/10 text-primary hover:bg-primary/20 ml-auto rounded-xl border px-4 py-2 transition-colors disabled:opacity-50"
             >
               {isTranslating ? 'Đang dịch...' : 'Dịch tự động (AI)'}

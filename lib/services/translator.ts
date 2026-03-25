@@ -13,6 +13,9 @@ import { runWithConcurrency } from '@/lib/utils/async';
 
 type TranslationLanguage = Exclude<SupportedLanguageCode, 'vi'>;
 type TranslationResponse = Record<TranslationLanguage, string>;
+interface TranslateTextsOptions {
+  targetLanguages?: TranslationLanguage[];
+}
 
 const TARGET_LANGUAGES = NON_DEFAULT_LANGUAGE_CODES as readonly TranslationLanguage[];
 const MAX_TRANSLATION_CONCURRENCY = 100;
@@ -104,17 +107,22 @@ export async function translateText(text: string): Promise<TranslationResponse> 
 }
 
 export async function translateTexts(
-  texts: Record<string, string>
+  texts: Record<string, string>,
+  options: TranslateTextsOptions = {}
 ): Promise<Record<string, TranslationResponse>> {
   const client = createOpenAIClient();
   const model = getOpenAIModel();
+  const targetLanguages =
+    options.targetLanguages && options.targetLanguages.length > 0
+      ? options.targetLanguages
+      : TARGET_LANGUAGES;
   const textEntries = Object.entries(texts)
     .map(([key, value]) => [key, normalizeTranslationText(value)] as const)
     .filter(([, value]) => value.length > 0);
 
   try {
     const taskFactories = textEntries.flatMap(([fieldKey, value]) =>
-      TARGET_LANGUAGES.map((language) => async () => ({
+      targetLanguages.map((language) => async () => ({
         fieldKey,
         language,
         value: await translateIntoLanguage(client, model, value, language),

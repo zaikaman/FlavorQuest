@@ -2,6 +2,7 @@ import { createServerClient, isUserAdmin } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { translateText, translateTexts } from '@/lib/services/translator';
+import { isSupportedLanguageCode, type SupportedLanguageCode } from '@/lib/constants';
 
 export async function POST(request: NextRequest) {
   try {
@@ -13,10 +14,25 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { text, texts } = body as {
+    const { text, texts, targetLanguages } = body as {
       text?: string;
       texts?: Record<string, string>;
+      targetLanguages?: string[];
     };
+    const normalizedTargetLanguages =
+      Array.isArray(targetLanguages) && targetLanguages.length > 0
+        ? targetLanguages.filter(
+            (language): language is Exclude<SupportedLanguageCode, 'vi'> =>
+              isSupportedLanguageCode(language) && language !== 'vi'
+          )
+        : undefined;
+
+    if (
+      Array.isArray(targetLanguages) &&
+      (!normalizedTargetLanguages || normalizedTargetLanguages.length === 0)
+    ) {
+      return NextResponse.json({ error: 'Invalid targetLanguages' }, { status: 400 });
+    }
 
     if (texts && typeof texts === 'object') {
       const validTexts = Object.fromEntries(
@@ -29,7 +45,9 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Missing required field: texts' }, { status: 400 });
       }
 
-      const translations = await translateTexts(validTexts);
+      const translations = await translateTexts(validTexts, {
+        targetLanguages: normalizedTargetLanguages,
+      });
       return NextResponse.json({ translations });
     }
 
