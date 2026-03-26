@@ -486,27 +486,6 @@ export function SettingsPanel({ isOpen, onClose, onSettingsChange }: SettingsPan
 
                 <div className="py-3">
                   <div className="mb-2 flex items-center justify-between">
-                    <p className="font-medium text-white">{t('settings.volume')}</p>
-                    <span className="text-muted text-sm">{Math.round(settings.volume * 100)}%</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className="material-symbols-outlined text-muted text-lg">
-                      volume_mute
-                    </span>
-                    <input
-                      type="range"
-                      min="0"
-                      max="100"
-                      value={settings.volume * 100}
-                      onChange={(e) => updateSetting('volume', Number(e.target.value) / 100)}
-                      className="accent-primary h-2 flex-1 cursor-pointer appearance-none rounded-lg bg-white/10"
-                    />
-                    <span className="material-symbols-outlined text-muted text-lg">volume_up</span>
-                  </div>
-                </div>
-
-                <div className="py-3">
-                  <div className="mb-2 flex items-center justify-between">
                     <p className="font-medium text-white">{t('settings.geofenceRadius')}</p>
                     <span className="text-muted text-sm">{settings.geofenceRadius}m</span>
                   </div>
