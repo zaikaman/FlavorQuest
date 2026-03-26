@@ -314,20 +314,6 @@ export function SettingsPanel({ isOpen, onClose, onSettingsChange }: SettingsPan
     }
   };
 
-  const deviceFacts = [
-    `CPU ${deviceAssessment?.hardwareConcurrency ?? '—'}`,
-    deviceAssessment?.deviceMemory
-      ? `RAM ${deviceAssessment.deviceMemory} GB`
-      : `RAM ${getDeviceCopy('deviceProfileUnknown')}`,
-    deviceAssessment?.effectiveConnectionType &&
-    deviceAssessment.effectiveConnectionType !== 'unknown'
-      ? deviceAssessment.effectiveConnectionType.toUpperCase()
-      : getDeviceCopy('deviceProfileUnknown'),
-    deviceAssessment?.prefersReducedMotion
-      ? getDeviceCopy('deviceProfileMotionReduced')
-      : getDeviceCopy('deviceProfileMotionStandard'),
-  ];
-
   if (!isOpen) return null;
 
   return (
@@ -431,17 +417,6 @@ export function SettingsPanel({ isOpen, onClose, onSettingsChange }: SettingsPan
                       {getPerformanceLabel(effectivePerformance.effectiveTier)}
                     </p>
                   </div>
-                </div>
-
-                <div className="mt-4 flex flex-wrap gap-2">
-                  {deviceFacts.map((fact) => (
-                    <span
-                      key={fact}
-                      className="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-medium text-white/80"
-                    >
-                      {fact}
-                    </span>
-                  ))}
                 </div>
 
                 {effectivePerformance.batterySaverAdjusted && (
