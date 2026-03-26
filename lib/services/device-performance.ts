@@ -9,6 +9,11 @@ import type {
 
 type NetworkType = DeviceCapabilityAssessment['effectiveConnectionType'];
 
+interface QuickBenchmarkResult {
+  scoreDelta: -1 | 0 | 1;
+  durationMs: number;
+}
+
 type NavigatorWithDeviceInfo = Navigator & {
   connection?: {
     effectiveType?: string;
@@ -83,6 +88,8 @@ export function assessDevicePerformance(): DeviceCapabilityAssessment {
       isTouchDevice: false,
       viewportWidth: 1280,
       pixelRatio: 1,
+      benchmarkDurationMs: null,
+      benchmarkAdjusted: false,
     };
   }
 
@@ -160,6 +167,67 @@ export function assessDevicePerformance(): DeviceCapabilityAssessment {
     isTouchDevice,
     viewportWidth,
     pixelRatio,
+    benchmarkDurationMs: null,
+    benchmarkAdjusted: false,
+  };
+}
+
+export async function runQuickDeviceBenchmark(): Promise<QuickBenchmarkResult | null> {
+  if (typeof window === 'undefined' || typeof performance === 'undefined') {
+    return null;
+  }
+
+  const start = performance.now();
+
+  // Wait one frame to capture current rendering latency.
+  const frameStart = performance.now();
+  await new Promise<void>((resolve) => {
+    window.requestAnimationFrame(() => resolve());
+  });
+  const frameLatencyMs = performance.now() - frameStart;
+
+  // Keep CPU probe intentionally short (about 12-20ms on most phones).
+  const cpuStart = performance.now();
+  let checksum = 0;
+  let index = 0;
+
+  while (index < 50000 && performance.now() - cpuStart < 20) {
+    checksum += Math.sqrt((index % 97) + 1) * Math.sin(index);
+    index += 1;
+  }
+
+  const cpuDurationMs = performance.now() - cpuStart;
+
+  if (!Number.isFinite(checksum)) {
+    return null;
+  }
+
+  let scoreDelta: -1 | 0 | 1 = 0;
+
+  if (cpuDurationMs <= 10 && frameLatencyMs <= 22) {
+    scoreDelta = 1;
+  } else if (cpuDurationMs >= 22 || frameLatencyMs >= 42) {
+    scoreDelta = -1;
+  }
+
+  return {
+    scoreDelta,
+    durationMs: Math.round(performance.now() - start),
+  };
+}
+
+export function applyQuickBenchmarkAdjustment(
+  assessment: DeviceCapabilityAssessment,
+  benchmark: QuickBenchmarkResult
+): DeviceCapabilityAssessment {
+  const adjustedScore = assessment.score + benchmark.scoreDelta;
+
+  return {
+    ...assessment,
+    score: adjustedScore,
+    tier: scoreTier(adjustedScore),
+    benchmarkDurationMs: benchmark.durationMs,
+    benchmarkAdjusted: benchmark.scoreDelta !== 0,
   };
 }
 

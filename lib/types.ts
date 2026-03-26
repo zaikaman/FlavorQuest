@@ -481,6 +481,8 @@ export interface DeviceCapabilityAssessment {
   isTouchDevice: boolean;
   viewportWidth: number;
   pixelRatio: number;
+  benchmarkDurationMs: number | null;
+  benchmarkAdjusted: boolean;
 }
 
 export interface DeviceResourceProfile {
