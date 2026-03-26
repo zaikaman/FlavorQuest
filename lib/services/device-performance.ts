@@ -239,6 +239,44 @@ function downgradeTier(tier: DevicePerformanceTier): DevicePerformanceTier {
   return 'light';
 }
 
+function tierRank(tier: DevicePerformanceTier): number {
+  if (tier === 'light') {
+    return 0;
+  }
+
+  if (tier === 'balanced') {
+    return 1;
+  }
+
+  return 2;
+}
+
+function lowerTier(tierA: DevicePerformanceTier, tierB: DevicePerformanceTier): DevicePerformanceTier {
+  return tierRank(tierA) <= tierRank(tierB) ? tierA : tierB;
+}
+
+function getSafetyCapTier(assessment: DeviceCapabilityAssessment | null | undefined): DevicePerformanceTier {
+  if (!assessment) {
+    return 'full';
+  }
+
+  const hasConstrainedNetwork =
+    assessment.saveDataEnabled ||
+    assessment.effectiveConnectionType === 'slow-2g' ||
+    assessment.effectiveConnectionType === '2g';
+
+  if (hasConstrainedNetwork) {
+    return 'light';
+  }
+
+  // Weak devices should not be forced into full profile.
+  if (assessment.score <= 2 || assessment.tier === 'light') {
+    return 'balanced';
+  }
+
+  return 'full';
+}
+
 function toTier(preference: Exclude<DevicePerformancePreference, 'system'>): DevicePerformanceTier {
   return preference;
 }
@@ -251,13 +289,19 @@ export function resolveDevicePerformance(
   const source = settings?.performancePreference ?? 'system';
   const requestedTier = source === 'system' ? detectedTier : toTier(source);
   const batterySaverAdjusted = Boolean(settings?.batterySaverMode && requestedTier !== 'light');
-  const effectiveTier = batterySaverAdjusted ? downgradeTier(requestedTier) : requestedTier;
+  const batteryTier = batterySaverAdjusted ? downgradeTier(requestedTier) : requestedTier;
+
+  const safetyCapTier = source === 'system' ? 'full' : getSafetyCapTier(assessment);
+  const effectiveTier = lowerTier(batteryTier, safetyCapTier);
+  const safetyAdjusted = source !== 'system' && effectiveTier !== batteryTier;
 
   return {
     source,
     detectedTier,
     effectiveTier,
     batterySaverAdjusted,
+    safetyAdjusted,
+    safetyCapTier,
     profile: DEVICE_RESOURCE_PROFILES[effectiveTier],
   };
 }

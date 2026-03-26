@@ -500,6 +500,8 @@ export interface EffectiveDevicePerformance {
   detectedTier: DevicePerformanceTier;
   effectiveTier: DevicePerformanceTier;
   batterySaverAdjusted: boolean;
+  safetyAdjusted: boolean;
+  safetyCapTier: DevicePerformanceTier;
   profile: DeviceResourceProfile;
 }
 
