@@ -83,9 +83,27 @@ export default function TourPage() {
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [showNotifications, setShowNotifications] = useState(false);
   const deviceAssessment = useDevicePerformance();
+  const settingsReady = settings !== null;
+  const isBatterySaverEnabled = settings?.batterySaverMode ?? false;
+  const geolocationOptions = useMemo(
+    () =>
+      settingsReady
+        ? {
+            enableHighAccuracy: !isBatterySaverEnabled,
+            timeout: isBatterySaverEnabled ? 20000 : 10000,
+            maximumAge: isBatterySaverEnabled ? 15000 : 0,
+          }
+        : {
+            enableHighAccuracy: false,
+            timeout: 20000,
+            maximumAge: 15000,
+          },
+    [isBatterySaverEnabled, settingsReady]
+  );
 
   // Geolocation
-  const { coordinates, accuracy, heading, error: geoError, permissionState } = useGeolocation();
+  const { coordinates, accuracy, heading, error: geoError, permissionState } =
+    useGeolocation(geolocationOptions);
 
   // Refs
   const noiseFilterRef = useRef<NoiseFilter>(new NoiseFilter({ windowSize: 5 })); // 5 samples moving average
@@ -133,7 +151,7 @@ export default function TourPage() {
 
   // Offline Sync
   const { isOfflineReady: offlineSyncReady } = useOfflineSync({
-    autoSync: true,
+    autoSync: settingsReady && !isBatterySaverEnabled,
     onSyncSuccess: handleOfflineSyncSuccess,
   });
 
@@ -145,7 +163,8 @@ export default function TourPage() {
     preloadAllAssets,
   } = usePOIManager({
     language,
-    autoPreloadAudio: devicePerformance.profile.autoPreloadAudio,
+    autoPreloadAudio:
+      settingsReady && !isBatterySaverEnabled && devicePerformance.profile.autoPreloadAudio,
     preloadRadius: devicePerformance.profile.nearbyPreloadRadius,
     onOfflineReady: handlePOIOfflineReady,
   });
@@ -372,21 +391,29 @@ export default function TourPage() {
 
   // Preload narration audio and POI images in the background as soon as the current dataset is ready.
   useEffect(() => {
-    if (activePOIs.length === 0 || hasPreloadedRef.current) {
+    if (!settingsReady || activePOIs.length === 0 || hasPreloadedRef.current) {
       return;
     }
 
-    if (devicePerformance.profile.backgroundPreload !== 'all') {
+    if (isBatterySaverEnabled || devicePerformance.profile.backgroundPreload !== 'all') {
       return;
     }
 
     hasPreloadedRef.current = true;
     void preloadAllAssets();
-  }, [activePOIs.length, devicePerformance.profile.backgroundPreload, preloadAllAssets]);
+  }, [
+    activePOIs.length,
+    devicePerformance.profile.backgroundPreload,
+    isBatterySaverEnabled,
+    preloadAllAssets,
+    settingsReady,
+  ]);
 
   useEffect(() => {
     if (
+      !settingsReady ||
       activePOIs.length === 0 ||
+      isBatterySaverEnabled ||
       devicePerformance.profile.backgroundPreload !== 'nearby' ||
       !devicePerformance.profile.autoPreloadAudio ||
       !filteredPosition
@@ -414,7 +441,9 @@ export default function TourPage() {
     devicePerformance.profile.backgroundPreload,
     devicePerformance.profile.nearbyPreloadRadius,
     filteredPosition,
+    isBatterySaverEnabled,
     preloadNearbyAudio,
+    settingsReady,
   ]);
 
   // Handle POI entry event
@@ -969,7 +998,7 @@ export default function TourPage() {
   ]);
 
   useEffect(() => {
-    if (warmupCandidates.length === 0) {
+    if (!settingsReady || isBatterySaverEnabled || warmupCandidates.length === 0) {
       return;
     }
 
@@ -993,7 +1022,7 @@ export default function TourPage() {
     return () => {
       window.clearTimeout(timer);
     };
-  }, [language, warmupCandidates]);
+  }, [isBatterySaverEnabled, language, settingsReady, warmupCandidates]);
 
   useEffect(() => {
     if (!blockedAutoPlayItem) {

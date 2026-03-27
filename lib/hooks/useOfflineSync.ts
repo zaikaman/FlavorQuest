@@ -311,9 +311,11 @@ export function useOfflineSync(options: UseOfflineSyncOptions = {}): UseOfflineS
     setOfflineStatus('offline');
     onNetworkChange?.(false);
 
-    // Register for background sync
-    void registerBackgroundSync();
-  }, [onNetworkChange, registerBackgroundSync]);
+    if (autoSync) {
+      // Register for background sync only when automatic syncing is enabled.
+      void registerBackgroundSync();
+    }
+  }, [autoSync, onNetworkChange, registerBackgroundSync]);
 
   // Initialize và listen to network events
   useEffect(() => {

@@ -61,6 +61,10 @@ export function useGeolocation(options: UseGeolocationOptions = {}) {
 
   const watchIdRef = useRef<number | null>(null);
 
+  useEffect(() => {
+    setUseHighAccuracy(enableHighAccuracy);
+  }, [enableHighAccuracy]);
+
   // Check permission status
   const checkPermission = useCallback(async () => {
     if (!('permissions' in navigator)) {
