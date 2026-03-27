@@ -157,6 +157,11 @@ export default function TourPage() {
     [selectedTourId, tours]
   );
 
+  const replaceTourUrl = useCallback((params: URLSearchParams, pathname = '/tour') => {
+    const nextUrl = params.toString() ? `${pathname}?${params.toString()}` : pathname;
+    window.history.replaceState(window.history.state, '', nextUrl);
+  }, []);
+
   const activePOIs = useMemo(() => {
     if (!selectedTour) {
       return pois;
@@ -188,10 +193,9 @@ export default function TourPage() {
         params.delete('tour');
       }
 
-      const nextUrl = params.toString() ? `/tour?${params.toString()}` : '/tour';
-      router.replace(nextUrl, { scroll: false });
+      replaceTourUrl(params);
     },
-    [router, searchParams]
+    [replaceTourUrl, searchParams]
   );
 
   const selectedTourMetadata = useMemo<Json | undefined>(() => {
@@ -854,13 +858,11 @@ export default function TourPage() {
 
       if (tab === 'settings') {
         params.set('tab', 'settings');
-        const nextUrl = params.toString() ? `/tour?${params.toString()}` : '/tour';
-        router.replace(nextUrl, { scroll: false });
+        replaceTourUrl(params);
         setShowSettings(true);
       } else if (tab === 'history') {
         params.set('tab', 'history');
-        const nextUrl = params.toString() ? `/tour?${params.toString()}` : '/tour';
-        router.replace(nextUrl, { scroll: false });
+        replaceTourUrl(params);
         setShowHistory(true);
       } else if (tab === 'assistant') {
         params.set('tab', 'assistant');
@@ -874,12 +876,11 @@ export default function TourPage() {
         router.push(nextUrl);
       } else {
         params.set('tab', tab);
-        const nextUrl = params.toString() ? `/tour?${params.toString()}` : '/tour';
-        router.replace(nextUrl, { scroll: false });
+        replaceTourUrl(params);
         setActiveTab(tab);
       }
     },
-    [router, searchParams, setActiveTab, setShowHistory, setShowSettings]
+    [replaceTourUrl, router, searchParams, setActiveTab, setShowHistory, setShowSettings]
   );
 
   // Toggle auto/manual mode
@@ -1263,8 +1264,7 @@ export default function TourPage() {
           setShowSettings(false);
           const params = new URLSearchParams(searchParams.toString());
           params.set('tab', activeTab);
-          const nextUrl = params.toString() ? `/tour?${params.toString()}` : '/tour';
-          router.replace(nextUrl, { scroll: false });
+          replaceTourUrl(params);
           // Reload settings
           loadSettings().then((s) => {
             setSettings(s);
@@ -1280,8 +1280,7 @@ export default function TourPage() {
           setShowHistory(false);
           const params = new URLSearchParams(searchParams.toString());
           params.set('tab', activeTab);
-          const nextUrl = params.toString() ? `/tour?${params.toString()}` : '/tour';
-          router.replace(nextUrl, { scroll: false });
+          replaceTourUrl(params);
         }}
         onPlayPOI={handlePlayPOI}
         onViewPOI={handleViewPOI}

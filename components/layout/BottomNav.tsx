@@ -35,6 +35,7 @@ export function BottomNav({ activeTab, onTabChange, className = '' }: BottomNavP
           return (
             <button
               key={tab.id}
+              type="button"
               onClick={() => onTabChange(tab.id)}
               className="group flex flex-1 flex-col items-center justify-center gap-1.5 rounded-lg py-1 transition-colors"
               aria-label={t(tab.labelKey)}

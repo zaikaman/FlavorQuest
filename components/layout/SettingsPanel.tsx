@@ -326,6 +326,7 @@ export function SettingsPanel({ isOpen, onClose, onSettingsChange }: SettingsPan
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-bold text-white">{t('settings.title')}</h2>
             <button
+              type="button"
               onClick={onClose}
               className="flex h-10 w-10 items-center justify-center rounded-full bg-white/5 text-white hover:bg-white/10"
             >
@@ -356,6 +357,7 @@ export function SettingsPanel({ isOpen, onClose, onSettingsChange }: SettingsPan
                   {availableLanguages.map((lang) => (
                     <button
                       key={lang.code}
+                      type="button"
                       onClick={() => handleLanguageChange(lang.code)}
                       className={`rounded-2xl border p-3 text-left transition-all ${
                         language === lang.code
