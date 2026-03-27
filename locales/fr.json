@@ -160,7 +160,9 @@
     "deviceProfileUnknown": "Inconnu",
     "deviceProfileMotionReduced": "Mouvement réduit",
     "deviceProfileMotionStandard": "Mouvement standard",
-    "deviceProfileBatteryHint": "Le mode économie d’énergie rend le profil plus prudent d’un niveau."
+    "deviceProfileBatteryHint": "Le mode économie d’énergie rend le profil plus prudent d’un niveau.",
+    "deviceProfileRequestedLabel": "Votre choix",
+    "deviceProfileSafetyHint": "Vous avez choisi {requested}, mais l’appareil reste actuellement limité à {applied} pour préserver la fluidité et la stabilité."
   },
   "history": {
     "title": "Historique",

@@ -6,7 +6,14 @@
   "metadata": {
     "title": "FlavorQuest - Откройте кухню Винь Кхань",
     "description": "Автоматический аудиотур по гастрономической улице Винь Кхань, Кантхо. PWA с приоритетом офлайн и поддержкой нескольких языков.",
-    "keywords": ["гастрономический тур", "аудиогид", "Винь Кхань", "Кантхо", "кухня", "PWA"]
+    "keywords": [
+      "гастрономический тур",
+      "аудиогид",
+      "Винь Кхань",
+      "Кантхо",
+      "кухня",
+      "PWA"
+    ]
   },
   "manifest": {
     "name": "FlavorQuest - Автоматический аудиогид",
@@ -153,7 +160,9 @@
     "deviceProfileUnknown": "Неизвестно",
     "deviceProfileMotionReduced": "Ограниченное движение",
     "deviceProfileMotionStandard": "Стандартное движение",
-    "deviceProfileBatteryHint": "Режим энергосбережения делает профиль осторожнее."
+    "deviceProfileBatteryHint": "Режим энергосбережения делает профиль осторожнее.",
+    "deviceProfileRequestedLabel": "Ваш выбор",
+    "deviceProfileSafetyHint": "Вы выбрали {requested}, но сейчас устройство ограничено режимом {applied}, чтобы сохранить плавность и стабильность."
   },
   "history": {
     "title": "История",

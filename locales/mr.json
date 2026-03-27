@@ -6,7 +6,14 @@
   "metadata": {
     "title": "FlavorQuest - व्हिन्ह खान्ह पाककला शोधा",
     "description": "स्थानआधारित स्वयंचलित ऑडिओ टूर, व्हिन्ह खान्ह रस्ता, क़न थो. बहुभाषा समर्थन असलेले ऑफलाइन-प्रथम PWA.",
-    "keywords": ["अन्न टूर", "ऑडिओ गाईड", "व्हिन्ह खान्ह", "क़न थो", "पाककला", "PWA"]
+    "keywords": [
+      "अन्न टूर",
+      "ऑडिओ गाईड",
+      "व्हिन्ह खान्ह",
+      "क़न थो",
+      "पाककला",
+      "PWA"
+    ]
   },
   "manifest": {
     "name": "FlavorQuest - स्वयंचलित ऑडिओ टूर अनुभव",
@@ -153,7 +160,9 @@
     "deviceProfileUnknown": "अज्ञात",
     "deviceProfileMotionReduced": "हालचाल कमी",
     "deviceProfileMotionStandard": "मानक हालचाल",
-    "deviceProfileBatteryHint": "बॅटरी सेव्हरमुळे प्रोफाइल अधिक संयमित आहे."
+    "deviceProfileBatteryHint": "बॅटरी सेव्हरमुळे प्रोफाइल अधिक संयमित आहे.",
+    "deviceProfileRequestedLabel": "तुम्ही निवडले",
+    "deviceProfileSafetyHint": "तुम्ही {requested} निवडले आहे, परंतु स्मूथ आणि स्थिर अनुभव राखण्यासाठी हा डिवाइस सध्या {applied} पर्यंत मर्यादित आहे."
   },
   "history": {
     "title": "इतिहास",

@@ -12,6 +12,9 @@ type NetworkType = DeviceCapabilityAssessment['effectiveConnectionType'];
 interface QuickBenchmarkResult {
   scoreDelta: -1 | 0 | 1;
   durationMs: number;
+  iterations: number;
+  frameLatencyMs: number;
+  cpuDurationMs: number;
 }
 
 type NavigatorWithDeviceInfo = Navigator & {
@@ -24,6 +27,17 @@ type NavigatorWithDeviceInfo = Navigator & {
   deviceMemory?: number;
   msMaxTouchPoints?: number;
 };
+
+export interface DevicePerformanceSignals {
+  hardwareConcurrency: number | null;
+  deviceMemory: number | null;
+  effectiveConnectionType: NetworkType;
+  saveDataEnabled: boolean;
+  prefersReducedMotion: boolean;
+  isTouchDevice: boolean;
+  viewportWidth: number;
+  pixelRatio: number;
+}
 
 export const DEVICE_RESOURCE_PROFILES: Record<DevicePerformanceTier, DeviceResourceProfile> = {
   light: {
@@ -85,7 +99,7 @@ function normalizeNetworkType(value: string | undefined): NetworkType {
 }
 
 function scoreTier(score: number): DevicePerformanceTier {
-  if (score <= 1) {
+  if (score <= 0) {
     return 'light';
   }
 
@@ -94,6 +108,141 @@ function scoreTier(score: number): DevicePerformanceTier {
   }
 
   return 'balanced';
+}
+
+function inferDeviceMemory(deviceMemory: number | null, hardwareConcurrency: number | null): number | null {
+  if (deviceMemory !== null) {
+    return deviceMemory;
+  }
+
+  if (hardwareConcurrency === null) {
+    return null;
+  }
+
+  if (hardwareConcurrency >= 8) {
+    return 8;
+  }
+
+  if (hardwareConcurrency >= 6) {
+    return 6;
+  }
+
+  if (hardwareConcurrency >= 4) {
+    return 4;
+  }
+
+  if (hardwareConcurrency >= 2) {
+    return 2;
+  }
+
+  return 1;
+}
+
+function scoreHardwareConcurrency(hardwareConcurrency: number | null): number {
+  if (hardwareConcurrency === null) {
+    return 0;
+  }
+
+  if (hardwareConcurrency >= 8) {
+    return 3;
+  }
+
+  if (hardwareConcurrency >= 6) {
+    return 2;
+  }
+
+  if (hardwareConcurrency >= 4) {
+    return 1;
+  }
+
+  if (hardwareConcurrency >= 2) {
+    return 0;
+  }
+
+  return -1;
+}
+
+function scoreDeviceMemory(deviceMemory: number | null): number {
+  if (deviceMemory === null) {
+    return 0;
+  }
+
+  if (deviceMemory >= 8) {
+    return 3;
+  }
+
+  if (deviceMemory >= 6) {
+    return 2;
+  }
+
+  if (deviceMemory >= 4) {
+    return 1;
+  }
+
+  if (deviceMemory >= 2) {
+    return 0;
+  }
+
+  return -1;
+}
+
+export function assessDevicePerformanceFromSignals(
+  signals: DevicePerformanceSignals
+): DeviceCapabilityAssessment {
+  const inferredMemory = inferDeviceMemory(signals.deviceMemory, signals.hardwareConcurrency);
+  let score = 0;
+
+  score += scoreHardwareConcurrency(signals.hardwareConcurrency);
+  score += scoreDeviceMemory(inferredMemory);
+
+  if (signals.effectiveConnectionType === '4g') {
+    score += 1;
+  } else if (signals.effectiveConnectionType === '2g') {
+    score -= 2;
+  } else if (signals.effectiveConnectionType === 'slow-2g') {
+    score -= 3;
+  }
+
+  if (signals.saveDataEnabled) {
+    score -= 2;
+  }
+
+  if (signals.prefersReducedMotion) {
+    score -= 1;
+  }
+
+  // High-density mobile screens are common on powerful phones, so do not
+  // down-rank them by default. Only penalize truly constrained touch devices.
+  if (
+    signals.isTouchDevice &&
+    signals.hardwareConcurrency !== null &&
+    signals.hardwareConcurrency <= 2 &&
+    signals.pixelRatio > 2.5 &&
+    signals.viewportWidth < 768
+  ) {
+    score -= 1;
+  }
+
+  // Missing browser hints should not automatically push otherwise modern devices
+  // into the lowest tier.
+  if (signals.hardwareConcurrency === null && signals.deviceMemory === null) {
+    score += 1;
+  }
+
+  return {
+    tier: scoreTier(score),
+    score,
+    hardwareConcurrency: signals.hardwareConcurrency,
+    deviceMemory: signals.deviceMemory,
+    effectiveConnectionType: signals.effectiveConnectionType,
+    saveDataEnabled: signals.saveDataEnabled,
+    prefersReducedMotion: signals.prefersReducedMotion,
+    isTouchDevice: signals.isTouchDevice,
+    viewportWidth: signals.viewportWidth,
+    pixelRatio: signals.pixelRatio,
+    benchmarkDurationMs: null,
+    benchmarkAdjusted: false,
+  };
 }
 
 export function assessDevicePerformance(): DeviceCapabilityAssessment {
@@ -125,61 +274,7 @@ export function assessDevicePerformance(): DeviceCapabilityAssessment {
   const pixelRatio = window.devicePixelRatio || 1;
   const isTouchDevice = navigator.maxTouchPoints > 0 || Boolean(nav.msMaxTouchPoints);
 
-  let score = 0;
-
-  if (hardwareConcurrency !== null) {
-    if (hardwareConcurrency >= 8) {
-      score += 3;
-    } else if (hardwareConcurrency >= 4) {
-      score += 2;
-    } else if (hardwareConcurrency >= 2) {
-      score += 1;
-    } else {
-      score -= 1;
-    }
-  }
-
-  if (deviceMemory !== null) {
-    if (deviceMemory >= 8) {
-      score += 3;
-    } else if (deviceMemory >= 4) {
-      score += 2;
-    } else if (deviceMemory >= 2) {
-      score += 1;
-    } else {
-      score -= 1;
-    }
-  }
-
-  if (connectionType === '4g') {
-    score += 2;
-  } else if (connectionType === '3g') {
-    score -= 1;
-  } else if (connectionType === '2g') {
-    score -= 2;
-  } else if (connectionType === 'slow-2g') {
-    score -= 3;
-  }
-
-  if (saveDataEnabled) {
-    score -= 2;
-  }
-
-  if (prefersReducedMotion) {
-    score -= 1;
-  }
-
-  if (viewportWidth < 640 && isTouchDevice) {
-    score -= 1;
-  }
-
-  if (pixelRatio > 2.5 && viewportWidth < 768) {
-    score -= 1;
-  }
-
-  return {
-    tier: scoreTier(score),
-    score,
+  return assessDevicePerformanceFromSignals({
     hardwareConcurrency,
     deviceMemory,
     effectiveConnectionType: connectionType,
@@ -188,9 +283,29 @@ export function assessDevicePerformance(): DeviceCapabilityAssessment {
     isTouchDevice,
     viewportWidth,
     pixelRatio,
-    benchmarkDurationMs: null,
-    benchmarkAdjusted: false,
-  };
+  });
+}
+
+export function deriveQuickBenchmarkScoreDelta(metrics: {
+  iterations: number;
+  cpuDurationMs: number;
+  frameLatencyMs: number;
+}): -1 | 0 | 1 {
+  const completedAllIterations = metrics.iterations >= 60000;
+
+  if (completedAllIterations && metrics.cpuDurationMs <= 16 && metrics.frameLatencyMs <= 24) {
+    return 1;
+  }
+
+  if (metrics.frameLatencyMs >= 48) {
+    return -1;
+  }
+
+  if (!completedAllIterations && metrics.iterations < 28000 && metrics.cpuDurationMs >= 18) {
+    return -1;
+  }
+
+  return 0;
 }
 
 export async function runQuickDeviceBenchmark(): Promise<QuickBenchmarkResult | null> {
@@ -207,12 +322,16 @@ export async function runQuickDeviceBenchmark(): Promise<QuickBenchmarkResult | 
   });
   const frameLatencyMs = performance.now() - frameStart;
 
-  // Keep CPU probe intentionally short (about 12-20ms on most phones).
+  const maxIterations = 60000;
+  const maxRuntimeMs = 24;
+
+  // Keep CPU probe intentionally short while still allowing fast devices to
+  // differentiate themselves by completed iterations.
   const cpuStart = performance.now();
   let checksum = 0;
   let index = 0;
 
-  while (index < 50000 && performance.now() - cpuStart < 20) {
+  while (index < maxIterations && performance.now() - cpuStart < maxRuntimeMs) {
     checksum += Math.sqrt((index % 97) + 1) * Math.sin(index);
     index += 1;
   }
@@ -223,17 +342,18 @@ export async function runQuickDeviceBenchmark(): Promise<QuickBenchmarkResult | 
     return null;
   }
 
-  let scoreDelta: -1 | 0 | 1 = 0;
-
-  if (cpuDurationMs <= 10 && frameLatencyMs <= 22) {
-    scoreDelta = 1;
-  } else if (cpuDurationMs >= 22 || frameLatencyMs >= 42) {
-    scoreDelta = -1;
-  }
+  const scoreDelta = deriveQuickBenchmarkScoreDelta({
+    iterations: index,
+    cpuDurationMs,
+    frameLatencyMs,
+  });
 
   return {
     scoreDelta,
     durationMs: Math.round(performance.now() - start),
+    iterations: index,
+    frameLatencyMs,
+    cpuDurationMs: Math.round(cpuDurationMs * 100) / 100,
   };
 }
 

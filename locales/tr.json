@@ -6,7 +6,14 @@
   "metadata": {
     "title": "FlavorQuest - Vĩnh Khánh Mutfağını Keşfedin",
     "description": "Cần Thơ, Vĩnh Khánh yemek sokağının konum bazlı otomatik sesli turu. Çevrimdışı öncelikli PWA ve çok dilli destek.",
-    "keywords": ["yemek turu", "sesli rehber", "Vĩnh Khánh", "Cần Thơ", "mutfak", "PWA"]
+    "keywords": [
+      "yemek turu",
+      "sesli rehber",
+      "Vĩnh Khánh",
+      "Cần Thơ",
+      "mutfak",
+      "PWA"
+    ]
   },
   "manifest": {
     "name": "FlavorQuest - Otomatik Sesli Tur Deneyimi",
@@ -153,7 +160,9 @@
     "deviceProfileUnknown": "Bilinmiyor",
     "deviceProfileMotionReduced": "Azaltılmış hareket",
     "deviceProfileMotionStandard": "Standart hareket",
-    "deviceProfileBatteryHint": "Pil tasarrufu aktif profili daha muhafazakar yapar."
+    "deviceProfileBatteryHint": "Pil tasarrufu aktif profili daha muhafazakar yapar.",
+    "deviceProfileRequestedLabel": "Seçimin",
+    "deviceProfileSafetyHint": "{requested} seçtin, ancak akıcılığı ve kararlılığı korumak için bu cihaz şu anda {applied} seviyesinde sınırlandırılıyor."
   },
   "history": {
     "title": "Geçmiş",

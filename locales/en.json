@@ -141,6 +141,7 @@
     "deviceProfileTitle": "Device profile",
     "deviceProfileDescription": "FlavorQuest automatically adjusts motion, map details, and background loading to suit your device.",
     "deviceProfileDetectedLabel": "System detected",
+    "deviceProfileRequestedLabel": "You selected",
     "deviceProfileAppliedLabel": "Currently applied",
     "deviceProfileSystem": "Auto",
     "deviceProfileLight": "Light",
@@ -153,7 +154,8 @@
     "deviceProfileUnknown": "Unknown",
     "deviceProfileMotionReduced": "Reduced motion",
     "deviceProfileMotionStandard": "Standard motion",
-    "deviceProfileBatteryHint": "Battery saver mode is making the active profile one notch more conservative."
+    "deviceProfileBatteryHint": "Battery saver mode is making the active profile one notch more conservative.",
+    "deviceProfileSafetyHint": "You selected {requested}, but this device is currently capped at {applied} to keep the experience smooth and stable."
   },
   "history": {
     "title": "History",

@@ -141,6 +141,7 @@
     "deviceProfileTitle": "Perfil de dispositivo",
     "deviceProfileDescription": "FlavorQuest adapta movimiento del mapa, visuales y carga en segundo plano según el dispositivo que uses.",
     "deviceProfileDetectedLabel": "Sistema detectado",
+    "deviceProfileRequestedLabel": "Has elegido",
     "deviceProfileAppliedLabel": "Usando actualmente",
     "deviceProfileSystem": "Automático",
     "deviceProfileLight": "Ligero",
@@ -153,7 +154,8 @@
     "deviceProfileUnknown": "Desconocido",
     "deviceProfileMotionReduced": "Movimiento reducido",
     "deviceProfileMotionStandard": "Movimiento estándar",
-    "deviceProfileBatteryHint": "El ahorro de batería hace que el perfil activo sea un paso más conservador."
+    "deviceProfileBatteryHint": "El ahorro de batería hace que el perfil activo sea un paso más conservador.",
+    "deviceProfileSafetyHint": "Has elegido {requested}, pero este dispositivo se mantiene en {applied} para conservar fluidez y estabilidad."
   },
   "history": {
     "title": "Historial",

@@ -34,6 +34,7 @@ type DeviceCopyKey =
   | 'deviceProfileTitle'
   | 'deviceProfileDescription'
   | 'deviceProfileDetectedLabel'
+  | 'deviceProfileRequestedLabel'
   | 'deviceProfileAppliedLabel'
   | 'deviceProfileSystem'
   | 'deviceProfileLight'
@@ -46,7 +47,8 @@ type DeviceCopyKey =
   | 'deviceProfileUnknown'
   | 'deviceProfileMotionReduced'
   | 'deviceProfileMotionStandard'
-  | 'deviceProfileBatteryHint';
+  | 'deviceProfileBatteryHint'
+  | 'deviceProfileSafetyHint';
 
 const PERFORMANCE_OPTIONS: DevicePerformancePreference[] = ['system', 'light', 'balanced', 'full'];
 
@@ -57,6 +59,7 @@ const DEVICE_PROFILE_COPY: Partial<Record<Language, Record<DeviceCopyKey, string
     deviceProfileDescription:
       'FlavorQuest tự điều chỉnh chuyển động, bản đồ và tải nền để hợp với máy bạn đang dùng.',
     deviceProfileDetectedLabel: 'Hệ thống nhận diện',
+    deviceProfileRequestedLabel: 'Bạn đã chọn',
     deviceProfileAppliedLabel: 'Đang áp dụng',
     deviceProfileSystem: 'Tự động',
     deviceProfileLight: 'Nhẹ',
@@ -75,6 +78,8 @@ const DEVICE_PROFILE_COPY: Partial<Record<Language, Record<DeviceCopyKey, string
     deviceProfileMotionStandard: 'Chuyển động chuẩn',
     deviceProfileBatteryHint:
       'Chế độ tiết kiệm pin đang làm hồ sơ hoạt động thận trọng hơn một nấc.',
+    deviceProfileSafetyHint:
+      'Bạn đã chọn {requested}, nhưng thiết bị hiện đang được giới hạn ở {applied} để giữ độ mượt và ổn định.',
   },
   en: {
     tourExperience: 'Tour Experience',
@@ -82,6 +87,7 @@ const DEVICE_PROFILE_COPY: Partial<Record<Language, Record<DeviceCopyKey, string
     deviceProfileDescription:
       "FlavorQuest adapts map motion, visuals, and background loading to fit the device you're using.",
     deviceProfileDetectedLabel: 'System detected',
+    deviceProfileRequestedLabel: 'You selected',
     deviceProfileAppliedLabel: 'Currently using',
     deviceProfileSystem: 'Auto',
     deviceProfileLight: 'Light',
@@ -100,6 +106,8 @@ const DEVICE_PROFILE_COPY: Partial<Record<Language, Record<DeviceCopyKey, string
     deviceProfileMotionStandard: 'Standard motion',
     deviceProfileBatteryHint:
       'Battery Saver is making the active profile one step more conservative.',
+    deviceProfileSafetyHint:
+      'You selected {requested}, but this device is currently capped at {applied} to keep the experience smooth and stable.',
   },
   ja: {
     tourExperience: 'ツアー体験',
@@ -107,6 +115,7 @@ const DEVICE_PROFILE_COPY: Partial<Record<Language, Record<DeviceCopyKey, string
     deviceProfileDescription:
       'FlavorQuest はお使いの端末に合わせて、地図の動きや表示、バックグラウンド読み込みを調整します。',
     deviceProfileDetectedLabel: 'システム判定',
+    deviceProfileRequestedLabel: '選択中',
     deviceProfileAppliedLabel: '現在の設定',
     deviceProfileSystem: '自動',
     deviceProfileLight: '軽量',
@@ -124,6 +133,8 @@ const DEVICE_PROFILE_COPY: Partial<Record<Language, Record<DeviceCopyKey, string
     deviceProfileMotionStandard: '標準の動き',
     deviceProfileBatteryHint:
       '省電力モードにより、現在のプロファイルは一段控えめに調整されています。',
+    deviceProfileSafetyHint:
+      '「{requested}」を選んでいますが、安定性を優先するため現在は「{applied}」までで運用しています。',
   },
   fr: {
     tourExperience: 'Expérience de visite',
@@ -131,6 +142,7 @@ const DEVICE_PROFILE_COPY: Partial<Record<Language, Record<DeviceCopyKey, string
     deviceProfileDescription:
       "FlavorQuest adapte les mouvements, la carte et les chargements en arrière-plan selon l'appareil utilisé.",
     deviceProfileDetectedLabel: 'Détection du système',
+    deviceProfileRequestedLabel: 'Votre choix',
     deviceProfileAppliedLabel: 'Profil actif',
     deviceProfileSystem: 'Automatique',
     deviceProfileLight: 'Léger',
@@ -149,6 +161,8 @@ const DEVICE_PROFILE_COPY: Partial<Record<Language, Record<DeviceCopyKey, string
     deviceProfileMotionStandard: 'Mouvement standard',
     deviceProfileBatteryHint:
       "Le mode économie d'énergie rend le profil actif un cran plus prudent.",
+    deviceProfileSafetyHint:
+      "Vous avez choisi {requested}, mais l'appareil reste actuellement limité à {applied} pour préserver la fluidité et la stabilité.",
   },
   ko: {
     tourExperience: '투어 경험',
@@ -156,6 +170,7 @@ const DEVICE_PROFILE_COPY: Partial<Record<Language, Record<DeviceCopyKey, string
     deviceProfileDescription:
       'FlavorQuest는 현재 기기에 맞춰 지도 움직임, 화면 표현, 백그라운드 로딩을 조절합니다.',
     deviceProfileDetectedLabel: '시스템 감지',
+    deviceProfileRequestedLabel: '선택한 설정',
     deviceProfileAppliedLabel: '현재 적용',
     deviceProfileSystem: '자동',
     deviceProfileLight: '가볍게',
@@ -172,6 +187,8 @@ const DEVICE_PROFILE_COPY: Partial<Record<Language, Record<DeviceCopyKey, string
     deviceProfileMotionReduced: '움직임 줄이기',
     deviceProfileMotionStandard: '기본 움직임',
     deviceProfileBatteryHint: '절전 모드로 인해 현재 프로필이 한 단계 더 보수적으로 적용됩니다.',
+    deviceProfileSafetyHint:
+      '{requested}을 선택했지만, 현재 기기에서는 부드러움과 안정성을 위해 {applied}까지만 적용합니다.',
   },
   zh: {
     tourExperience: '导览体验',
@@ -179,6 +196,7 @@ const DEVICE_PROFILE_COPY: Partial<Record<Language, Record<DeviceCopyKey, string
     deviceProfileDescription:
       'FlavorQuest 会根据你当前设备的状态，调整地图动效、界面呈现和后台预加载。',
     deviceProfileDetectedLabel: '系统识别',
+    deviceProfileRequestedLabel: '您的选择',
     deviceProfileAppliedLabel: '当前启用',
     deviceProfileSystem: '自动',
     deviceProfileLight: '轻量',
@@ -192,6 +210,8 @@ const DEVICE_PROFILE_COPY: Partial<Record<Language, Record<DeviceCopyKey, string
     deviceProfileMotionReduced: '减少动效',
     deviceProfileMotionStandard: '标准动效',
     deviceProfileBatteryHint: '省电模式会让当前配置再保守一级。',
+    deviceProfileSafetyHint:
+      '您选了 {requested}，但为了保持流畅和稳定，当前设备仍会限制在 {applied}。',
   },
 };
 
@@ -316,6 +336,8 @@ export function SettingsPanel({ isOpen, onClose, onSettingsChange }: SettingsPan
 
   if (!isOpen) return null;
 
+  const selectedPerformanceLabel = getPerformanceLabel(settings.performancePreference);
+
   return (
     <div className="fixed inset-0 z-[60] bg-black/60 backdrop-blur-sm" onClick={onClose}>
       <div
@@ -402,13 +424,21 @@ export function SettingsPanel({ isOpen, onClose, onSettingsChange }: SettingsPan
                   </span>
                 </div>
 
-                <div className="mt-4 grid grid-cols-2 gap-3">
+                <div className="mt-4 grid gap-3 sm:grid-cols-3">
                   <div className="rounded-2xl border border-white/10 bg-black/20 p-3">
                     <p className="text-xs tracking-[0.18em] text-white/45 uppercase">
                       {getDeviceCopy('deviceProfileDetectedLabel')}
                     </p>
                     <p className="mt-2 text-base font-semibold text-white">
                       {getPerformanceLabel(effectivePerformance.detectedTier)}
+                    </p>
+                  </div>
+                  <div className="rounded-2xl border border-white/10 bg-black/20 p-3">
+                    <p className="text-xs tracking-[0.18em] text-white/45 uppercase">
+                      {getDeviceCopy('deviceProfileRequestedLabel')}
+                    </p>
+                    <p className="mt-2 text-base font-semibold text-white">
+                      {selectedPerformanceLabel}
                     </p>
                   </div>
                   <div className="rounded-2xl border border-white/10 bg-black/20 p-3">
@@ -424,6 +454,19 @@ export function SettingsPanel({ isOpen, onClose, onSettingsChange }: SettingsPan
                 {effectivePerformance.batterySaverAdjusted && (
                   <p className="mt-4 rounded-2xl border border-amber-400/20 bg-amber-500/10 px-3 py-2 text-sm text-amber-100">
                     {getDeviceCopy('deviceProfileBatteryHint')}
+                  </p>
+                )}
+
+                {effectivePerformance.safetyAdjusted && (
+                  <p className="mt-4 rounded-2xl border border-sky-400/20 bg-sky-500/10 px-3 py-2 text-sm text-sky-100">
+                    {t(
+                      'settings.deviceProfileSafetyHint',
+                      {
+                        requested: selectedPerformanceLabel,
+                        applied: getPerformanceLabel(effectivePerformance.effectiveTier),
+                      },
+                      deviceCopy.deviceProfileSafetyHint
+                    )}
                   </p>
                 )}
 

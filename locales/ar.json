@@ -6,7 +6,14 @@
   "metadata": {
     "title": "FlavorQuest - اكتشف شارع الطعام Vĩnh Khánh",
     "description": "جولة صوتية تلقائية تعتمد على الموقع لشارع الطعام Vĩnh Khánh في مدينة Cần Thơ. تطبيق PWA يعمل أولاً بدون اتصال ويدعم لغات متعددة.",
-    "keywords": ["جولة طعام", "دليل صوتي", "Vĩnh Khánh", "Cần Thơ", "مأكولات", "PWA"]
+    "keywords": [
+      "جولة طعام",
+      "دليل صوتي",
+      "Vĩnh Khánh",
+      "Cần Thơ",
+      "مأكولات",
+      "PWA"
+    ]
   },
   "manifest": {
     "name": "FlavorQuest - تجربة الجولة الصوتية التلقائية",
@@ -153,7 +160,9 @@
     "deviceProfileUnknown": "غير معروف",
     "deviceProfileMotionReduced": "حركة منخفضة",
     "deviceProfileMotionStandard": "حركة قياسية",
-    "deviceProfileBatteryHint": "يعمل وضع توفير البطارية على جعل الملف النشط أكثر تحفظاً بدرجة واحدة."
+    "deviceProfileBatteryHint": "يعمل وضع توفير البطارية على جعل الملف النشط أكثر تحفظاً بدرجة واحدة.",
+    "deviceProfileRequestedLabel": "اختيارك",
+    "deviceProfileSafetyHint": "اخترت {requested}، لكن الجهاز محدود حالياً على {applied} للحفاظ على السلاسة والاستقرار."
   },
   "history": {
     "title": "السجل",

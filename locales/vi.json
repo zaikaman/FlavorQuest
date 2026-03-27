@@ -141,6 +141,7 @@
     "deviceProfileTitle": "Hồ sơ thiết bị",
     "deviceProfileDescription": "FlavorQuest tự điều chỉnh chuyển động, bản đồ và tải nền để phù hợp với máy bạn đang dùng.",
     "deviceProfileDetectedLabel": "Hệ thống nhận diện",
+    "deviceProfileRequestedLabel": "Bạn đã chọn",
     "deviceProfileAppliedLabel": "Đang áp dụng",
     "deviceProfileSystem": "Tự động",
     "deviceProfileLight": "Nhẹ",
@@ -153,7 +154,8 @@
     "deviceProfileUnknown": "Chưa rõ",
     "deviceProfileMotionReduced": "Giảm chuyển động",
     "deviceProfileMotionStandard": "Chuyển động chuẩn",
-    "deviceProfileBatteryHint": "Chế độ tiết kiệm pin đang làm hồ sơ hoạt động thận trọng hơn một mức."
+    "deviceProfileBatteryHint": "Chế độ tiết kiệm pin đang làm hồ sơ hoạt động thận trọng hơn một mức.",
+    "deviceProfileSafetyHint": "Bạn đã chọn {requested}, nhưng thiết bị hiện đang được giới hạn ở {applied} để giữ độ mượt và ổn định."
   },
   "history": {
     "title": "Lịch sử",

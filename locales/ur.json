@@ -6,7 +6,14 @@
   "metadata": {
     "title": "FlavorQuest - وِنخ خانہ فوڈ اسٹریٹ دریافت کریں",
     "description": "وِنخ خانہ فوڈ اسٹریٹ، کین تھو کی خودکار لوکیشن پر مبنی آڈیو ٹور۔ آف لائن فرسٹ PWA کے ساتھ کثیر زبان کی سہولت۔",
-    "keywords": ["فوڈ ٹور", "آڈیو گائیڈ", "وِنخ خانہ", "کین تھو", "کھانے", "PWA"]
+    "keywords": [
+      "فوڈ ٹور",
+      "آڈیو گائیڈ",
+      "وِنخ خانہ",
+      "کین تھو",
+      "کھانے",
+      "PWA"
+    ]
   },
   "manifest": {
     "name": "FlavorQuest - خودکار آڈیو ٹور تجربہ",
@@ -153,7 +160,9 @@
     "deviceProfileUnknown": "نامعلوم",
     "deviceProfileMotionReduced": "کم حرکت",
     "deviceProfileMotionStandard": "معیاری حرکت",
-    "deviceProfileBatteryHint": "بیٹری سیور فعال پروفائل کو ایک قدم زیادہ محتاط بنا رہا ہے۔"
+    "deviceProfileBatteryHint": "بیٹری سیور فعال پروفائل کو ایک قدم زیادہ محتاط بنا رہا ہے۔",
+    "deviceProfileRequestedLabel": "آپ کا انتخاب",
+    "deviceProfileSafetyHint": "آپ نے {requested} چنا ہے، لیکن ہمواری اور استحکام برقرار رکھنے کے لیے اس آلے پر فی الحال {applied} تک محدود کیا گیا ہے۔"
   },
   "history": {
     "title": "تاریخ",

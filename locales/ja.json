@@ -6,7 +6,14 @@
   "metadata": {
     "title": "FlavorQuest - ヴィンカイン料理を発見",
     "description": "カントーのヴィンカイン料理街を自動音声ガイドで探索。多言語対応のオフライン優先PWA。",
-    "keywords": ["フードツアー", "音声ガイド", "ヴィンカイン", "カントー", "料理", "PWA"]
+    "keywords": [
+      "フードツアー",
+      "音声ガイド",
+      "ヴィンカイン",
+      "カントー",
+      "料理",
+      "PWA"
+    ]
   },
   "manifest": {
     "name": "FlavorQuest - 自動音声ガイド体験",
@@ -153,7 +160,9 @@
     "deviceProfileUnknown": "不明",
     "deviceProfileMotionReduced": "動き軽減",
     "deviceProfileMotionStandard": "標準動作",
-    "deviceProfileBatteryHint": "省電力モードによりプロファイルの動作が控えめになっています"
+    "deviceProfileBatteryHint": "省電力モードによりプロファイルの動作が控えめになっています",
+    "deviceProfileRequestedLabel": "選択中",
+    "deviceProfileSafetyHint": "「{requested}」を選んでいますが、安定性を優先するため現在は「{applied}」までで運用しています。"
   },
   "history": {
     "title": "履歴",

@@ -6,7 +6,14 @@
   "metadata": {
     "title": "FlavorQuest - Descubra a Culinária de Vĩnh Khánh",
     "description": "Tour sonoro com navegação automática para explorar a culinária da Rua Vĩnh Khánh, Cần Thơ. PWA offline-first com suporte multilíngue.",
-    "keywords": ["tour gastronômico", "guia de áudio", "Vĩnh Khánh", "Cần Thơ", "culinária", "PWA"]
+    "keywords": [
+      "tour gastronômico",
+      "guia de áudio",
+      "Vĩnh Khánh",
+      "Cần Thơ",
+      "culinária",
+      "PWA"
+    ]
   },
   "manifest": {
     "name": "FlavorQuest - Experiência de Narração de Áudio Automática",
@@ -153,7 +160,9 @@
     "deviceProfileUnknown": "Desconhecido",
     "deviceProfileMotionReduced": "Reduzir movimento",
     "deviceProfileMotionStandard": "Movimento padrão",
-    "deviceProfileBatteryHint": "O modo de economia de bateria está tornando o perfil de uso mais conservador."
+    "deviceProfileBatteryHint": "O modo de economia de bateria está tornando o perfil de uso mais conservador.",
+    "deviceProfileRequestedLabel": "Sua escolha",
+    "deviceProfileSafetyHint": "Você escolheu {requested}, mas este dispositivo está limitado a {applied} no momento para manter a experiência fluida e estável."
   },
   "history": {
     "title": "Histórico",

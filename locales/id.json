@@ -7,7 +7,14 @@
   "metadata": {
     "title": "FlavorQuest - Temukan Kuliner Vĩnh Khánh",
     "description": "Tur audio otomatis untuk menjelajahi kuliner jalan Vĩnh Khánh, Cần Thơ. PWA offline-first dengan dukungan multi bahasa.",
-    "keywords": ["tur kuliner", "panduan audio", "Vĩnh Khánh", "Cần Thơ", "kuliner", "PWA"]
+    "keywords": [
+      "tur kuliner",
+      "panduan audio",
+      "Vĩnh Khánh",
+      "Cần Thơ",
+      "kuliner",
+      "PWA"
+    ]
   },
   "manifest": {
     "name": "FlavorQuest - Pengalaman Narasi Audio Otomatis",
@@ -154,7 +161,9 @@
     "deviceProfileUnknown": "Tidak diketahui",
     "deviceProfileMotionReduced": "Gerakan berkurang",
     "deviceProfileMotionStandard": "Gerakan standar",
-    "deviceProfileBatteryHint": "Penghemat baterai membuat profil aktif menjadi lebih hemat satu tingkat"
+    "deviceProfileBatteryHint": "Penghemat baterai membuat profil aktif menjadi lebih hemat satu tingkat",
+    "deviceProfileRequestedLabel": "Pilihanmu",
+    "deviceProfileSafetyHint": "Kamu memilih {requested}, tetapi perangkat ini saat ini dibatasi ke {applied} agar pengalaman tetap mulus dan stabil."
   },
   "history": {
     "title": "Riwayat",
