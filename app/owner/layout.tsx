@@ -80,7 +80,12 @@ export default function OwnerLayout({ children }: { children: React.ReactNode })
       return;
     }
 
-    if (!isOwner && !isAdmin) {
+    if (isAdmin) {
+      router.replace('/admin');
+      return;
+    }
+
+    if (!isOwner) {
       router.replace(isPendingOwner ? '/pending-owner' : '/tour');
     }
   }, [isAdmin, isLoading, isOwner, isPendingOwner, isRoleReady, router, user]);
@@ -89,7 +94,7 @@ export default function OwnerLayout({ children }: { children: React.ReactNode })
     return <OwnerLoadingShell />;
   }
 
-  if (!user || (!isOwner && !isAdmin)) {
+  if (!user || !isOwner) {
     return null;
   }
 
