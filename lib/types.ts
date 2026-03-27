@@ -472,6 +472,8 @@ export type DevicePerformanceTier = 'light' | 'balanced' | 'full';
 
 export type DevicePreloadStrategy = 'none' | 'nearby' | 'all';
 
+export type DeviceDetailCardVariant = 'compact' | 'rich';
+
 export interface DeviceCapabilityAssessment {
   tier: DevicePerformanceTier;
   score: number;
@@ -494,10 +496,14 @@ export interface DeviceResourceProfile {
   showAccuracyRing: boolean;
   showUserPulse: boolean;
   showPoiLabels: boolean;
+  showPoiLabelsOnMobile: boolean;
+  showNearbyPoiHalos: boolean;
+  focusSelectedPoi: boolean;
   autoPreloadAudio: boolean;
   nearbyPreloadRadius: number;
   backgroundPreload: DevicePreloadStrategy;
   audioWarmupCount: number;
+  detailCardVariant: DeviceDetailCardVariant;
 }
 
 export interface EffectiveDevicePerformance {

@@ -7,7 +7,7 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import type { POI, Coordinates } from '@/lib/types/index';
+import type { DeviceDetailCardVariant, POI, Coordinates } from '@/lib/types/index';
 import { getLocalizedPOI } from '@/lib/utils/localization';
 import { useTranslations } from '@/lib/hooks/useTranslations';
 import { useLanguage } from '@/lib/contexts/LanguageContext';
@@ -38,6 +38,11 @@ interface InteractiveMapProps {
   showAccuracyRing?: boolean;
   showUserPulse?: boolean;
   showPOILabels?: boolean;
+  showPOILabelsOnMobile?: boolean;
+  showPOIHalos?: boolean;
+  focusSelectedPOI?: boolean;
+  highlightedPOIIds?: string[];
+  detailCardVariant?: DeviceDetailCardVariant;
 }
 
 export function InteractiveMap({
@@ -57,6 +62,11 @@ export function InteractiveMap({
   showAccuracyRing = true,
   showUserPulse = true,
   showPOILabels = true,
+  showPOILabelsOnMobile = false,
+  showPOIHalos = false,
+  focusSelectedPOI = false,
+  highlightedPOIIds = [],
+  detailCardVariant = 'compact',
 }: InteractiveMapProps) {
   const { language } = useLanguage();
   const { t } = useTranslations();
@@ -69,6 +79,7 @@ export function InteractiveMap({
     userLocation ? [userLocation.lat, userLocation.lng] : [10.761, 106.704]
   );
   const onSelectPOIRef = useRef(onSelectPOI);
+  const lastFocusedPOIRef = useRef<string | null>(null);
   const [mapLoaded, setMapLoaded] = useState(false);
 
   useEffect(() => {
@@ -197,6 +208,7 @@ export function InteractiveMap({
     pois.forEach((poi) => {
       const localizedPOI = getLocalizedPOI(poi, language);
       const isSelected = selectedPOI?.id === poi.id;
+      const isHighlighted = highlightedPOIIds.includes(poi.id);
       const hasVisibleLabel = showPOILabels || isSelected;
       const iconSize: [number, number] = isSelected
         ? [100, 60]
@@ -212,8 +224,9 @@ export function InteractiveMap({
       const poiIcon = L.divIcon({
         className: `poi-marker ${isSelected ? 'selected' : ''}`,
         html: `
-          <div class="poi-marker-container ${isSelected ? 'selected' : ''}">
+          <div class="poi-marker-container ${isSelected ? 'selected' : ''} ${showPOILabelsOnMobile ? 'show-mobile-labels' : ''} ${isHighlighted ? 'highlighted' : ''} ${showPOIHalos ? 'halo-enabled' : ''}">
             <div class="poi-marker-icon">
+              ${showPOIHalos && (isSelected || isHighlighted) ? '<div class="poi-marker-halo"></div>' : ''}
               <span class="material-symbols-outlined">restaurant</span>
             </div>
             ${hasVisibleLabel ? `<div class="poi-marker-label">${localizedPOI.name}</div>` : ''}
@@ -262,11 +275,40 @@ export function InteractiveMap({
     selectedPOI,
     mapLoaded,
     language,
+    highlightedPOIIds,
     onSelectPOI,
     onViewPOI,
+    showPOIHalos,
     showPOILabels,
+    showPOILabelsOnMobile,
     userLocation,
   ]);
+
+  useEffect(() => {
+    if (!mapRef.current || !mapLoaded || !selectedPOI) {
+      if (!selectedPOI) {
+        lastFocusedPOIRef.current = null;
+      }
+      return;
+    }
+
+    if (!focusSelectedPOI || lastFocusedPOIRef.current === selectedPOI.id) {
+      return;
+    }
+
+    lastFocusedPOIRef.current = selectedPOI.id;
+
+    if (enableFlyAnimation) {
+      mapRef.current.flyTo([selectedPOI.lat, selectedPOI.lng], Math.max(preferredZoom, 17), {
+        duration: 0.8,
+      });
+      return;
+    }
+
+    mapRef.current.setView([selectedPOI.lat, selectedPOI.lng], Math.max(preferredZoom, 17), {
+      animate: false,
+    });
+  }, [enableFlyAnimation, focusSelectedPOI, mapLoaded, preferredZoom, selectedPOI]);
 
   // Center map on user
   const handleCenterOnUser = useCallback(() => {
@@ -365,6 +407,7 @@ export function InteractiveMap({
             onPlay={() => onPlayPOI(selectedPOI)}
             onClose={() => onSelectPOI(null)}
             onViewDetail={() => onViewPOI(selectedPOI)}
+            variant={detailCardVariant}
           />
         </div>
       )}
@@ -459,6 +502,7 @@ export function InteractiveMap({
         }
 
         .poi-marker-icon {
+          position: relative;
           width: 32px;
           height: 32px;
           background: rgba(242, 108, 13, 0.2);
@@ -472,7 +516,17 @@ export function InteractiveMap({
           box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
         }
 
+        .poi-marker-halo {
+          position: absolute;
+          inset: -8px;
+          border-radius: 999px;
+          background: radial-gradient(rgba(242, 108, 13, 0.3), transparent 70%);
+          animation: poi-halo 2.4s ease-out infinite;
+        }
+
         .poi-marker-icon .material-symbols-outlined {
+          position: relative;
+          z-index: 1;
           font-size: 16px;
         }
 
@@ -487,6 +541,13 @@ export function InteractiveMap({
 
         .poi-marker-container.selected .poi-marker-icon .material-symbols-outlined {
           font-size: 20px;
+        }
+
+        .poi-marker-container.highlighted:not(.selected) .poi-marker-icon {
+          box-shadow:
+            0 0 0 1px rgba(255, 214, 179, 0.2),
+            0 10px 18px rgba(242, 108, 13, 0.28);
+          transform: scale(1.08);
         }
 
         .poi-marker-label {
@@ -506,8 +567,23 @@ export function InteractiveMap({
 
         /* Hide labels for non-selected markers on mobile */
         @media (max-width: 640px) {
-          .poi-marker-container:not(.selected) .poi-marker-label {
+          .poi-marker-container:not(.selected):not(.show-mobile-labels) .poi-marker-label {
             display: none;
+          }
+        }
+
+        @keyframes poi-halo {
+          0% {
+            transform: scale(0.9);
+            opacity: 0.7;
+          }
+          70% {
+            transform: scale(1.35);
+            opacity: 0;
+          }
+          100% {
+            transform: scale(1.35);
+            opacity: 0;
           }
         }
 

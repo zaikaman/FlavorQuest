@@ -904,6 +904,10 @@ export default function TourPage() {
 
   // Get next POI
   const nextPOI = nearbyPOIs.find((p) => p.id !== audioPlayer.currentItem?.poi.id);
+  const highlightedPOIIds = useMemo(
+    () => nearbyPOIs.slice(0, 3).map((poi) => poi.id),
+    [nearbyPOIs]
+  );
   const audioLoadingPOIId = audioPlayer.isLoading
     ? (audioPlayer.currentItem?.poi.id ?? null)
     : null;
@@ -1147,6 +1151,11 @@ export default function TourPage() {
                 showAccuracyRing={devicePerformance.profile.showAccuracyRing}
                 showUserPulse={devicePerformance.profile.showUserPulse}
                 showPOILabels={devicePerformance.profile.showPoiLabels}
+                showPOILabelsOnMobile={devicePerformance.profile.showPoiLabelsOnMobile}
+                showPOIHalos={devicePerformance.profile.showNearbyPoiHalos}
+                focusSelectedPOI={devicePerformance.profile.focusSelectedPoi}
+                highlightedPOIIds={highlightedPOIIds}
+                detailCardVariant={devicePerformance.profile.detailCardVariant}
               />
             )}
 
