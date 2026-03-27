@@ -42,6 +42,13 @@ export const STORAGE_KEYS = {
   PRELOAD_STATUS: 'preload-status',
 } as const;
 
+function normalizeUserSettings(settings: UserSettings): UserSettings {
+  return {
+    ...settings,
+    geofenceRadius: DEFAULT_USER_SETTINGS.geofenceRadius,
+  };
+}
+
 /**
  * Type-safe storage operations
  */
@@ -99,7 +106,7 @@ export async function clearTours(): Promise<void> {
  * Save user settings to IndexedDB
  */
 export async function saveSettings(settings: UserSettings): Promise<void> {
-  await set(STORAGE_KEYS.USER_SETTINGS, settings);
+  await set(STORAGE_KEYS.USER_SETTINGS, normalizeUserSettings(settings));
 }
 
 /**
@@ -114,7 +121,7 @@ export async function loadSettings(): Promise<UserSettings> {
     return DEFAULT_USER_SETTINGS;
   }
 
-  return { ...DEFAULT_USER_SETTINGS, ...settings };
+  return normalizeUserSettings({ ...DEFAULT_USER_SETTINGS, ...settings });
 }
 
 /**
@@ -122,7 +129,7 @@ export async function loadSettings(): Promise<UserSettings> {
  */
 export async function updateSettings(partialSettings: Partial<UserSettings>): Promise<void> {
   const currentSettings = await loadSettings();
-  const updatedSettings = { ...currentSettings, ...partialSettings };
+  const updatedSettings = normalizeUserSettings({ ...currentSettings, ...partialSettings });
   await saveSettings(updatedSettings);
 }
 

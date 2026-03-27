@@ -483,26 +483,6 @@ export function SettingsPanel({ isOpen, onClose, onSettingsChange }: SettingsPan
                     <div className="peer-checked:bg-primary h-7 w-12 rounded-full bg-white/20 after:absolute after:start-[2px] after:top-[2px] after:h-6 after:w-6 after:rounded-full after:bg-white after:transition-all after:content-[''] peer-checked:after:translate-x-full peer-checked:after:border-white" />
                   </label>
                 </div>
-
-                <div className="py-3">
-                  <div className="mb-2 flex items-center justify-between">
-                    <p className="font-medium text-white">{t('settings.geofenceRadius')}</p>
-                    <span className="text-muted text-sm">{settings.geofenceRadius}m</span>
-                  </div>
-                  <input
-                    type="range"
-                    min="10"
-                    max="50"
-                    step="5"
-                    value={settings.geofenceRadius}
-                    onChange={(e) => updateSetting('geofenceRadius', Number(e.target.value))}
-                    className="accent-primary h-2 w-full cursor-pointer appearance-none rounded-lg bg-white/10"
-                  />
-                  <div className="text-muted mt-1 flex justify-between text-xs">
-                    <span>{t('settings.geofenceClose')}</span>
-                    <span>{t('settings.geofenceFar')}</span>
-                  </div>
-                </div>
               </section>
 
               <div className="my-4 h-px bg-white/10" />
