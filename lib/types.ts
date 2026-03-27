@@ -470,6 +470,8 @@ export type DevicePerformancePreference = 'system' | 'light' | 'balanced' | 'ful
 
 export type DevicePerformanceTier = 'light' | 'balanced' | 'full';
 
+export type DevicePreloadStrategy = 'none' | 'nearby' | 'all';
+
 export interface DeviceCapabilityAssessment {
   tier: DevicePerformanceTier;
   score: number;
@@ -491,8 +493,11 @@ export interface DeviceResourceProfile {
   mapFlyAnimation: boolean;
   showAccuracyRing: boolean;
   showUserPulse: boolean;
+  showPoiLabels: boolean;
   autoPreloadAudio: boolean;
   nearbyPreloadRadius: number;
+  backgroundPreload: DevicePreloadStrategy;
+  audioWarmupCount: number;
 }
 
 export interface EffectiveDevicePerformance {

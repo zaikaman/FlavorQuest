@@ -94,6 +94,7 @@ export default function TourPage() {
   const autoPlayCooldownRef = useRef<Map<string, number>>(new Map());
   const [filteredPosition, setFilteredPosition] = useState<Coordinates | null>(null);
   const hasPreloadedRef = useRef(false);
+  const nearbyPreloadAnchorRef = useRef<Coordinates | null>(null);
   const devicePerformance = useMemo(
     () => resolveDevicePerformance(settings, deviceAssessment),
     [deviceAssessment, settings]
@@ -140,10 +141,11 @@ export default function TourPage() {
   const {
     pois,
     isLoading: poisLoading,
+    preloadNearbyAudio,
     preloadAllAssets,
   } = usePOIManager({
     language,
-    autoPreloadAudio: true,
+    autoPreloadAudio: devicePerformance.profile.autoPreloadAudio,
     preloadRadius: devicePerformance.profile.nearbyPreloadRadius,
     onOfflineReady: handlePOIOfflineReady,
   });
@@ -244,8 +246,9 @@ export default function TourPage() {
 
   useEffect(() => {
     hasPreloadedRef.current = false;
+    nearbyPreloadAnchorRef.current = null;
     autoPlayCooldownRef.current.clear();
-  }, [language, selectedTourId]);
+  }, [devicePerformance.effectiveTier, language, selectedTourId]);
 
   const isAutoPlayOnCooldown = useCallback((poiId: string) => {
     const lastPlayedAt = autoPlayCooldownRef.current.get(poiId);
@@ -365,11 +368,50 @@ export default function TourPage() {
 
   // Preload narration audio and POI images in the background as soon as the current dataset is ready.
   useEffect(() => {
-    if (activePOIs.length > 0 && !hasPreloadedRef.current) {
-      void preloadAllAssets();
-      hasPreloadedRef.current = true;
+    if (activePOIs.length === 0 || hasPreloadedRef.current) {
+      return;
     }
-  }, [activePOIs.length, preloadAllAssets]);
+
+    if (devicePerformance.profile.backgroundPreload !== 'all') {
+      return;
+    }
+
+    hasPreloadedRef.current = true;
+    void preloadAllAssets();
+  }, [activePOIs.length, devicePerformance.profile.backgroundPreload, preloadAllAssets]);
+
+  useEffect(() => {
+    if (
+      activePOIs.length === 0 ||
+      devicePerformance.profile.backgroundPreload !== 'nearby' ||
+      !devicePerformance.profile.autoPreloadAudio ||
+      !filteredPosition
+    ) {
+      return;
+    }
+
+    const lastAnchor = nearbyPreloadAnchorRef.current;
+    const movementThreshold = Math.max(
+      120,
+      Math.round(devicePerformance.profile.nearbyPreloadRadius * 0.35)
+    );
+    const shouldPreload =
+      !lastAnchor || calculateDistance(lastAnchor, filteredPosition) >= movementThreshold;
+
+    if (!shouldPreload) {
+      return;
+    }
+
+    nearbyPreloadAnchorRef.current = filteredPosition;
+    void preloadNearbyAudio(filteredPosition);
+  }, [
+    activePOIs.length,
+    devicePerformance.profile.autoPreloadAudio,
+    devicePerformance.profile.backgroundPreload,
+    devicePerformance.profile.nearbyPreloadRadius,
+    filteredPosition,
+    preloadNearbyAudio,
+  ]);
 
   // Handle POI entry event
   const handlePOIEnter = async (event: { poi: POI; distance: number }) => {
@@ -875,6 +917,10 @@ export default function TourPage() {
   }, [blockedAutoPlayItem, language]);
 
   const warmupCandidates = useMemo(() => {
+    if (devicePerformance.profile.audioWarmupCount <= 0) {
+      return [];
+    }
+
     const rankedPOIs = [...activePOIs];
 
     if (filteredPosition) {
@@ -905,10 +951,17 @@ export default function TourPage() {
     addCandidate(selectedPOI);
     addCandidate(audioPlayer.currentItem?.poi);
     addCandidate(nextPOI);
-    rankedPOIs.slice(0, 3).forEach(addCandidate);
+    rankedPOIs.slice(0, devicePerformance.profile.audioWarmupCount).forEach(addCandidate);
 
-    return selected;
-  }, [activePOIs, audioPlayer.currentItem, filteredPosition, nextPOI, selectedPOI]);
+    return selected.slice(0, devicePerformance.profile.audioWarmupCount);
+  }, [
+    activePOIs,
+    audioPlayer.currentItem,
+    devicePerformance.profile.audioWarmupCount,
+    filteredPosition,
+    nextPOI,
+    selectedPOI,
+  ]);
 
   useEffect(() => {
     if (warmupCandidates.length === 0) {
@@ -1093,6 +1146,7 @@ export default function TourPage() {
                 enableFlyAnimation={devicePerformance.profile.mapFlyAnimation}
                 showAccuracyRing={devicePerformance.profile.showAccuracyRing}
                 showUserPulse={devicePerformance.profile.showUserPulse}
+                showPOILabels={devicePerformance.profile.showPoiLabels}
               />
             )}
 

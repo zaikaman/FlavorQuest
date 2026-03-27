@@ -32,8 +32,11 @@ export const DEVICE_RESOURCE_PROFILES: Record<DevicePerformanceTier, DeviceResou
     mapFlyAnimation: false,
     showAccuracyRing: false,
     showUserPulse: false,
+    showPoiLabels: false,
     autoPreloadAudio: false,
     nearbyPreloadRadius: 220,
+    backgroundPreload: 'none',
+    audioWarmupCount: 0,
   },
   balanced: {
     tier: 'balanced',
@@ -41,8 +44,11 @@ export const DEVICE_RESOURCE_PROFILES: Record<DevicePerformanceTier, DeviceResou
     mapFlyAnimation: true,
     showAccuracyRing: true,
     showUserPulse: true,
+    showPoiLabels: true,
     autoPreloadAudio: true,
     nearbyPreloadRadius: 500,
+    backgroundPreload: 'nearby',
+    audioWarmupCount: 2,
   },
   full: {
     tier: 'full',
@@ -50,8 +56,11 @@ export const DEVICE_RESOURCE_PROFILES: Record<DevicePerformanceTier, DeviceResou
     mapFlyAnimation: true,
     showAccuracyRing: true,
     showUserPulse: true,
+    showPoiLabels: true,
     autoPreloadAudio: true,
     nearbyPreloadRadius: 900,
+    backgroundPreload: 'all',
+    audioWarmupCount: 5,
   },
 };
 

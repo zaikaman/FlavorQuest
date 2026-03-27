@@ -37,6 +37,7 @@ interface InteractiveMapProps {
   enableFlyAnimation?: boolean;
   showAccuracyRing?: boolean;
   showUserPulse?: boolean;
+  showPOILabels?: boolean;
 }
 
 export function InteractiveMap({
@@ -55,6 +56,7 @@ export function InteractiveMap({
   enableFlyAnimation = true,
   showAccuracyRing = true,
   showUserPulse = true,
+  showPOILabels = true,
 }: InteractiveMapProps) {
   const { language } = useLanguage();
   const { t } = useTranslations();
@@ -195,6 +197,17 @@ export function InteractiveMap({
     pois.forEach((poi) => {
       const localizedPOI = getLocalizedPOI(poi, language);
       const isSelected = selectedPOI?.id === poi.id;
+      const hasVisibleLabel = showPOILabels || isSelected;
+      const iconSize: [number, number] = isSelected
+        ? [100, 60]
+        : hasVisibleLabel
+          ? [80, 50]
+          : [36, 36];
+      const iconAnchor: [number, number] = isSelected
+        ? [50, 50]
+        : hasVisibleLabel
+          ? [40, 45]
+          : [18, 18];
 
       const poiIcon = L.divIcon({
         className: `poi-marker ${isSelected ? 'selected' : ''}`,
@@ -203,11 +216,11 @@ export function InteractiveMap({
             <div class="poi-marker-icon">
               <span class="material-symbols-outlined">restaurant</span>
             </div>
-            <div class="poi-marker-label">${localizedPOI.name}</div>
+            ${hasVisibleLabel ? `<div class="poi-marker-label">${localizedPOI.name}</div>` : ''}
           </div>
         `,
-        iconSize: isSelected ? [100, 60] : [80, 50],
-        iconAnchor: isSelected ? [50, 50] : [40, 45],
+        iconSize,
+        iconAnchor,
       });
 
       if (!poiMarkersRef.current.has(poi.id)) {
@@ -243,7 +256,17 @@ export function InteractiveMap({
         mapRef.current.fitBounds(bounds, { padding: [50, 50], maxZoom: preferredZoom });
       }
     }
-  }, [pois, preferredZoom, selectedPOI, mapLoaded, language, onSelectPOI, onViewPOI, userLocation]);
+  }, [
+    pois,
+    preferredZoom,
+    selectedPOI,
+    mapLoaded,
+    language,
+    onSelectPOI,
+    onViewPOI,
+    showPOILabels,
+    userLocation,
+  ]);
 
   // Center map on user
   const handleCenterOnUser = useCallback(() => {
