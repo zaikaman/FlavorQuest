@@ -40,11 +40,10 @@ import { TourPageSkeleton } from '@/components/ui/Loading';
 import { NoiseFilter } from '@/lib/utils/noise-filter';
 import { SpeedCalculator } from '@/lib/utils/speed';
 import { logAutoPlay, logManualPlay, logSkip, logTourEnd } from '@/lib/services/analytics';
-import { warmAudioUrls } from '@/lib/services/audio-session';
 import { resolveDevicePerformance } from '@/lib/services/device-performance';
 import { saveVisit, loadSettings } from '@/lib/services/storage';
 import { getLocalizedPOI } from '@/lib/utils/localization';
-import { calculateDistance, findNearestPOI } from '@/lib/utils/distance';
+import { findNearestPOI } from '@/lib/utils/distance';
 import type { Json } from '@/lib/types/database.types';
 import type { AppNotification, POI, Coordinates, UserSettings } from '@/lib/types/index';
 import {
@@ -52,11 +51,6 @@ import {
   GEOFENCE_TRIGGER_RADIUS_M,
   MAX_WALKING_SPEED_KMH,
 } from '@/lib/constants/index';
-
-type NavigatorConnection = {
-  saveData?: boolean;
-  effectiveType?: string;
-};
 
 export default function TourPage() {
   const router = useRouter();
@@ -111,8 +105,7 @@ export default function TourPage() {
   const pendingAutoPlayRef = useRef<Map<string, { distance: number }>>(new Map());
   const autoPlayCooldownRef = useRef<Map<string, number>>(new Map());
   const [filteredPosition, setFilteredPosition] = useState<Coordinates | null>(null);
-  const hasPreloadedRef = useRef(false);
-  const nearbyPreloadAnchorRef = useRef<Coordinates | null>(null);
+  const lastPreloadedDatasetRef = useRef<string | null>(null);
   const devicePerformance = useMemo(
     () => resolveDevicePerformance(settings, deviceAssessment),
     [deviceAssessment, settings]
@@ -159,13 +152,9 @@ export default function TourPage() {
   const {
     pois,
     isLoading: poisLoading,
-    preloadNearbyAudio,
     preloadAllAssets,
   } = usePOIManager({
     language,
-    autoPreloadAudio:
-      settingsReady && !isBatterySaverEnabled && devicePerformance.profile.autoPreloadAudio,
-    preloadRadius: devicePerformance.profile.nearbyPreloadRadius,
     onOfflineReady: handlePOIOfflineReady,
   });
 
@@ -191,6 +180,10 @@ export default function TourPage() {
       .map((poiId) => poiMap.get(poiId))
       .filter((poi): poi is POI => Boolean(poi));
   }, [pois, selectedTour]);
+  const activePreloadKey = useMemo(
+    () => `${language}:${selectedTourId ?? 'all'}:${activePOIs.map((poi) => poi.id).join(',')}`,
+    [activePOIs, language, selectedTourId]
+  );
 
   const baseGeofenceRadius = settings?.geofenceRadius || GEOFENCE_TRIGGER_RADIUS_M;
   const effectiveGeofenceRadius = useMemo(() => {
@@ -268,10 +261,9 @@ export default function TourPage() {
   }, [requestedTab, router, searchParams]);
 
   useEffect(() => {
-    hasPreloadedRef.current = false;
-    nearbyPreloadAnchorRef.current = null;
+    lastPreloadedDatasetRef.current = null;
     autoPlayCooldownRef.current.clear();
-  }, [devicePerformance.effectiveTier, language, selectedTourId]);
+  }, [language, selectedTourId]);
 
   const isAutoPlayOnCooldown = useCallback((poiId: string) => {
     const lastPlayedAt = autoPlayCooldownRef.current.get(poiId);
@@ -389,62 +381,20 @@ export default function TourPage() {
     };
   }, [unlockAudio]);
 
-  // Preload narration audio and POI images in the background as soon as the current dataset is ready.
-  useEffect(() => {
-    if (!settingsReady || activePOIs.length === 0 || hasPreloadedRef.current) {
-      return;
-    }
-
-    if (isBatterySaverEnabled || devicePerformance.profile.backgroundPreload !== 'all') {
-      return;
-    }
-
-    hasPreloadedRef.current = true;
-    void preloadAllAssets();
-  }, [
-    activePOIs.length,
-    devicePerformance.profile.backgroundPreload,
-    isBatterySaverEnabled,
-    preloadAllAssets,
-    settingsReady,
-  ]);
-
+  // Preload all narration audio for the active language and all POI images
+  // once the current dataset is ready, regardless of the performance tier.
   useEffect(() => {
     if (
       !settingsReady ||
       activePOIs.length === 0 ||
-      isBatterySaverEnabled ||
-      devicePerformance.profile.backgroundPreload !== 'nearby' ||
-      !devicePerformance.profile.autoPreloadAudio ||
-      !filteredPosition
+      lastPreloadedDatasetRef.current === activePreloadKey
     ) {
       return;
     }
 
-    const lastAnchor = nearbyPreloadAnchorRef.current;
-    const movementThreshold = Math.max(
-      120,
-      Math.round(devicePerformance.profile.nearbyPreloadRadius * 0.35)
-    );
-    const shouldPreload =
-      !lastAnchor || calculateDistance(lastAnchor, filteredPosition) >= movementThreshold;
-
-    if (!shouldPreload) {
-      return;
-    }
-
-    nearbyPreloadAnchorRef.current = filteredPosition;
-    void preloadNearbyAudio(filteredPosition);
-  }, [
-    activePOIs.length,
-    devicePerformance.profile.autoPreloadAudio,
-    devicePerformance.profile.backgroundPreload,
-    devicePerformance.profile.nearbyPreloadRadius,
-    filteredPosition,
-    isBatterySaverEnabled,
-    preloadNearbyAudio,
-    settingsReady,
-  ]);
+    lastPreloadedDatasetRef.current = activePreloadKey;
+    void preloadAllAssets();
+  }, [activePOIs.length, activePreloadKey, preloadAllAssets, settingsReady]);
 
   // Handle POI entry event
   const handlePOIEnter = async (event: { poi: POI; distance: number }) => {
@@ -949,80 +899,6 @@ export default function TourPage() {
 
     return getLocalizedPOI(blockedAutoPlayItem.poi, language).name;
   }, [blockedAutoPlayItem, language]);
-
-  const warmupCandidates = useMemo(() => {
-    if (devicePerformance.profile.audioWarmupCount <= 0) {
-      return [];
-    }
-
-    const rankedPOIs = [...activePOIs];
-
-    if (filteredPosition) {
-      rankedPOIs.sort((left, right) => {
-        const leftDistance = calculateDistance(filteredPosition, { lat: left.lat, lng: left.lng });
-        const rightDistance = calculateDistance(filteredPosition, {
-          lat: right.lat,
-          lng: right.lng,
-        });
-        return leftDistance - rightDistance;
-      });
-    } else {
-      rankedPOIs.sort((left, right) => left.name_vi.localeCompare(right.name_vi, 'vi'));
-    }
-
-    const selected: POI[] = [];
-    const seen = new Set<string>();
-
-    const addCandidate = (poi: POI | null | undefined) => {
-      if (!poi || seen.has(poi.id)) {
-        return;
-      }
-
-      seen.add(poi.id);
-      selected.push(poi);
-    };
-
-    addCandidate(selectedPOI);
-    addCandidate(audioPlayer.currentItem?.poi);
-    addCandidate(nextPOI);
-    rankedPOIs.slice(0, devicePerformance.profile.audioWarmupCount).forEach(addCandidate);
-
-    return selected.slice(0, devicePerformance.profile.audioWarmupCount);
-  }, [
-    activePOIs,
-    audioPlayer.currentItem,
-    devicePerformance.profile.audioWarmupCount,
-    filteredPosition,
-    nextPOI,
-    selectedPOI,
-  ]);
-
-  useEffect(() => {
-    if (!settingsReady || isBatterySaverEnabled || warmupCandidates.length === 0) {
-      return;
-    }
-
-    const connection = (navigator as Navigator & { connection?: NavigatorConnection }).connection;
-    if (
-      connection?.saveData ||
-      connection?.effectiveType === 'slow-2g' ||
-      connection?.effectiveType === '2g'
-    ) {
-      return;
-    }
-
-    const timer = window.setTimeout(() => {
-      const urls = warmupCandidates
-        .map((poi) => getLocalizedPOI(poi, language).audio_url)
-        .filter((url): url is string => Boolean(url));
-
-      warmAudioUrls(urls);
-    }, 150);
-
-    return () => {
-      window.clearTimeout(timer);
-    };
-  }, [isBatterySaverEnabled, language, settingsReady, warmupCandidates]);
 
   useEffect(() => {
     if (!blockedAutoPlayItem) {
