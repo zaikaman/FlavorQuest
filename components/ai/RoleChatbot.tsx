@@ -180,6 +180,9 @@ export function RoleChatbot({
     };
   }, [role, t]);
 
+  const floatingPanelClassName =
+    'max-h-[calc(100dvh-6.5rem)] sm:max-h-[calc(100dvh-8rem)] lg:max-h-[calc(100dvh-10rem)]';
+
   const theme = useMemo(() => {
     if (role === 'customer') {
       return {
@@ -381,14 +384,20 @@ export function RoleChatbot({
       className={`${
         isPageMode
           ? 'flex h-full min-h-[calc(100vh-7.5rem)] w-full flex-col border-none bg-transparent'
-          : `w-[calc(100vw-2rem)] overflow-hidden rounded-[28px] border bg-[#2c1e16]/85 backdrop-blur-xl sm:w-[24rem] ${theme.ring} origin-bottom-right`
+          : `flex w-[calc(100vw-2rem)] max-w-[24rem] flex-col overflow-hidden rounded-[28px] border bg-[#2c1e16]/85 backdrop-blur-xl sm:w-[24rem] ${floatingPanelClassName} ${theme.ring} origin-bottom-right`
       }`}
     >
       <div
-        className={`${isPageMode ? 'flex h-full flex-col' : `bg-gradient-to-br ${theme.shell} p-[1px]`}`}
+        className={`${
+          isPageMode ? 'flex h-full flex-col' : `flex h-full min-h-0 flex-col bg-gradient-to-br ${theme.shell} p-[1px]`
+        }`}
       >
         <div
-          className={`${isPageMode ? 'flex h-full flex-col' : 'rounded-[27px] bg-[#1a120b]/90 backdrop-blur-xl'}`}
+          className={`${
+            isPageMode
+              ? 'flex h-full flex-col'
+              : 'flex h-full min-h-0 flex-col rounded-[27px] bg-[#1a120b]/90 backdrop-blur-xl'
+          }`}
         >
           <div
             className={`px-5 py-4 ${isPageMode ? 'border-b border-white/10' : 'border-b border-white/10'}`}
@@ -443,7 +452,7 @@ export function RoleChatbot({
                 ) : conversations.length === 0 ? (
                   <p className="text-xs text-white/60">{copy.historyEmpty}</p>
                 ) : (
-                  <div className="space-y-2">
+                  <div className="max-h-48 space-y-2 overflow-y-auto pr-1">
                     {conversations.map((conversation) => {
                       const isActive = conversation.id === activeConversationId;
                       const activeBorder =
@@ -490,13 +499,11 @@ export function RoleChatbot({
 
           <div
             className={`overflow-y-auto px-4 py-4 ${
-              isPageMode
-                ? `min-h-0 flex-1 ${
-                    messages.length === 0 && !isSending && !error
-                      ? 'flex flex-col justify-center'
-                      : 'space-y-4'
-                  }`
-                : 'max-h-[24rem] space-y-4'
+              `min-h-0 flex-1 ${
+                messages.length === 0 && !isSending && !error
+                  ? 'flex flex-col justify-center'
+                  : 'space-y-4'
+              }`
             }`}
           >
             {isPageMode && messages.length === 0 && !isSending && !error && (
