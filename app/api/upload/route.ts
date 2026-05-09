@@ -1,20 +1,18 @@
-import { createServerClient, isUserAdmin } from '@/lib/supabase/server';
+import { createServerClient, getCurrentUserProfile, isUserAdmin } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 /**
  * POST /api/upload
- * Upload file to Supabase Storage (admin only)
+ * Upload file to Supabase Storage.
+ * Admin can upload managed assets. Owners can upload dish images.
  */
 export async function POST(request: NextRequest) {
   try {
     const supabase = await createServerClient();
     const isAdmin = await isUserAdmin(supabase);
-
-    if (!isAdmin) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
-    }
+    const profile = await getCurrentUserProfile(supabase);
 
     // Use Admin Client for storage operations to bypass RLS
     const adminSupabase = createAdminClient();
@@ -23,6 +21,12 @@ export async function POST(request: NextRequest) {
     const file = formData.get('file') as File;
     const bucket = (formData.get('bucket') as string) || 'images';
     const folder = (formData.get('folder') as string) || 'uploads';
+    const isOwnerDishImageUpload =
+      profile?.role === 'owner' && bucket === 'images' && folder === 'dishes';
+
+    if (!isAdmin && !isOwnerDishImageUpload) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+    }
 
     if (!file) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 });

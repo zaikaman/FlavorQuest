@@ -1,13 +1,29 @@
 'use client';
 
+import Image from 'next/image';
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
+import { ImageUploader } from '@/components/admin/ImageUploader';
 import { InlineSpinner } from '@/components/ui/Loading';
 import type { AppNotification, Dish, POI, PreorderOrder } from '@/lib/types';
 
 type OwnerTab = 'pois' | 'menu' | 'orders' | 'notifications';
 type OrderStatus = PreorderOrder['status'];
 
+interface DishFormState {
+  name: string;
+  description: string;
+  price: string;
+  image_url: string;
+}
+
 const REQUEST_TIMEOUT_MS = 10000;
+
+const EMPTY_DISH_FORM: DishFormState = {
+  name: '',
+  description: '',
+  price: '',
+  image_url: '',
+};
 
 const ownerTabs: Array<{
   id: OwnerTab;
@@ -162,6 +178,15 @@ function getOrderTypeLabel(order: PreorderOrder) {
   return order.order_type === 'delivery' ? 'Giao tận nơi' : 'Nhận tại quán';
 }
 
+function dishToFormState(dish: Dish): DishFormState {
+  return {
+    name: dish.name,
+    description: dish.description ?? '',
+    price: String(dish.price),
+    image_url: dish.image_url ?? '',
+  };
+}
+
 export default function OwnerDashboardPage() {
   const [activeTab, setActiveTab] = useState<OwnerTab>('pois');
   const [pois, setPois] = useState<POI[]>([]);
@@ -173,8 +198,11 @@ export default function OwnerDashboardPage() {
   const [hasLoadedInitialData, setHasLoadedInitialData] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
-  const [newDish, setNewDish] = useState({ name: '', description: '', price: '' });
+  const [newDish, setNewDish] = useState<DishFormState>(EMPTY_DISH_FORM);
+  const [editingDishId, setEditingDishId] = useState<string | null>(null);
+  const [editDish, setEditDish] = useState<DishFormState>(EMPTY_DISH_FORM);
   const [isSubmittingDish, setIsSubmittingDish] = useState(false);
+  const [updatingDishId, setUpdatingDishId] = useState<string | null>(null);
   const [deletingDishId, setDeletingDishId] = useState<string | null>(null);
   const [updatingOrderId, setUpdatingOrderId] = useState<string | null>(null);
   const [isMarkingNotifications, setIsMarkingNotifications] = useState(false);
@@ -349,6 +377,7 @@ export default function OwnerDashboardPage() {
           name: newDish.name.trim(),
           description: newDish.description.trim(),
           price: Number(newDish.price),
+          image_url: newDish.image_url || null,
         }),
       });
 
@@ -356,13 +385,62 @@ export default function OwnerDashboardPage() {
         throw new Error(await readErrorMessage(response, 'Không thể lưu món mới.'));
       }
 
-      setNewDish({ name: '', description: '', price: '' });
+      setNewDish(EMPTY_DISH_FORM);
       await loadDishes(selectedPoiId);
     } catch (error) {
       console.error('[OwnerPage] create dish failed:', error);
       setActionError(error instanceof Error ? error.message : 'Không thể lưu món mới.');
     } finally {
       setIsSubmittingDish(false);
+    }
+  };
+
+  const startEditingDish = (dish: Dish) => {
+    setEditingDishId(dish.id);
+    setEditDish(dishToFormState(dish));
+    setActionError(null);
+  };
+
+  const cancelEditingDish = () => {
+    setEditingDishId(null);
+    setEditDish(EMPTY_DISH_FORM);
+  };
+
+  const handleUpdateDish = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (!selectedPoiId || !editingDishId || !editDish.name || !editDish.price) {
+      setActionError('Bạn cần nhập tên món và giá bán trước khi lưu.');
+      return;
+    }
+
+    setUpdatingDishId(editingDishId);
+    setActionError(null);
+
+    try {
+      const response = await fetch(`/api/dishes/${editingDishId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: editDish.name.trim(),
+          description: editDish.description.trim(),
+          price: Number(editDish.price),
+          is_available: true,
+          image_url: editDish.image_url || null,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(await readErrorMessage(response, 'Không thể cập nhật món.'));
+      }
+
+      cancelEditingDish();
+      await loadDishes(selectedPoiId);
+    } catch (error) {
+      console.error('[OwnerPage] update dish failed:', error);
+      setActionError(error instanceof Error ? error.message : 'Không thể cập nhật món.');
+    } finally {
+      setUpdatingDishId(null);
     }
   };
 
@@ -1001,12 +1079,24 @@ export default function OwnerDashboardPage() {
                         className="focus:border-primary/40 w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white transition-colors outline-none placeholder:text-gray-500"
                       />
                     </label>
+
+                    <div>
+                      <span className="mb-2 block text-sm font-semibold text-gray-200">
+                        Ảnh món
+                      </span>
+                      <ImageUploader
+                        currentImageUrl={newDish.image_url}
+                        folder="dishes"
+                        onImageUploaded={(url) =>
+                          setNewDish((previous) => ({ ...previous, image_url: url }))
+                        }
+                      />
+                    </div>
                   </div>
 
                   <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <p className="text-xs leading-5 text-gray-400 sm:max-w-md">
-                      Dùng biểu mẫu này cho cập nhật nhanh. Nếu sau này cần ảnh hoặc biến thể món,
-                      nên mở rộng cấu trúc dữ liệu riêng.
+                      Thêm tên, giá và ảnh để món hiển thị rõ hơn trong thực đơn đặt trước.
                     </p>
                     <button
                       type="submit"
@@ -1040,42 +1130,171 @@ export default function OwnerDashboardPage() {
                     </div>
                   ) : (
                     <div className="mt-6 space-y-3">
-                      {dishes.map((dish) => (
-                        <div
-                          key={dish.id}
-                          className="rounded-2xl border border-white/10 bg-black/15 px-4 py-4"
-                        >
-                          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                            <div className="min-w-0">
-                              <div className="flex flex-wrap items-center gap-2">
-                                <p className="font-semibold break-words text-white">{dish.name}</p>
-                                <span className="rounded-full bg-emerald-500/15 px-2 py-1 text-[11px] font-bold text-emerald-200">
-                                  Đang bán
-                                </span>
-                              </div>
-                              <p className="mt-2 text-sm leading-6 text-gray-400">
-                                {dish.description || 'Chưa có mô tả cho món này.'}
-                              </p>
-                              <p className="text-primary mt-3 text-sm font-semibold">
-                                {formatCurrency(Number(dish.price))}
-                              </p>
-                            </div>
+                      {dishes.map((dish) => {
+                        const isEditing = editingDishId === dish.id;
 
-                            <button
-                              type="button"
-                              onClick={() => void handleDeleteDish(dish.id)}
-                              disabled={deletingDishId === dish.id}
-                              className="rounded-xl border border-white/10 px-3 py-2 text-sm font-semibold text-gray-300 transition-colors hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
-                            >
-                              {deletingDishId === dish.id ? (
-                                <InlineSpinner label="Đang xóa..." />
-                              ) : (
-                                'Xóa'
-                              )}
-                            </button>
+                        return (
+                          <div
+                            key={dish.id}
+                            className="rounded-2xl border border-white/10 bg-black/15 px-4 py-4"
+                          >
+                            {isEditing ? (
+                              <form onSubmit={handleUpdateDish} className="space-y-4">
+                                <div className="grid gap-4 lg:grid-cols-[0.85fr_1.15fr]">
+                                  <ImageUploader
+                                    currentImageUrl={editDish.image_url}
+                                    folder="dishes"
+                                    onImageUploaded={(url) =>
+                                      setEditDish((previous) => ({
+                                        ...previous,
+                                        image_url: url,
+                                      }))
+                                    }
+                                  />
+
+                                  <div className="space-y-3">
+                                    <label className="block">
+                                      <span className="mb-2 block text-xs font-semibold text-gray-300">
+                                        Tên món
+                                      </span>
+                                      <input
+                                        value={editDish.name}
+                                        onChange={(event) =>
+                                          setEditDish((previous) => ({
+                                            ...previous,
+                                            name: event.target.value,
+                                          }))
+                                        }
+                                        className="focus:border-primary/40 w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white transition-colors outline-none placeholder:text-gray-500"
+                                      />
+                                    </label>
+
+                                    <label className="block">
+                                      <span className="mb-2 block text-xs font-semibold text-gray-300">
+                                        Mô tả
+                                      </span>
+                                      <textarea
+                                        value={editDish.description}
+                                        onChange={(event) =>
+                                          setEditDish((previous) => ({
+                                            ...previous,
+                                            description: event.target.value,
+                                          }))
+                                        }
+                                        rows={3}
+                                        className="focus:border-primary/40 w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white transition-colors outline-none placeholder:text-gray-500"
+                                      />
+                                    </label>
+
+                                    <label className="block">
+                                      <span className="mb-2 block text-xs font-semibold text-gray-300">
+                                        Giá bán (VND)
+                                      </span>
+                                      <input
+                                        value={editDish.price}
+                                        onChange={(event) =>
+                                          setEditDish((previous) => ({
+                                            ...previous,
+                                            price: event.target.value,
+                                          }))
+                                        }
+                                        type="number"
+                                        min="0"
+                                        className="focus:border-primary/40 w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white transition-colors outline-none placeholder:text-gray-500"
+                                      />
+                                    </label>
+                                  </div>
+                                </div>
+
+                                <div className="flex flex-wrap justify-end gap-2">
+                                  <button
+                                    type="button"
+                                    onClick={cancelEditingDish}
+                                    disabled={updatingDishId === dish.id}
+                                    className="rounded-xl border border-white/10 px-3 py-2 text-sm font-semibold text-gray-300 transition-colors hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
+                                  >
+                                    Hủy
+                                  </button>
+                                  <button
+                                    type="submit"
+                                    disabled={updatingDishId === dish.id}
+                                    className="bg-primary rounded-xl px-3 py-2 text-sm font-bold text-white transition-colors hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
+                                  >
+                                    {updatingDishId === dish.id ? (
+                                      <InlineSpinner label="Đang lưu..." />
+                                    ) : (
+                                      'Lưu thay đổi'
+                                    )}
+                                  </button>
+                                </div>
+                              </form>
+                            ) : (
+                              <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                                <div className="flex min-w-0 gap-4">
+                                  <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-2xl border border-white/10 bg-black/20">
+                                    {dish.image_url ? (
+                                      <Image
+                                        src={dish.image_url}
+                                        alt={dish.name}
+                                        fill
+                                        unoptimized
+                                        className="object-cover"
+                                      />
+                                    ) : (
+                                      <div className="flex h-full w-full items-center justify-center text-gray-500">
+                                        <span className="material-symbols-outlined">
+                                          restaurant
+                                        </span>
+                                      </div>
+                                    )}
+                                  </div>
+                                  <div className="min-w-0">
+                                    <div className="flex flex-wrap items-center gap-2">
+                                      <p className="font-semibold break-words text-white">
+                                        {dish.name}
+                                      </p>
+                                      <span className="rounded-full bg-emerald-500/15 px-2 py-1 text-[11px] font-bold text-emerald-200">
+                                        Đang bán
+                                      </span>
+                                    </div>
+                                    <p className="mt-2 text-sm leading-6 text-gray-400">
+                                      {dish.description || 'Chưa có mô tả cho món này.'}
+                                    </p>
+                                    <p className="text-primary mt-3 text-sm font-semibold">
+                                      {formatCurrency(Number(dish.price))}
+                                    </p>
+                                  </div>
+                                </div>
+
+                                <div className="flex shrink-0 flex-wrap gap-2">
+                                  <button
+                                    type="button"
+                                    onClick={() => startEditingDish(dish)}
+                                    disabled={Boolean(editingDishId) || deletingDishId === dish.id}
+                                    className="rounded-xl border border-white/10 px-3 py-2 text-sm font-semibold text-gray-300 transition-colors hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
+                                  >
+                                    Sửa
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => void handleDeleteDish(dish.id)}
+                                    disabled={
+                                      deletingDishId === dish.id || updatingDishId === dish.id
+                                    }
+                                    className="rounded-xl border border-white/10 px-3 py-2 text-sm font-semibold text-gray-300 transition-colors hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
+                                  >
+                                    {deletingDishId === dish.id ? (
+                                      <InlineSpinner label="Đang xóa..." />
+                                    ) : (
+                                      'Xóa'
+                                    )}
+                                  </button>
+                                </div>
+                              </div>
+                            )}
                           </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   )}
                 </div>
