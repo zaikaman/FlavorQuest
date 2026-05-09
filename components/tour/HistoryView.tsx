@@ -74,6 +74,10 @@ export function HistoryView({ isOpen, onClose, onPlayPOI, onViewPOI }: HistoryVi
     const date = new Date(dateStr);
     const now = new Date();
     const diff = now.getTime() - date.getTime();
+    const vietnameseTime = date.toLocaleTimeString('vi-VN', {
+      hour: '2-digit',
+      minute: '2-digit',
+    });
 
     // Less than 1 hour
     if (diff < 60 * 60 * 1000) {
@@ -84,10 +88,7 @@ export function HistoryView({ isOpen, onClose, onPlayPOI, onViewPOI }: HistoryVi
     // Today
     if (date.toDateString() === now.toDateString()) {
       return t('history.today', {
-        time: date.toLocaleTimeString(language === 'vi' ? 'vi-VN' : 'en-US', {
-          hour: '2-digit',
-          minute: '2-digit',
-        }),
+        time: vietnameseTime,
       });
     }
 
@@ -96,19 +97,16 @@ export function HistoryView({ isOpen, onClose, onPlayPOI, onViewPOI }: HistoryVi
     yesterday.setDate(yesterday.getDate() - 1);
     if (date.toDateString() === yesterday.toDateString()) {
       return t('history.yesterday', {
-        time: date.toLocaleTimeString(language === 'vi' ? 'vi-VN' : 'en-US', {
-          hour: '2-digit',
-          minute: '2-digit',
-        }),
+        time: vietnameseTime,
       });
     }
 
     // Older
-    return date.toLocaleDateString(language === 'vi' ? 'vi-VN' : 'en-US', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-    });
+    return `ngày ${date.getDate().toString().padStart(2, '0')} tháng ${(
+      date.getMonth() + 1
+    )
+      .toString()
+      .padStart(2, '0')} năm ${date.getFullYear()}`;
   };
 
   if (!isOpen) return null;

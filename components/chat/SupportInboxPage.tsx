@@ -44,10 +44,11 @@ interface MessagesResponse {
   messages: SupportMessage[];
 }
 
-function formatThreadTimestamp(value: string, locale: string) {
-  return new Intl.DateTimeFormat(locale === 'vi' ? 'vi-VN' : locale, {
+function formatThreadTimestamp(value: string) {
+  return new Intl.DateTimeFormat('vi-VN', {
     day: '2-digit',
     month: '2-digit',
+    year: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
   }).format(new Date(value));
@@ -73,7 +74,7 @@ export function SupportInboxPage({
   initialThreadId = null,
 }: SupportInboxPageProps) {
   const { user } = useAuth();
-  const { t, language } = useTranslations();
+  const { t } = useTranslations();
   const isOwnerRequestMode = role === 'pending-owner' && mode === 'owner-request';
   const [threads, setThreads] = useState<SupportThreadSummary[]>([]);
   const [directory, setDirectory] = useState<SupportDirectoryEntry[]>([]);
@@ -852,7 +853,7 @@ export function SupportInboxPage({
                         </div>
                         <div className="shrink-0 text-right">
                           <p className="text-[11px] text-gray-500">
-                            {formatThreadTimestamp(thread.last_message_at, language)}
+                            {formatThreadTimestamp(thread.last_message_at)}
                           </p>
                           {thread.unread_count > 0 && (
                             <span className="bg-primary mt-2 inline-flex min-w-6 items-center justify-center rounded-full px-2 py-1 text-[11px] font-bold text-white">
@@ -1011,7 +1012,7 @@ export function SupportInboxPage({
                                 : t('support.counterparts.customerShort', undefined, 'Khách')}
                           </span>
                           <span className="text-[11px] text-white/55">
-                            {formatThreadTimestamp(message.created_at, language)}
+                            {formatThreadTimestamp(message.created_at)}
                           </span>
                         </div>
                         <FormattedChatMessage

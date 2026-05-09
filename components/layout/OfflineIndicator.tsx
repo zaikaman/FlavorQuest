@@ -15,7 +15,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useOfflineSync } from '@/lib/hooks/useOfflineSync';
 import { useTranslations } from '@/lib/hooks/useTranslations';
-import { useLanguage } from '@/lib/contexts/LanguageContext';
 
 export interface OfflineIndicatorProps {
   /** Hiển thị dạng compact (chỉ icon) */
@@ -220,7 +219,6 @@ export function OfflineBadge({ className = '' }: { className?: string }) {
 export function SyncStatusIndicator({ className = '' }: { className?: string }) {
   const { isOnline, syncStatus, pendingEventsCount, lastSyncTime, syncNow } = useOfflineSync();
   const { t } = useTranslations();
-  const { language } = useLanguage();
   const [currentTimestamp, setCurrentTimestamp] = useState(() => Date.now());
 
   useEffect(() => {
@@ -241,7 +239,12 @@ export function SyncStatusIndicator({ className = '' }: { className?: string }) 
     if (diff < 60000) return t('history.justNow');
     if (diff < 3600000) return t('history.minsAgo', { mins: Math.floor(diff / 60000) });
     if (diff < 86400000) return t('history.hoursAgo', { hours: Math.floor(diff / 3600000) });
-    return new Date(timestamp).toLocaleDateString(language === 'vi' ? 'vi-VN' : 'en-US');
+    const date = new Date(timestamp);
+    return `ngày ${date.getDate().toString().padStart(2, '0')} tháng ${(
+      date.getMonth() + 1
+    )
+      .toString()
+      .padStart(2, '0')} năm ${date.getFullYear()}`;
   };
 
   return (
