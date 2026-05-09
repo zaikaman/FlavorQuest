@@ -468,14 +468,35 @@ export default function POIDetailPage() {
                   key={dish.id}
                   className="flex items-center justify-between gap-3 rounded-xl border border-white/10 bg-[#2a1e16] p-3"
                 >
-                  <div>
-                    <p className="font-semibold">{dish.name}</p>
-                    <p className="text-sm text-gray-400">{dish.description || '-'}</p>
-                    <p className="text-primary mt-1 text-sm">
-                      {Number(dish.price).toLocaleString('vi-VN')}đ
-                    </p>
+                  <div className="flex min-w-0 flex-1 items-center gap-3">
+                    <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-xl border border-white/10 bg-black/20">
+                      {dish.image_url ? (
+                        <Image
+                          src={dish.image_url}
+                          alt={dish.name}
+                          fill
+                          unoptimized
+                          className="object-cover"
+                        />
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center text-gray-500">
+                          <span className="material-symbols-outlined">restaurant</span>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="min-w-0">
+                      <p className="font-semibold break-words">{dish.name}</p>
+                      <p className="line-clamp-2 text-sm break-words text-gray-400">
+                        {dish.description || '-'}
+                      </p>
+                      <p className="text-primary mt-1 text-sm">
+                        {Number(dish.price).toLocaleString('vi-VN')}đ
+                      </p>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
+
+                  <div className="flex shrink-0 items-center gap-2">
                     <button
                       onClick={() => removeFromCart(dish.id)}
                       className="h-8 w-8 rounded-full border border-white/10"
