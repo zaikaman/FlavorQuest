@@ -4,10 +4,97 @@ import Image from 'next/image';
 import { useEffect, useRef, useState } from 'react';
 import { useToast } from '@/components/ui/ToastProvider';
 
+const MAX_UPLOAD_IMAGE_WIDTH = 1600;
+const MAX_UPLOAD_IMAGE_HEIGHT = 1200;
+const JPEG_QUALITY = 0.82;
+const DIRECT_UPLOAD_LIMIT_BYTES = 4 * 1024 * 1024;
+
 interface ImageUploaderProps {
   currentImageUrl?: string | null;
   onImageUploaded: (url: string) => void;
   folder?: string;
+}
+
+function getFileExtension(file: File) {
+  const extension = file.name.split('.').pop()?.toLowerCase();
+
+  if (extension) {
+    return extension;
+  }
+
+  if (file.type === 'image/png') return 'png';
+  if (file.type === 'image/webp') return 'webp';
+
+  return 'jpg';
+}
+
+function canvasToBlob(canvas: HTMLCanvasElement, type: string, quality?: number) {
+  return new Promise<Blob>((resolve, reject) => {
+    canvas.toBlob(
+      (blob) => {
+        if (blob) {
+          resolve(blob);
+          return;
+        }
+
+        reject(new Error('Không thể xử lý ảnh.'));
+      },
+      type,
+      quality
+    );
+  });
+}
+
+async function normalizeImageForUpload(file: File) {
+  if (!file.type.startsWith('image/')) {
+    throw new Error('Tệp được chọn không phải là ảnh.');
+  }
+
+  const image = new window.Image();
+  const objectUrl = URL.createObjectURL(file);
+
+  try {
+    await new Promise<void>((resolve, reject) => {
+      image.onload = () => resolve();
+      image.onerror = () => reject(new Error('Không thể đọc ảnh.'));
+      image.src = objectUrl;
+    });
+
+    const scale = Math.min(
+      1,
+      MAX_UPLOAD_IMAGE_WIDTH / image.naturalWidth,
+      MAX_UPLOAD_IMAGE_HEIGHT / image.naturalHeight
+    );
+    const width = Math.max(1, Math.round(image.naturalWidth * scale));
+    const height = Math.max(1, Math.round(image.naturalHeight * scale));
+
+    if (scale === 1 && file.size <= DIRECT_UPLOAD_LIMIT_BYTES) {
+      return file;
+    }
+
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+
+    const context = canvas.getContext('2d');
+    if (!context) {
+      throw new Error('Không thể xử lý ảnh.');
+    }
+
+    context.drawImage(image, 0, 0, width, height);
+    const outputType = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
+    const blob = await canvasToBlob(
+      canvas,
+      outputType,
+      outputType === 'image/jpeg' ? JPEG_QUALITY : undefined
+    );
+    const extension = outputType === 'image/jpeg' ? 'jpg' : getFileExtension(file);
+    const baseName = file.name.replace(/\.[^/.]+$/, '') || 'image';
+
+    return new File([blob], `${baseName}.${extension}`, { type: outputType });
+  } finally {
+    URL.revokeObjectURL(objectUrl);
+  }
 }
 
 export function ImageUploader({
@@ -42,7 +129,6 @@ export function ImageUploader({
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Xem trước
     const objectUrl = URL.createObjectURL(file);
     if (objectUrlRef.current) {
       URL.revokeObjectURL(objectUrlRef.current);
@@ -50,32 +136,49 @@ export function ImageUploader({
     objectUrlRef.current = objectUrl;
     setPreview(objectUrl);
 
-    // Tải lên
     setIsUploading(true);
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('bucket', 'images');
-    formData.append('folder', folder);
 
     try {
+      const uploadFile = await normalizeImageForUpload(file);
+      const formData = new FormData();
+      formData.append('file', uploadFile);
+      formData.append('bucket', 'images');
+      formData.append('folder', folder);
+
       const res = await fetch('/api/upload', {
         method: 'POST',
         body: formData,
       });
 
       if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        console.error('Upload failed response:', errorData);
-        throw new Error(errorData.error || 'Tải lên thất bại');
+        const responseText = await res.text();
+        let message = 'Tải lên thất bại';
+
+        try {
+          const errorData = JSON.parse(responseText) as { error?: string };
+          message = errorData.error || message;
+          console.error('Upload failed response:', errorData);
+        } catch {
+          console.error('Upload failed response:', responseText);
+        }
+
+        throw new Error(message);
       }
 
-      const data = await res.json();
+      const data = (await res.json()) as { url?: string };
+      if (!data.url) {
+        throw new Error('Tải lên thất bại');
+      }
+
       onImageUploaded(data.url);
     } catch (error) {
       console.error('Error uploading image:', error);
-      toast.error('Lỗi khi tải ảnh');
+      toast.error(error instanceof Error ? error.message : 'Lỗi khi tải ảnh');
     } finally {
       setIsUploading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
     }
   };
 

@@ -3,6 +3,9 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
+const ALLOWED_BUCKETS = ['images', 'audio'] as const;
+const MAX_IMAGE_UPLOAD_BYTES = 4 * 1024 * 1024;
+
 /**
  * POST /api/upload
  * Upload file to Supabase Storage.
@@ -13,9 +16,6 @@ export async function POST(request: NextRequest) {
     const supabase = await createServerClient();
     const isAdmin = await isUserAdmin(supabase);
     const profile = await getCurrentUserProfile(supabase);
-
-    // Use Admin Client for storage operations to bypass RLS
-    const adminSupabase = createAdminClient();
 
     const formData = await request.formData();
     const file = formData.get('file') as File;
@@ -32,16 +32,22 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 });
     }
 
-    // Validate bucket
-    if (!['images', 'audio'].includes(bucket)) {
+    if (!ALLOWED_BUCKETS.includes(bucket as (typeof ALLOWED_BUCKETS)[number])) {
       return NextResponse.json({ error: 'Invalid bucket' }, { status: 400 });
+    }
+
+    if (bucket === 'images' && file.size > MAX_IMAGE_UPLOAD_BYTES) {
+      return NextResponse.json(
+        { error: 'Ảnh quá lớn. Vui lòng chọn ảnh nhỏ hơn hoặc thử ảnh khác.' },
+        { status: 413 }
+      );
     }
 
     const buffer = Buffer.from(await file.arrayBuffer());
     const fileExt = file.name.split('.').pop();
     const fileName = `${folder}/${crypto.randomUUID()}.${fileExt}`;
 
-    // Upload with Admin Client (bypasses RLS)
+    const adminSupabase = createAdminClient();
     const { error: uploadError } = await adminSupabase.storage
       .from(bucket)
       .upload(fileName, buffer, {
